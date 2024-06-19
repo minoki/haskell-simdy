@@ -28,6 +28,8 @@ class NumF f a where
 class NumF f a => FractionalF f a where
   divF :: f a -> f a -> f a
   recipF :: f a -> f a
+  default recipF :: (Num a, Broadcast f a) => f a -> f a
+  recipF = divF (broadcast 1)
   fromRationalF :: Rational -> f a
   default fromRationalF :: (Fractional a, Broadcast f a) => Rational -> f a
   fromRationalF = broadcast . fromRational
