@@ -19,10 +19,24 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Data.ShortVector.Class
+                      Data.ShortVector.Internal.NoSIMD
                       Data.ShortVector.Internal.SIMD128
-    other-modules: Data.ShortVector.Class.Generated
+                      Data.ShortVector.Unboxed
+    other-modules:    Data.ShortVector.Class.Generated
+                      Data.ShortVector.Internal.NoSIMD.X2
+                      Data.ShortVector.Internal.NoSIMD.X4
+                      Data.ShortVector.Internal.NoSIMD.X8
+                      Data.ShortVector.Internal.NoSIMD.X16
+                      Data.ShortVector.Internal.NoSIMD.X32
+                      Data.ShortVector.Internal.SIMD128.X2
+                      Data.ShortVector.Internal.SIMD128.X4
+                      Data.ShortVector.Internal.SIMD128.X8
+                      Data.ShortVector.Internal.SIMD128.X16
+                      Data.ShortVector.Internal.SIMD128.X32
     -- other-extensions:
-    build-depends:    base >=4.18.0.0 && <4.21
+    build-depends:    base >=4.18.0.0 && <4.21,
+                      primitive ^>=0.9.0.0,
+                      vector ^>=0.13.1.0
     hs-source-dirs:   src
     default-language: GHC2021
 
