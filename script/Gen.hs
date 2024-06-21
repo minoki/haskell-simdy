@@ -23,6 +23,9 @@ gen !vecCount !maxBits
   = ["data family " ++ tyCon ++ " a"
     ,"instance ShortVectorLength " ++ tyCon ++ " where"
     ,"  shortVectorLength = " ++ show vecCount
+    ,if vecCount == 2
+     then "type instance HalfVector " ++ tyCon ++ " = Identity"
+     else "type instance HalfVector " ++ tyCon ++ " = X" ++ show (vecCount `quot` 2)
     ]
     ++ genType "Float" "F#" 32 [genNum True, genFractional, genFloating, genPrim, genStorable]
     ++ genType "Double" "D#" 64 [genNum True, genFractional, genFloating, genPrim, genStorable]
@@ -45,7 +48,20 @@ gen !vecCount !maxBits
        ,"  unpack" ++ tyCon ++ " (MkComplex" ++ tyCon ++ " s t) = case unpack" ++ tyCon ++ " s of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " t of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> (" ++ commaSep ["x" ++ show i ++ " :+ y" ++ show i | i <- [0..vecCount-1]] ++ ")"
        ,"instance Broadcast " ++ tyCon ++ " a => Broadcast " ++ tyCon ++ " (Complex a) where"
        ,"  broadcast (x :+ y) = MkComplex" ++ tyCon ++ " (broadcast x) (broadcast y)"
-       ,"instance UnboxSV " ++ tyCon ++ " a => UnboxSV " ++ tyCon ++ " (Complex a) where"
+       ]
+    ++ (if vecCount == 2
+        then ["instance SplitShortVector " ++ tyCon ++ " a => SplitShortVector " ++ tyCon ++ " (Complex a) where"
+             ,"  splitShortVector (MkComplex" ++ tyCon ++ " s t) = case splitShortVector s of (Identity x0, Identity x1) -> case splitShortVector t of (Identity y0, Identity y1) -> (Identity (x0 :+ y0), Identity (x1 :+ y1))"
+             ,"  joinShortVector (Identity (x0 :+ y0)) (Identity (x1 :+ y1)) = MkComplex" ++ tyCon ++ " (joinShortVector (Identity x0) (Identity x1)) (joinShortVector (Identity y0) (Identity y1))"
+             ]
+        else
+          let halfTyCon = "X" ++ show (vecCount `quot` 2)
+          in ["instance SplitShortVector " ++ tyCon ++ " a => SplitShortVector " ++ tyCon ++ " (Complex a) where"
+             ,"  splitShortVector (MkComplex" ++ tyCon ++ " s t) = case splitShortVector s of (x0, x1) -> case splitShortVector t of (y0, y1) -> (MkComplex" ++ halfTyCon ++ " x0 y0, MkComplex" ++ halfTyCon ++ " x1 y1)"
+             ,"  joinShortVector (MkComplex" ++ halfTyCon ++ " x0 y0) (MkComplex" ++ halfTyCon ++ " x1 y1) = MkComplex" ++ tyCon ++ " (joinShortVector x0 x1) (joinShortVector y0 y1)"
+             ]
+       )
+    ++ ["instance UnboxSV " ++ tyCon ++ " a => UnboxSV " ++ tyCon ++ " (Complex a) where"
        ,"  unsafeIndexUnboxedSV (VUB.V_Complex (VUB.V_2 _ u v)) !i = MkComplex" ++ tyCon ++ " (unsafeIndexUnboxedSV u i) (unsafeIndexUnboxedSV v i)"
        ,"  unsafeReadUnboxedSV (VUB.MV_Complex (VUB.MV_2 _ u v)) !i = do { x <- unsafeReadUnboxedSV u i; y <- unsafeReadUnboxedSV v i; pure (MkComplex" ++ tyCon ++ " x y) }"
        ,"  unsafeWriteUnboxedSV (VUB.MV_Complex (VUB.MV_2 _ u v)) !i (MkComplex" ++ tyCon ++ " x y) = do { unsafeWriteUnboxedSV u i x; unsafeWriteUnboxedSV v i y }"
@@ -57,6 +73,18 @@ gen !vecCount !maxBits
        ,"instance Broadcast " ++ tyCon ++ " () where"
        ,"  broadcast _ = MkUnit" ++ tyCon
        ]
+    ++ (if vecCount == 2
+        then ["instance SplitShortVector " ++ tyCon ++ " () where"
+             ,"  splitShortVector MkUnit" ++ tyCon ++ " = (Identity (), Identity ())"
+             ,"  joinShortVector _ _ = MkUnit" ++ tyCon
+             ]
+        else
+          let halfTyCon = "X" ++ show (vecCount `quot` 2)
+          in ["instance SplitShortVector " ++ tyCon ++ " () where"
+             ,"  splitShortVector MkUnit" ++ tyCon ++ " = (MkUnit" ++ halfTyCon ++ ", MkUnit" ++ halfTyCon ++ ")"
+             ,"  joinShortVector MkUnit" ++ halfTyCon ++ " MkUnit" ++ halfTyCon ++ " = MkUnit" ++ tyCon
+             ]
+       )
     ++ concatMap genTuple [2..maxTupleLen]
     ++ ["instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Unpack" ++ tyCon ++ " " ++ tyCon ++ " a) => MonoMap " ++ tyCon ++ " a where"
        ,"  monoMap f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -75,6 +103,7 @@ gen !vecCount !maxBits
     genType name primCon !bitsPerElem others
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
+            halfTyCon = if vecCount == 2 then "Identity" else "X" ++ show (vecCount `quot` 2)
             mainDef = if bitCount < 128 || maxBits == 0
                       then ["data instance " ++ tyCon ++ " " ++ name ++ " = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep (replicate vecCount ('!':name))
                            ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " " ++ name ++ " where"
@@ -84,6 +113,15 @@ gen !vecCount !maxBits
                            ,"instance Broadcast " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  broadcast !x = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep (replicate vecCount "x")
                            ]
+                           ++ if vecCount == 2
+                              then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
+                                   ,"  splitShortVector (Mk" ++ name ++ tyCon ++ "WithElems x0 x1) = (Identity x0, Identity x1)"
+                                   ,"  joinShortVector (Identity x0) (Identity x1) = Mk" ++ name ++ tyCon ++ "WithElems x0 x1"
+                                   ]
+                              else ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
+                                   ,"  splitShortVector (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
+                                   ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
+                                   ]
                       else
                         let shortVecSize = vecBitCount `div` bitsPerElem
                             shortVecCount = bitCount `div` vecBitCount
@@ -100,6 +138,23 @@ gen !vecCount !maxBits
                             then "  broadcast (" ++ primCon ++ " x) = Mk" ++ name ++ tyCon ++ suffix ++ " (broadcast" ++ name ++ "X" ++ show shortVecSize ++ "# x)"
                             else "  broadcast (" ++ primCon ++ " x) = let !v = broadcast" ++ name ++ "X" ++ show shortVecSize ++ "# x in Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep (replicate shortVecCount "v")
                            ]
+                           ++ if vecCount == 2
+                              then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
+                                   ,"  splitShortVector v = coerce (unpack" ++ tyCon ++ " v)"
+                                   ,"  joinShortVector (Identity x0) (Identity x1) = pack" ++ tyCon ++ " x0 x1"
+                                   ]
+                              else if shortVecCount == 1
+                                   then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
+                                        ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
+                                        ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
+                                        ]
+                                   else
+                                     let halfSuffix | shortVecCount == 2 = ""
+                                                    | otherwise = "WithVec" ++ show vecBitCount
+                                     in ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
+                                        ,"  splitShortVector (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..(shortVecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [shortVecCount `quot` 2..shortVecCount-1]] ++ ")"
+                                        ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..(shortVecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [shortVecCount `quot` 2..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]]
+                                        ]
         in mainDef ++ concatMap (\f -> f name primCon bitsPerElem) others
     genNum isSigned name primCon !bitsPerElem
       = let bitCount = bitsPerElem * vecCount
@@ -212,7 +267,19 @@ gen !vecCount !maxBits
         ,"  unpack" ++ tyCon ++ " (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ concat ["case unpack" ++ tyCon ++ " v" ++ show i ++ " of (" ++ commaSep ["x" ++ show j ++ "_" ++ show i | j <- [0..vecCount-1]] ++ ") -> " | i <- [0..n-1]] ++ "(" ++ commaSep ["(" ++ commaSep ["x" ++ show i ++ "_" ++ show j | j <- [0..n-1]] ++ ")" | i <- [0..vecCount-1]] ++ ")"
         ,"instance (" ++ commaSep ["Broadcast " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => Broadcast " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
         ,"  broadcast (" ++ commaSep ["x" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(broadcast x" ++ show i ++ ")" | i <- [0..n-1]]
-        ] ++ if n <= maxTupleLenForUnboxedVector
+        ] ++ (if vecCount == 2
+              then ["instance (" ++ commaSep ["SplitShortVector " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => SplitShortVector " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
+                   ,"  splitShortVector (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ concat ["case splitShortVector v" ++ show i ++ " of (Identity a" ++ show i ++ ", Identity b" ++ show i ++ ") -> " | i <- [0..n-1]] ++ "(Identity (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ "), Identity (" ++ commaSep ["b" ++ show i | i <- [0..n-1]] ++ "))"
+                   ,"  joinShortVector (Identity (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ")) (Identity (" ++ commaSep ["b" ++ show i | i <- [0..n-1]] ++ ")) = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(joinShortVector (Identity a" ++ show i ++ ") (Identity b" ++ show i ++ "))" | i <- [0..n-1]]
+                   ]
+              else
+                let halfTyCon = "X" ++ show (vecCount `quot` 2)
+                in ["instance (" ++ commaSep ["SplitShortVector " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => SplitShortVector " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
+                   ,"  splitShortVector (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ concat ["case splitShortVector v" ++ show i ++ " of (a" ++ show i ++ ", b" ++ show i ++ ") -> " | i <- [0..n-1]] ++ "(MkTuple" ++ show n ++ halfTyCon ++ " " ++ spaceSep ["a" ++ show i | i <- [0..n-1]] ++ ", MkTuple" ++ show n ++ halfTyCon ++ " " ++ spaceSep ["b" ++ show i | i <- [0..n-1]] ++ ")"
+                   ,"  joinShortVector (MkTuple" ++ show n ++ halfTyCon ++ " " ++ spaceSep ["a" ++ show i | i <- [0..n-1]] ++ ") (MkTuple" ++ show n ++ halfTyCon ++ " " ++ spaceSep ["b" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(joinShortVector a" ++ show i ++ " b" ++ show i ++ ")" | i <- [0..n-1]]
+                   ]
+             )
+         ++ if n <= maxTupleLenForUnboxedVector
              then ["instance (" ++ commaSep ["UnboxSV " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSV " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
                   ,"  unsafeIndexUnboxedSV (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSV v" ++ show i ++ " i)" | i <- [0..n-1]]
                   ,"  unsafeReadUnboxedSV (VUB.MV_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = do { " ++ semicolonSep ["!s" ++ show i ++ " <- unsafeReadUnboxedSV v" ++ show i ++ " i" | i <- [0..n-1]] ++ "; pure (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["s" ++ show i | i <- [0..n-1]] ++ ") }"
@@ -227,6 +294,9 @@ gen !vecCount !maxBits
         ,"  unpack" ++ tyCon ++ " = coerce (unpack" ++ tyCon ++ " @" ++ tyCon ++ " @a)"
         ,"instance Broadcast " ++ tyCon ++ " a => Broadcast " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  broadcast = coerce (broadcast @" ++ tyCon ++ " @a)"
+        ,"instance SplitShortVector " ++ tyCon ++ " a => SplitShortVector " ++ tyCon ++ " (" ++ name ++ " a) where"
+        ,"  splitShortVector = coerce (splitShortVector @" ++ tyCon ++ " @a)"
+        ,"  joinShortVector = coerce (joinShortVector @" ++ tyCon ++ " @a)"
         ,"instance UnboxSV " ++ tyCon ++ " a => UnboxSV " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  unsafeIndexUnboxedSV = coerce (unsafeIndexUnboxedSV @" ++ tyCon ++ " @a)"
         ,"  unsafeReadUnboxedSV = coerce (unsafeReadUnboxedSV @" ++ tyCon ++ " @a)"
@@ -254,8 +324,8 @@ genFile moduleName !maxBits
     ] ++ gen 2 maxBits ++ gen 4 maxBits ++ gen 8 maxBits ++ gen 16 maxBits ++ gen 32 maxBits
 -}
 
-genFile :: String -> Int -> Int -> [String]
-genFile moduleName !n !maxBits
+genFile :: String -> String -> Int -> Int -> [String]
+genFile moduleName halfMod !n !maxBits
   = ["-- This file was created by Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE MagicHash #-}"
@@ -272,6 +342,9 @@ genFile moduleName !n !maxBits
     ,"import GHC.Exts"
     ,"import Data.ShortVector.Class"
     ,"import qualified Data.Vector.Unboxed.Base as VUB"
+    ,if n == 2
+     then "import Data.Functor.Identity"
+     else "import " ++ halfMod
     ] ++ gen n maxBits
 
 main :: IO ()
@@ -301,7 +374,7 @@ main = do
   writeFile "src/Data/ShortVector/Internal/SIMD512.hs" $ unlines $ genFile "Data.ShortVector.Internal.SIMD512" 512
   -}
   forM_ [2,4,8,16,32] $ \i -> do
-    writeFile ("src/Data/ShortVector/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.NoSIMD.X" ++ show i) i 0
-    writeFile ("src/Data/ShortVector/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD128.X" ++ show i) i 128
-    when (i * 64 > 128) $ writeFile ("src/Data/ShortVector/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD256.X" ++ show i) i 256
-    when (i * 64 > 256) $ writeFile ("src/Data/ShortVector/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD512.X" ++ show i) i 512
+    writeFile ("src/Data/ShortVector/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.NoSIMD.X" ++ show i) ("Data.ShortVector.Internal.NoSIMD.X" ++ show (i `quot` 2)) i 0
+    writeFile ("src/Data/ShortVector/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD128.X" ++ show i) ("Data.ShortVector.Internal.SIMD128.X" ++ show (i `quot` 2)) i 128
+    when (i * 64 > 128) $ writeFile ("src/Data/ShortVector/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD256.X" ++ show i) ("Data.ShortVector.Internal.SIMD" ++ (if i * 32 > 128 then "256" else "128") ++ ".X" ++ show (i `quot` 2)) i 256
+    when (i * 64 > 256) $ writeFile ("src/Data/ShortVector/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD512.X" ++ show i) ("Data.ShortVector.Internal.SIMD" ++ (if i * 32 > 256 then "512" else "256") ++ ".X" ++ show (i `quot` 2)) i 512

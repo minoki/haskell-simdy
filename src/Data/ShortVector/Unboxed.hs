@@ -1,16 +1,25 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE CPP #-}
 module Data.ShortVector.Unboxed where
 import Data.ShortVector.Class
-import Data.ShortVector.Internal.SIMD128
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Vector.Unboxed.Mutable as VUM
 import Data.Functor.Identity
+#if defined(USE_SIMD512)
+import Data.ShortVector.Internal.SIMD512
+#elif defined(USE_SIMD256)
+import Data.ShortVector.Internal.SIMD256
+#elif defined(USE_SIMD128)
+import Data.ShortVector.Internal.SIMD128
+#else
+import Data.ShortVector.Internal.NoSIMD
+#endif
 
 mapX :: forall m a b. (ShortVector m, VU.Unbox a, UnboxSV m a, VU.Unbox b, UnboxSV m b) => (forall f. ShortVector f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX f !v = VU.create $ do
   let !n = VU.length v
       !m = shortVectorLength @m
-  result <- VUM.unsafeNew n
+  !result <- VUM.unsafeNew n
   let goVec !i = if i + m <= n
                  then
                    do let !s = unsafeIndexUnboxedSV @m v i
@@ -44,7 +53,7 @@ zipWithX :: forall m a b c. (ShortVector m, VU.Unbox a, UnboxSV m a, VU.Unbox b,
 zipWithX f !v0 !v1 = VU.create $ do
   let !n = min (VU.length v0) (VU.length v1)
       !m = shortVectorLength @m
-  result <- VUM.unsafeNew n
+  !result <- VUM.unsafeNew n
   let goVec !i = if i + m <= n
                  then
                    do let !s0 = unsafeIndexUnboxedSV @m v0 i

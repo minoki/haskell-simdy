@@ -13,6 +13,21 @@ build-type:         Simple
 extra-doc-files:    CHANGELOG.md
 -- extra-source-files:
 
+flag no-simd
+    description: Don't use native vector types
+    manual: True
+    default: False
+
+flag avx2
+    description: Enable 256-bit vector via AVX2
+    manual: True
+    default: False
+
+flag avx512
+    description: Enable 512-bit vector via AVX-512
+    manual: True
+    default: False
+
 common warnings
     ghc-options: -Wall -Wcompat -fllvm
 
@@ -20,7 +35,6 @@ library
     import:           warnings
     exposed-modules:  Data.ShortVector.Class
                       Data.ShortVector.Internal.NoSIMD
-                      Data.ShortVector.Internal.SIMD128
                       Data.ShortVector.Unboxed
     other-modules:    Data.ShortVector.Class.Generated
                       Data.ShortVector.Internal.NoSIMD.X2
@@ -28,11 +42,29 @@ library
                       Data.ShortVector.Internal.NoSIMD.X8
                       Data.ShortVector.Internal.NoSIMD.X16
                       Data.ShortVector.Internal.NoSIMD.X32
-                      Data.ShortVector.Internal.SIMD128.X2
-                      Data.ShortVector.Internal.SIMD128.X4
-                      Data.ShortVector.Internal.SIMD128.X8
-                      Data.ShortVector.Internal.SIMD128.X16
-                      Data.ShortVector.Internal.SIMD128.X32
+    if !flag(no-simd)
+        exposed-modules:  Data.ShortVector.Internal.SIMD128
+        other-modules:    Data.ShortVector.Internal.SIMD128.X2
+                          Data.ShortVector.Internal.SIMD128.X4
+                          Data.ShortVector.Internal.SIMD128.X8
+                          Data.ShortVector.Internal.SIMD128.X16
+                          Data.ShortVector.Internal.SIMD128.X32
+        cpp-options: -DUSE_SIMD128
+    if flag(avx2)
+        exposed-modules: Data.ShortVector.Internal.SIMD256
+        other-modules:    Data.ShortVector.Internal.SIMD256.X4
+                          Data.ShortVector.Internal.SIMD256.X8
+                          Data.ShortVector.Internal.SIMD256.X16
+                          Data.ShortVector.Internal.SIMD256.X32
+        ghc-options: -mavx2
+        cpp-options: -DUSE_SIMD256
+    if flag(avx512)
+        exposed-modules:  Data.ShortVector.Internal.SIMD512
+        other-modules:    Data.ShortVector.Internal.SIMD512.X8
+                          Data.ShortVector.Internal.SIMD512.X16
+                          Data.ShortVector.Internal.SIMD512.X32
+        ghc-options: -mavx512f
+        cpp-options: -DUSE_SIMD512
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.21,
                       primitive ^>=0.9.0.0,

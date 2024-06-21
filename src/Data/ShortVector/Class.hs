@@ -1,7 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DefaultSignatures #-}
--- {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.ShortVector.Class (module M, module Data.ShortVector.Class) where
@@ -23,11 +23,12 @@ import Data.Monoid
 import Data.Functor.Identity
 import Foreign.Storable
 
-{-
-class SplitShortVector f g a | g -> f where
-  splitShortVector :: g a -> (f a, f a)
-  unsplitShortVector :: f a -> f a -> g a
--}
+type HalfVector :: (Type -> Type) -> Type -> Type
+type family HalfVector f
+
+class SplitShortVector f a where
+  splitShortVector :: f a -> (HalfVector f a, HalfVector f a)
+  joinShortVector :: HalfVector f a -> HalfVector f a -> f a
 
 class Broadcast f a where
   broadcast :: a -> f a
@@ -155,8 +156,8 @@ class NumF f a where
   -- default mulF :: (Num a, MonoZipWith f a) => f a -> f a -> f a
   -- mulF = monoZipWith (*)
   negateF :: f a -> f a
-  default negateF :: (Num a, MonoMap f a) => f a -> f a
-  negateF = monoMap negate
+  default negateF :: (Num a, Broadcast f a) => f a -> f a
+  negateF = subF (broadcast 0) -- For Word-like instances
   absF :: f a -> f a
   default absF :: (Num a, MonoMap f a) => f a -> f a
   absF = monoMap abs

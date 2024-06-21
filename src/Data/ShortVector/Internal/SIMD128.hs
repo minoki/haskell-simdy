@@ -52,6 +52,11 @@ class (PackX2 X2 a
       ,MonoZipWith X16 a
       ,MonoZipWith X32 a
       -}
+      ,SplitShortVector X2 a
+      ,SplitShortVector X4 a
+      ,SplitShortVector X8 a
+      ,SplitShortVector X16 a
+      ,SplitShortVector X32 a
       ) => ShortVectorElement a
 instance ShortVectorElement Float
 instance ShortVectorElement Double
