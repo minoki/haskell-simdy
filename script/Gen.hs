@@ -1,7 +1,12 @@
--- Run as 'runghc script/Gen.hs'
+-- Run as 'cabal run script/Gen.hs'
+{- cabal:
+build-depends: base, directory
+default-language: GHC2021
+-}
 import System.IO
 import qualified Data.List as List
 import Control.Monad
+import System.Directory (createDirectoryIfMissing)
 
 maxTupleLen :: Int
 maxTupleLen = 6
@@ -306,7 +311,7 @@ gen !vecCount !maxBits
 {-
 genFile :: String -> Int -> [String]
 genFile moduleName !maxBits
-  = ["-- This file was created by Gen.hs. Do not edit by hand!"
+  = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
@@ -326,7 +331,7 @@ genFile moduleName !maxBits
 
 genFile :: String -> String -> Int -> Int -> [String]
 genFile moduleName halfMod !n !maxBits
-  = ["-- This file was created by Gen.hs. Do not edit by hand!"
+  = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
@@ -349,8 +354,9 @@ genFile moduleName halfMod !n !maxBits
 
 main :: IO ()
 main = do
+  createDirectoryIfMissing True "src/Data/ShortVector/Class"
   writeFile "src/Data/ShortVector/Class/Generated.hs" $ unlines $
-    ["-- This file was created by Gen.hs. Do not edit by hand!"
+    ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE PatternSynonyms #-}"
     ,"{-# LANGUAGE ViewPatterns #-}"
     ,"module Data.ShortVector.Class.Generated where"]
@@ -373,6 +379,10 @@ main = do
   writeFile "src/Data/ShortVector/Internal/SIMD256.hs" $ unlines $ genFile "Data.ShortVector.Internal.SIMD256" 256
   writeFile "src/Data/ShortVector/Internal/SIMD512.hs" $ unlines $ genFile "Data.ShortVector.Internal.SIMD512" 512
   -}
+  createDirectoryIfMissing True "src/Data/ShortVector/Internal/NoSIMD"
+  createDirectoryIfMissing True "src/Data/ShortVector/Internal/SIMD128"
+  createDirectoryIfMissing True "src/Data/ShortVector/Internal/SIMD256"
+  createDirectoryIfMissing True "src/Data/ShortVector/Internal/SIMD512"
   forM_ [2,4,8,16,32] $ \i -> do
     writeFile ("src/Data/ShortVector/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.NoSIMD.X" ++ show i) ("Data.ShortVector.Internal.NoSIMD.X" ++ show (i `quot` 2)) i 0
     writeFile ("src/Data/ShortVector/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD128.X" ++ show i) ("Data.ShortVector.Internal.SIMD128.X" ++ show (i `quot` 2)) i 128
