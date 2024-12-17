@@ -36,18 +36,23 @@ mapX f !v = VU.create $ do
 
 mapX2 :: (MultiUnbox a, MultiUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX2 = mapX @X2
+{-# INLINE mapX2 #-}
 
 mapX4 :: (MultiUnbox a, MultiUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX4 = mapX @X4
+{-# INLINE mapX4 #-}
 
 mapX8 :: (MultiUnbox a, MultiUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX8 = mapX @X8
+{-# INLINE mapX8 #-}
 
 mapX16 :: (MultiUnbox a, MultiUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX16 = mapX @X16
+{-# INLINE mapX16 #-}
 
 mapX32 :: (MultiUnbox a, MultiUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX32 = mapX @X32
+{-# INLINE mapX32 #-}
 
 zipWithX :: forall m a b c. (SIMD m, VU.Unbox a, UnboxSIMD m a, VU.Unbox b, UnboxSIMD m b, VU.Unbox c, UnboxSIMD m c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX f !v0 !v1 = VU.create $ do
@@ -72,15 +77,20 @@ zipWithX f !v0 !v1 = VU.create $ do
 
 zipWithX2 :: (MultiUnbox a, MultiUnbox b, MultiUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX2 = zipWithX @X2
+{-# INLINE zipWithX2 #-}
 
 zipWithX4 :: (MultiUnbox a, MultiUnbox b, MultiUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX4 = zipWithX @X4
+{-# INLINE zipWithX4 #-}
 
 zipWithX8 :: (MultiUnbox a, MultiUnbox b, MultiUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX8 = zipWithX @X8
+{-# INLINE zipWithX8 #-}
 
 zipWithX16 :: (MultiUnbox a, MultiUnbox b, MultiUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX16 = zipWithX @X16
+{-# INLINE zipWithX16 #-}
 
 zipWithX32 :: (MultiUnbox a, MultiUnbox b, MultiUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX32 = zipWithX @X32
+{-# INLINE zipWithX32 #-}
