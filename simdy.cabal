@@ -1,0 +1,85 @@
+cabal-version:      3.0
+name:               simdy
+version:            0.1.0.0
+-- synopsis:
+-- description:
+license:            BSD-3-Clause
+license-file:       LICENSE
+author:             ARATA Mizuki
+maintainer:         minorinoki@gmail.com
+-- copyright:
+category:           Data
+build-type:         Simple
+extra-doc-files:    CHANGELOG.md
+-- extra-source-files:
+
+flag no-simd
+    description: Don't use native vector types
+    manual: True
+    default: False
+
+flag avx2
+    description: Enable 256-bit vector via AVX2
+    manual: True
+    default: False
+
+flag avx512
+    description: Enable 512-bit vector via AVX-512
+    manual: True
+    default: False
+
+common warnings
+    ghc-options: -Wall -Wcompat -fllvm
+
+library
+    import:           warnings
+    exposed-modules:  Data.Simdy.Class
+                      Data.Simdy.Internal.NoSIMD
+                      Data.Simdy.Unboxed
+    other-modules:    Data.Simdy.Class.Generated
+                      Data.Simdy.Internal.NoSIMD.X2
+                      Data.Simdy.Internal.NoSIMD.X4
+                      Data.Simdy.Internal.NoSIMD.X8
+                      Data.Simdy.Internal.NoSIMD.X16
+                      Data.Simdy.Internal.NoSIMD.X32
+    if !flag(no-simd)
+        exposed-modules:  Data.Simdy.Internal.SIMD128
+        other-modules:    Data.Simdy.Internal.SIMD128.X2
+                          Data.Simdy.Internal.SIMD128.X4
+                          Data.Simdy.Internal.SIMD128.X8
+                          Data.Simdy.Internal.SIMD128.X16
+                          Data.Simdy.Internal.SIMD128.X32
+        cpp-options: -DUSE_SIMD128
+    if flag(avx2)
+        exposed-modules: Data.Simdy.Internal.SIMD256
+        other-modules:    Data.Simdy.Internal.SIMD256.X4
+                          Data.Simdy.Internal.SIMD256.X8
+                          Data.Simdy.Internal.SIMD256.X16
+                          Data.Simdy.Internal.SIMD256.X32
+        ghc-options: -mavx2
+        cpp-options: -DUSE_SIMD256
+    if flag(avx512)
+        exposed-modules:  Data.Simdy.Internal.SIMD512
+        other-modules:    Data.Simdy.Internal.SIMD512.X8
+                          Data.Simdy.Internal.SIMD512.X16
+                          Data.Simdy.Internal.SIMD512.X32
+        ghc-options: -mavx512f
+        cpp-options: -DUSE_SIMD512
+    -- other-extensions:
+    build-depends:    base >=4.18.0.0 && <4.21,
+                      primitive ^>=0.9.0.0,
+                      vector ^>=0.13.1.0
+    hs-source-dirs:   src
+    default-language: GHC2021
+
+test-suite simdy-test
+    import:           warnings
+    default-language: GHC2021
+    -- other-modules:
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test
+    main-is:          Main.hs
+    build-depends:
+        base >=4.18.0.0 && <4.21,
+        simdy

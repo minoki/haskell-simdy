@@ -325,7 +325,7 @@ genFile moduleName !maxBits
     ,"import Data.Complex"
     ,"import GHC.IO"
     ,"import GHC.Exts"
-    ,"import Data.ShortVector.Class"
+    ,"import Data.Simdy.Class"
     ] ++ gen 2 maxBits ++ gen 4 maxBits ++ gen 8 maxBits ++ gen 16 maxBits ++ gen 32 maxBits
 -}
 
@@ -345,7 +345,7 @@ genFile moduleName halfMod !n !maxBits
     ,"import Data.Complex"
     ,"import GHC.IO"
     ,"import GHC.Exts"
-    ,"import Data.ShortVector.Class"
+    ,"import Data.Simdy.Class"
     ,"import qualified Data.Vector.Unboxed.Base as VUB"
     ,if n == 2
      then "import Data.Functor.Identity"
@@ -354,12 +354,12 @@ genFile moduleName halfMod !n !maxBits
 
 main :: IO ()
 main = do
-  createDirectoryIfMissing True "src/Data/ShortVector/Class"
-  writeFile "src/Data/ShortVector/Class/Generated.hs" $ unlines $
+  createDirectoryIfMissing True "src/Data/Simdy/Class"
+  writeFile "src/Data/Simdy/Class/Generated.hs" $ unlines $
     ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE PatternSynonyms #-}"
     ,"{-# LANGUAGE ViewPatterns #-}"
-    ,"module Data.ShortVector.Class.Generated where"]
+    ,"module Data.Simdy.Class.Generated where"]
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
                         ,"  packX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
                         ,"class UnpackX" ++ show n ++ " f a where"
@@ -374,17 +374,17 @@ main = do
                ,"  MkTuple" ++ show n ++ " = mkTuple" ++ show n
                ] | n <- [2..maxTupleLen]]
   {-
-  writeFile "src/Data/ShortVector/Internal/NoSIMD.hs" $ unlines $ genFile "Data.ShortVector.Internal.NoSIMD" 0
-  writeFile "src/Data/ShortVector/Internal/SIMD128.hs" $ unlines $ genFile "Data.ShortVector.Internal.SIMD128" 128
-  writeFile "src/Data/ShortVector/Internal/SIMD256.hs" $ unlines $ genFile "Data.ShortVector.Internal.SIMD256" 256
-  writeFile "src/Data/ShortVector/Internal/SIMD512.hs" $ unlines $ genFile "Data.ShortVector.Internal.SIMD512" 512
+  writeFile "src/Data/Simdy/Internal/NoSIMD.hs" $ unlines $ genFile "Data.Simdy.Internal.NoSIMD" 0
+  writeFile "src/Data/Simdy/Internal/SIMD128.hs" $ unlines $ genFile "Data.Simdy.Internal.SIMD128" 128
+  writeFile "src/Data/Simdy/Internal/SIMD256.hs" $ unlines $ genFile "Data.Simdy.Internal.SIMD256" 256
+  writeFile "src/Data/Simdy/Internal/SIMD512.hs" $ unlines $ genFile "Data.Simdy.Internal.SIMD512" 512
   -}
-  createDirectoryIfMissing True "src/Data/ShortVector/Internal/NoSIMD"
-  createDirectoryIfMissing True "src/Data/ShortVector/Internal/SIMD128"
-  createDirectoryIfMissing True "src/Data/ShortVector/Internal/SIMD256"
-  createDirectoryIfMissing True "src/Data/ShortVector/Internal/SIMD512"
+  createDirectoryIfMissing True "src/Data/Simdy/Internal/NoSIMD"
+  createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD128"
+  createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD256"
+  createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD512"
   forM_ [2,4,8,16,32] $ \i -> do
-    writeFile ("src/Data/ShortVector/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.NoSIMD.X" ++ show i) ("Data.ShortVector.Internal.NoSIMD.X" ++ show (i `quot` 2)) i 0
-    writeFile ("src/Data/ShortVector/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD128.X" ++ show i) ("Data.ShortVector.Internal.SIMD128.X" ++ show (i `quot` 2)) i 128
-    when (i * 64 > 128) $ writeFile ("src/Data/ShortVector/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD256.X" ++ show i) ("Data.ShortVector.Internal.SIMD" ++ (if i * 32 > 128 then "256" else "128") ++ ".X" ++ show (i `quot` 2)) i 256
-    when (i * 64 > 256) $ writeFile ("src/Data/ShortVector/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.ShortVector.Internal.SIMD512.X" ++ show i) ("Data.ShortVector.Internal.SIMD" ++ (if i * 32 > 256 then "512" else "256") ++ ".X" ++ show (i `quot` 2)) i 512
+    writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) ("Data.Simdy.Internal.NoSIMD.X" ++ show (i `quot` 2)) i 0
+    writeFile ("src/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) ("Data.Simdy.Internal.SIMD128.X" ++ show (i `quot` 2)) i 128
+    when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ("Data.Simdy.Internal.SIMD" ++ (if i * 32 > 128 then "256" else "128") ++ ".X" ++ show (i `quot` 2)) i 256
+    when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ("Data.Simdy.Internal.SIMD" ++ (if i * 32 > 256 then "512" else "256") ++ ".X" ++ show (i `quot` 2)) i 512

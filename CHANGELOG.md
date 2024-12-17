@@ -1,4 +1,4 @@
-# Revision history for short-vector
+# Revision history for simdy
 
 ## 0.1.0.0 -- YYYY-mm-dd
 

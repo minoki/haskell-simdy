@@ -1,5 +1,5 @@
 {-# LANGUAGE QuantifiedConstraints #-}
-module Data.ShortVector.Internal.SIMD128
+module Data.Simdy.Internal.SIMD128
   (module M
   ,ShortVector
   ,ShortVectorElement
@@ -10,12 +10,12 @@ module Data.ShortVector.Internal.SIMD128
   ,MultiUnbox
   ,MultiStorable
   ) where
-import Data.ShortVector.Class
-import Data.ShortVector.Internal.SIMD128.X2 as M
-import Data.ShortVector.Internal.SIMD128.X4 as M
-import Data.ShortVector.Internal.SIMD128.X8 as M
-import Data.ShortVector.Internal.SIMD128.X16 as M
-import Data.ShortVector.Internal.SIMD128.X32 as M
+import Data.Simdy.Class
+import Data.Simdy.Internal.SIMD128.X2 as M
+import Data.Simdy.Internal.SIMD128.X4 as M
+import Data.Simdy.Internal.SIMD128.X8 as M
+import Data.Simdy.Internal.SIMD128.X16 as M
+import Data.Simdy.Internal.SIMD128.X32 as M
 import Data.Int
 import Data.Word
 import Data.Semigroup

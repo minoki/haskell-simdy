@@ -1,18 +1,18 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
-module Data.ShortVector.Unboxed where
-import Data.ShortVector.Class
+module Data.Simdy.Unboxed where
+import Data.Simdy.Class
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Vector.Unboxed.Mutable as VUM
 import Data.Functor.Identity
 #if defined(USE_SIMD512)
-import Data.ShortVector.Internal.SIMD512
+import Data.Simdy.Internal.SIMD512
 #elif defined(USE_SIMD256)
-import Data.ShortVector.Internal.SIMD256
+import Data.Simdy.Internal.SIMD256
 #elif defined(USE_SIMD128)
-import Data.ShortVector.Internal.SIMD128
+import Data.Simdy.Internal.SIMD128
 #else
-import Data.ShortVector.Internal.NoSIMD
+import Data.Simdy.Internal.NoSIMD
 #endif
 
 mapX :: forall m a b. (ShortVector m, VU.Unbox a, UnboxSV m a, VU.Unbox b, UnboxSV m b) => (forall f. ShortVector f => f a -> f b) -> VU.Vector a -> VU.Vector b

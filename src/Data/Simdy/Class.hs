@@ -4,10 +4,10 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Data.ShortVector.Class (module M, module Data.ShortVector.Class) where
+module Data.Simdy.Class (module M, module Data.Simdy.Class) where
 import Data.Kind
 import Data.Coerce
-import Data.ShortVector.Class.Generated as M -- PackXn, UnpackXn, MkTuple, DeconstructTuple
+import Data.Simdy.Class.Generated as M -- PackXn, UnpackXn, MkTuple, DeconstructTuple
 import GHC.Exts
 import Data.Primitive
 import qualified Data.Vector.Primitive as VP
