@@ -66,10 +66,10 @@ gen !vecCount !maxBits
              ,"  joinShortVector (MkComplex" ++ halfTyCon ++ " x0 y0) (MkComplex" ++ halfTyCon ++ " x1 y1) = MkComplex" ++ tyCon ++ " (joinShortVector x0 x1) (joinShortVector y0 y1)"
              ]
        )
-    ++ ["instance UnboxSV " ++ tyCon ++ " a => UnboxSV " ++ tyCon ++ " (Complex a) where"
-       ,"  unsafeIndexUnboxedSV (VUB.V_Complex (VUB.V_2 _ u v)) !i = MkComplex" ++ tyCon ++ " (unsafeIndexUnboxedSV u i) (unsafeIndexUnboxedSV v i)"
-       ,"  unsafeReadUnboxedSV (VUB.MV_Complex (VUB.MV_2 _ u v)) !i = do { x <- unsafeReadUnboxedSV u i; y <- unsafeReadUnboxedSV v i; pure (MkComplex" ++ tyCon ++ " x y) }"
-       ,"  unsafeWriteUnboxedSV (VUB.MV_Complex (VUB.MV_2 _ u v)) !i (MkComplex" ++ tyCon ++ " x y) = do { unsafeWriteUnboxedSV u i x; unsafeWriteUnboxedSV v i y }"
+    ++ ["instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (Complex a) where"
+       ,"  unsafeIndexUnboxedSIMD (VUB.V_Complex (VUB.V_2 _ u v)) !i = MkComplex" ++ tyCon ++ " (unsafeIndexUnboxedSIMD u i) (unsafeIndexUnboxedSIMD v i)"
+       ,"  unsafeReadUnboxedSIMD (VUB.MV_Complex (VUB.MV_2 _ u v)) !i = do { x <- unsafeReadUnboxedSIMD u i; y <- unsafeReadUnboxedSIMD v i; pure (MkComplex" ++ tyCon ++ " x y) }"
+       ,"  unsafeWriteUnboxedSIMD (VUB.MV_Complex (VUB.MV_2 _ u v)) !i (MkComplex" ++ tyCon ++ " x y) = do { unsafeWriteUnboxedSIMD u i x; unsafeWriteUnboxedSIMD v i y }"
        ,"data instance " ++ tyCon ++ " () = MkUnit" ++ tyCon
        ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " () where"
        ,"  pack" ++ tyCon ++ " " ++ spaceSep (replicate vecCount "_") ++ " = MkUnit" ++ tyCon
@@ -228,10 +228,10 @@ gen !vecCount !maxBits
             i_plus 0 = "i"
             i_plus k = "(i +# " ++ show k ++ "#)"
         in if bitCount < 128 || maxBits == 0
-           then ["instance PrimSV " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  indexByteArraySV# ba i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " (index" ++ name ++ "Array# ba " ++ i_plus i ++ "))" | i <- [0..vecCount-1]]
-                ,"  readByteArraySV# mba i s0 = " ++ concat ["case read" ++ name ++ "Array# mba " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #)"
-                ,"  writeByteArraySV# mba i (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") s0 = " ++ concat ["case write" ++ name ++ "Array# mba " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "write" ++ name ++ "Array# mba (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1)
+           then ["instance PrimSIMD " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " (index" ++ name ++ "Array# ba " ++ i_plus i ++ "))" | i <- [0..vecCount-1]]
+                ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case read" ++ name ++ "Array# mba " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #)"
+                ,"  writeByteArraySIMD# mba i (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") s0 = " ++ concat ["case write" ++ name ++ "Array# mba " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "write" ++ name ++ "Array# mba (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1)
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -239,10 +239,10 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance PrimSV " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  indexByteArraySV# ba i = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(index" ++ name ++ "ArrayAs" ++ shortVecName ++ "# ba " ++ i_plus (i * shortVecSize) ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  readByteArraySV# mba i s0 = " ++ concat ["case read" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #)"
-                ,"  writeByteArraySV# mba i (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") s0 = " ++ concat ["case write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1)
+             in ["instance PrimSIMD " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(index" ++ name ++ "ArrayAs" ++ shortVecName ++ "# ba " ++ i_plus (i * shortVecSize) ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case read" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #)"
+                ,"  writeByteArraySIMD# mba i (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") s0 = " ++ concat ["case write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1)
                 ]
     genStorable name primCon !bitsPerElem
       = let bitCount = bitsPerElem * vecCount
@@ -250,9 +250,9 @@ gen !vecCount !maxBits
             i_plus 0 = "i"
             i_plus k = "(i +# " ++ show k ++ "#)"
         in if bitCount < 128 || maxBits == 0
-           then ["instance StorableSV " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  peekElemOffSV (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case read" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #))"
-                ,"  pokeElemOffSV (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case write" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "(# write" ++ name ++ "OffAddr# addr (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1) ++ ", () #))"
+           then ["instance StorableSIMD " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case read" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #))"
+                ,"  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case write" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "(# write" ++ name ++ "OffAddr# addr (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1) ++ ", () #))"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -260,9 +260,9 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance StorableSV " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  peekElemOffSV (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case read" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #))"
-                ,"  pokeElemOffSV (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "(# write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1) ++ ", () #))"
+             in ["instance StorableSIMD " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case read" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #))"
+                ,"  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "(# write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1) ++ ", () #))"
                 ]
     genTuple !n
       = ["data instance " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["!(" ++ tyCon ++ " a" ++ show i ++ ")" | i <- [0..n-1]]
@@ -285,10 +285,10 @@ gen !vecCount !maxBits
                    ]
              )
          ++ if n <= maxTupleLenForUnboxedVector
-             then ["instance (" ++ commaSep ["UnboxSV " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSV " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
-                  ,"  unsafeIndexUnboxedSV (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSV v" ++ show i ++ " i)" | i <- [0..n-1]]
-                  ,"  unsafeReadUnboxedSV (VUB.MV_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = do { " ++ semicolonSep ["!s" ++ show i ++ " <- unsafeReadUnboxedSV v" ++ show i ++ " i" | i <- [0..n-1]] ++ "; pure (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["s" ++ show i | i <- [0..n-1]] ++ ") }"
-                  ,"  unsafeWriteUnboxedSV (VUB.MV_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["s" ++ show i | i <- [0..n-1]] ++ ") = do { " ++ semicolonSep ["unsafeWriteUnboxedSV v" ++ show i ++ " i s" ++ show i | i <- [0..n-1]] ++ " }"
+             then ["instance (" ++ commaSep ["UnboxSIMD " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSIMD " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
+                  ,"  unsafeIndexUnboxedSIMD (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSIMD v" ++ show i ++ " i)" | i <- [0..n-1]]
+                  ,"  unsafeReadUnboxedSIMD (VUB.MV_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = do { " ++ semicolonSep ["!s" ++ show i ++ " <- unsafeReadUnboxedSIMD v" ++ show i ++ " i" | i <- [0..n-1]] ++ "; pure (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["s" ++ show i | i <- [0..n-1]] ++ ") }"
+                  ,"  unsafeWriteUnboxedSIMD (VUB.MV_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["s" ++ show i | i <- [0..n-1]] ++ ") = do { " ++ semicolonSep ["unsafeWriteUnboxedSIMD v" ++ show i ++ " i s" ++ show i | i <- [0..n-1]] ++ " }"
                   ]
              else []
     genNewtype !name
@@ -302,10 +302,10 @@ gen !vecCount !maxBits
         ,"instance SplitShortVector " ++ tyCon ++ " a => SplitShortVector " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  splitShortVector = coerce (splitShortVector @" ++ tyCon ++ " @a)"
         ,"  joinShortVector = coerce (joinShortVector @" ++ tyCon ++ " @a)"
-        ,"instance UnboxSV " ++ tyCon ++ " a => UnboxSV " ++ tyCon ++ " (" ++ name ++ " a) where"
-        ,"  unsafeIndexUnboxedSV = coerce (unsafeIndexUnboxedSV @" ++ tyCon ++ " @a)"
-        ,"  unsafeReadUnboxedSV = coerce (unsafeReadUnboxedSV @" ++ tyCon ++ " @a)"
-        ,"  unsafeWriteUnboxedSV = coerce (unsafeWriteUnboxedSV @" ++ tyCon ++ " @a)"
+        ,"instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (" ++ name ++ " a) where"
+        ,"  unsafeIndexUnboxedSIMD = coerce (unsafeIndexUnboxedSIMD @" ++ tyCon ++ " @a)"
+        ,"  unsafeReadUnboxedSIMD = coerce (unsafeReadUnboxedSIMD @" ++ tyCon ++ " @a)"
+        ,"  unsafeWriteUnboxedSIMD = coerce (unsafeWriteUnboxedSIMD @" ++ tyCon ++ " @a)"
         ]
 
 {-
