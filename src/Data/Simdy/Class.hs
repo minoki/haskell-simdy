@@ -5,23 +5,23 @@
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Data.Simdy.Class (module M, module Data.Simdy.Class) where
-import Data.Kind
-import Data.Coerce
-import Data.Simdy.Class.Generated as M -- PackXn, UnpackXn, MkTuple, DeconstructTuple
-import GHC.Exts
-import Data.Primitive
+import           Control.Monad.ST
+import           Data.Coerce
+import           Data.Functor.Identity
+import           Data.Int
+import           Data.Kind
+import           Data.Monoid
+import           Data.Primitive
+import           Data.Semigroup
+import           Data.Simdy.Class.Generated as M
 import qualified Data.Vector.Primitive as VP
 import qualified Data.Vector.Unboxed as VU
-import qualified Data.Vector.Unboxed.Mutable as VUM
 import qualified Data.Vector.Unboxed.Base as VUB
-import Control.Monad.ST
-import GHC.ST
-import Data.Int
-import Data.Word
-import Data.Semigroup
-import Data.Monoid
-import Data.Functor.Identity
-import Foreign.Storable
+import qualified Data.Vector.Unboxed.Mutable as VUM
+import           Data.Word
+import           Foreign.Storable
+import           GHC.Exts
+import           GHC.ST
 
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f

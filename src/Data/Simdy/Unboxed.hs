@@ -1,19 +1,19 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
 module Data.Simdy.Unboxed where
-import Data.Simdy.Class
+import           Data.Coerce (coerce)
+import           Data.Functor.Identity (Identity (Identity))
+import           Data.Simdy.Class
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Vector.Unboxed.Mutable as VUM
-import Data.Functor.Identity
-import Data.Coerce (coerce)
 #if defined(USE_SIMD512)
-import Data.Simdy.Internal.SIMD512
+import           Data.Simdy.Internal.SIMD512
 #elif defined(USE_SIMD256)
-import Data.Simdy.Internal.SIMD256
+import           Data.Simdy.Internal.SIMD256
 #elif defined(USE_SIMD128)
-import Data.Simdy.Internal.SIMD128
+import           Data.Simdy.Internal.SIMD128
 #else
-import Data.Simdy.Internal.NoSIMD
+import           Data.Simdy.Internal.NoSIMD
 #endif
 
 mapX :: forall m a b. (SIMD m, VU.Unbox a, UnboxSIMD m a, VU.Unbox b, UnboxSIMD m b) => (m a -> m b) -> (a -> b) -> VU.Vector a -> VU.Vector b

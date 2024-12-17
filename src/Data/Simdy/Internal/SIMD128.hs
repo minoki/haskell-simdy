@@ -1,29 +1,29 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Internal.SIMD128
-  (module M
-  ,SIMD
-  ,SIMDElement
-  ,MultiNum
-  ,MultiFractional
-  ,MultiFloating
-  ,MultiPrim
-  ,MultiUnbox
-  ,MultiStorable
+  ( module M
+  , SIMD
+  , SIMDElement
+  , MultiNum
+  , MultiFractional
+  , MultiFloating
+  , MultiPrim
+  , MultiUnbox
+  , MultiStorable
   ) where
-import Data.Simdy.Class
-import Data.Simdy.Internal.SIMD128.X2 as M
-import Data.Simdy.Internal.SIMD128.X4 as M
-import Data.Simdy.Internal.SIMD128.X8 as M
-import Data.Simdy.Internal.SIMD128.X16 as M
-import Data.Simdy.Internal.SIMD128.X32 as M
-import Data.Int
-import Data.Word
-import Data.Semigroup
-import Data.Complex
-import Data.Functor.Identity
+import           Data.Complex
+import           Data.Functor.Identity
+import           Data.Int
+import           Data.Primitive
+import           Data.Semigroup
+import           Data.Simdy.Class
+import           Data.Simdy.Internal.SIMD128.X16 as M
+import           Data.Simdy.Internal.SIMD128.X2 as M
+import           Data.Simdy.Internal.SIMD128.X32 as M
+import           Data.Simdy.Internal.SIMD128.X4 as M
+import           Data.Simdy.Internal.SIMD128.X8 as M
 import qualified Data.Vector.Unboxed as VU
-import Data.Primitive
-import Foreign.Storable
+import           Data.Word
+import           Foreign.Storable
 
 class ( PackX2 X2 a
       , UnpackX2 X2 a
