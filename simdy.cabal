@@ -51,7 +51,7 @@ library
                           Data.Simdy.Internal.SIMD128.X32
         cpp-options: -DUSE_SIMD128
     if flag(avx2)
-        exposed-modules: Data.Simdy.Internal.SIMD256
+        exposed-modules:  Data.Simdy.Internal.SIMD256
         other-modules:    Data.Simdy.Internal.SIMD256.X4
                           Data.Simdy.Internal.SIMD256.X8
                           Data.Simdy.Internal.SIMD256.X16
@@ -66,7 +66,7 @@ library
         ghc-options: -mavx512f
         cpp-options: -DUSE_SIMD512
     -- other-extensions:
-    build-depends:    base >=4.18.0.0 && <4.21,
+    build-depends:    base >=4.18.0.0 && <4.22,
                       primitive ^>=0.9.0.0,
                       vector ^>=0.13.1.0
     hs-source-dirs:   src
@@ -81,5 +81,5 @@ test-suite simdy-test
     hs-source-dirs:   test
     main-is:          Main.hs
     build-depends:
-        base >=4.18.0.0 && <4.21,
+        base >=4.18.0.0 && <4.22,
         simdy
