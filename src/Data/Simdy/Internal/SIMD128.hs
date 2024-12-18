@@ -3,6 +3,7 @@ module Data.Simdy.Internal.SIMD128
   ( module M
   , SIMD
   , SIMDElement
+  , broadcast
   , liftSIMD
   , liftSIMD2
   , SIMDNum
@@ -17,7 +18,8 @@ import           Data.Functor.Identity
 import           Data.Int
 import           Data.Primitive
 import           Data.Semigroup
-import           Data.Simdy.Internal.Class
+import           Data.Simdy.Internal.Class hiding (broadcast)
+import qualified Data.Simdy.Internal.Class as I
 import           Data.Simdy.Internal.SIMD128.X16 as M
 import           Data.Simdy.Internal.SIMD128.X2 as M
 import           Data.Simdy.Internal.SIMD128.X32 as M
@@ -208,6 +210,10 @@ instance SIMD X4
 instance SIMD X8
 instance SIMD X16
 instance SIMD X32
+
+broadcast :: (SIMD f, SIMDElement a) => a -> f a
+broadcast = I.broadcast
+{-# INLINE broadcast #-}
 
 liftSIMD :: (SIMD f, SIMDElement a, SIMDElement b) => (a -> b) -> f a -> f b
 liftSIMD = simdMap
