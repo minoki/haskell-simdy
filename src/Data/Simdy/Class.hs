@@ -37,19 +37,19 @@ instance Broadcast Identity a where
   broadcast = Identity
   {-# INLINE broadcast #-}
 
-class MonoMap f a where
-  monoMap :: (a -> a) -> f a -> f a
+class SIMDFunctor f a b where
+  simdMap :: (a -> b) -> f a -> f b
 
-instance MonoMap Identity a where
-  monoMap = coerce
-  {-# INLINE monoMap #-}
+instance SIMDFunctor Identity a b where
+  simdMap = coerce
+  {-# INLINE simdMap #-}
 
-class MonoZipWith f a where
-  monoZipWith :: (a -> a -> a) -> f a -> f a -> f a
+class SIMDZipWith f a b c where
+  simdZipWith :: (a -> b -> c) -> f a -> f b -> f c
 
-instance MonoZipWith Identity a where
-  monoZipWith = coerce
-  {-# INLINE monoZipWith #-}
+instance SIMDZipWith Identity a b c where
+  simdZipWith = coerce
+  {-# INLINE simdZipWith #-}
 
 type ShortVectorLength :: (Type -> Type) -> Constraint
 class ShortVectorLength f where
@@ -192,23 +192,23 @@ newtype WrappedMulti f a = MkWrappedMulti (f a)
 
 class NumF f a where
   addF :: f a -> f a -> f a
-  -- default addF :: (Num a, MonoZipWith f a) => f a -> f a -> f a
-  -- addF = monoZipWith (+)
+  -- default addF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
+  -- addF = simdZipWith (+)
   subF :: f a -> f a -> f a
-  -- default subF :: (Num a, MonoZipWith f a) => f a -> f a -> f a
-  -- subF = monoZipWith (-)
+  -- default subF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
+  -- subF = simdZipWith (-)
   mulF :: f a -> f a -> f a
-  -- default mulF :: (Num a, MonoZipWith f a) => f a -> f a -> f a
-  -- mulF = monoZipWith (*)
+  -- default mulF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
+  -- mulF = simdZipWith (*)
   negateF :: f a -> f a
   default negateF :: (Num a, Broadcast f a) => f a -> f a
   negateF = subF (broadcast 0) -- For Word-like instances
   absF :: f a -> f a
-  default absF :: (Num a, MonoMap f a) => f a -> f a
-  absF = monoMap abs
+  default absF :: (Num a, SIMDFunctor f a a) => f a -> f a
+  absF = simdMap abs
   signumF :: f a -> f a
-  default signumF :: (Num a, MonoMap f a) => f a -> f a
-  signumF = monoMap signum
+  default signumF :: (Num a, SIMDFunctor f a a) => f a -> f a
+  signumF = simdMap signum
   fromIntegerF :: Integer -> f a
   default fromIntegerF :: (Num a, Broadcast f a) => Integer -> f a
   fromIntegerF = broadcast . fromInteger
@@ -235,8 +235,8 @@ instance NumF f a => Num (WrappedMulti f a) where
 
 class NumF f a => FractionalF f a where
   divF :: f a -> f a -> f a
-  -- default divF :: (Num a, MonoZipWith f a) => f a -> f a -> f a
-  -- divF = monoZipWith (/)
+  -- default divF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
+  -- divF = simdZipWith (/)
   recipF :: f a -> f a
   default recipF :: (Num a, Broadcast f a) => f a -> f a
   recipF = divF (broadcast 1)
@@ -259,56 +259,56 @@ class FractionalF f a => FloatingF f a where
   default piF :: (Floating a, Broadcast f a) => f a
   piF = broadcast pi
   expF :: f a -> f a
-  default expF :: (Floating a, MonoMap f a) => f a -> f a
-  expF = monoMap exp
+  default expF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  expF = simdMap exp
   logF :: f a -> f a
-  default logF :: (Floating a, MonoMap f a) => f a -> f a
-  logF = monoMap log
+  default logF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  logF = simdMap log
   sqrtF :: f a -> f a
-  default sqrtF :: (Floating a, MonoMap f a) => f a -> f a
-  sqrtF = monoMap sqrt
+  default sqrtF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  sqrtF = simdMap sqrt
   powF :: f a -> f a -> f a
-  default powF :: (Floating a, MonoZipWith f a) => f a -> f a -> f a
-  powF = monoZipWith (**)
+  default powF :: (Floating a, SIMDZipWith f a a a) => f a -> f a -> f a
+  powF = simdZipWith (**)
   logBaseF :: f a -> f a -> f a
-  default logBaseF :: (Floating a, MonoZipWith f a) => f a -> f a -> f a
-  logBaseF = monoZipWith logBase
+  default logBaseF :: (Floating a, SIMDZipWith f a a a) => f a -> f a -> f a
+  logBaseF = simdZipWith logBase
   sinF :: f a -> f a
-  default sinF :: (Floating a, MonoMap f a) => f a -> f a
-  sinF = monoMap sin
+  default sinF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  sinF = simdMap sin
   cosF :: f a -> f a
-  default cosF :: (Floating a, MonoMap f a) => f a -> f a
-  cosF = monoMap cos
+  default cosF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  cosF = simdMap cos
   tanF :: f a -> f a
-  default tanF :: (Floating a, MonoMap f a) => f a -> f a
-  tanF = monoMap tan
+  default tanF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  tanF = simdMap tan
   asinF :: f a -> f a
-  default asinF :: (Floating a, MonoMap f a) => f a -> f a
-  asinF = monoMap asin
+  default asinF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  asinF = simdMap asin
   acosF :: f a -> f a
-  default acosF :: (Floating a, MonoMap f a) => f a -> f a
-  acosF = monoMap acos
+  default acosF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  acosF = simdMap acos
   atanF :: f a -> f a
-  default atanF :: (Floating a, MonoMap f a) => f a -> f a
-  atanF = monoMap atan
+  default atanF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  atanF = simdMap atan
   sinhF :: f a -> f a
-  default sinhF :: (Floating a, MonoMap f a) => f a -> f a
-  sinhF = monoMap sinh
+  default sinhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  sinhF = simdMap sinh
   coshF :: f a -> f a
-  default coshF :: (Floating a, MonoMap f a) => f a -> f a
-  coshF = monoMap cosh
+  default coshF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  coshF = simdMap cosh
   tanhF :: f a -> f a
-  default tanhF :: (Floating a, MonoMap f a) => f a -> f a
-  tanhF = monoMap tanh
+  default tanhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  tanhF = simdMap tanh
   asinhF :: f a -> f a
-  default asinhF :: (Floating a, MonoMap f a) => f a -> f a
-  asinhF = monoMap asinh
+  default asinhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  asinhF = simdMap asinh
   acoshF :: f a -> f a
-  default acoshF :: (Floating a, MonoMap f a) => f a -> f a
-  acoshF = monoMap acosh
+  default acoshF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  acoshF = simdMap acosh
   atanhF :: f a -> f a
-  default atanhF :: (Floating a, MonoMap f a) => f a -> f a
-  atanhF = monoMap atanh
+  default atanhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
+  atanhF = simdMap atanh
   {-# INLINE piF #-}
   {-# INLINE expF #-}
   {-# INLINE logF #-}

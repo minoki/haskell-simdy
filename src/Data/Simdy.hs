@@ -3,6 +3,8 @@ module Data.Simdy
   ( -- * Classes
     SIMD
   , SIMDElement
+  , liftSIMD
+  , liftSIMD2
   , MultiNum
   , MultiFractional
   , MultiFloating
@@ -12,8 +14,6 @@ module Data.Simdy
   , HalfVector
   , SplitShortVector (splitShortVector, joinShortVector)
   , Broadcast (broadcast)
-  , MonoMap (monoMap)
-  , MonoZipWith (monoZipWith)
   , ShortVectorLength (shortVectorLength)
     -- * SIMD vector types
   , X2

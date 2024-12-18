@@ -108,12 +108,12 @@ gen !vecCount !maxBits
              ]
        )
     ++ concatMap genTuple [2..maxTupleLen]
-    ++ ["instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Unpack" ++ tyCon ++ " " ++ tyCon ++ " a) => MonoMap " ++ tyCon ++ " a where"
-       ,"  monoMap f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
-       ,"  {-# INLINE monoMap #-}"
-       ,"instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Unpack" ++ tyCon ++ " " ++ tyCon ++ " a) => MonoZipWith " ++ tyCon ++ " a where"
-       ,"  monoZipWith f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-       ,"  {-# INLINE monoZipWith #-}"
+    ++ ["instance (Unpack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b) => SIMDFunctor " ++ tyCon ++ " a b where"
+       ,"  simdMap f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
+       ,"  {-# INLINE simdMap #-}"
+       ,"instance (Unpack" ++ tyCon ++ " " ++ tyCon ++ " a, Unpack" ++ tyCon ++ " " ++ tyCon ++ " b, Pack" ++ tyCon ++ " " ++ tyCon ++ " c) => SIMDZipWith " ++ tyCon ++ " a b c where"
+       ,"  simdZipWith f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+       ,"  {-# INLINE simdZipWith #-}"
        ]
     ++ ["instance MkTuple " ++ tyCon ++ " where"]
     ++ ["  mkTuple" ++ show i ++ " = MkTuple" ++ show i ++ tyCon | i <- [2..maxTupleLen]]

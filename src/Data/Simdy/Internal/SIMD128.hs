@@ -3,6 +3,8 @@ module Data.Simdy.Internal.SIMD128
   ( module M
   , SIMD
   , SIMDElement
+  , liftSIMD
+  , liftSIMD2
   , MultiNum
   , MultiFractional
   , MultiFloating
@@ -31,8 +33,8 @@ class ( PackX2 X2 a
       , PackX4 X4 a
       , UnpackX4 X4 a
       , PackX8 X8 a
-      , PackX8 X8 a
-      , UnpackX16 X16 a
+      , UnpackX8 X8 a
+      , PackX16 X16 a
       , UnpackX16 X16 a
       , PackX32 X32 a
       , UnpackX32 X32 a
@@ -41,18 +43,6 @@ class ( PackX2 X2 a
       , Broadcast X8 a
       , Broadcast X16 a
       , Broadcast X32 a
-      {-
-      , MonoMap X2 a
-      , MonoMap X4 a
-      , MonoMap X8 a
-      , MonoMap X16 a
-      , MonoMap X32 a
-      , MonoZipWith X2 a
-      , MonoZipWith X4 a
-      , MonoZipWith X8 a
-      , MonoZipWith X16 a
-      , MonoZipWith X32 a
-      -}
       , SplitShortVector X2 a
       , SplitShortVector X4 a
       , SplitShortVector X8 a
@@ -206,6 +196,8 @@ instance MultiStorable Word64
 -- | SIMD vector types
 class ( ShortVectorLength f
       , forall a. SIMDElement a => Broadcast f a
+      , forall a b. (SIMDElement a, SIMDElement b) => SIMDFunctor f a b
+      , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => SIMDZipWith f a b c
       , forall a. MultiNum a => Num (f a)
       , forall a. MultiFractional a => Fractional (f a)
       , forall a. MultiFloating a => Floating (f a)
@@ -216,3 +208,11 @@ instance SIMD X4
 instance SIMD X8
 instance SIMD X16
 instance SIMD X32
+
+liftSIMD :: (SIMD f, SIMDElement a, SIMDElement b) => (a -> b) -> f a -> f b
+liftSIMD = simdMap
+{-# INLINE liftSIMD #-}
+
+liftSIMD2 :: (SIMD f, SIMDElement a, SIMDElement b, SIMDElement c) => (a -> b -> c) -> f a -> f b -> f c
+liftSIMD2 = simdZipWith
+{-# INLINE liftSIMD2 #-}
