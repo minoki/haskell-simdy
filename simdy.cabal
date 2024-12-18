@@ -34,6 +34,7 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Data.Simdy
+                      Data.Simdy.Horizontal
                       Data.Simdy.Pack
                       Data.Simdy.Split
                       Data.Simdy.Tuple

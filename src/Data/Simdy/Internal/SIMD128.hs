@@ -1,7 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Internal.SIMD128
   ( module M
-  , SIMD
+  , SIMD (horizontalFold)
   , SIMDElement
   , broadcast
   , liftSIMD
@@ -198,13 +198,26 @@ class ( KnownSIMDLength f
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
-      ) => SIMD f
-instance SIMD Identity
-instance SIMD X2
-instance SIMD X4
-instance SIMD X8
-instance SIMD X16
-instance SIMD X32
+      ) => SIMD f where
+  horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a
+instance SIMD Identity where
+  horizontalFold _ = runIdentity
+  {-# INLINE horizontalFold #-}
+instance SIMD X2 where
+  horizontalFold op !v = case splitShortVector v of (low, high) -> runIdentity (op low high)
+  {-# INLINE horizontalFold #-}
+instance SIMD X4 where
+  horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  {-# INLINE horizontalFold #-}
+instance SIMD X8 where
+  horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  {-# INLINE horizontalFold #-}
+instance SIMD X16 where
+  horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  {-# INLINE horizontalFold #-}
+instance SIMD X32 where
+  horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  {-# INLINE horizontalFold #-}
 
 broadcast :: (SIMD f, SIMDElement a) => a -> f a
 broadcast = I.broadcast
