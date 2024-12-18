@@ -36,7 +36,7 @@ library
     exposed-modules:  Data.Simdy
                       Data.Simdy.Class
                       Data.Simdy.Internal.NoSIMD
-                      Data.Simdy.Unboxed
+                      Data.Simdy.Vector.Unboxed
     other-modules:    Data.Simdy.Class.Generated
                       Data.Simdy.Internal.NoSIMD.X2
                       Data.Simdy.Internal.NoSIMD.X4

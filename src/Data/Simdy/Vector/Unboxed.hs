@@ -1,6 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE CPP #-}
-module Data.Simdy.Unboxed where
+module Data.Simdy.Vector.Unboxed where
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Simdy.Class
