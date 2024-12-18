@@ -5,6 +5,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Control.Monad.ST
 import           Data.Coerce
