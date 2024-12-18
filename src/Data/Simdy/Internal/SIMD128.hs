@@ -31,15 +31,10 @@ import           Foreign.Storable
 
 -- | An instance of 'SIMDElement' supports basic SIMD operations (pack\/unpack\/broadcast)
 class ( PackX2 X2 a
-      , UnpackX2 X2 a
       , PackX4 X4 a
-      , UnpackX4 X4 a
       , PackX8 X8 a
-      , UnpackX8 X8 a
       , PackX16 X16 a
-      , UnpackX16 X16 a
       , PackX32 X32 a
-      , UnpackX32 X32 a
       , Broadcast X2 a
       , Broadcast X4 a
       , Broadcast X8 a
