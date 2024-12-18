@@ -25,6 +25,7 @@ import qualified Data.Vector.Unboxed as VU
 import           Data.Word
 import           Foreign.Storable
 
+-- | An instance of 'SIMDElement' supports basic SIMD operations (pack/unpack/broadcast)
 class ( PackX2 X2 a
       , UnpackX2 X2 a
       , PackX4 X4 a
@@ -80,6 +81,7 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3) => SIM
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4) => SIMDElement (a0, a1, a2, a3, a4)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4, SIMDElement a5) => SIMDElement (a0, a1, a2, a3, a4, a5)
 
+-- | An instance of 'MultiNum' has its 'Num' instance lifted to SIMD vector types
 class ( Num a
       , NumF X2 a
       , NumF X4 a
@@ -100,6 +102,7 @@ instance MultiNum Word32
 instance MultiNum Word64
 -- instance (RealFloat a, MultiNum a) => MultiNum (Complex a)
 
+-- | An instance of 'MultiFractional' has its 'Fractional' instance lifted to SIMD vector types
 class ( Fractional a
       , FractionalF X2 a
       , FractionalF X4 a
@@ -112,6 +115,7 @@ instance MultiFractional Float
 instance MultiFractional Double
 -- instance (RealFloat a, MultiFractional a) => MultiFractional (Complex a)
 
+-- | An instance of 'MultiFloating' has its 'Floating' instance lifted to SIMD vector types
 class ( Floating a
       , FloatingF X2 a
       , FloatingF X4 a
@@ -143,6 +147,7 @@ instance MultiPrim Word16
 instance MultiPrim Word32
 instance MultiPrim Word64
 
+-- | An instance of 'MultiUnbox' supports unboxed vectors
 class ( VU.Unbox a
       , UnboxSIMD X2 a
       , UnboxSIMD X4 a
@@ -192,6 +197,7 @@ instance MultiStorable Word16
 instance MultiStorable Word32
 instance MultiStorable Word64
 
+-- | SIMD vector types
 class ( ShortVectorLength f
       , forall a. SIMDElement a => Broadcast f a
       , forall a. MultiNum a => Num (f a)

@@ -33,7 +33,8 @@ common warnings
 
 library
     import:           warnings
-    exposed-modules:  Data.Simdy.Class
+    exposed-modules:  Data.Simdy
+                      Data.Simdy.Class
                       Data.Simdy.Internal.NoSIMD
                       Data.Simdy.Unboxed
     other-modules:    Data.Simdy.Class.Generated
