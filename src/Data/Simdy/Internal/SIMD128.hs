@@ -25,7 +25,7 @@ import qualified Data.Vector.Unboxed as VU
 import           Data.Word
 import           Foreign.Storable
 
--- | An instance of 'SIMDElement' supports basic SIMD operations (pack/unpack/broadcast)
+-- | An instance of 'SIMDElement' supports basic SIMD operations (pack\/unpack\/broadcast)
 class ( PackX2 X2 a
       , UnpackX2 X2 a
       , PackX4 X4 a
@@ -82,6 +82,8 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDEl
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4, SIMDElement a5) => SIMDElement (a0, a1, a2, a3, a4, a5)
 
 -- | An instance of 'MultiNum' has its 'Num' instance lifted to SIMD vector types
+--
+-- @('SIMD' f, 'MultiNum' a)@ implies @'Num' (f a)@.
 class ( Num a
       , NumF X2 a
       , NumF X4 a
@@ -103,6 +105,8 @@ instance MultiNum Word64
 -- instance (RealFloat a, MultiNum a) => MultiNum (Complex a)
 
 -- | An instance of 'MultiFractional' has its 'Fractional' instance lifted to SIMD vector types
+--
+-- @('SIMD' f, 'MultiFractional' a)@ implies @'Fractional' (f a)@.
 class ( Fractional a
       , FractionalF X2 a
       , FractionalF X4 a
@@ -116,6 +120,8 @@ instance MultiFractional Double
 -- instance (RealFloat a, MultiFractional a) => MultiFractional (Complex a)
 
 -- | An instance of 'MultiFloating' has its 'Floating' instance lifted to SIMD vector types
+--
+-- @('SIMD' f, 'MultiFloating' a)@ implies @'Floating' (f a)@.
 class ( Floating a
       , FloatingF X2 a
       , FloatingF X4 a
