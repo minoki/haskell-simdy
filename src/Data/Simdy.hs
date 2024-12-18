@@ -12,8 +12,6 @@ module Data.Simdy
   , SIMDPrim
   , SIMDUnbox
   , SIMDStorable
-  , HalfVector
-  , SplitShortVector (splitShortVector, joinShortVector)
   , KnownSIMDLength (SIMDLength, simdLength)
     -- * SIMD vector types
   , X2
