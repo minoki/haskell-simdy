@@ -34,10 +34,10 @@ common warnings
 library
     import:           warnings
     exposed-modules:  Data.Simdy
-                      Data.Simdy.Class
+                      Data.Simdy.Internal.Class
                       Data.Simdy.Internal.NoSIMD
                       Data.Simdy.Vector.Unboxed
-    other-modules:    Data.Simdy.Class.Generated
+    other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.NoSIMD.X2
                       Data.Simdy.Internal.NoSIMD.X4
                       Data.Simdy.Internal.NoSIMD.X8

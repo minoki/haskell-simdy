@@ -26,8 +26,10 @@ semicolonSep = List.intercalate "; "
 gen :: Int -> Int -> [String]
 gen !vecCount !maxBits
   = ["data family " ++ tyCon ++ " a"
-    ,"instance ShortVectorLength " ++ tyCon ++ " where"
-    ,"  shortVectorLength = " ++ show vecCount
+    ,"instance KnownSIMDLength " ++ tyCon ++ " where"
+    ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
+    ,"  simdLength = " ++ show vecCount
+    ,"  {-# INLINE simdLength #-}"
     ,if vecCount == 2
      then "type instance HalfVector " ++ tyCon ++ " = Identity"
      else "type instance HalfVector " ++ tyCon ++ " = X" ++ show (vecCount `quot` 2)
@@ -410,34 +412,35 @@ genFile moduleName !maxBits
 genFile :: String -> String -> Int -> Int -> [String]
 genFile moduleName halfMod !n !maxBits
   = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
+    ,"{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
     ,"{-# LANGUAGE UnboxedTuples #-}"
     ,"{-# LANGUAGE UndecidableInstances #-}"
     ,"module " ++ moduleName ++ " where"
-    ,"import GHC.Int"
-    ,"import GHC.Word"
-    ,"import Data.Monoid"
-    ,"import Data.Semigroup"
-    ,"import Data.Complex"
-    ,"import GHC.IO"
-    ,"import GHC.Exts"
-    ,"import Data.Simdy.Class"
+    ,"import           Data.Complex"
+    ,"import           Data.Monoid"
+    ,"import           Data.Semigroup"
+    ,"import           Data.Simdy.Internal.Class"
+    ,"import           GHC.Exts"
+    ,"import           GHC.Int"
+    ,"import           GHC.IO"
+    ,"import           GHC.Word"
     ,"import qualified Data.Vector.Unboxed.Base as VUB"
     ,if n == 2
-     then "import Data.Functor.Identity"
-     else "import " ++ halfMod
+     then "import           Data.Functor.Identity"
+     else "import           " ++ halfMod
     ] ++ gen n maxBits
 
 main :: IO ()
 main = do
-  createDirectoryIfMissing True "src/Data/Simdy/Class"
-  writeFile "src/Data/Simdy/Class/Generated.hs" $ unlines $
+  createDirectoryIfMissing True "src/Data/Simdy/Internal/Class"
+  writeFile "src/Data/Simdy/Internal/Class/Generated.hs" $ unlines $
     ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE PatternSynonyms #-}"
     ,"{-# LANGUAGE ViewPatterns #-}"
-    ,"module Data.Simdy.Class.Generated where"]
+    ,"module Data.Simdy.Internal.Class.Generated where"]
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
                         ,"  packX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
                         ,"class UnpackX" ++ show n ++ " f a where"

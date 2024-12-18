@@ -5,19 +5,19 @@ module Data.Simdy.Internal.SIMD128
   , SIMDElement
   , liftSIMD
   , liftSIMD2
-  , MultiNum
-  , MultiFractional
-  , MultiFloating
-  , MultiPrim
-  , MultiUnbox
-  , MultiStorable
+  , SIMDNum
+  , SIMDFractional
+  , SIMDFloating
+  , SIMDPrim
+  , SIMDUnbox
+  , SIMDStorable
   ) where
 import           Data.Complex
 import           Data.Functor.Identity
 import           Data.Int
 import           Data.Primitive
 import           Data.Semigroup
-import           Data.Simdy.Class
+import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.SIMD128.X16 as M
 import           Data.Simdy.Internal.SIMD128.X2 as M
 import           Data.Simdy.Internal.SIMD128.X32 as M
@@ -71,9 +71,9 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3) => SIM
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4) => SIMDElement (a0, a1, a2, a3, a4)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4, SIMDElement a5) => SIMDElement (a0, a1, a2, a3, a4, a5)
 
--- | An instance of 'MultiNum' has its 'Num' instance lifted to SIMD vector types
+-- | An instance of 'SIMDNum' has its 'Num' instance lifted to SIMD vector types
 --
--- @('SIMD' f, 'MultiNum' a)@ implies @'Num' (f a)@.
+-- @('SIMD' f, 'SIMDNum' a)@ implies @'Num' (f a)@.
 class ( Num a
       , NumF X2 a
       , NumF X4 a
@@ -81,48 +81,48 @@ class ( Num a
       , NumF X16 a
       , NumF X32 a
       , SIMDElement a
-      ) => MultiNum a
-instance MultiNum Float
-instance MultiNum Double
-instance MultiNum Int8
-instance MultiNum Int16
-instance MultiNum Int32
-instance MultiNum Int64
-instance MultiNum Word8
-instance MultiNum Word16
-instance MultiNum Word32
-instance MultiNum Word64
--- instance (RealFloat a, MultiNum a) => MultiNum (Complex a)
+      ) => SIMDNum a
+instance SIMDNum Float
+instance SIMDNum Double
+instance SIMDNum Int8
+instance SIMDNum Int16
+instance SIMDNum Int32
+instance SIMDNum Int64
+instance SIMDNum Word8
+instance SIMDNum Word16
+instance SIMDNum Word32
+instance SIMDNum Word64
+-- instance (RealFloat a, SIMDNum a) => SIMDNum (Complex a)
 
--- | An instance of 'MultiFractional' has its 'Fractional' instance lifted to SIMD vector types
+-- | An instance of 'SIMDFractional' has its 'Fractional' instance lifted to SIMD vector types
 --
--- @('SIMD' f, 'MultiFractional' a)@ implies @'Fractional' (f a)@.
+-- @('SIMD' f, 'SIMDFractional' a)@ implies @'Fractional' (f a)@.
 class ( Fractional a
       , FractionalF X2 a
       , FractionalF X4 a
       , FractionalF X8 a
       , FractionalF X16 a
       , FractionalF X32 a
-      , MultiNum a
-      ) => MultiFractional a
-instance MultiFractional Float
-instance MultiFractional Double
--- instance (RealFloat a, MultiFractional a) => MultiFractional (Complex a)
+      , SIMDNum a
+      ) => SIMDFractional a
+instance SIMDFractional Float
+instance SIMDFractional Double
+-- instance (RealFloat a, SIMDFractional a) => SIMDFractional (Complex a)
 
--- | An instance of 'MultiFloating' has its 'Floating' instance lifted to SIMD vector types
+-- | An instance of 'SIMDFloating' has its 'Floating' instance lifted to SIMD vector types
 --
--- @('SIMD' f, 'MultiFloating' a)@ implies @'Floating' (f a)@.
+-- @('SIMD' f, 'SIMDFloating' a)@ implies @'Floating' (f a)@.
 class ( Floating a
       , FloatingF X2 a
       , FloatingF X4 a
       , FloatingF X8 a
       , FloatingF X16 a
       , FloatingF X32 a
-      , MultiFractional a
-      ) => MultiFloating a
-instance MultiFloating Float
-instance MultiFloating Double
--- instance (RealFloat a, MultiFloating a) => MultiFloating (Complex a)
+      , SIMDFractional a
+      ) => SIMDFloating a
+instance SIMDFloating Float
+instance SIMDFloating Double
+-- instance (RealFloat a, SIMDFloating a) => SIMDFloating (Complex a)
 
 class ( Prim a
       , PrimSIMD X2 a
@@ -131,19 +131,19 @@ class ( Prim a
       , PrimSIMD X16 a
       , PrimSIMD X32 a
       , SIMDElement a
-      ) => MultiPrim a
-instance MultiPrim Float
-instance MultiPrim Double
-instance MultiPrim Int8
-instance MultiPrim Int16
-instance MultiPrim Int32
-instance MultiPrim Int64
-instance MultiPrim Word8
-instance MultiPrim Word16
-instance MultiPrim Word32
-instance MultiPrim Word64
+      ) => SIMDPrim a
+instance SIMDPrim Float
+instance SIMDPrim Double
+instance SIMDPrim Int8
+instance SIMDPrim Int16
+instance SIMDPrim Int32
+instance SIMDPrim Int64
+instance SIMDPrim Word8
+instance SIMDPrim Word16
+instance SIMDPrim Word32
+instance SIMDPrim Word64
 
--- | An instance of 'MultiUnbox' supports unboxed vectors
+-- | An instance of 'SIMDUnbox' supports unboxed vectors
 class ( VU.Unbox a
       , UnboxSIMD X2 a
       , UnboxSIMD X4 a
@@ -151,28 +151,28 @@ class ( VU.Unbox a
       , UnboxSIMD X16 a
       , UnboxSIMD X32 a
       , SIMDElement a
-      ) => MultiUnbox a
-instance MultiUnbox Float
-instance MultiUnbox Double
-instance MultiUnbox Int8
-instance MultiUnbox Int16
-instance MultiUnbox Int32
-instance MultiUnbox Int64
-instance MultiUnbox Word8
-instance MultiUnbox Word16
-instance MultiUnbox Word32
-instance MultiUnbox Word64
-instance MultiUnbox a => MultiUnbox (Sum a)
-instance MultiUnbox a => MultiUnbox (Product a)
-instance MultiUnbox a => MultiUnbox (Min a)
-instance MultiUnbox a => MultiUnbox (Max a)
-instance MultiUnbox a => MultiUnbox (Complex a)
-instance MultiUnbox ()
-instance (MultiUnbox a0, MultiUnbox a1) => MultiUnbox (a0, a1)
-instance (MultiUnbox a0, MultiUnbox a1, MultiUnbox a2) => MultiUnbox (a0, a1, a2)
-instance (MultiUnbox a0, MultiUnbox a1, MultiUnbox a2, MultiUnbox a3) => MultiUnbox (a0, a1, a2, a3)
-instance (MultiUnbox a0, MultiUnbox a1, MultiUnbox a2, MultiUnbox a3, MultiUnbox a4) => MultiUnbox (a0, a1, a2, a3, a4)
-instance (MultiUnbox a0, MultiUnbox a1, MultiUnbox a2, MultiUnbox a3, MultiUnbox a4, MultiUnbox a5) => MultiUnbox (a0, a1, a2, a3, a4, a5)
+      ) => SIMDUnbox a
+instance SIMDUnbox Float
+instance SIMDUnbox Double
+instance SIMDUnbox Int8
+instance SIMDUnbox Int16
+instance SIMDUnbox Int32
+instance SIMDUnbox Int64
+instance SIMDUnbox Word8
+instance SIMDUnbox Word16
+instance SIMDUnbox Word32
+instance SIMDUnbox Word64
+instance SIMDUnbox a => SIMDUnbox (Sum a)
+instance SIMDUnbox a => SIMDUnbox (Product a)
+instance SIMDUnbox a => SIMDUnbox (Min a)
+instance SIMDUnbox a => SIMDUnbox (Max a)
+instance SIMDUnbox a => SIMDUnbox (Complex a)
+instance SIMDUnbox ()
+instance (SIMDUnbox a0, SIMDUnbox a1) => SIMDUnbox (a0, a1)
+instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2) => SIMDUnbox (a0, a1, a2)
+instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3) => SIMDUnbox (a0, a1, a2, a3)
+instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4) => SIMDUnbox (a0, a1, a2, a3, a4)
+instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4, SIMDUnbox a5) => SIMDUnbox (a0, a1, a2, a3, a4, a5)
 
 class ( Storable a
       , StorableSIMD X2 a
@@ -181,26 +181,26 @@ class ( Storable a
       , StorableSIMD X16 a
       , StorableSIMD X32 a
       , SIMDElement a
-      ) => MultiStorable a
-instance MultiStorable Float
-instance MultiStorable Double
-instance MultiStorable Int8
-instance MultiStorable Int16
-instance MultiStorable Int32
-instance MultiStorable Int64
-instance MultiStorable Word8
-instance MultiStorable Word16
-instance MultiStorable Word32
-instance MultiStorable Word64
+      ) => SIMDStorable a
+instance SIMDStorable Float
+instance SIMDStorable Double
+instance SIMDStorable Int8
+instance SIMDStorable Int16
+instance SIMDStorable Int32
+instance SIMDStorable Int64
+instance SIMDStorable Word8
+instance SIMDStorable Word16
+instance SIMDStorable Word32
+instance SIMDStorable Word64
 
 -- | SIMD vector types
-class ( ShortVectorLength f
+class ( KnownSIMDLength f
       , forall a. SIMDElement a => Broadcast f a
       , forall a b. (SIMDElement a, SIMDElement b) => SIMDFunctor f a b
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => SIMDZipWith f a b c
-      , forall a. MultiNum a => Num (f a)
-      , forall a. MultiFractional a => Fractional (f a)
-      , forall a. MultiFloating a => Floating (f a)
+      , forall a. SIMDNum a => Num (f a)
+      , forall a. SIMDFractional a => Fractional (f a)
+      , forall a. SIMDFloating a => Floating (f a)
       ) => SIMD f
 instance SIMD Identity
 instance SIMD X2

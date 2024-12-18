@@ -3,18 +3,18 @@ module Data.Simdy
   ( -- * Classes
     SIMD
   , SIMDElement
+  , broadcast
   , liftSIMD
   , liftSIMD2
-  , MultiNum
-  , MultiFractional
-  , MultiFloating
-  , MultiPrim
-  , MultiUnbox
-  , MultiStorable
+  , SIMDNum
+  , SIMDFractional
+  , SIMDFloating
+  , SIMDPrim
+  , SIMDUnbox
+  , SIMDStorable
   , HalfVector
   , SplitShortVector (splitShortVector, joinShortVector)
-  , Broadcast (broadcast)
-  , ShortVectorLength (shortVectorLength)
+  , KnownSIMDLength (SIMDLength, simdLength)
     -- * SIMD vector types
   , X2
   , X4
@@ -24,7 +24,7 @@ module Data.Simdy
   , Identity (Identity)
   ) where
 import           Data.Functor.Identity (Identity (Identity))
-import           Data.Simdy.Class
+import           Data.Simdy.Internal.Class
 #if defined(USE_SIMD512)
 import           Data.Simdy.Internal.SIMD512
 #elif defined(USE_SIMD256)

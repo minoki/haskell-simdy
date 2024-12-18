@@ -1,10 +1,11 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Data.Simdy.Class (module M, module Data.Simdy.Class) where
+module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Control.Monad.ST
 import           Data.Coerce
 import           Data.Functor.Identity
@@ -13,7 +14,7 @@ import           Data.Kind
 import           Data.Monoid
 import           Data.Primitive
 import           Data.Semigroup
-import           Data.Simdy.Class.Generated as M
+import           Data.Simdy.Internal.Class.Generated as M
 import qualified Data.Vector.Primitive as VP
 import qualified Data.Vector.Unboxed as VU
 import qualified Data.Vector.Unboxed.Base as VUB
@@ -22,6 +23,7 @@ import           Data.Word
 import           Foreign.Storable
 import           GHC.Exts
 import           GHC.ST
+import           GHC.TypeNats (KnownNat, Natural)
 
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f
@@ -51,15 +53,17 @@ instance SIMDZipWith Identity a b c where
   simdZipWith = coerce
   {-# INLINE simdZipWith #-}
 
-type ShortVectorLength :: (Type -> Type) -> Constraint
-class ShortVectorLength f where
-  shortVectorLength :: Int
+type KnownSIMDLength :: (Type -> Type) -> Constraint
+class KnownNat (SIMDLength f) => KnownSIMDLength f where
+  type SIMDLength f :: Natural
+  simdLength :: Int
 
-instance ShortVectorLength Identity where
-  shortVectorLength = 1
-  {-# INLINE shortVectorLength #-}
+instance KnownSIMDLength Identity where
+  type SIMDLength Identity = 1
+  simdLength = 1
+  {-# INLINE simdLength #-}
 
-class ShortVectorLength f => PrimSIMD f a where
+class KnownSIMDLength f => PrimSIMD f a where
   indexByteArraySIMD# :: ByteArray# -> Int# -> f a
   readByteArraySIMD# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, f a #)
   writeByteArraySIMD# :: MutableByteArray# s -> Int# -> f a -> State# s -> State# s
@@ -84,7 +88,7 @@ unsafeWritePrimSIMD :: PrimSIMD f a => VP.MVector s a -> Int -> f a -> ST s ()
 unsafeWritePrimSIMD (VP.MVector (I# offset) _ (MutableByteArray ba)) (I# i) !v = ST (\s -> (# writeByteArraySIMD# ba (offset +# i) v s, () #))
 {-# INLINE unsafeWritePrimSIMD #-}
 
-class ShortVectorLength f => StorableSIMD f a where
+class KnownSIMDLength f => StorableSIMD f a where
   peekElemOffSIMD :: Ptr a -> Int -> IO (f a)
   pokeElemOffSIMD :: Ptr a -> Int -> f a -> IO ()
 
@@ -94,12 +98,12 @@ instance Storable a => StorableSIMD Identity a where
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
 
-class ShortVectorLength f => UnboxSIMD f a where
+class KnownSIMDLength f => UnboxSIMD f a where
   unsafeIndexUnboxedSIMD :: VU.Vector a -> Int -> f a
   unsafeReadUnboxedSIMD :: VUM.MVector s a -> Int -> ST s (f a)
   unsafeWriteUnboxedSIMD :: VUM.MVector s a -> Int -> f a -> ST s ()
 
-instance (ShortVectorLength f, PrimSIMD f Float) => UnboxSIMD f Float where
+instance (KnownSIMDLength f, PrimSIMD f Float) => UnboxSIMD f Float where
   unsafeIndexUnboxedSIMD (VUB.V_Float v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Float mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Float mv) = unsafeWritePrimSIMD mv
@@ -107,7 +111,7 @@ instance (ShortVectorLength f, PrimSIMD f Float) => UnboxSIMD f Float where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Double) => UnboxSIMD f Double where
+instance (KnownSIMDLength f, PrimSIMD f Double) => UnboxSIMD f Double where
   unsafeIndexUnboxedSIMD (VUB.V_Double v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Double mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Double mv) = unsafeWritePrimSIMD mv
@@ -115,7 +119,7 @@ instance (ShortVectorLength f, PrimSIMD f Double) => UnboxSIMD f Double where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Int8) => UnboxSIMD f Int8 where
+instance (KnownSIMDLength f, PrimSIMD f Int8) => UnboxSIMD f Int8 where
   unsafeIndexUnboxedSIMD (VUB.V_Int8 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Int8 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Int8 mv) = unsafeWritePrimSIMD mv
@@ -123,7 +127,7 @@ instance (ShortVectorLength f, PrimSIMD f Int8) => UnboxSIMD f Int8 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Int16) => UnboxSIMD f Int16 where
+instance (KnownSIMDLength f, PrimSIMD f Int16) => UnboxSIMD f Int16 where
   unsafeIndexUnboxedSIMD (VUB.V_Int16 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Int16 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Int16 mv) = unsafeWritePrimSIMD mv
@@ -131,7 +135,7 @@ instance (ShortVectorLength f, PrimSIMD f Int16) => UnboxSIMD f Int16 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Int32) => UnboxSIMD f Int32 where
+instance (KnownSIMDLength f, PrimSIMD f Int32) => UnboxSIMD f Int32 where
   unsafeIndexUnboxedSIMD (VUB.V_Int32 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Int32 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Int32 mv) = unsafeWritePrimSIMD mv
@@ -139,7 +143,7 @@ instance (ShortVectorLength f, PrimSIMD f Int32) => UnboxSIMD f Int32 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Int64) => UnboxSIMD f Int64 where
+instance (KnownSIMDLength f, PrimSIMD f Int64) => UnboxSIMD f Int64 where
   unsafeIndexUnboxedSIMD (VUB.V_Int64 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Int64 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Int64 mv) = unsafeWritePrimSIMD mv
@@ -147,7 +151,7 @@ instance (ShortVectorLength f, PrimSIMD f Int64) => UnboxSIMD f Int64 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Word8) => UnboxSIMD f Word8 where
+instance (KnownSIMDLength f, PrimSIMD f Word8) => UnboxSIMD f Word8 where
   unsafeIndexUnboxedSIMD (VUB.V_Word8 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Word8 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Word8 mv) = unsafeWritePrimSIMD mv
@@ -155,7 +159,7 @@ instance (ShortVectorLength f, PrimSIMD f Word8) => UnboxSIMD f Word8 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Word16) => UnboxSIMD f Word16 where
+instance (KnownSIMDLength f, PrimSIMD f Word16) => UnboxSIMD f Word16 where
   unsafeIndexUnboxedSIMD (VUB.V_Word16 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Word16 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Word16 mv) = unsafeWritePrimSIMD mv
@@ -163,7 +167,7 @@ instance (ShortVectorLength f, PrimSIMD f Word16) => UnboxSIMD f Word16 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Word32) => UnboxSIMD f Word32 where
+instance (KnownSIMDLength f, PrimSIMD f Word32) => UnboxSIMD f Word32 where
   unsafeIndexUnboxedSIMD (VUB.V_Word32 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Word32 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Word32 mv) = unsafeWritePrimSIMD mv
@@ -171,7 +175,7 @@ instance (ShortVectorLength f, PrimSIMD f Word32) => UnboxSIMD f Word32 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, PrimSIMD f Word64) => UnboxSIMD f Word64 where
+instance (KnownSIMDLength f, PrimSIMD f Word64) => UnboxSIMD f Word64 where
   unsafeIndexUnboxedSIMD (VUB.V_Word64 v) = unsafeIndexPrimSIMD v
   unsafeReadUnboxedSIMD (VUB.MV_Word64 mv) = unsafeReadPrimSIMD mv
   unsafeWriteUnboxedSIMD (VUB.MV_Word64 mv) = unsafeWritePrimSIMD mv
@@ -179,7 +183,7 @@ instance (ShortVectorLength f, PrimSIMD f Word64) => UnboxSIMD f Word64 where
   {-# INLINE unsafeReadUnboxedSIMD #-}
   {-# INLINE unsafeWriteUnboxedSIMD #-}
 
-instance (ShortVectorLength f, Broadcast f ()) => UnboxSIMD f () where
+instance (KnownSIMDLength f, Broadcast f ()) => UnboxSIMD f () where
   unsafeIndexUnboxedSIMD (VUB.V_Unit _) !_ = broadcast ()
   unsafeReadUnboxedSIMD (VUB.MV_Unit _) !_ = pure (broadcast ())
   unsafeWriteUnboxedSIMD (VUB.MV_Unit _) !_ !_ = pure ()
