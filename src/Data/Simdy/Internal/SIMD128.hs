@@ -18,7 +18,7 @@ import           Data.Functor.Identity
 import           Data.Int
 import           Data.Primitive
 import           Data.Semigroup
-import           Data.Simdy.Internal.Class hiding (broadcast)
+import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
 import qualified Data.Simdy.Internal.Class as I
 import           Data.Simdy.Internal.SIMD128.X16 as M
 import           Data.Simdy.Internal.SIMD128.X2 as M
@@ -72,12 +72,12 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDEl
 --
 -- @('SIMD' f, 'SIMDNum' a)@ implies @'Num' (f a)@.
 class ( Num a
+      , SIMDElement a
       , NumF X2 a
       , NumF X4 a
       , NumF X8 a
       , NumF X16 a
       , NumF X32 a
-      , SIMDElement a
       ) => SIMDNum a
 instance SIMDNum Float
 instance SIMDNum Double
@@ -95,12 +95,12 @@ instance SIMDNum Word64
 --
 -- @('SIMD' f, 'SIMDFractional' a)@ implies @'Fractional' (f a)@.
 class ( Fractional a
+      , SIMDNum a
       , FractionalF X2 a
       , FractionalF X4 a
       , FractionalF X8 a
       , FractionalF X16 a
       , FractionalF X32 a
-      , SIMDNum a
       ) => SIMDFractional a
 instance SIMDFractional Float
 instance SIMDFractional Double
@@ -110,24 +110,24 @@ instance SIMDFractional Double
 --
 -- @('SIMD' f, 'SIMDFloating' a)@ implies @'Floating' (f a)@.
 class ( Floating a
+      , SIMDFractional a
       , FloatingF X2 a
       , FloatingF X4 a
       , FloatingF X8 a
       , FloatingF X16 a
       , FloatingF X32 a
-      , SIMDFractional a
       ) => SIMDFloating a
 instance SIMDFloating Float
 instance SIMDFloating Double
 -- instance (RealFloat a, SIMDFloating a) => SIMDFloating (Complex a)
 
 class ( Prim a
+      , SIMDElement a
       , PrimSIMD X2 a
       , PrimSIMD X4 a
       , PrimSIMD X8 a
       , PrimSIMD X16 a
       , PrimSIMD X32 a
-      , SIMDElement a
       ) => SIMDPrim a
 instance SIMDPrim Float
 instance SIMDPrim Double
@@ -142,12 +142,12 @@ instance SIMDPrim Word64
 
 -- | An instance of 'SIMDUnbox' supports unboxed vectors
 class ( VU.Unbox a
+      , SIMDElement a
       , UnboxSIMD X2 a
       , UnboxSIMD X4 a
       , UnboxSIMD X8 a
       , UnboxSIMD X16 a
       , UnboxSIMD X32 a
-      , SIMDElement a
       ) => SIMDUnbox a
 instance SIMDUnbox Float
 instance SIMDUnbox Double
@@ -172,12 +172,12 @@ instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4) 
 instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4, SIMDUnbox a5) => SIMDUnbox (a0, a1, a2, a3, a4, a5)
 
 class ( Storable a
+      , SIMDElement a
       , StorableSIMD X2 a
       , StorableSIMD X4 a
       , StorableSIMD X8 a
       , StorableSIMD X16 a
       , StorableSIMD X32 a
-      , SIMDElement a
       ) => SIMDStorable a
 instance SIMDStorable Float
 instance SIMDStorable Double
@@ -193,8 +193,8 @@ instance SIMDStorable Word64
 -- | SIMD vector types
 class ( KnownSIMDLength f
       , forall a. SIMDElement a => Broadcast f a
-      , forall a b. (SIMDElement a, SIMDElement b) => SIMDFunctor f a b
-      , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => SIMDZipWith f a b c
+      , forall a b. (SIMDElement a, SIMDElement b) => LiftSIMD f a b
+      , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
@@ -224,9 +224,9 @@ broadcast = I.broadcast
 {-# INLINE broadcast #-}
 
 liftSIMD :: (SIMD f, SIMDElement a, SIMDElement b) => (a -> b) -> f a -> f b
-liftSIMD = simdMap
+liftSIMD = I.liftSIMD
 {-# INLINE liftSIMD #-}
 
 liftSIMD2 :: (SIMD f, SIMDElement a, SIMDElement b, SIMDElement c) => (a -> b -> c) -> f a -> f b -> f c
-liftSIMD2 = simdZipWith
+liftSIMD2 = I.liftSIMD2
 {-# INLINE liftSIMD2 #-}

@@ -22,7 +22,7 @@ module Data.Simdy
   , Identity (Identity)
   ) where
 import           Data.Functor.Identity (Identity (Identity))
-import           Data.Simdy.Internal.Class hiding (broadcast)
+import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
 #if defined(USE_SIMD512)
 import           Data.Simdy.Internal.SIMD512
 #elif defined(USE_SIMD256)

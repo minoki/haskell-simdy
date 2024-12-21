@@ -40,19 +40,19 @@ instance Broadcast Identity a where
   broadcast = Identity
   {-# INLINE broadcast #-}
 
-class SIMDFunctor f a b where
-  simdMap :: (a -> b) -> f a -> f b
+class LiftSIMD f a b where
+  liftSIMD :: (a -> b) -> f a -> f b
 
-instance SIMDFunctor Identity a b where
-  simdMap = coerce
-  {-# INLINE simdMap #-}
+instance LiftSIMD Identity a b where
+  liftSIMD = coerce
+  {-# INLINE liftSIMD #-}
 
-class SIMDZipWith f a b c where
-  simdZipWith :: (a -> b -> c) -> f a -> f b -> f c
+class LiftSIMD2 f a b c where
+  liftSIMD2 :: (a -> b -> c) -> f a -> f b -> f c
 
-instance SIMDZipWith Identity a b c where
-  simdZipWith = coerce
-  {-# INLINE simdZipWith #-}
+instance LiftSIMD2 Identity a b c where
+  liftSIMD2 = coerce
+  {-# INLINE liftSIMD2 #-}
 
 type KnownSIMDLength :: (Type -> Type) -> Constraint
 class KnownNat (SIMDLength f) => KnownSIMDLength f where
@@ -197,23 +197,23 @@ newtype WrappedMulti f a = MkWrappedMulti (f a)
 
 class NumF f a where
   addF :: f a -> f a -> f a
-  -- default addF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
-  -- addF = simdZipWith (+)
+  -- default addF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- addF = liftSIMD2 (+)
   subF :: f a -> f a -> f a
-  -- default subF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
-  -- subF = simdZipWith (-)
+  -- default subF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- subF = liftSIMD2 (-)
   mulF :: f a -> f a -> f a
-  -- default mulF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
-  -- mulF = simdZipWith (*)
+  -- default mulF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- mulF = liftSIMD2 (*)
   negateF :: f a -> f a
   default negateF :: (Num a, Broadcast f a) => f a -> f a
   negateF = subF (broadcast 0) -- For Word-like instances
   absF :: f a -> f a
-  default absF :: (Num a, SIMDFunctor f a a) => f a -> f a
-  absF = simdMap abs
+  default absF :: (Num a, LiftSIMD f a a) => f a -> f a
+  absF = liftSIMD abs
   signumF :: f a -> f a
-  default signumF :: (Num a, SIMDFunctor f a a) => f a -> f a
-  signumF = simdMap signum
+  default signumF :: (Num a, LiftSIMD f a a) => f a -> f a
+  signumF = liftSIMD signum
   fromIntegerF :: Integer -> f a
   default fromIntegerF :: (Num a, Broadcast f a) => Integer -> f a
   fromIntegerF = broadcast . fromInteger
@@ -240,8 +240,8 @@ instance NumF f a => Num (WrappedMulti f a) where
 
 class NumF f a => FractionalF f a where
   divF :: f a -> f a -> f a
-  -- default divF :: (Num a, SIMDZipWith f a a a) => f a -> f a -> f a
-  -- divF = simdZipWith (/)
+  -- default divF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- divF = liftSIMD2 (/)
   recipF :: f a -> f a
   default recipF :: (Num a, Broadcast f a) => f a -> f a
   recipF = divF (broadcast 1)
@@ -264,56 +264,56 @@ class FractionalF f a => FloatingF f a where
   default piF :: (Floating a, Broadcast f a) => f a
   piF = broadcast pi
   expF :: f a -> f a
-  default expF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  expF = simdMap exp
+  default expF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  expF = liftSIMD exp
   logF :: f a -> f a
-  default logF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  logF = simdMap log
+  default logF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  logF = liftSIMD log
   sqrtF :: f a -> f a
-  default sqrtF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  sqrtF = simdMap sqrt
+  default sqrtF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  sqrtF = liftSIMD sqrt
   powF :: f a -> f a -> f a
-  default powF :: (Floating a, SIMDZipWith f a a a) => f a -> f a -> f a
-  powF = simdZipWith (**)
+  default powF :: (Floating a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  powF = liftSIMD2 (**)
   logBaseF :: f a -> f a -> f a
-  default logBaseF :: (Floating a, SIMDZipWith f a a a) => f a -> f a -> f a
-  logBaseF = simdZipWith logBase
+  default logBaseF :: (Floating a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  logBaseF = liftSIMD2 logBase
   sinF :: f a -> f a
-  default sinF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  sinF = simdMap sin
+  default sinF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  sinF = liftSIMD sin
   cosF :: f a -> f a
-  default cosF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  cosF = simdMap cos
+  default cosF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  cosF = liftSIMD cos
   tanF :: f a -> f a
-  default tanF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  tanF = simdMap tan
+  default tanF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  tanF = liftSIMD tan
   asinF :: f a -> f a
-  default asinF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  asinF = simdMap asin
+  default asinF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  asinF = liftSIMD asin
   acosF :: f a -> f a
-  default acosF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  acosF = simdMap acos
+  default acosF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  acosF = liftSIMD acos
   atanF :: f a -> f a
-  default atanF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  atanF = simdMap atan
+  default atanF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  atanF = liftSIMD atan
   sinhF :: f a -> f a
-  default sinhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  sinhF = simdMap sinh
+  default sinhF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  sinhF = liftSIMD sinh
   coshF :: f a -> f a
-  default coshF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  coshF = simdMap cosh
+  default coshF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  coshF = liftSIMD cosh
   tanhF :: f a -> f a
-  default tanhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  tanhF = simdMap tanh
+  default tanhF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  tanhF = liftSIMD tanh
   asinhF :: f a -> f a
-  default asinhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  asinhF = simdMap asinh
+  default asinhF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  asinhF = liftSIMD asinh
   acoshF :: f a -> f a
-  default acoshF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  acoshF = simdMap acosh
+  default acoshF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  acoshF = liftSIMD acosh
   atanhF :: f a -> f a
-  default atanhF :: (Floating a, SIMDFunctor f a a) => f a -> f a
-  atanhF = simdMap atanh
+  default atanhF :: (Floating a, LiftSIMD f a a) => f a -> f a
+  atanhF = liftSIMD atanh
   {-# INLINE piF #-}
   {-# INLINE expF #-}
   {-# INLINE logF #-}
