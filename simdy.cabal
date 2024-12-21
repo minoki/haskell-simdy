@@ -19,12 +19,12 @@ flag no-simd
     default: False
 
 flag avx2
-    description: Enable 256-bit vector via AVX2
+    description: Enable 256-bit vector via AVX2 (AVX2+FMA+F16C)
     manual: True
     default: False
 
 flag avx512
-    description: Enable 512-bit vector via AVX-512
+    description: Enable 512-bit vector via AVX-512 (F+VL+BW+DQ)
     manual: True
     default: False
 
@@ -47,6 +47,8 @@ library
                       Data.Simdy.Internal.NoSIMD.X8
                       Data.Simdy.Internal.NoSIMD.X16
                       Data.Simdy.Internal.NoSIMD.X32
+    c-sources:        cbits/float_minmax.c
+                      cbits/float_minmaxnm.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.X2
@@ -63,6 +65,7 @@ library
                           Data.Simdy.Internal.SIMD256.X32
         ghc-options: -mavx2
         cpp-options: -DUSE_SIMD256
+        cc-options: -mavx2 -mfma -mf16c
     if flag(avx512)
         exposed-modules:  Data.Simdy.Internal.SIMD512
         other-modules:    Data.Simdy.Internal.SIMD512.X8
@@ -70,6 +73,7 @@ library
                           Data.Simdy.Internal.SIMD512.X32
         ghc-options: -mavx512f
         cpp-options: -DUSE_SIMD512
+        cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.22,
                       primitive ^>=0.9.0.0,
