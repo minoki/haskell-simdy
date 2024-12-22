@@ -1,0 +1,111 @@
+on: [push, pull_request]
+name: Build and test
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ghc: ['9.6', '9.8', '9.10', '9.12']
+        os: [ubuntu-22.04, ubuntu-24.04, macos-13, macos-14, windows-latest]
+        flags: ['', '--flags no-simd', '--flags avx2', '--flags avx512']
+        exclude:
+          # Ubuntu 24.04 doesn't contain LLVM 12
+          - ghc: '9.6'
+            os: ubuntu-24.04
+          - ghc: '9.8'
+            os: ubuntu-24.04
+          # Ubuntu 22.04 doesn't contain LLVM 15
+          - ghc: '9.10'
+            os: ubuntu-22.04
+          - ghc: '9.12'
+            os: ubuntu-22.04
+          # LLVM on Windows requires GHC >= 9.12
+          - ghc: '9.6'
+            os: windows-latest
+          - ghc: '9.8'
+            os: windows-latest
+          - ghc: '9.10'
+            os: windows-latest
+          # AArch64 NEON support requires GHC >= 9.8
+          - ghc: '9.6'
+            os: macos-14
+          # GHC 9.10 + macos-14 (AArch64) has a problem with FFI
+          - ghc: '9.10'
+            os: macos-14
+          # x86-only features
+          - os: macos-14
+            flags: '--flags avx2'
+          - os: macos-14
+            flags: '--flags avx512'
+    steps:
+      - uses: actions/checkout@v4
+
+      # GHC <= 9.8 needs LLVM 12: https://gitlab.haskell.org/ghc/ghc/-/issues/23870
+      - name: Install LLVM 12 with Homebrew
+        run: |
+          brew install llvm@12
+          echo "OPT=$(brew --prefix llvm@12)/bin/opt" >> "${GITHUB_ENV}"
+          echo "LLC=$(brew --prefix llvm@12)/bin/llc" >> "${GITHUB_ENV}"
+        if: ${{ (matrix.os == 'macos-13' || matrix.os == 'macos-14') && (matrix.ghc == '9.6' || matrix.ghc == '9.8') }}
+
+      - name: Install LLVM 12 with APT
+        run: |
+          sudo apt-get install llvm-12 clang-12
+          echo "OPT=opt-12" >> "${GITHUB_ENV}"
+          echo "LLC=llc-12" >> "${GITHUB_ENV}"
+          echo "LLVMAS=clang-12" >> "${GITHUB_ENV}"
+        if: ${{ matrix.os == 'ubuntu-22.04' && (matrix.ghc == '9.6' || matrix.ghc == '9.8') }}
+
+      - name: Install LLVM 15 with Homebrew
+        run: |
+          brew install llvm@15
+          echo "OPT=$(brew --prefix llvm@15)/bin/opt" >> "${GITHUB_ENV}"
+          echo "LLC=$(brew --prefix llvm@15)/bin/llc" >> "${GITHUB_ENV}"
+        if: ${{ (matrix.os == 'macos-13' || matrix.os == 'macos-14') && (matrix.ghc == '9.10' || matrix.ghc == '9.12') }}
+
+      - name: Install LLVM 15 with APT
+        run: |
+          sudo apt-get install llvm-15 clang-15
+          echo "OPT=opt-15" >> "${GITHUB_ENV}"
+          echo "LLC=llc-15" >> "${GITHUB_ENV}"
+          echo "LLVMAS=clang-15" >> "${GITHUB_ENV}"
+        if: ${{ matrix.os == 'ubuntu-24.04' && (matrix.ghc == '9.10' || matrix.ghc == '9.12') }}
+
+      - uses: haskell-actions/setup@v2
+        name: Setup Haskell
+        with:
+          ghc-version: ${{ matrix.ghc }}
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+          key: ${{ runner.os }}-${{ matrix.ghc }}
+
+      # Cmm lint fails with older GHCs
+      - name: Configure without Cmm lint
+        run: cabal configure --ghc-options="-pgmlo $OPT -pgmlc $LLC -dcore-lint -dstg-lint -dasm-lint -fllvm-fill-undef-with-garbage -fcatch-nonexhaustive-cases -debug -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks
+        if: ${{ matrix.ghc == '9.6' || matrix.ghc == '9.8' || matrix.ghc == '9.10' }}
+
+      - name: Configure with Cmm lint (non-Windows)
+        run: cabal configure --ghc-options="-pgmlo $OPT -pgmlc $LLC -dlint -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks
+        if: ${{ matrix.ghc == '9.12' && matrix.os != 'windows-latest' }}
+
+      - name: Configure with Cmm lint (Windows)
+        run: cabal configure --ghc-options="-dlint -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks
+        if: ${{ matrix.ghc == '9.12' && matrix.os == 'windows-latest' }}
+
+      # TODO: Add sources
+      - name: Generate sources
+        run: cabal run script/Gen.hs
+
+      - name: Build
+        run: cabal build ${{ matrix.flags }}
+
+      - name: Test
+        run: cabal test ${{ matrix.flags }}
+        if: ${{ matrix.flags != '--flags avx512' }}
+        # AVX-512 may not be available in the runner
