@@ -20,6 +20,7 @@ import           Data.Primitive
 import           Data.Semigroup
 import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
 import qualified Data.Simdy.Internal.Class as I
+import           Data.Simdy.Internal.NoSIMD.HalfVector ()
 import           Data.Simdy.Internal.NoSIMD.X16 as M
 import           Data.Simdy.Internal.NoSIMD.X2 as M
 import           Data.Simdy.Internal.NoSIMD.X32 as M

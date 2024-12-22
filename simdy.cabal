@@ -47,6 +47,7 @@ library
                       Data.Simdy.Internal.NoSIMD.X8
                       Data.Simdy.Internal.NoSIMD.X16
                       Data.Simdy.Internal.NoSIMD.X32
+                      Data.Simdy.Internal.NoSIMD.HalfVector
     c-sources:        cbits/float_minmax.c
                       cbits/float_minmaxnm.c
     if !flag(no-simd)
@@ -56,6 +57,7 @@ library
                           Data.Simdy.Internal.SIMD128.X8
                           Data.Simdy.Internal.SIMD128.X16
                           Data.Simdy.Internal.SIMD128.X32
+                          Data.Simdy.Internal.SIMD128.HalfVector
         cpp-options: -DUSE_SIMD128
     if flag(avx2)
         exposed-modules:  Data.Simdy.Internal.SIMD256
@@ -63,6 +65,7 @@ library
                           Data.Simdy.Internal.SIMD256.X8
                           Data.Simdy.Internal.SIMD256.X16
                           Data.Simdy.Internal.SIMD256.X32
+                          Data.Simdy.Internal.SIMD256.HalfVector
         ghc-options: -mavx2
         cpp-options: -DUSE_SIMD256
         cc-options: -mavx2 -mfma -mf16c
@@ -71,6 +74,7 @@ library
         other-modules:    Data.Simdy.Internal.SIMD512.X8
                           Data.Simdy.Internal.SIMD512.X16
                           Data.Simdy.Internal.SIMD512.X32
+                          Data.Simdy.Internal.SIMD512.HalfVector
         ghc-options: -mavx512f
         cpp-options: -DUSE_SIMD512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
