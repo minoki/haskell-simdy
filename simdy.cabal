@@ -40,7 +40,7 @@ common arch-options
         cc-options: -mavx2 -mfma -mf16c
     if flag(avx512)
         ghc-options: -mavx512f
-        cpp-options: -DUSE_SIMD512
+        cpp-options: -DUSE_SIMD512 -DUSE_AVX512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
 
 library
@@ -55,6 +55,7 @@ library
                       Data.Simdy.Internal.NoSIMD
                       Data.Simdy.Vector.Unboxed
     other-modules:    Data.Simdy.Internal.Class.Generated
+                      Data.Simdy.Internal.PrimExtra
                       Data.Simdy.Internal.NoSIMD.X2
                       Data.Simdy.Internal.NoSIMD.X4
                       Data.Simdy.Internal.NoSIMD.X8
