@@ -25,7 +25,12 @@ semicolonSep = List.intercalate "; "
 
 gen :: Int -> Int -> [String]
 gen !vecCount !maxBits
-  = ["data family " ++ tyCon ++ " a"
+  = ["-- | @'" ++ tyCon ++ "' a@ is a fixed-length vector of length " ++ show vecCount ++ "."
+    ,"--"
+    ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Pack" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
+    ,"--"
+    ,"-- You can access the elements by 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
+    ,"data family " ++ tyCon ++ " a"
     ,"instance KnownSIMDLength " ++ tyCon ++ " where"
     ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
     ,"  simdLength = " ++ show vecCount

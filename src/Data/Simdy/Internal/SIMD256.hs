@@ -1,3 +1,8 @@
+{-|
+This module contains types and classes that use 256-bit vectors (x86 AVX/AVX2).
+
+In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. "Data.Simdy.Internal.NoSIMD", "Data.Simdy.Internal.SIMD128", "Data.Simdy.Internal.SIMD512").
+-}
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Internal.SIMD256
   ( module M
@@ -220,14 +225,23 @@ instance SIMD X32 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
   {-# INLINE horizontalFold #-}
 
+-- | Broadcasts a value to the entire vector.
+--
+-- Conceptually, @'broadcast' x = packXN x x x ... x@.
 broadcast :: (SIMD f, SIMDElement a) => a -> f a
 broadcast = I.broadcast
 {-# INLINE broadcast #-}
 
+-- | Lifts a unary function to the vector.
+--
+-- In general, the resulting function does not use SIMD instructions.
 liftSIMD :: (SIMD f, SIMDElement a, SIMDElement b) => (a -> b) -> f a -> f b
 liftSIMD = I.liftSIMD
 {-# INLINE liftSIMD #-}
 
+-- | Lifts a binary function to the vector.
+--
+-- In general, the resulting function does not use SIMD instructions.
 liftSIMD2 :: (SIMD f, SIMDElement a, SIMDElement b, SIMDElement c) => (a -> b -> c) -> f a -> f b -> f c
 liftSIMD2 = I.liftSIMD2
 {-# INLINE liftSIMD2 #-}
