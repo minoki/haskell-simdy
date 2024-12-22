@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #if defined(__SSE2__)
 #include <xmmintrin.h>
@@ -398,7 +399,7 @@ void test_commutativity(const char *name, float (*f)(float, float))
             printf(", ");
             print_float(x);
             printf(")\n");
-            return;
+            exit(1);
         }
     }
     printf("commutativity for %s...OK\n", name);
@@ -429,6 +430,7 @@ void test_scalar(const char *name, float (*f)(float, float), size_t offset)
             printf("...expected ");
             print_float(expected);
             printf(" with %s\n", invalid ? "INVALID" : "no exception");
+            exit(1);
         }
     }
 }
@@ -468,6 +470,7 @@ void test_array(size_t n, const char *name, void (*f_arr)(const float [], const 
             printf("...expected ");
             print_float(expected);
             printf(" with %s\n", invalid ? "INVALID" : "no exception");
+            exit(1);
         }
     }
     bool ok = true;
@@ -498,6 +501,9 @@ void test_array(size_t n, const char *name, void (*f_arr)(const float [], const 
         }
     }
     printf("%s...%s\n", name, ok ? "OK" : "failed");
+    if (!ok) {
+        exit(1);
+    }
 }
 
 int main(int argc, char *argv[])

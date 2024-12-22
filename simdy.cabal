@@ -31,8 +31,21 @@ flag avx512
 common warnings
     ghc-options: -Wall -Wcompat -fllvm
 
+common arch-options
+    if !flag(no-simd)
+        cpp-options: -DUSE_SIMD128
+    if flag(avx2) || flag(avx512)
+        ghc-options: -mavx2
+        cpp-options: -DUSE_SIMD256
+        cc-options: -mavx2 -mfma -mf16c
+    if flag(avx512)
+        ghc-options: -mavx512f
+        cpp-options: -DUSE_SIMD512
+        cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
+
 library
     import:           warnings
+                    , arch-options
     exposed-modules:  Data.Simdy
                       Data.Simdy.Horizontal
                       Data.Simdy.Pack
@@ -50,6 +63,8 @@ library
                       Data.Simdy.Internal.NoSIMD.HalfVector
     c-sources:        cbits/float_minmax.c
                       cbits/float_minmaxnm.c
+                      cbits/double_minmax.c
+                      cbits/double_minmaxnm.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.X2
@@ -58,7 +73,6 @@ library
                           Data.Simdy.Internal.SIMD128.X16
                           Data.Simdy.Internal.SIMD128.X32
                           Data.Simdy.Internal.SIMD128.HalfVector
-        cpp-options: -DUSE_SIMD128
     if flag(avx2) || flag(avx512)
         exposed-modules:  Data.Simdy.Internal.SIMD256
         other-modules:    Data.Simdy.Internal.SIMD256.X4
@@ -66,18 +80,12 @@ library
                           Data.Simdy.Internal.SIMD256.X16
                           Data.Simdy.Internal.SIMD256.X32
                           Data.Simdy.Internal.SIMD256.HalfVector
-        ghc-options: -mavx2
-        cpp-options: -DUSE_SIMD256
-        cc-options: -mavx2 -mfma -mf16c
     if flag(avx512)
         exposed-modules:  Data.Simdy.Internal.SIMD512
         other-modules:    Data.Simdy.Internal.SIMD512.X8
                           Data.Simdy.Internal.SIMD512.X16
                           Data.Simdy.Internal.SIMD512.X32
                           Data.Simdy.Internal.SIMD512.HalfVector
-        ghc-options: -mavx512f
-        cpp-options: -DUSE_SIMD512
-        cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.22,
                       primitive ^>=0.9.0.0,
@@ -96,3 +104,19 @@ test-suite simdy-test
     build-depends:
         base >=4.18.0.0 && <4.22,
         simdy
+
+test-suite float-minmax-test
+    import:           warnings
+                    , arch-options
+    default-language: GHC2021
+    type:             exitcode-stdio-1.0
+    main-is:          cbits/test_float_minmax.c
+    build-depends:    simdy
+
+test-suite double-minmax-test
+    import:           warnings
+                    , arch-options
+    default-language: GHC2021
+    type:             exitcode-stdio-1.0
+    main-is:          cbits/test_double_minmax.c
+    build-depends:    simdy
