@@ -35,7 +35,7 @@ common arch-options
     if !flag(no-simd)
         cpp-options: -DUSE_SIMD128
     if flag(avx2) || flag(avx512)
-        ghc-options: -mavx2
+        ghc-options: -msse4.2 -mavx2
         cpp-options: -DUSE_SIMD256
         cc-options: -mavx2 -mfma -mf16c
     if flag(avx512)
