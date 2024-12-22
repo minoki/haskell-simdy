@@ -196,18 +196,18 @@ type WrappedMulti :: (Type -> Type) -> Type -> Type
 newtype WrappedMulti f a = MkWrappedMulti (f a)
 
 class NumF f a where
-  addF :: f a -> f a -> f a
-  -- default addF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
-  -- addF = liftSIMD2 (+)
-  subF :: f a -> f a -> f a
-  -- default subF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
-  -- subF = liftSIMD2 (-)
-  mulF :: f a -> f a -> f a
-  -- default mulF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
-  -- mulF = liftSIMD2 (*)
+  plusF :: f a -> f a -> f a
+  -- default plusF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- plusF = liftSIMD2 (+)
+  minusF :: f a -> f a -> f a
+  -- default minusF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- minusF = liftSIMD2 (-)
+  timesF :: f a -> f a -> f a
+  -- default timesF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- timesF = liftSIMD2 (*)
   negateF :: f a -> f a
   default negateF :: (Num a, Broadcast f a) => f a -> f a
-  negateF = subF (broadcast 0) -- For Word-like instances
+  negateF = minusF (broadcast 0) -- For Word-like instances
   absF :: f a -> f a
   default absF :: (Num a, LiftSIMD f a a) => f a -> f a
   absF = liftSIMD abs
@@ -223,9 +223,9 @@ class NumF f a where
   {-# INLINE fromIntegerF #-}
 
 instance NumF f a => Num (WrappedMulti f a) where
-  (+) = coerce (addF @f @a)
-  (-) = coerce (subF @f @a)
-  (*) = coerce (mulF @f @a)
+  (+) = coerce (plusF @f @a)
+  (-) = coerce (minusF @f @a)
+  (*) = coerce (timesF @f @a)
   negate = coerce (negateF @f @a)
   abs = coerce (absF @f @a)
   signum = coerce (signumF @f @a)
