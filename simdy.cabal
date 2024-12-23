@@ -28,8 +28,13 @@ flag avx512
     manual: True
     default: False
 
+flag llvm
+    description: Use LLVM backend
+    manual: True
+    default: True
+
 common warnings
-    ghc-options: -Wall -Wcompat -fllvm
+    ghc-options: -Wall -Wcompat
 
 common arch-options
     if !flag(no-simd)
@@ -42,6 +47,8 @@ common arch-options
         ghc-options: -mavx512f
         cpp-options: -DUSE_SIMD512 -DUSE_AVX512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
+    if flag(llvm)
+        ghc-options: -fllvm
 
 library
     import:           warnings

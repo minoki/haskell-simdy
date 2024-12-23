@@ -36,16 +36,31 @@ gen !vecCount !maxBits
     ,"  simdLength = " ++ show vecCount
     ,"  {-# INLINE simdLength #-}"
     ]
-    ++ genType "Float" "F#" 32 [genNum True, genFractional, genFloating, genPrim, genStorable]
-    ++ genType "Double" "D#" 64 [genNum True, genFractional, genFloating, genPrim, genStorable]
-    ++ genType "Int8" "I8#" 8 [genNum True, genPrim, genStorable]
-    ++ genType "Int16" "I16#" 16 [genNum True, genPrim, genStorable]
-    ++ genType "Int32" "I32#" 32 [genNum True, genPrim, genStorable]
-    ++ genType "Int64" "I64#" 64 [genNum True, genPrim, genStorable]
-    ++ genType "Word8" "W8#" 8 [genNum False, genPrim, genStorable]
-    ++ genType "Word16" "W16#" 16 [genNum False, genPrim, genStorable]
-    ++ genType "Word32" "W32#" 32 [genNum False, genPrim, genStorable]
-    ++ genType "Word64" "W64#" 64 [genNum False, genPrim, genStorable]
+    ++ genType "Float" "F#" 32 maxBits [genNum True, genFractional, genFloating, genPrim, genStorable]
+    ++ genType "Double" "D#" 64 maxBits [genNum True, genFractional, genFloating, genPrim, genStorable]
+    ++ ["#if defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
+    ++ genType "Int8" "I8#" 8 maxBits [genNum True, genPrim, genStorable]
+    ++ genType "Int16" "I16#" 16 maxBits [genNum True, genPrim, genStorable]
+    ++ genType "Int32" "I32#" 32 maxBits [genNum True, genPrim, genStorable]
+    ++ genType "Int64" "I64#" 64 maxBits [genNum True, genPrim, genStorable]
+    ++ genType "Word8" "W8#" 8 maxBits [genNum False, genPrim, genStorable]
+    ++ genType "Word16" "W16#" 16 maxBits [genNum False, genPrim, genStorable]
+    ++ genType "Word32" "W32#" 32 maxBits [genNum False, genPrim, genStorable]
+    ++ genType "Word64" "W64#" 64 maxBits [genNum False, genPrim, genStorable]
+    ++ (if maxBits == 128
+        then ["#else"
+             ,"-- The NCG of GHC 9.12 does not support integer vectors"]
+             ++ genType "Int8" "I8#" 8 0 [genNum True, genPrim, genStorable]
+             ++ genType "Int16" "I16#" 16 0 [genNum True, genPrim, genStorable]
+             ++ genType "Int32" "I32#" 32 0 [genNum True, genPrim, genStorable]
+             ++ genType "Int64" "I64#" 64 0 [genNum True, genPrim, genStorable]
+             ++ genType "Word8" "W8#" 8 0 [genNum False, genPrim, genStorable]
+             ++ genType "Word16" "W16#" 16 0 [genNum False, genPrim, genStorable]
+             ++ genType "Word32" "W32#" 32 0 [genNum False, genPrim, genStorable]
+             ++ genType "Word64" "W64#" 64 0 [genNum False, genPrim, genStorable]
+             ++ ["#endif"]
+        else []
+       )
     ++ genNewtype "Sum"
     ++ genNewtype "Product"
     ++ genNewtype "Min"
@@ -95,7 +110,7 @@ gen !vecCount !maxBits
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FloatingF " ++ tyCon ++ " a => Floating (" ++ tyCon ++ " a)"]
   where
     tyCon = 'X' : show vecCount
-    genType name primCon !bitsPerElem others
+    genType name primCon !bitsPerElem maxBits others
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
             halfTyCon = if vecCount == 2 then "Identity" else "X" ++ show (vecCount `quot` 2)
@@ -128,8 +143,8 @@ gen !vecCount !maxBits
                             else "  broadcast (" ++ primCon ++ " x) = let !v = broadcast" ++ name ++ "X" ++ show shortVecSize ++ "# x in Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep (replicate shortVecCount "v")
                            ,"  {-# INLINE broadcast #-}"
                            ]
-        in mainDef ++ concatMap (\f -> f name primCon bitsPerElem) others
-    genNum isSigned name primCon !bitsPerElem
+        in mainDef ++ concatMap (\f -> f name primCon bitsPerElem maxBits) others
+    genNum isSigned name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
@@ -165,7 +180,7 @@ gen !vecCount !maxBits
                    ,"  {-# INLINE timesF #-}"
                    ]
                 ++ ["  {-# INLINE negateF #-}" | isSigned]
-    genFractional name primCon !bitsPerElem
+    genFractional name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
@@ -185,7 +200,7 @@ gen !vecCount !maxBits
                 ,"  divF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(divide" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  {-# INLINE divF #-}"
                 ]
-    genFloating name primCon !bitsPerElem
+    genFloating name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
@@ -203,7 +218,7 @@ gen !vecCount !maxBits
                 ,"  -- sqrtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(sqrt" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  -- Currently. there is no sqrt" ++ shortVecName ++ "#"
                 ]
-    genPrim name primCon !bitsPerElem
+    genPrim name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
             i_plus 0 = "i"
@@ -231,7 +246,7 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE readByteArraySIMD# #-}"
                 ,"  {-# INLINE writeByteArraySIMD# #-}"
                 ]
-    genStorable name primCon !bitsPerElem
+    genStorable name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
             i_plus 0 = "i"
@@ -300,16 +315,31 @@ genHalf !vecCount !maxBits
      then "type instance HalfVector " ++ tyCon ++ " = Identity"
      else "type instance HalfVector " ++ tyCon ++ " = X" ++ show (vecCount `quot` 2)
     ]
-    ++ genType "Float" "F#" 32
-    ++ genType "Double" "D#" 64
-    ++ genType "Int8" "I8#" 8
-    ++ genType "Int16" "I16#" 16
-    ++ genType "Int32" "I32#" 32
-    ++ genType "Int64" "I64#" 64
-    ++ genType "Word8" "W8#" 8
-    ++ genType "Word16" "W16#" 16
-    ++ genType "Word32" "W32#" 32
-    ++ genType "Word64" "W64#" 64
+    ++ genType "Float" "F#" 32 maxBits
+    ++ genType "Double" "D#" 64 maxBits
+    ++ ["#if defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
+    ++ genType "Int8" "I8#" 8 maxBits
+    ++ genType "Int16" "I16#" 16 maxBits
+    ++ genType "Int32" "I32#" 32 maxBits
+    ++ genType "Int64" "I64#" 64 maxBits
+    ++ genType "Word8" "W8#" 8 maxBits
+    ++ genType "Word16" "W16#" 16 maxBits
+    ++ genType "Word32" "W32#" 32 maxBits
+    ++ genType "Word64" "W64#" 64 maxBits
+    ++ (if maxBits == 128
+        then ["#else"
+             ,"-- The NCG of GHC 9.12 does not support integer vectors"]
+             ++ genType "Int8" "I8#" 8 0
+             ++ genType "Int16" "I16#" 16 0
+             ++ genType "Int32" "I32#" 32 0
+             ++ genType "Int64" "I64#" 64 0
+             ++ genType "Word8" "W8#" 8 0
+             ++ genType "Word16" "W16#" 16 0
+             ++ genType "Word32" "W32#" 32 0
+             ++ genType "Word64" "W64#" 64 0
+             ++ ["#endif"]
+        else []
+       )
     ++ genNewtype "Sum"
     ++ genNewtype "Product"
     ++ genNewtype "Min"
@@ -349,7 +379,7 @@ genHalf !vecCount !maxBits
     ++ concatMap genTuple [2..maxTupleLen]
   where
     tyCon = 'X' : show vecCount
-    genType name primCon !bitsPerElem
+    genType name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
             halfTyCon = if vecCount == 2 then "Identity" else "X" ++ show (vecCount `quot` 2)
@@ -455,7 +485,8 @@ genFile moduleName !maxBits
 genFile :: String -> String -> Int -> Int -> [String]
 genFile moduleName primModule !n !maxBits
   = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
-    ,"{-# LANGUAGE DataKinds #-}"
+    ] ++ ["{-# LANGUAGE CPP #-}" | maxBits == 128] ++
+    ["{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
@@ -476,7 +507,8 @@ genFile moduleName primModule !n !maxBits
 genHalfFile :: String -> [String] -> [Int] -> Int -> [String]
 genHalfFile moduleName imports counts !maxBits
   = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
-    ,"{-# LANGUAGE TypeFamilies #-}"
+    ] ++ ["{-# LANGUAGE CPP #-}" | maxBits == 128] ++
+    ["{-# LANGUAGE TypeFamilies #-}"
     ,"{-# OPTIONS_GHC -Wno-orphans #-}"
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Complex"

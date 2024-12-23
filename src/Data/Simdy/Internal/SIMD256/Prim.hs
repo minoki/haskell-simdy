@@ -1,11 +1,11 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
+{-# OPTIONS_GHC -Wno-deprecations -Wno-dodgy-exports #-}
 module Data.Simdy.Internal.SIMD256.Prim
   ( module M
   , module Data.Simdy.Internal.SIMD256.Prim
   ) where
-#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 2, 0)
+#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 2, 0) && defined(__GLASGOW_HASKELL_LLVM__)
 -- GHC 9.12.1 has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
 
 import           GHC.Exts as M hiding (broadcastFloatX8#, broadcastDoubleX4#, broadcastInt8X32#, broadcastInt16X16#, broadcastInt32X8#, broadcastInt64X4#, broadcastWord8X32#, broadcastWord16X16#, broadcastWord32X8#, broadcastWord64X4#)

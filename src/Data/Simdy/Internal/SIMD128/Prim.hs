@@ -1,12 +1,12 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
+{-# OPTIONS_GHC -Wno-deprecations -Wno-dodgy-exports #-}
 module Data.Simdy.Internal.SIMD128.Prim
   ( module M
   , module Data.Simdy.Internal.SIMD128.Prim
   ) where
-#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 2, 0)
--- GHC 9.12.1 has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
+#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 2, 0) && defined(__GLASGOW_HASKELL_LLVM__)
+-- The LLVM backend of GHC 9.12.1 has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
 
 import           GHC.Exts as M hiding (broadcastFloatX4#, broadcastDoubleX2#, broadcastInt8X16#, broadcastInt16X8#, broadcastInt32X4#, broadcastInt64X2#, broadcastWord8X16#, broadcastWord16X8#, broadcastWord32X4#, broadcastWord64X2#)
 import qualified GHC.Exts
