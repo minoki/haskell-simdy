@@ -49,6 +49,8 @@ common arch-options
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
     if flag(llvm)
         ghc-options: -fllvm
+        cpp-options: -DUSE_LLVM_BACKEND
+        -- __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
 
 library
     import:           warnings
