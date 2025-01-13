@@ -61,6 +61,7 @@ library
                       Data.Simdy.Split
                       Data.Simdy.Tuple
                       Data.Simdy.Internal.Class
+                      Data.Simdy.Internal.Default
                       Data.Simdy.Internal.NoSIMD
                       Data.Simdy.Vector.Unboxed
     other-modules:    Data.Simdy.Internal.Class.Generated
@@ -99,6 +100,14 @@ library
                           Data.Simdy.Internal.SIMD512.X16
                           Data.Simdy.Internal.SIMD512.X32
                           Data.Simdy.Internal.SIMD512.HalfVector
+    if flag(no-simd)
+        hs-source-dirs: no-simd
+    elif flag(avx512)
+        hs-source-dirs: vl512
+    elif flag(avx2)
+        hs-source-dirs: vl256
+    else
+        hs-source-dirs: vl128
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.22,
                       primitive ^>=0.9.0.0,

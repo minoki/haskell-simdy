@@ -3,7 +3,7 @@ module Data.Simdy.Horizontal
   , horizontalSum
   , horizontalProduct
   ) where
-import Data.Simdy.Internal.SIMD128
+import           Data.Simdy.Internal.Default
 
 horizontalSum :: (SIMD f, SIMDNum a) => f a -> a
 horizontalSum = horizontalFold (+)

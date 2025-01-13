@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 module Data.Simdy
   ( -- * Classes
     SIMD
@@ -23,12 +22,4 @@ module Data.Simdy
   ) where
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
-#if defined(USE_SIMD512)
-import           Data.Simdy.Internal.SIMD512
-#elif defined(USE_SIMD256)
-import           Data.Simdy.Internal.SIMD256
-#elif defined(USE_SIMD128)
-import           Data.Simdy.Internal.SIMD128
-#else
-import           Data.Simdy.Internal.NoSIMD
-#endif
+import           Data.Simdy.Internal.Default
