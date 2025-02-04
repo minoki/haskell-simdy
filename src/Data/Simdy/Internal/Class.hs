@@ -1,6 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
@@ -25,6 +26,8 @@ import           Foreign.Storable
 import           GHC.Exts
 import           GHC.ST
 import           GHC.TypeNats (KnownNat, Natural)
+import           Prelude hiding (not, (&&), (||), (==), (/=), (<), (<=), (>), (>=))
+import qualified Prelude
 
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f
@@ -194,6 +197,189 @@ instance (KnownSIMDLength f, Broadcast f ()) => UnboxSIMD f () where
 
 type WrappedMulti :: (Type -> Type) -> Type -> Type
 newtype WrappedMulti f a = MkWrappedMulti (f a)
+
+type Mask :: Type -> Type
+type family Mask a
+type instance Mask (Identity a) = Identity Bool
+type instance Mask (WrappedMulti f a) = f Bool
+
+class Selectable a where
+  select :: Mask a -> a -> a -> a
+
+instance Selectable (Identity a) where
+  select (Identity True) !x !_ = x
+  select (Identity False) !_ !y = y
+  {-# INLINE select #-}
+
+class SelectableF f a where
+  selectF :: f Bool -> f a -> f a -> f a
+
+instance SelectableF f a => Selectable (WrappedMulti f a) where
+  select = coerce (selectF @f @a)
+  {-# INLINE select #-}
+
+infixr 3 &&
+infixr 2 ||
+
+class Boolean a where
+  true :: a
+  false :: a
+  not :: a -> a
+  (&&) :: a -> a -> a
+  (||) :: a -> a -> a
+
+instance Boolean Bool where
+  true = True
+  false = False
+  not = Prelude.not
+  (&&) = (Prelude.&&)
+  (||) = (Prelude.||)
+  {-# INLINE true #-}
+  {-# INLINE false #-}
+  {-# INLINE not #-}
+  {-# INLINE (&&) #-}
+  {-# INLINE (||) #-}
+
+deriving via Bool instance Boolean (Identity Bool)
+
+class BooleanF f where
+  trueF :: f Bool
+  falseF :: f Bool
+  notF :: f Bool -> f Bool
+  andF :: f Bool -> f Bool -> f Bool
+  orF :: f Bool -> f Bool -> f Bool
+
+instance BooleanF Identity where
+  trueF = Identity True
+  falseF = Identity False
+  notF = coerce Prelude.not
+  andF = coerce (Prelude.&&)
+  orF = coerce (Prelude.||)
+  {-# INLINE trueF #-}
+  {-# INLINE falseF #-}
+  {-# INLINE notF #-}
+  {-# INLINE andF #-}
+  {-# INLINE orF #-}
+
+instance BooleanF f => Boolean (WrappedMulti f Bool) where
+  true = coerce (trueF @f)
+  false = coerce (falseF @f)
+  not = coerce (notF @f)
+  (&&) = coerce (andF @f)
+  (||) = coerce (orF @f)
+  {-# INLINE true #-}
+  {-# INLINE false #-}
+  {-# INLINE not #-}
+  {-# INLINE (&&) #-}
+  {-# INLINE (||) #-}
+
+infix 4 ==, /=, <, <=, >, >=
+
+class Equatable a where
+  (==) :: a -> a -> Mask a
+
+(/=) :: (Boolean (Mask a), Equatable a) => a -> a -> Mask a
+x /= y = not (x == y)
+{-# INLINE (/=) #-}
+
+newtype Scalar a = MkScalar a
+
+type instance Mask (Scalar a) = Bool
+type instance Mask Int = Bool
+type instance Mask Int8 = Bool
+type instance Mask Int16 = Bool
+type instance Mask Int32 = Bool
+type instance Mask Int64 = Bool
+type instance Mask Word = Bool
+type instance Mask Word8 = Bool
+type instance Mask Word16 = Bool
+type instance Mask Word32 = Bool
+type instance Mask Word64 = Bool
+type instance Mask Float = Bool
+type instance Mask Double = Bool
+
+instance Eq a => Equatable (Scalar a) where
+  (==) = coerce ((Prelude.==) @a)
+  {-# INLINE (==) #-}
+
+deriving via Scalar Int instance Equatable Int
+deriving via Scalar Int8 instance Equatable Int8
+deriving via Scalar Int16 instance Equatable Int16
+deriving via Scalar Int32 instance Equatable Int32
+deriving via Scalar Int64 instance Equatable Int64
+deriving via Scalar Word instance Equatable Word
+deriving via Scalar Word8 instance Equatable Word8
+deriving via Scalar Word16 instance Equatable Word16
+deriving via Scalar Word32 instance Equatable Word32
+deriving via Scalar Word64 instance Equatable Word64
+deriving via Scalar Float instance Equatable Float
+deriving via Scalar Double instance Equatable Double
+
+instance Eq a => Equatable (Identity a) where
+  (==) = coerce ((Prelude.==) @a)
+  {-# INLINE (==) #-}
+
+class EquatableF f a where
+  eqF :: f a -> f a -> f Bool
+
+instance EquatableF f a => Equatable (WrappedMulti f a) where
+  (==) = coerce (eqF @f @a)
+  {-# INLINE (==) #-}
+
+class Equatable a => Ordered a where
+  (<) :: a -> a -> Mask a
+  (<=) :: a -> a -> Mask a
+  (>) :: a -> a -> Mask a
+  (>=) :: a -> a -> Mask a
+
+instance Ord a => Ordered (Scalar a) where
+  (<) = coerce ((Prelude.<) @a)
+  (<=) = coerce ((Prelude.<=) @a)
+  (>) = coerce ((Prelude.>) @a)
+  (>=) = coerce ((Prelude.>=) @a)
+  {-# INLINE (<) #-}
+  {-# INLINE (<=) #-}
+  {-# INLINE (>) #-}
+  {-# INLINE (>=) #-}
+
+deriving via Scalar Int instance Ordered Int
+deriving via Scalar Int8 instance Ordered Int8
+deriving via Scalar Int16 instance Ordered Int16
+deriving via Scalar Int32 instance Ordered Int32
+deriving via Scalar Int64 instance Ordered Int64
+deriving via Scalar Word instance Ordered Word
+deriving via Scalar Word8 instance Ordered Word8
+deriving via Scalar Word16 instance Ordered Word16
+deriving via Scalar Word32 instance Ordered Word32
+deriving via Scalar Word64 instance Ordered Word64
+deriving via Scalar Float instance Ordered Float
+deriving via Scalar Double instance Ordered Double
+
+instance Ord a => Ordered (Identity a) where
+  (<) = coerce ((Prelude.<) @a)
+  (<=) = coerce ((Prelude.<=) @a)
+  (>) = coerce ((Prelude.>) @a)
+  (>=) = coerce ((Prelude.>=) @a)
+  {-# INLINE (<) #-}
+  {-# INLINE (<=) #-}
+  {-# INLINE (>) #-}
+  {-# INLINE (>=) #-}
+
+class EquatableF f a => OrderedF f a where
+  ltF :: f a -> f a -> f Bool
+  leF :: f a -> f a -> f Bool
+  gtF :: f a -> f a -> f Bool
+  geF :: f a -> f a -> f Bool
+
+instance OrderedF f a => Ordered (WrappedMulti f a) where
+  (<) = coerce (ltF @f @a)
+  (<=) = coerce (leF @f @a)
+  (>) = coerce (gtF @f @a)
+  (>=) = coerce (geF @f @a)
+  {-# INLINE (<) #-}
+  {-# INLINE (<=) #-}
+  {-# INLINE (>) #-}
+  {-# INLINE (>=) #-}
 
 class NumF f a where
   plusF :: f a -> f a -> f a

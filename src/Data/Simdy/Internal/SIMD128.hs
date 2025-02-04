@@ -11,6 +11,8 @@ module Data.Simdy.Internal.SIMD128
   , broadcast
   , liftSIMD
   , liftSIMD2
+  , SIMDEq
+  , SIMDOrd
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
@@ -51,7 +53,13 @@ class ( PackX2 X2 a
       , SplitShortVector X8 a
       , SplitShortVector X16 a
       , SplitShortVector X32 a
+      , SelectableF X2 a
+      , SelectableF X4 a
+      , SelectableF X8 a
+      , SelectableF X16 a
+      , SelectableF X32 a
       ) => SIMDElement a
+instance SIMDElement Bool
 instance SIMDElement Float
 instance SIMDElement Double
 instance SIMDElement Int8
@@ -73,6 +81,24 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2) => SIMDElement (a0, a1
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3) => SIMDElement (a0, a1, a2, a3)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4) => SIMDElement (a0, a1, a2, a3, a4)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4, SIMDElement a5) => SIMDElement (a0, a1, a2, a3, a4, a5)
+
+class ( Eq a
+      , SIMDElement a
+      , EquatableF X2 a
+      , EquatableF X4 a
+      , EquatableF X8 a
+      , EquatableF X16 a
+      , EquatableF X32 a
+      ) => SIMDEq a
+
+class ( Ord a
+      , SIMDElement a
+      , OrderedF X2 a
+      , OrderedF X4 a
+      , OrderedF X8 a
+      , OrderedF X16 a
+      , OrderedF X32 a
+      ) => SIMDOrd a
 
 -- | An instance of 'SIMDNum' has its 'Num' instance lifted to SIMD vector types
 --
@@ -201,6 +227,10 @@ class ( KnownSIMDLength f
       , forall a. SIMDElement a => Broadcast f a
       , forall a b. (SIMDElement a, SIMDElement b) => LiftSIMD f a b
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c
+      , Boolean (f Bool)
+      , forall a. SIMDElement a => Selectable (f a)
+      , forall a. SIMDEq a => Equatable (f a)
+      , forall a. SIMDOrd a => Ordered (f a)
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)

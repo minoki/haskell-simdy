@@ -21,16 +21,16 @@ mapX fv fs !v = VU.create $ do
   let !n = VU.length v
       !m = simdLength @m
   !result <- VUM.unsafeNew n
-  let goVector !i = if i + m <= n
+  let goVector !i = if i + m Prelude.<= n
                     then
                       do let !s = unsafeIndexUnboxedSIMD @m v i
                          unsafeWriteUnboxedSIMD result i (fv s)
                          goVector (i + m)
                     else
                       goScalar i
-      goScalar !i | i < n = do let !x = VU.unsafeIndex v i
-                               VUM.unsafeWrite result i (fs x)
-                               goScalar (i + 1)
+      goScalar !i | i Prelude.< n = do let !x = VU.unsafeIndex v i
+                                       VUM.unsafeWrite result i (fs x)
+                                       goScalar (i + 1)
                   | otherwise = pure ()
   goVector 0
   pure result
@@ -60,7 +60,7 @@ zipWithX fv fs !v0 !v1 = VU.create $ do
   let !n = min (VU.length v0) (VU.length v1)
       !m = simdLength @m
   !result <- VUM.unsafeNew n
-  let goVec !i = if i + m <= n
+  let goVec !i = if i + m Prelude.<= n
                  then
                    do let !s0 = unsafeIndexUnboxedSIMD @m v0 i
                           !s1 = unsafeIndexUnboxedSIMD @m v1 i
@@ -68,10 +68,10 @@ zipWithX fv fs !v0 !v1 = VU.create $ do
                       goVec (i + m)
                  else
                    goScalar i
-      goScalar !i | i < n = do let !x0 = VU.unsafeIndex v0 i
-                                   !x1 = VU.unsafeIndex v1 i
-                               VUM.unsafeWrite result i (fs x0 x1)
-                               goScalar (i + 1)
+      goScalar !i | i Prelude.< n = do let !x0 = VU.unsafeIndex v0 i
+                                           !x1 = VU.unsafeIndex v1 i
+                                       VUM.unsafeWrite result i (fs x0 x1)
+                                       goScalar (i + 1)
                   | otherwise = pure ()
   goVec 0
   pure result

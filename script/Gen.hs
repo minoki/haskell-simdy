@@ -35,6 +35,27 @@ gen !vecCount !maxBits
     ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
     ,"  simdLength = " ++ show vecCount
     ,"  {-# INLINE simdLength #-}"
+    ,"newtype instance " ++ tyCon ++ " Bool = MkBool" ++ tyCon ++ " Word" ++ show (max vecCount 8)
+    ,"type instance Mask (" ++ tyCon ++ " a) = " ++ tyCon ++ " Bool"
+    ,"instance BooleanF " ++ tyCon ++ " where"
+    ,"  trueF = MkBool" ++ tyCon ++ " " ++ show (2^vecCount - 1)
+    ,"  falseF = MkBool" ++ tyCon ++ " 0"
+    ,"  notF (MkBool" ++ tyCon ++ " x) = MkBool" ++ tyCon ++ " (" ++ show (2^vecCount - 1) ++ " - x)"
+    ,"  andF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .&. y)"
+    ,"  orF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .|. y)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " Bool instance Boolean (" ++ tyCon ++ " Bool)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance EquatableF " ++ tyCon ++ " a => Equatable (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance OrderedF " ++ tyCon ++ " a => Ordered (" ++ tyCon ++ " a)"
+    ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " Bool where"
+    ,"  pack" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = MkBool" ++ tyCon ++ " (" ++ List.intercalate " .|. " ["(if x" ++ show i ++ " then " ++ show (2^i) ++ " else 0)" | i <- [0..vecCount-1]] ++ ")"
+    ,"  unpack" ++ tyCon ++ " (MkBool" ++ tyCon ++ " !x) = (" ++ List.intercalate ", " ["testBit x " ++ show i | i <- [0..vecCount-1]] ++ ")"
+    ,"instance Broadcast " ++ tyCon ++ " Bool where"
+    ,"  broadcast False = falseF"
+    ,"  broadcast True = trueF"
+    ,"  {-# INLINE broadcast #-}"
+    ,"instance SelectableF " ++ tyCon ++ " Bool where"
+    ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
+    ,"  {-# INLINE selectF #-}"
     ]
     ++ genType "Float" "F#" 32 maxBits [genNum True, genFractional, genFloating, genPrim, genStorable]
     ++ genType "Double" "D#" 64 maxBits [genNum True, genFractional, genFloating, genPrim, genStorable]
@@ -74,6 +95,9 @@ gen !vecCount !maxBits
        ,"instance Broadcast " ++ tyCon ++ " a => Broadcast " ++ tyCon ++ " (Complex a) where"
        ,"  broadcast (x :+ y) = MkComplex" ++ tyCon ++ " (broadcast x) (broadcast y)"
        ,"  {-# INLINE broadcast #-}"
+       ,"instance SelectableF " ++ tyCon ++ " a => SelectableF " ++ tyCon ++ " (Complex a) where"
+       ,"  selectF !cond (MkComplex" ++ tyCon ++ " x y) (MkComplex" ++ tyCon ++ " x' y') = MkComplex" ++ tyCon ++ " (selectF cond x x') (selectF cond y y')"
+       ,"  {-# INLINE selectF #-}"
        ]
     ++ ["instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (Complex a) where"
        ,"  unsafeIndexUnboxedSIMD (VUB.V_Complex (VUB.V_2 _ u v)) !i = MkComplex" ++ tyCon ++ " (unsafeIndexUnboxedSIMD u i) (unsafeIndexUnboxedSIMD v i)"
@@ -91,6 +115,9 @@ gen !vecCount !maxBits
        ,"instance Broadcast " ++ tyCon ++ " () where"
        ,"  broadcast _ = MkUnit" ++ tyCon
        ,"  {-# INLINE broadcast #-}"
+       ,"instance SelectableF " ++ tyCon ++ " () where"
+       ,"  selectF _ _ _ = MkUnit" ++ tyCon
+       ,"  {-# INLINE selectF #-}"
        ]
     ++ concatMap genTuple [2..maxTupleLen]
     ++ ["instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b) => LiftSIMD " ++ tyCon ++ " a b where"
@@ -105,6 +132,7 @@ gen !vecCount !maxBits
     ++ ["  deconstructTuple" ++ show i ++ " (MkTuple" ++ show i ++ tyCon ++ " " ++ spaceSep ["v" ++ show j | j <- [0..i-1]] ++ ") = (" ++ commaSep ["v" ++ show j | j <- [0..i-1]] ++ ")" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE mkTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE deconstructTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
+    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance SelectableF " ++ tyCon ++ " a => Selectable (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance NumF " ++ tyCon ++ " a => Num (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FractionalF " ++ tyCon ++ " a => Fractional (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FloatingF " ++ tyCon ++ " a => Floating (" ++ tyCon ++ " a)"]
@@ -124,6 +152,8 @@ gen !vecCount !maxBits
                            ,"instance Broadcast " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  broadcast !x = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep (replicate vecCount "x")
                            ,"  {-# INLINE broadcast #-}"
+                           ,"instance SelectableF " ++ tyCon ++ " " ++ name ++ " where"
+                           ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(if testBit cond " ++ show i ++ " then x" ++ show i ++ " else y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                            ]
                       else
                         let shortVecSize = vecBitCount `div` bitsPerElem
@@ -142,6 +172,9 @@ gen !vecCount !maxBits
                             then "  broadcast (" ++ primCon ++ " x) = Mk" ++ name ++ tyCon ++ suffix ++ " (broadcast" ++ name ++ "X" ++ show shortVecSize ++ "# x)"
                             else "  broadcast (" ++ primCon ++ " x) = let !v = broadcast" ++ name ++ "X" ++ show shortVecSize ++ "# x in Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep (replicate shortVecCount "v")
                            ,"  {-# INLINE broadcast #-}"
+                           ,"instance SelectableF " ++ tyCon ++ " " ++ name ++ " where"
+                           ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["y" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(select" ++ shortVecName ++ "# " ++ cond_i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..shortVecCount-1], let cond_i = if shortVecCount == 1 then "cond" else "(" ++ (if max 8 shortVecSize == max 8 vecCount then "" else "fromIntegral $ ") ++ "cond `unsafeShiftR` " ++ show (i * shortVecSize) ++ ")" ]
+                           ,"  {-# INLINE selectF #-}"
                            ]
         in mainDef ++ concatMap (\f -> f name primCon bitsPerElem maxBits) others
     genNum isSigned name primCon !bitsPerElem maxBits
@@ -280,6 +313,9 @@ gen !vecCount !maxBits
         ,"instance (" ++ commaSep ["Broadcast " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => Broadcast " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
         ,"  broadcast (" ++ commaSep ["x" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(broadcast x" ++ show i ++ ")" | i <- [0..n-1]]
         ,"  {-# INLINE broadcast #-}"
+        ,"instance (" ++ commaSep ["SelectableF " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => SelectableF " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
+        ,"  selectF !cond (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(selectF cond x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
+        ,"  {-# INLINE selectF #-}"
         ] ++ if n <= maxTupleLenForUnboxedVector
              then ["instance (" ++ commaSep ["UnboxSIMD " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSIMD " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
                   ,"  unsafeIndexUnboxedSIMD (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSIMD v" ++ show i ++ " i)" | i <- [0..n-1]]
@@ -300,6 +336,9 @@ gen !vecCount !maxBits
         ,"instance Broadcast " ++ tyCon ++ " a => Broadcast " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  broadcast = coerce (broadcast @" ++ tyCon ++ " @a)"
         ,"  {-# INLINE broadcast #-}"
+        ,"instance SelectableF " ++ tyCon ++ " a => SelectableF " ++ tyCon ++ " (" ++ name ++ " a) where"
+        ,"  selectF = coerce (selectF @" ++ tyCon ++ " @a)"
+        ,"  {-# INLINE selectF #-}"
         ,"instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  unsafeIndexUnboxedSIMD = coerce (unsafeIndexUnboxedSIMD @" ++ tyCon ++ " @a)"
         ,"  unsafeReadUnboxedSIMD = coerce (unsafeReadUnboxedSIMD @" ++ tyCon ++ " @a)"
@@ -314,6 +353,13 @@ genHalf !vecCount !maxBits
   = [if vecCount == 2
      then "type instance HalfVector " ++ tyCon ++ " = Identity"
      else "type instance HalfVector " ++ tyCon ++ " = X" ++ show (vecCount `quot` 2)
+    ,"instance SplitShortVector " ++ tyCon ++ " Bool where"
+    ,if vecCount == 2
+     then "  splitShortVector (MkBool" ++ tyCon ++ " !x) = (Identity (testBit x 0), Identity (testBit x 1))"
+     else "  splitShortVector (MkBool" ++ tyCon ++ " !x) = (MkBoolX" ++ show (vecCount `quot` 2) ++ " $ fromIntegral $ x .&. " ++ show (2^(vecCount `quot` 2)) ++ ", MkBoolX" ++ show (vecCount `quot` 2) ++ " $ fromIntegral $ x `unsafeShiftR` " ++ show (vecCount `quot` 2) ++ ")"
+    ,if vecCount == 2
+     then "  joinShortVector (Identity !x) (Identity !y) = MkBool" ++ tyCon ++ " ((if x then 1 else 0) .|. (if y then 2 else 0))"
+     else "  joinShortVector (MkBoolX" ++ show (vecCount `quot` 2) ++ " !x) (MkBoolX" ++ show (vecCount `quot` 2) ++ " !y) = MkBool" ++ tyCon ++ " (fromIntegral x .|. (fromIntegral y `unsafeShiftL` " ++ show (vecCount `quot` 2) ++ "))"
     ]
     ++ genType "Float" "F#" 32 maxBits
     ++ genType "Double" "D#" 64 maxBits
@@ -478,7 +524,6 @@ genFile moduleName !maxBits
     ,"import Data.Complex"
     ,"import GHC.IO"
     ,"import GHC.Exts"
-    ,"import Data.Simdy.Class"
     ] ++ gen 2 maxBits ++ gen 4 maxBits ++ gen 8 maxBits ++ gen 16 maxBits ++ gen 32 maxBits
 -}
 
@@ -493,15 +538,18 @@ genFile moduleName primModule !n !maxBits
     ,"{-# LANGUAGE UnboxedTuples #-}"
     ,"{-# LANGUAGE UndecidableInstances #-}"
     ,"module " ++ moduleName ++ " where"
+    ,"import           Data.Bits"
     ,"import           Data.Complex"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Internal.Class"
     ,"import           " ++ primModule
-    ,"import           GHC.Int"
+    ] ++ ["import           Data.Simdy.Internal.PrimExtra" | maxBits > 0] ++
+    ["import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
     ,"import qualified Data.Vector.Unboxed.Base as VUB"
+    ,"import           Prelude hiding (not, (&&), (||))"
     ] ++ gen n maxBits
 
 genHalfFile :: String -> [String] -> [Int] -> Int -> [String]
@@ -511,6 +559,7 @@ genHalfFile moduleName imports counts !maxBits
     ["{-# LANGUAGE TypeFamilies #-}"
     ,"{-# OPTIONS_GHC -Wno-orphans #-}"
     ,"module " ++ moduleName ++ " where"
+    ,"import           Data.Bits"
     ,"import           Data.Complex"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"

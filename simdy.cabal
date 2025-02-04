@@ -76,6 +76,9 @@ library
                       cbits/float_minmaxnm.c
                       cbits/double_minmax.c
                       cbits/double_minmaxnm.c
+                      cbits/mask.c
+                      cbits/select.c
+                      cbits/int_compare.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.Prim

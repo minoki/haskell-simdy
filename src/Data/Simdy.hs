@@ -5,6 +5,8 @@ module Data.Simdy
   , broadcast
   , liftSIMD
   , liftSIMD2
+  , SIMDEq
+  , SIMDOrd
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
