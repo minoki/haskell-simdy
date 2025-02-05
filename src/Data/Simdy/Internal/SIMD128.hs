@@ -82,6 +82,9 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3) => SIM
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4) => SIMDElement (a0, a1, a2, a3, a4)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4, SIMDElement a5) => SIMDElement (a0, a1, a2, a3, a4, a5)
 
+-- | Vectors whose element type is an instance of 'SIMDEq' can be compared using 'Equatable' class
+--
+-- @('SIMD' f, 'SIMDEq' a)@ implies @'Equatable' (f a)@.
 class ( Eq a
       , SIMDElement a
       , EquatableF X2 a
@@ -91,6 +94,9 @@ class ( Eq a
       , EquatableF X32 a
       ) => SIMDEq a
 
+-- | Vectors whose element type is an instance of 'SIMDOrd' can be compared using 'Ordered' class
+--
+-- @('SIMD' f, 'SIMDOrd' a)@ implies @'Ordered' (f a)@.
 class ( Ord a
       , SIMDElement a
       , OrderedF X2 a
@@ -228,8 +234,11 @@ class ( KnownSIMDLength f
       , forall a b. (SIMDElement a, SIMDElement b) => LiftSIMD f a b
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c
       , Boolean (f Bool)
+      , forall a. SIMDElement a => SelectableF f a
       , forall a. SIMDElement a => Selectable (f a)
+      , forall a. SIMDEq a => EquatableF f a
       , forall a. SIMDEq a => Equatable (f a)
+      , forall a. SIMDOrd a => OrderedF f a
       , forall a. SIMDOrd a => Ordered (f a)
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)

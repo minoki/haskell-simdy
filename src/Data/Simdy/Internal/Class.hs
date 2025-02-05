@@ -214,6 +214,10 @@ instance Selectable (Identity a) where
 class SelectableF f a where
   selectF :: f Bool -> f a -> f a -> f a
 
+instance SelectableF Identity a where
+  selectF = select
+  {-# INLINE selectF #-}
+
 instance SelectableF f a => Selectable (WrappedMulti f a) where
   select = coerce (selectF @f @a)
   {-# INLINE select #-}
@@ -322,6 +326,10 @@ instance Eq a => Equatable (Identity a) where
 class EquatableF f a where
   eqF :: f a -> f a -> f Bool
 
+instance Eq a => EquatableF Identity a where
+  eqF = coerce ((Prelude.==) @a)
+  {-# INLINE eqF #-}
+
 instance EquatableF f a => Equatable (WrappedMulti f a) where
   (==) = coerce (eqF @f @a)
   {-# INLINE (==) #-}
@@ -370,6 +378,16 @@ class EquatableF f a => OrderedF f a where
   leF :: f a -> f a -> f Bool
   gtF :: f a -> f a -> f Bool
   geF :: f a -> f a -> f Bool
+
+instance Ord a => OrderedF Identity a where
+  ltF = coerce ((Prelude.<) @a)
+  leF = coerce ((Prelude.<=) @a)
+  gtF = coerce ((Prelude.>) @a)
+  geF = coerce ((Prelude.>=) @a)
+  {-# INLINE ltF #-}
+  {-# INLINE leF #-}
+  {-# INLINE gtF #-}
+  {-# INLINE geF #-}
 
 instance OrderedF f a => Ordered (WrappedMulti f a) where
   (<) = coerce (ltF @f @a)

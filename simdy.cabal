@@ -57,6 +57,7 @@ library
                     , arch-options
     exposed-modules:  Data.Simdy
                       Data.Simdy.Horizontal
+                      Data.Simdy.Mask
                       Data.Simdy.Pack
                       Data.Simdy.Split
                       Data.Simdy.Tuple
