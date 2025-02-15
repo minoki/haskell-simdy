@@ -6,7 +6,7 @@ In general, the types and classes exported from this module are not compatible w
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Internal.SIMD128
   ( module M
-  , SIMD (horizontalFold)
+  , SIMD (horizontalFold, (==*), (/=*))
   , SIMDElement
   , broadcast
   , liftSIMD
@@ -36,6 +36,7 @@ import           Data.Simdy.Internal.SIMD128.X8 as M
 import qualified Data.Vector.Unboxed as VU
 import           Data.Word
 import           Foreign.Storable
+import           Prelude hiding (not)
 
 -- | An instance of 'SIMDElement' supports basic SIMD operations (pack\/unpack\/broadcast)
 class ( PackX2 X2 a
@@ -228,6 +229,8 @@ instance SIMDStorable Word16
 instance SIMDStorable Word32
 instance SIMDStorable Word64
 
+infix 4 ==*, /=*
+
 -- | SIMD vector types
 class ( KnownSIMDLength f
       , forall a. SIMDElement a => Broadcast f a
@@ -245,24 +248,50 @@ class ( KnownSIMDLength f
       , forall a. SIMDFloating a => Floating (f a)
       ) => SIMD f where
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a
+  (==*) :: SIMDEq a => f a -> f a -> f Bool
+  (/=*) :: SIMDEq a => f a -> f a -> f Bool
 instance SIMD Identity where
   horizontalFold _ = runIdentity
+  (==*) = eqF
+  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
+  {-# INLINE (==*) #-}
+  {-# INLINE (/=*) #-}
 instance SIMD X2 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> runIdentity (op low high)
+  (==*) = eqF
+  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
+  {-# INLINE (==*) #-}
+  {-# INLINE (/=*) #-}
 instance SIMD X4 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  (==*) = eqF
+  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
+  {-# INLINE (==*) #-}
+  {-# INLINE (/=*) #-}
 instance SIMD X8 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  (==*) = eqF
+  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
+  {-# INLINE (==*) #-}
+  {-# INLINE (/=*) #-}
 instance SIMD X16 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  (==*) = eqF
+  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
+  {-# INLINE (==*) #-}
+  {-# INLINE (/=*) #-}
 instance SIMD X32 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  (==*) = eqF
+  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
+  {-# INLINE (==*) #-}
+  {-# INLINE (/=*) #-}
 
 -- | Broadcasts a value to the entire vector.
 --

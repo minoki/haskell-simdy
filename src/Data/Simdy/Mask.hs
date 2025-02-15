@@ -25,7 +25,8 @@ selectSIMD :: (SIMD f, SIMDElement a)
 selectSIMD = selectF
 {-# INLINE selectSIMD #-}
 
-infix 4 ==*, /=*, <*, <=*, >*, >=*
+{-
+infix 4 ==*, /=*
 
 -- TODO: Why is 'EquatableF f a' needed?
 (==*) :: (SIMD f, SIMDEq a, EquatableF f a) => f a -> f a -> f Bool
@@ -36,6 +37,9 @@ infix 4 ==*, /=*, <*, <=*, >*, >=*
 (/=*) :: (SIMD f, SIMDEq a, EquatableF f a) => f a -> f a -> f Bool
 x /=* y = not (eqF x y)
 {-# INLINE (/=*) #-}
+-}
+
+infix 4 <*, <=*, >*, >=*
 
 (<*) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
 (<*) = ltF
