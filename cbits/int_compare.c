@@ -1,6 +1,7 @@
 #if defined(__SSE2__)
 #include <stdint.h>
 #include <emmintrin.h>
+#include <smmintrin.h>
 
 __m128i hs_simdy_int8x16_eq(__m128i a, __m128i b)
 {

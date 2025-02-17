@@ -7,6 +7,8 @@ import GHC.Exts
 
 #if defined(USE_SIMD128)
 
+-- GHC bug: https://gitlab.haskell.org/ghc/ghc/-/issues/25730
+#if 0
 foreign import ccall unsafe "hs_simdy_pack_mask8x16"
   packMask8X16 :: Int8X16# -> Word16
 
@@ -109,11 +111,44 @@ selectFloatX4# !x = selectFloatX4Mask# (unpackMask32X4 x)
 selectDoubleX2# :: Word8 -> DoubleX2# -> DoubleX2# -> DoubleX2#
 selectDoubleX2# !x = selectDoubleX2Mask# (unpackMask64X2 x)
 {-# INLINE selectDoubleX2# #-}
+#endif
+
+foreign import ccall unsafe "hs_simdy_select_int8x16_densemask"
+  selectInt8X16# :: Word16 -> Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_select_int16x8_densemask"
+  selectInt16X8# :: Word8 -> Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_select_int32x4_densemask"
+  selectInt32X4# :: Word8 -> Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_select_int64x2_densemask"
+  selectInt64X2# :: Word8 -> Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_select_int8x16_densemask"
+  selectWord8X16# :: Word16 -> Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_select_int16x8_densemask"
+  selectWord16X8# :: Word8 -> Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_select_int32x4_densemask"
+  selectWord32X4# :: Word8 -> Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_select_int64x2_densemask"
+  selectWord64X2# :: Word8 -> Word64X2# -> Word64X2# -> Word64X2#
+
+foreign import ccall unsafe "hs_simdy_select_floatx4_densemask"
+  selectFloatX4# :: Word8 -> FloatX4# -> FloatX4# -> FloatX4#
+
+foreign import ccall unsafe "hs_simdy_select_doublex2_densemask"
+  selectDoubleX2# :: Word8 -> DoubleX2# -> DoubleX2# -> DoubleX2#
 
 #endif
 
 #if defined(USE_SIMD256)
 
+-- GHC bug: https://gitlab.haskell.org/ghc/ghc/-/issues/25730
+#if 0
 foreign import ccall unsafe "hs_simdy_pack_mask8x32"
   packMask8X32 :: Int8X32# -> Word32
 
@@ -207,6 +242,37 @@ selectFloatX8# !x = selectFloatX8Mask# (unpackMask32X8 x)
 selectDoubleX4# :: Word8 -> DoubleX4# -> DoubleX4# -> DoubleX4#
 selectDoubleX4# !x = selectDoubleX4Mask# (unpackMask64X4 x)
 {-# INLINE selectDoubleX4# #-}
+#endif
+
+foreign import ccall unsafe "hs_simdy_select_int8x32_densemask"
+  selectInt8X32# :: Word32 -> Int8X32# -> Int8X32# -> Int8X32#
+
+foreign import ccall unsafe "hs_simdy_select_int16x16_densemask"
+  selectInt16X16# :: Word16 -> Int16X16# -> Int16X16# -> Int16X16#
+
+foreign import ccall unsafe "hs_simdy_select_int32x8_densemask"
+  selectInt32X8# :: Word8 -> Int32X8# -> Int32X8# -> Int32X8#
+
+foreign import ccall unsafe "hs_simdy_select_int64x2_densemask"
+  selectInt64X4# :: Word8 -> Int64X4# -> Int64X4# -> Int64X4#
+
+foreign import ccall unsafe "hs_simdy_select_int8x32_densemask"
+  selectWord8X32# :: Word32 -> Word8X32# -> Word8X32# -> Word8X32#
+
+foreign import ccall unsafe "hs_simdy_select_int16x16_densemask"
+  selectWord16X16# :: Word16 -> Word16X16# -> Word16X16# -> Word16X16#
+
+foreign import ccall unsafe "hs_simdy_select_int32x8_densemask"
+  selectWord32X8# :: Word8 -> Word32X8# -> Word32X8# -> Word32X8#
+
+foreign import ccall unsafe "hs_simdy_select_int64x2_densemask"
+  selectWord64X4# :: Word8 -> Word64X4# -> Word64X4# -> Word64X4#
+
+foreign import ccall unsafe "hs_simdy_select_floatx8"
+  selectFloatX8# :: Word8 -> FloatX8# -> FloatX8# -> FloatX8#
+
+foreign import ccall unsafe "hs_simdy_select_doublex4"
+  selectDoubleX4# :: Word8 -> DoubleX4# -> DoubleX4# -> DoubleX4#
 
 #endif
 
