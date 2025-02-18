@@ -114,6 +114,7 @@ library
         hs-source-dirs: vl128
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.22,
+                      ghc-prim,
                       primitive ^>=0.9.0.0,
                       vector ^>=0.13.1.0
     hs-source-dirs:   src
