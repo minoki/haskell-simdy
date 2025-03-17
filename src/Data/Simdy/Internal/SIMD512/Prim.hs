@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE UnboxedTuples #-}
 module Data.Simdy.Internal.SIMD512.Prim
   ( M.Int8X64#
   , M.Int16X32#
@@ -269,51 +270,51 @@ module Data.Simdy.Internal.SIMD512.Prim
   ) where
 import           Data.Simdy.Internal.SIMD256.Prim
 
-#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 2, 0) && defined(USE_LLVM_BACKEND)
--- GHC 9.12.1 has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
+#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 3, 0) && defined(USE_LLVM_BACKEND)
+-- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
 
 import qualified GHC.Prim as M
 import           GHC.Prim (Float#, Double#, Int8#, Int16#, Int32#, Int64#, Word8#, Word16#, Word32#, Word64#, FloatX16#, DoubleX8#, Int8X64#, Int16X32#, Int32X16#, Int64X8#, Word8X64#, Word16X32#, Word32X16#, Word64X8#)
 
 broadcastFloatX16# :: Float# -> FloatX16#
-broadcastFloatX16# = M.broadcastFloatX16#
-{-# NOINLINE broadcastFloatX16# #-}
+broadcastFloatX16# x = M.packFloatX16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastFloatX16# #-}
 
 broadcastDoubleX8# :: Double# -> DoubleX8#
-broadcastDoubleX8# = M.broadcastDoubleX8#
-{-# NOINLINE broadcastDoubleX8# #-}
+broadcastDoubleX8# x = M.packDoubleX8# (# x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastDoubleX8# #-}
 
 broadcastInt8X64# :: Int8# -> Int8X64#
-broadcastInt8X64# = M.broadcastInt8X64#
-{-# NOINLINE broadcastInt8X64# #-}
+broadcastInt8X64# x = M.packInt8X64# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastInt8X64# #-}
 
 broadcastInt16X32# :: Int16# -> Int16X32#
-broadcastInt16X32# = M.broadcastInt16X32#
-{-# NOINLINE broadcastInt16X32# #-}
+broadcastInt16X32# x = M.packInt16X32# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastInt16X32# #-}
 
 broadcastInt32X16# :: Int32# -> Int32X16#
-broadcastInt32X16# = M.broadcastInt32X16#
-{-# NOINLINE broadcastInt32X16# #-}
+broadcastInt32X16# x = M.packInt32X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastInt32X16# #-}
 
 broadcastInt64X8# :: Int64# -> Int64X8#
-broadcastInt64X8# = M.broadcastInt64X8#
-{-# NOINLINE broadcastInt64X8# #-}
+broadcastInt64X8# x = M.packInt64X8# (# x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastInt64X8# #-}
 
 broadcastWord8X64# :: Word8# -> Word8X64#
-broadcastWord8X64# = M.broadcastWord8X64#
-{-# NOINLINE broadcastWord8X64# #-}
+broadcastWord8X64# x = M.packWord8X64# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastWord8X64# #-}
 
 broadcastWord16X32# :: Word16# -> Word16X32#
-broadcastWord16X32# = M.broadcastWord16X32#
-{-# NOINLINE broadcastWord16X32# #-}
+broadcastWord16X32# x = M.packWord16X32# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastWord16X32# #-}
 
 broadcastWord32X16# :: Word32# -> Word32X16#
-broadcastWord32X16# = M.broadcastWord32X16#
-{-# NOINLINE broadcastWord32X16# #-}
+broadcastWord32X16# x = M.packWord32X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastWord32X16# #-}
 
 broadcastWord64X8# :: Word64# -> Word64X8#
-broadcastWord64X8# = M.broadcastWord64X8#
-{-# NOINLINE broadcastWord64X8# #-}
+broadcastWord64X8# x = M.packWord64X8# (# x, x, x, x, x, x, x, x #)
+{-# INLINE broadcastWord64X8# #-}
 
 #else
 
