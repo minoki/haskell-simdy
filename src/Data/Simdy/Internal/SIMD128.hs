@@ -17,7 +17,7 @@ module Data.Simdy.Internal.SIMD128
   , SIMDFractional
   , SIMDFloating
   , SIMDPrim
-  , SIMDUnbox
+  -- , SIMDUnbox
   , SIMDStorable
   ) where
 import           Data.Complex
@@ -33,7 +33,7 @@ import           Data.Simdy.Internal.SIMD128.X2 as M
 import           Data.Simdy.Internal.SIMD128.X32 as M
 import           Data.Simdy.Internal.SIMD128.X4 as M
 import           Data.Simdy.Internal.SIMD128.X8 as M
-import qualified Data.Vector.Unboxed as VU
+-- import qualified Data.Vector.Unboxed as VU
 import           Data.Word
 import           Foreign.Storable
 import           Prelude hiding (not)
@@ -179,6 +179,7 @@ instance SIMDPrim Word16
 instance SIMDPrim Word32
 instance SIMDPrim Word64
 
+{-
 -- | An instance of 'SIMDUnbox' supports unboxed vectors
 class ( VU.Unbox a
       , SIMDElement a
@@ -209,6 +210,7 @@ instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2) => SIMDUnbox (a0, a1, a2)
 instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3) => SIMDUnbox (a0, a1, a2, a3)
 instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4) => SIMDUnbox (a0, a1, a2, a3, a4)
 instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4, SIMDUnbox a5) => SIMDUnbox (a0, a1, a2, a3, a4, a5)
+-}
 
 class ( Storable a
       , SIMDElement a
@@ -239,10 +241,10 @@ class ( KnownSIMDLength f
       , Boolean (f Bool)
       , forall a. SIMDElement a => SelectableF f a
       , forall a. SIMDElement a => Selectable (f a)
-      , forall a. SIMDEq a => EquatableF f a
-      , forall a. SIMDEq a => Equatable (f a)
-      , forall a. SIMDOrd a => OrderedF f a
-      , forall a. SIMDOrd a => Ordered (f a)
+      -- , forall a. SIMDEq a => EquatableF f a
+      -- , forall a. SIMDEq a => Equatable (f a)
+      -- , forall a. SIMDOrd a => OrderedF f a
+      -- , forall a. SIMDOrd a => Ordered (f a)
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)

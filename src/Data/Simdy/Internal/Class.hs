@@ -3,30 +3,31 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Control.Monad.ST
 import           Data.Coerce
+import           Data.Complex (Complex)
 import           Data.Functor.Identity
-import           Data.Int
+import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Kind
 import           Data.Monoid
 import           Data.Primitive
 import           Data.Semigroup
 import           Data.Simdy.Internal.Class.Generated as M
 import qualified Data.Vector.Primitive as VP
-import qualified Data.Vector.Unboxed as VU
-import qualified Data.Vector.Unboxed.Base as VUB
-import qualified Data.Vector.Unboxed.Mutable as VUM
-import           Data.Word
+import           Data.Word (Word16, Word32, Word64, Word8)
 import           Foreign.Storable
-import           GHC.Exts
-import           GHC.ST
+import           GHC.Exts (Int (I#), Int#, State#, (+#))
+import           GHC.ST (ST (ST))
 import           GHC.TypeNats (KnownNat, Natural)
-import           Prelude hiding (not, (&&), (||), (==), (/=), (<), (<=), (>), (>=))
+import           Prelude hiding (not, (&&), (/=), (<), (<=), (==), (>), (>=),
+                          (||))
 import qualified Prelude
 
 type HalfVector :: (Type -> Type) -> Type -> Type
@@ -56,6 +57,84 @@ class LiftSIMD2 f a b c where
 instance LiftSIMD2 Identity a b c where
   liftSIMD2 = coerce
   {-# INLINE liftSIMD2 #-}
+
+class LiftConstructor f where
+  mkTuple2 :: f a0 -> f a1 -> f (a0, a1)
+  mkTuple3 :: f a0 -> f a1 -> f a2 -> f (a0, a1, a2)
+  mkTuple4 :: f a0 -> f a1 -> f a2 -> f a3 -> f (a0, a1, a2, a3)
+  mkTuple5 :: f a0 -> f a1 -> f a2 -> f a3 -> f a4 -> f (a0, a1, a2, a3, a4)
+  mkTuple6 :: f a0 -> f a1 -> f a2 -> f a3 -> f a4 -> f a5 -> f (a0, a1, a2, a3, a4, a5)
+  deconstructTuple2 :: f (a0, a1) -> (f a0, f a1)
+  deconstructTuple3 :: f (a0, a1, a2) -> (f a0, f a1, f a2)
+  deconstructTuple4 :: f (a0, a1, a2, a3) -> (f a0, f a1, f a2, f a3)
+  deconstructTuple5 :: f (a0, a1, a2, a3, a4) -> (f a0, f a1, f a2, f a3, f a4)
+  deconstructTuple6 :: f (a0, a1, a2, a3, a4, a5) -> (f a0, f a1, f a2, f a3, f a4, f a5)
+  mkSum :: f a -> f (Sum a)
+  getSum' :: f (Sum a) -> f a
+  mkProduct :: f a -> f (Product a)
+  getProduct' :: f (Product a) -> f a
+  mkMin :: f a -> f (Min a)
+  getMin' :: f (Min a) -> f a
+  mkMax :: f a -> f (Max a)
+  getMax' :: f (Max a) -> f a
+  {-
+  mkAll :: f Bool -> f All
+  getAll' :: f All -> f Bool
+  mkAny :: f Bool -> f Any
+  getAny' :: f Any -> f Bool
+  -}
+  mkComplex :: f a -> f a -> f (Complex a)
+  deconstructComplex :: f (Complex a) -> (f a, f a)
+
+pattern MkTuple2 :: LiftConstructor f => f a0 -> f a1 -> f (a0, a1)
+pattern MkTuple2 x0 x1 <- (deconstructTuple2 -> (x0, x1)) where
+  MkTuple2 = mkTuple2
+
+pattern MkTuple3 :: LiftConstructor f => f a0 -> f a1 -> f a2 -> f (a0, a1, a2)
+pattern MkTuple3 x0 x1 x2 <- (deconstructTuple3 -> (x0, x1, x2)) where
+  MkTuple3 = mkTuple3
+
+pattern MkTuple4 :: LiftConstructor f => f a0 -> f a1 -> f a2 -> f a3 -> f (a0, a1, a2, a3)
+pattern MkTuple4 x0 x1 x2 x3 <- (deconstructTuple4 -> (x0, x1, x2, x3)) where
+  MkTuple4 = mkTuple4
+
+pattern MkTuple5 :: LiftConstructor f => f a0 -> f a1 -> f a2 -> f a3 -> f a4 -> f (a0, a1, a2, a3, a4)
+pattern MkTuple5 x0 x1 x2 x3 x4 <- (deconstructTuple5 -> (x0, x1, x2, x3, x4)) where
+  MkTuple5 = mkTuple5
+
+pattern MkTuple6 :: LiftConstructor f => f a0 -> f a1 -> f a2 -> f a3 -> f a4 -> f a5 -> f (a0, a1, a2, a3, a4, a5)
+pattern MkTuple6 x0 x1 x2 x3 x4 x5 <- (deconstructTuple6 -> (x0, x1, x2, x3, x4, x5)) where
+  MkTuple6 = mkTuple6
+
+pattern MkSum :: LiftConstructor f => f a -> f (Sum a)
+pattern MkSum x <- (getSum' -> x) where
+  MkSum = mkSum
+
+pattern MkProduct :: LiftConstructor f => f a -> f (Product a)
+pattern MkProduct x <- (getProduct' -> x) where
+  MkProduct = mkProduct
+
+pattern MkMin :: LiftConstructor f => f a -> f (Min a)
+pattern MkMin x <- (getMin' -> x) where
+  MkMin = mkMin
+
+pattern MkMax :: LiftConstructor f => f a -> f (Max a)
+pattern MkMax x <- (getMax' -> x) where
+  MkMax = mkMax
+
+{-
+pattern MkAll :: LiftConstructor f => f Bool -> f All
+pattern MkAll x <- (getAll' -> x) where
+  MkAll = mkAll
+
+pattern MkAny :: LiftConstructor f => f Bool -> f Any
+pattern MkAny x <- (getAny' -> x) where
+  MkAny = mkAny
+-}
+
+pattern MkComplex :: LiftConstructor f => f a -> f a -> f (Complex a)
+pattern MkComplex x0 x1 <- (deconstructComplex -> (x0, x1)) where
+  MkComplex = mkComplex
 
 type KnownSIMDLength :: (Type -> Type) -> Constraint
 class KnownNat (SIMDLength f) => KnownSIMDLength f where
@@ -102,99 +181,6 @@ instance Storable a => StorableSIMD Identity a where
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
 
-class KnownSIMDLength f => UnboxSIMD f a where
-  unsafeIndexUnboxedSIMD :: VU.Vector a -> Int -> f a
-  unsafeReadUnboxedSIMD :: VUM.MVector s a -> Int -> ST s (f a)
-  unsafeWriteUnboxedSIMD :: VUM.MVector s a -> Int -> f a -> ST s ()
-
-instance (KnownSIMDLength f, PrimSIMD f Float) => UnboxSIMD f Float where
-  unsafeIndexUnboxedSIMD (VUB.V_Float v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Float mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Float mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Double) => UnboxSIMD f Double where
-  unsafeIndexUnboxedSIMD (VUB.V_Double v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Double mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Double mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Int8) => UnboxSIMD f Int8 where
-  unsafeIndexUnboxedSIMD (VUB.V_Int8 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Int8 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Int8 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Int16) => UnboxSIMD f Int16 where
-  unsafeIndexUnboxedSIMD (VUB.V_Int16 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Int16 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Int16 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Int32) => UnboxSIMD f Int32 where
-  unsafeIndexUnboxedSIMD (VUB.V_Int32 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Int32 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Int32 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Int64) => UnboxSIMD f Int64 where
-  unsafeIndexUnboxedSIMD (VUB.V_Int64 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Int64 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Int64 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Word8) => UnboxSIMD f Word8 where
-  unsafeIndexUnboxedSIMD (VUB.V_Word8 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Word8 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Word8 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Word16) => UnboxSIMD f Word16 where
-  unsafeIndexUnboxedSIMD (VUB.V_Word16 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Word16 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Word16 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Word32) => UnboxSIMD f Word32 where
-  unsafeIndexUnboxedSIMD (VUB.V_Word32 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Word32 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Word32 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, PrimSIMD f Word64) => UnboxSIMD f Word64 where
-  unsafeIndexUnboxedSIMD (VUB.V_Word64 v) = unsafeIndexPrimSIMD v
-  unsafeReadUnboxedSIMD (VUB.MV_Word64 mv) = unsafeReadPrimSIMD mv
-  unsafeWriteUnboxedSIMD (VUB.MV_Word64 mv) = unsafeWritePrimSIMD mv
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
-instance (KnownSIMDLength f, Broadcast f ()) => UnboxSIMD f () where
-  unsafeIndexUnboxedSIMD (VUB.V_Unit _) !_ = broadcast ()
-  unsafeReadUnboxedSIMD (VUB.MV_Unit _) !_ = pure (broadcast ())
-  unsafeWriteUnboxedSIMD (VUB.MV_Unit _) !_ !_ = pure ()
-  {-# INLINE unsafeIndexUnboxedSIMD #-}
-  {-# INLINE unsafeReadUnboxedSIMD #-}
-  {-# INLINE unsafeWriteUnboxedSIMD #-}
-
 type WrappedMulti :: (Type -> Type) -> Type -> Type
 newtype WrappedMulti f a = MkWrappedMulti (f a)
 
@@ -207,7 +193,7 @@ class Selectable a where
   select :: Mask a -> a -> a -> a
 
 instance Selectable (Identity a) where
-  select (Identity True) !x !_ = x
+  select (Identity True) !x !_  = x
   select (Identity False) !_ !y = y
   {-# INLINE select #-}
 

@@ -64,6 +64,9 @@ library
                       Data.Simdy.Internal.Class
                       Data.Simdy.Internal.Default
                       Data.Simdy.Internal.NoSIMD
+                      Data.Simdy.Vector.Bundle
+                      Data.Simdy.Vector.Class
+                      Data.Simdy.Vector.Generic
                       Data.Simdy.Vector.Unboxed
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.PrimExtra
@@ -147,3 +150,15 @@ test-suite double-minmax-test
     type:             exitcode-stdio-1.0
     main-is:          cbits/test_double_minmax.c
     build-depends:    simdy
+
+benchmark simdy-benchmark
+    import:           warnings
+                    , arch-options
+    default-language: GHC2021
+    type:             exitcode-stdio-1.0
+    main-is:          Main.hs
+    hs-source-dirs:   benchmark
+    build-depends:    base >=4.18.0.0 && <4.22,
+                      simdy,
+                      vector ^>=0.13.1.0,
+                      tasty-bench ^>=0.4.1

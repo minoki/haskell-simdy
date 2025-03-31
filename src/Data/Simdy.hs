@@ -11,7 +11,7 @@ module Data.Simdy
   , SIMDFractional
   , SIMDFloating
   , SIMDPrim
-  , SIMDUnbox
+  -- , SIMDUnbox
   , SIMDStorable
   , KnownSIMDLength (SIMDLength, simdLength)
     -- * SIMD vector types

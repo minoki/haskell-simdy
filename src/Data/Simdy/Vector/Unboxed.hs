@@ -1,97 +1,58 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE CPP #-}
 module Data.Simdy.Vector.Unboxed where
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity (Identity (Identity))
-import           Data.Simdy.Internal.Class
+import           Data.Simdy.Internal.Class (LiftConstructor)
+import           Data.Simdy.Internal.Default
+import           Data.Simdy.Vector.Class (SIMDUnbox)
+import qualified Data.Simdy.Vector.Generic as G
 import qualified Data.Vector.Unboxed as VU
-import qualified Data.Vector.Unboxed.Mutable as VUM
-#if defined(USE_SIMD512)
-import           Data.Simdy.Internal.SIMD512
-#elif defined(USE_SIMD256)
-import           Data.Simdy.Internal.SIMD256
-#elif defined(USE_SIMD128)
-import           Data.Simdy.Internal.SIMD128
-#else
-import           Data.Simdy.Internal.NoSIMD
-#endif
+-- import qualified Data.Vector.Unboxed.Mutable as VUM
 
-mapX :: forall m a b. (SIMD m, VU.Unbox a, UnboxSIMD m a, VU.Unbox b, UnboxSIMD m b) => (m a -> m b) -> (a -> b) -> VU.Vector a -> VU.Vector b
-mapX fv fs !v = VU.create $ do
-  let !n = VU.length v
-      !m = simdLength @m
-  !result <- VUM.unsafeNew n
-  let goVector !i = if i + m Prelude.<= n
-                    then
-                      do let !s = unsafeIndexUnboxedSIMD @m v i
-                         unsafeWriteUnboxedSIMD result i (fv s)
-                         goVector (i + m)
-                    else
-                      goScalar i
-      goScalar !i | i Prelude.< n = do let !x = VU.unsafeIndex v i
-                                       VUM.unsafeWrite result i (fs x)
-                                       goScalar (i + 1)
-                  | otherwise = pure ()
-  goVector 0
-  pure result
+mapX :: forall x a b. (SIMD x, SIMDUnbox x a, SIMDUnbox x b) => (x a -> x b) -> (a -> b) -> VU.Vector a -> VU.Vector b
+mapX = G.map
+{-# INLINE mapX #-}
 
-mapX2 :: (SIMDUnbox a, SIMDUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
+mapX2 :: (SIMDUnbox X2 a, SIMDUnbox X2 b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX2 f = mapX @X2 f (coerce (f @Identity))
 {-# INLINE mapX2 #-}
 
-mapX4 :: (SIMDUnbox a, SIMDUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
+mapX4 :: (SIMDUnbox X4 a, SIMDUnbox X4 b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX4 f = mapX @X4 f (coerce (f @Identity))
 {-# INLINE mapX4 #-}
 
-mapX8 :: (SIMDUnbox a, SIMDUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
+mapX8 :: (SIMDUnbox X8 a, SIMDUnbox X8 b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX8 f = mapX @X8 f (coerce (f @Identity))
 {-# INLINE mapX8 #-}
 
-mapX16 :: (SIMDUnbox a, SIMDUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
+mapX16 :: (SIMDUnbox X16 a, SIMDUnbox X16 b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX16 f = mapX @X16 f (coerce (f @Identity))
 {-# INLINE mapX16 #-}
 
-mapX32 :: (SIMDUnbox a, SIMDUnbox b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
+mapX32 :: (SIMDUnbox X32 a, SIMDUnbox X32 b) => (forall f. SIMD f => f a -> f b) -> VU.Vector a -> VU.Vector b
 mapX32 f = mapX @X32 f (coerce (f @Identity))
 {-# INLINE mapX32 #-}
 
-zipWithX :: forall m a b c. (SIMD m, VU.Unbox a, UnboxSIMD m a, VU.Unbox b, UnboxSIMD m b, VU.Unbox c, UnboxSIMD m c) => (m a -> m b -> m c) -> (a -> b -> c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
-zipWithX fv fs !v0 !v1 = VU.create $ do
-  let !n = min (VU.length v0) (VU.length v1)
-      !m = simdLength @m
-  !result <- VUM.unsafeNew n
-  let goVec !i = if i + m Prelude.<= n
-                 then
-                   do let !s0 = unsafeIndexUnboxedSIMD @m v0 i
-                          !s1 = unsafeIndexUnboxedSIMD @m v1 i
-                      unsafeWriteUnboxedSIMD result i (fv s0 s1)
-                      goVec (i + m)
-                 else
-                   goScalar i
-      goScalar !i | i Prelude.< n = do let !x0 = VU.unsafeIndex v0 i
-                                           !x1 = VU.unsafeIndex v1 i
-                                       VUM.unsafeWrite result i (fs x0 x1)
-                                       goScalar (i + 1)
-                  | otherwise = pure ()
-  goVec 0
-  pure result
+zipWithX :: forall x a b c. (SIMD x, SIMDUnbox x a, SIMDUnbox x b, SIMDUnbox x c, LiftConstructor x) => (x a -> x b -> x c) -> (a -> b -> c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+zipWithX = G.zipWith
+{-# INLINE zipWithX #-}
 
-zipWithX2 :: (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+zipWithX2 :: (SIMDUnbox X2 a, SIMDUnbox X2 b, SIMDUnbox X2 c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX2 f = zipWithX @X2 f (coerce (f @Identity))
 {-# INLINE zipWithX2 #-}
 
-zipWithX4 :: (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+zipWithX4 :: (SIMDUnbox X4 a, SIMDUnbox X4 b, SIMDUnbox X4 c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX4 f = zipWithX @X4 f (coerce (f @Identity))
 {-# INLINE zipWithX4 #-}
 
-zipWithX8 :: (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+zipWithX8 :: (SIMDUnbox X8 a, SIMDUnbox X8 b, SIMDUnbox X8 c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX8 f = zipWithX @X8 f (coerce (f @Identity))
 {-# INLINE zipWithX8 #-}
 
-zipWithX16 :: (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+zipWithX16 :: (SIMDUnbox X16 a, SIMDUnbox X16 b, SIMDUnbox X16 c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX16 f = zipWithX @X16 f (coerce (f @Identity))
 {-# INLINE zipWithX16 #-}
 
-zipWithX32 :: (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+zipWithX32 :: (SIMDUnbox X32 a, SIMDUnbox X32 b, SIMDUnbox X32 c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX32 f = zipWithX @X32 f (coerce (f @Identity))
 {-# INLINE zipWithX32 #-}

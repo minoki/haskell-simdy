@@ -8,10 +8,12 @@ module Data.Simdy.Mask
   , (==*)
   , (/=*)
   , Ordered (..)
+  {-
   , (<*)
   , (<=*)
   , (>*)
   , (>=*)
+  -}
   ) where
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Default
@@ -39,6 +41,7 @@ x /=* y = not (eqF x y)
 {-# INLINE (/=*) #-}
 -}
 
+{-
 infix 4 <*, <=*, >*, >=*
 
 (<*) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
@@ -56,3 +59,4 @@ infix 4 <*, <=*, >*, >=*
 (>=*) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
 (>=*) = geF
 {-# INLINE (>=*) #-}
+-}

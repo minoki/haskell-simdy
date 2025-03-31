@@ -99,6 +99,7 @@ gen !vecCount !maxBits
        ,"  selectF !cond (MkComplex" ++ tyCon ++ " x y) (MkComplex" ++ tyCon ++ " x' y') = MkComplex" ++ tyCon ++ " (selectF cond x x') (selectF cond y y')"
        ,"  {-# INLINE selectF #-}"
        ]
+    {-
     ++ ["instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (Complex a) where"
        ,"  unsafeIndexUnboxedSIMD (VUB.V_Complex (VUB.V_2 _ u v)) !i = MkComplex" ++ tyCon ++ " (unsafeIndexUnboxedSIMD u i) (unsafeIndexUnboxedSIMD v i)"
        ,"  unsafeReadUnboxedSIMD (VUB.MV_Complex (VUB.MV_2 _ u v)) !i = do { x <- unsafeReadUnboxedSIMD u i; y <- unsafeReadUnboxedSIMD v i; pure (MkComplex" ++ tyCon ++ " x y) }"
@@ -106,7 +107,9 @@ gen !vecCount !maxBits
        ,"  {-# INLINE unsafeIndexUnboxedSIMD #-}"
        ,"  {-# INLINE unsafeReadUnboxedSIMD #-}"
        ,"  {-# INLINE unsafeWriteUnboxedSIMD #-}"
-       ,"data instance " ++ tyCon ++ " () = MkUnit" ++ tyCon
+       ]
+    -}
+    ++ ["data instance " ++ tyCon ++ " () = MkUnit" ++ tyCon
        ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " () where"
        ,"  pack" ++ tyCon ++ " " ++ spaceSep (replicate vecCount "_") ++ " = MkUnit" ++ tyCon
        ,"  unpack" ++ tyCon ++ " MkUnit" ++ tyCon ++ " = (" ++ commaSep (replicate vecCount "()") ++ ")"
@@ -127,11 +130,17 @@ gen !vecCount !maxBits
        ,"  liftSIMD2 f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
        ,"  {-# INLINE liftSIMD2 #-}"
        ]
-    ++ ["instance MkTuple " ++ tyCon ++ " where"]
+    ++ ["instance LiftConstructor " ++ tyCon ++ " where"]
     ++ ["  mkTuple" ++ show i ++ " = MkTuple" ++ show i ++ tyCon | i <- [2..maxTupleLen]]
     ++ ["  deconstructTuple" ++ show i ++ " (MkTuple" ++ show i ++ tyCon ++ " " ++ spaceSep ["v" ++ show j | j <- [0..i-1]] ++ ") = (" ++ commaSep ["v" ++ show j | j <- [0..i-1]] ++ ")" | i <- [2..maxTupleLen]]
+    ++ ["  " ++ name ++ " = coerce" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ ["  mkComplex = MkComplex" ++ tyCon]
+    ++ ["  deconstructComplex (MkComplex" ++ tyCon ++ " x y) = (x, y)"]
     ++ ["  {-# INLINE mkTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE deconstructTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
+    ++ ["  {-# INLINE " ++ name ++ " #-}" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ ["  {-# INLINE mkComplex #-}"]
+    ++ ["  {-# INLINE deconstructComplex #-}"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance SelectableF " ++ tyCon ++ " a => Selectable (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance NumF " ++ tyCon ++ " a => Num (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FractionalF " ++ tyCon ++ " a => Fractional (" ++ tyCon ++ " a)"]
@@ -316,7 +325,7 @@ gen !vecCount !maxBits
         ,"instance (" ++ commaSep ["SelectableF " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => SelectableF " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
         ,"  selectF !cond (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(selectF cond x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
         ,"  {-# INLINE selectF #-}"
-        ] ++ if n <= maxTupleLenForUnboxedVector
+        ] {- ++ if n <= maxTupleLenForUnboxedVector
              then ["instance (" ++ commaSep ["UnboxSIMD " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSIMD " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
                   ,"  unsafeIndexUnboxedSIMD (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSIMD v" ++ show i ++ " i)" | i <- [0..n-1]]
                   ,"  unsafeReadUnboxedSIMD (VUB.MV_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = do { " ++ semicolonSep ["!s" ++ show i ++ " <- unsafeReadUnboxedSIMD v" ++ show i ++ " i" | i <- [0..n-1]] ++ "; pure (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["s" ++ show i | i <- [0..n-1]] ++ ") }"
@@ -325,7 +334,7 @@ gen !vecCount !maxBits
                   ,"  {-# INLINE unsafeReadUnboxedSIMD #-}"
                   ,"  {-# INLINE unsafeWriteUnboxedSIMD #-}"
                   ]
-             else []
+             else [] -}
     genNewtype !name
       = ["newtype instance " ++ tyCon ++ " (" ++ name ++ " a) = Mk" ++ name ++ tyCon ++ " (" ++ tyCon ++ " a)"
         ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => Pack" ++ tyCon ++ " " ++ tyCon ++ " (" ++ name ++ " a) where"
@@ -339,6 +348,7 @@ gen !vecCount !maxBits
         ,"instance SelectableF " ++ tyCon ++ " a => SelectableF " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  selectF = coerce (selectF @" ++ tyCon ++ " @a)"
         ,"  {-# INLINE selectF #-}"
+        {-
         ,"instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  unsafeIndexUnboxedSIMD = coerce (unsafeIndexUnboxedSIMD @" ++ tyCon ++ " @a)"
         ,"  unsafeReadUnboxedSIMD = coerce (unsafeReadUnboxedSIMD @" ++ tyCon ++ " @a)"
@@ -346,6 +356,7 @@ gen !vecCount !maxBits
         ,"  {-# INLINE unsafeIndexUnboxedSIMD #-}"
         ,"  {-# INLINE unsafeReadUnboxedSIMD #-}"
         ,"  {-# INLINE unsafeWriteUnboxedSIMD #-}"
+        -}
         ]
 
 genHalf :: Int -> Int -> [String]
@@ -540,6 +551,7 @@ genFile moduleName primModule !n !maxBits
     ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Bits"
+    ,"import           Data.Coerce (coerce)"
     ,"import           Data.Complex"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
@@ -578,13 +590,14 @@ main = do
   createDirectoryIfMissing True "src/Data/Simdy/Internal/Class"
   writeFile "src/Data/Simdy/Internal/Class/Generated.hs" $ unlines $
     ["-- This file was created by script/Gen.hs. Do not edit by hand!"
-    ,"{-# LANGUAGE PatternSynonyms #-}"
-    ,"{-# LANGUAGE ViewPatterns #-}"
+    -- ,"{-# LANGUAGE PatternSynonyms #-}"
+    -- ,"{-# LANGUAGE ViewPatterns #-}"
     ,"module Data.Simdy.Internal.Class.Generated where"]
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
                         ,"  packX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
                         ,"  unpackX" ++ show n ++ " :: f a -> (" ++ commaSep (replicate n "a") ++ ")"
                         ]) [2,4,8,16,32]
+    {-
     ++ ["class MkTuple f where"]
     ++ ["  mkTuple" ++ show n ++ " :: " ++ concat ["f a" ++ show i ++ " -> " | i <- [0..n-1]] ++ "f (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ")" | n <- [2..maxTupleLen]]
     ++ ["  deconstructTuple" ++ show n ++ " :: " ++ "f (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") -> (" ++ commaSep ["f a" ++ show i | i <- [0..n-1]] ++ ")" | n <- [2..maxTupleLen]]
@@ -592,6 +605,7 @@ main = do
                ,"pattern MkTuple" ++ show n ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ " <- (deconstructTuple" ++ show n ++ " -> (" ++ commaSep ["x" ++ show i | i <- [0..n-1]] ++ ")) where"
                ,"  MkTuple" ++ show n ++ " = mkTuple" ++ show n
                ] | n <- [2..maxTupleLen]]
+    -}
   {-
   writeFile "src/Data/Simdy/Internal/NoSIMD.hs" $ unlines $ genFile "Data.Simdy.Internal.NoSIMD" 0
   writeFile "src/Data/Simdy/Internal/SIMD128.hs" $ unlines $ genFile "Data.Simdy.Internal.SIMD128" 128
