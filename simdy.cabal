@@ -18,8 +18,8 @@ flag no-simd
     manual: True
     default: False
 
-flag avx2
-    description: Enable 256-bit vector via AVX2 (AVX2+FMA+F16C)
+flag haswell
+    description: Enable 256-bit vector via AVX2+FMA+F16C (Intel: Haswell or later, AMD: Zen or later)
     manual: True
     default: False
 
@@ -39,10 +39,12 @@ common warnings
 common arch-options
     if !flag(no-simd)
         cpp-options: -DUSE_SIMD128
-    if flag(avx2) || flag(avx512)
+    if flag(haswell) || flag(avx512)
         ghc-options: -msse4.2 -mavx2
         cpp-options: -DUSE_SIMD256
         cc-options: -mavx2 -mfma -mf16c
+    if (flag(haswell) || flag(avx512)) && impl(ghc >= 9.8)
+        ghc-options: -mfma
     if flag(avx512)
         ghc-options: -mavx512f
         cpp-options: -DUSE_SIMD512 -DUSE_AVX512
@@ -92,7 +94,7 @@ library
                           Data.Simdy.Internal.SIMD128.X16
                           Data.Simdy.Internal.SIMD128.X32
                           Data.Simdy.Internal.SIMD128.HalfVector
-    if flag(avx2) || flag(avx512)
+    if flag(haswell) || flag(avx512)
         exposed-modules:  Data.Simdy.Internal.SIMD256
         other-modules:    Data.Simdy.Internal.SIMD256.Prim
                           Data.Simdy.Internal.SIMD256.X4
@@ -111,7 +113,7 @@ library
         hs-source-dirs: no-simd
     elif flag(avx512)
         hs-source-dirs: vl512
-    elif flag(avx2)
+    elif flag(haswell)
         hs-source-dirs: vl256
     else
         hs-source-dirs: vl128
