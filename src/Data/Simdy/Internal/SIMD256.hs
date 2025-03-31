@@ -20,6 +20,7 @@ module Data.Simdy.Internal.SIMD256
   -- , SIMDUnbox
   , SIMDStorable
   ) where
+import           Data.Coerce (coerce)
 import           Data.Complex
 import           Data.Functor.Identity
 import           Data.Int
@@ -307,11 +308,114 @@ broadcast = I.broadcast
 -- In general, the resulting function does not use SIMD instructions.
 liftSIMD :: (SIMD f, SIMDElement a, SIMDElement b) => (a -> b) -> f a -> f b
 liftSIMD = I.liftSIMD
-{-# INLINE liftSIMD #-}
+{-# INLINE [1] liftSIMD #-}
 
 -- | Lifts a binary function to the vector.
 --
 -- In general, the resulting function does not use SIMD instructions.
 liftSIMD2 :: (SIMD f, SIMDElement a, SIMDElement b, SIMDElement c) => (a -> b -> c) -> f a -> f b -> f c
 liftSIMD2 = I.liftSIMD2
-{-# INLINE liftSIMD2 #-}
+{-# INLINE [1] liftSIMD2 #-}
+
+{-# RULES
+"liftSIMD/Sum/X2"
+  liftSIMD coerce = mkSum @X2
+"liftSIMD/Sum/X4"
+  liftSIMD coerce = mkSum @X4
+"liftSIMD/Sum/X8"
+  liftSIMD coerce = mkSum @X8
+"liftSIMD/Sum/X16"
+  liftSIMD coerce = mkSum @X16
+"liftSIMD/Sum/X32"
+  liftSIMD coerce = mkSum @X32
+"liftSIMD/getSum/X2"
+  liftSIMD coerce = getSum' @X2
+"liftSIMD/getSum/X4"
+  liftSIMD coerce = getSum' @X4
+"liftSIMD/getSum/X8"
+  liftSIMD coerce = getSum' @X8
+"liftSIMD/getSum/X16"
+  liftSIMD coerce = getSum' @X16
+"liftSIMD/getSum/X32"
+  liftSIMD coerce = getSum' @X32
+"liftSIMD/Product/X2"
+  liftSIMD coerce = mkProduct @X2
+"liftSIMD/Product/X4"
+  liftSIMD coerce = mkProduct @X4
+"liftSIMD/Product/X8"
+  liftSIMD coerce = mkProduct @X8
+"liftSIMD/Product/X16"
+  liftSIMD coerce = mkProduct @X16
+"liftSIMD/Product/X32"
+  liftSIMD coerce = mkProduct @X32
+"liftSIMD/getProduct/X2"
+  liftSIMD coerce = getProduct' @X2
+"liftSIMD/getProduct/X4"
+  liftSIMD coerce = getProduct' @X4
+"liftSIMD/getProduct/X8"
+  liftSIMD coerce = getProduct' @X8
+"liftSIMD/getProduct/X16"
+  liftSIMD coerce = getProduct' @X16
+"liftSIMD/getProduct/X32"
+  liftSIMD coerce = getProduct' @X32
+"liftSIMD/Min/X2"
+  liftSIMD coerce = mkMin @X2
+"liftSIMD/Min/X4"
+  liftSIMD coerce = mkMin @X4
+"liftSIMD/Min/X8"
+  liftSIMD coerce = mkMin @X8
+"liftSIMD/Min/X16"
+  liftSIMD coerce = mkMin @X16
+"liftSIMD/Min/X32"
+  liftSIMD coerce = mkMin @X32
+"liftSIMD/getMin/X2"
+  liftSIMD coerce = getMin' @X2
+"liftSIMD/getMin/X4"
+  liftSIMD coerce = getMin' @X4
+"liftSIMD/getMin/X8"
+  liftSIMD coerce = getMin' @X8
+"liftSIMD/getMin/X16"
+  liftSIMD coerce = getMin' @X16
+"liftSIMD/getMin/X32"
+  liftSIMD coerce = getMin' @X32
+"liftSIMD/Max/X2"
+  liftSIMD coerce = mkMax @X2
+"liftSIMD/Max/X4"
+  liftSIMD coerce = mkMax @X4
+"liftSIMD/Max/X8"
+  liftSIMD coerce = mkMax @X8
+"liftSIMD/Max/X16"
+  liftSIMD coerce = mkMax @X16
+"liftSIMD/Max/X32"
+  liftSIMD coerce = mkMax @X32
+"liftSIMD/getMax/X2"
+  liftSIMD coerce = getMax' @X2
+"liftSIMD/getMax/X4"
+  liftSIMD coerce = getMax' @X4
+"liftSIMD/getMax/X8"
+  liftSIMD coerce = getMax' @X8
+"liftSIMD/getMax/X16"
+  liftSIMD coerce = getMax' @X16
+"liftSIMD/getMax/X32"
+  liftSIMD coerce = getMax' @X32
+"liftSIMD2/Complex/X2"
+  liftSIMD2 (:+) = mkComplex @X2
+"liftSIMD2/Complex/X4"
+  liftSIMD2 (:+) = mkComplex @X4
+"liftSIMD2/Complex/X8"
+  liftSIMD2 (:+) = mkComplex @X8
+"liftSIMD2/Complex/X16"
+  liftSIMD2 (:+) = mkComplex @X16
+"liftSIMD2/Complex/X32"
+  liftSIMD2 (:+) = mkComplex @X32
+"liftSIMD2/(,)/X2"
+  liftSIMD2 (,) = mkTuple2 @X2
+"liftSIMD2/(,)/X4"
+  liftSIMD2 (,) = mkTuple2 @X4
+"liftSIMD2/(,)/X8"
+  liftSIMD2 (,) = mkTuple2 @X8
+"liftSIMD2/(,)/X16"
+  liftSIMD2 (,) = mkTuple2 @X16
+"liftSIMD2/(,)/X32"
+  liftSIMD2 (,) = mkTuple2 @X32
+  #-}
