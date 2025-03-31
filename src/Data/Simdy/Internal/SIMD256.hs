@@ -163,11 +163,11 @@ instance SIMDFloating Double
 
 class ( Prim a
       , SIMDElement a
-      , PrimSIMD X2 a
-      , PrimSIMD X4 a
-      , PrimSIMD X8 a
-      , PrimSIMD X16 a
-      , PrimSIMD X32 a
+      , MultiPrim X2 a
+      , MultiPrim X4 a
+      , MultiPrim X8 a
+      , MultiPrim X16 a
+      , MultiPrim X32 a
       ) => SIMDPrim a
 instance SIMDPrim Float
 instance SIMDPrim Double
@@ -215,11 +215,11 @@ instance (SIMDUnbox a0, SIMDUnbox a1, SIMDUnbox a2, SIMDUnbox a3, SIMDUnbox a4, 
 
 class ( Storable a
       , SIMDElement a
-      , StorableSIMD X2 a
-      , StorableSIMD X4 a
-      , StorableSIMD X8 a
-      , StorableSIMD X16 a
-      , StorableSIMD X32 a
+      , MultiStorable X2 a
+      , MultiStorable X4 a
+      , MultiStorable X8 a
+      , MultiStorable X16 a
+      , MultiStorable X32 a
       ) => SIMDStorable a
 instance SIMDStorable Float
 instance SIMDStorable Double

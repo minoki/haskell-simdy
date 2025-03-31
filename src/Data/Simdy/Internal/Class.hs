@@ -10,21 +10,19 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
-import           Control.Monad.ST
-import           Data.Coerce
+import           Data.Coerce (coerce)
 import           Data.Complex (Complex)
-import           Data.Functor.Identity
+import           Data.Functor.Identity (Identity (Identity))
 import           Data.Int (Int16, Int32, Int64, Int8)
-import           Data.Kind
-import           Data.Monoid
-import           Data.Primitive
-import           Data.Semigroup
+import           Data.Kind (Type, Constraint)
+import           Data.Monoid (Sum, Product)
+import           Data.Primitive (Prim (..))
+import           Data.Semigroup (Min, Max)
 import           Data.Simdy.Internal.Class.Generated as M
-import qualified Data.Vector.Primitive as VP
 import           Data.Word (Word16, Word32, Word64, Word8)
+import           Foreign.Ptr (Ptr)
 import           Foreign.Storable
-import           GHC.Exts (Int (I#), Int#, State#, (+#))
-import           GHC.ST (ST (ST))
+import           GHC.Exts (ByteArray#, MutableByteArray#, Int#, State#)
 import           GHC.TypeNats (KnownNat, Natural)
 import           Prelude hiding (not, (&&), (/=), (<), (<=), (==), (>), (>=),
                           (||))
@@ -146,12 +144,12 @@ instance KnownSIMDLength Identity where
   simdLength = 1
   {-# INLINE simdLength #-}
 
-class KnownSIMDLength f => PrimSIMD f a where
+class (KnownSIMDLength f, Prim a) => MultiPrim f a where
   indexByteArraySIMD# :: ByteArray# -> Int# -> f a
   readByteArraySIMD# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, f a #)
   writeByteArraySIMD# :: MutableByteArray# s -> Int# -> f a -> State# s -> State# s
 
-instance Prim a => PrimSIMD Identity a where
+instance Prim a => MultiPrim Identity a where
   indexByteArraySIMD# = coerce (indexByteArray# @a)
   readByteArraySIMD# = coerce (readByteArray# @a)
   writeByteArraySIMD# = coerce (writeByteArray# @a)
@@ -159,23 +157,11 @@ instance Prim a => PrimSIMD Identity a where
   {-# INLINE readByteArraySIMD# #-}
   {-# INLINE writeByteArraySIMD# #-}
 
-unsafeIndexPrimSIMD :: PrimSIMD f a => VP.Vector a -> Int -> f a
-unsafeIndexPrimSIMD (VP.Vector (I# offset) _ (ByteArray ba)) (I# i) = indexByteArraySIMD# ba (offset +# i)
-{-# INLINE unsafeIndexPrimSIMD #-}
-
-unsafeReadPrimSIMD :: PrimSIMD f a => VP.MVector s a -> Int -> ST s (f a)
-unsafeReadPrimSIMD (VP.MVector (I# offset) _ (MutableByteArray ba)) (I# i) = ST (readByteArraySIMD# ba (offset +# i))
-{-# INLINE unsafeReadPrimSIMD #-}
-
-unsafeWritePrimSIMD :: PrimSIMD f a => VP.MVector s a -> Int -> f a -> ST s ()
-unsafeWritePrimSIMD (VP.MVector (I# offset) _ (MutableByteArray ba)) (I# i) !v = ST (\s -> (# writeByteArraySIMD# ba (offset +# i) v s, () #))
-{-# INLINE unsafeWritePrimSIMD #-}
-
-class KnownSIMDLength f => StorableSIMD f a where
+class (KnownSIMDLength f, Storable a) => MultiStorable f a where
   peekElemOffSIMD :: Ptr a -> Int -> IO (f a)
   pokeElemOffSIMD :: Ptr a -> Int -> f a -> IO ()
 
-instance Storable a => StorableSIMD Identity a where
+instance Storable a => MultiStorable Identity a where
   peekElemOffSIMD = coerce (peekElemOff @a)
   pokeElemOffSIMD = coerce (pokeElemOff @a)
   {-# INLINE peekElemOffSIMD #-}

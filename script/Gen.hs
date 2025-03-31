@@ -266,7 +266,7 @@ gen !vecCount !maxBits
             i_plus 0 = "i"
             i_plus k = "(i +# " ++ show k ++ "#)"
         in if bitCount < 128 || maxBits == 0
-           then ["instance PrimSIMD " ++ tyCon ++ " " ++ name ++ " where"
+           then ["instance MultiPrim " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " (GHC.Exts.index" ++ name ++ "Array# ba " ++ i_plus i ++ "))" | i <- [0..vecCount-1]]
                 ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case GHC.Exts.read" ++ name ++ "Array# mba " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #)"
                 ,"  writeByteArraySIMD# mba i (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") s0 = " ++ concat ["case GHC.Exts.write" ++ name ++ "Array# mba " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "GHC.Exts.write" ++ name ++ "Array# mba (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1)
@@ -280,7 +280,7 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance PrimSIMD " ++ tyCon ++ " " ++ name ++ " where"
+             in ["instance MultiPrim " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(index" ++ name ++ "ArrayAs" ++ shortVecName ++ "# ba " ++ i_plus (i * shortVecSize) ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case read" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #)"
                 ,"  writeByteArraySIMD# mba i (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") s0 = " ++ concat ["case write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1)
@@ -294,7 +294,7 @@ gen !vecCount !maxBits
             i_plus 0 = "i"
             i_plus k = "(i +# " ++ show k ++ "#)"
         in if bitCount < 128 || maxBits == 0
-           then ["instance StorableSIMD " ++ tyCon ++ " " ++ name ++ " where"
+           then ["instance MultiStorable " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case GHC.Exts.read" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #))"
                 ,"  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case GHC.Exts.write" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "(# GHC.Exts.write" ++ name ++ "OffAddr# addr (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1) ++ ", () #))"
                 ,"  {-# INLINE peekElemOffSIMD #-}"
@@ -306,7 +306,7 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance StorableSIMD " ++ tyCon ++ " " ++ name ++ " where"
+             in ["instance MultiStorable " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case read" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #))"
                 ,"  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "(# write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1) ++ ", () #))"
                 ,"  {-# INLINE peekElemOffSIMD #-}"

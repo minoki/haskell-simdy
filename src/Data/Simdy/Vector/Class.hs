@@ -34,13 +34,13 @@ class (VGM.MVector v a, KnownSIMDLength f) => SIMDMVector v f a where
 class (VG.Vector v a, SIMDMVector (VG.Mutable v) f a) => SIMDVector v f a where
   unsafeIndexMulti :: v a -> Int -> f a
 
-class (SIMDVector VU.Vector f a, SIMDMVector VUM.MVector f a, VU.Unbox a) => SIMDUnbox f a
+class (SIMDVector VU.Vector f a, SIMDMVector VUM.MVector f a, VU.Unbox a) => MultiUnbox f a
 
 --
 -- Primitive Vectors
 --
 
-instance (VPM.Prim a, PrimSIMD f a) => SIMDMVector VPM.MVector f a where
+instance MultiPrim f a => SIMDMVector VPM.MVector f a where
   unsafeReadMulti (VPM.MVector offset _length (MutableByteArray mba#)) i = case offset + i of
     I# i# -> ST (readByteArraySIMD# mba# i#)
   unsafeWriteMulti (VPM.MVector offset _length (MutableByteArray mba#)) i !v = case offset + i of
@@ -48,7 +48,7 @@ instance (VPM.Prim a, PrimSIMD f a) => SIMDMVector VPM.MVector f a where
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (VPM.Prim a, PrimSIMD f a) => SIMDVector VP.Vector f a where
+instance MultiPrim f a => SIMDVector VP.Vector f a where
   unsafeIndexMulti (VP.Vector offset _length (ByteArray ba#)) i = case offset + i of
     I# i# -> indexByteArraySIMD# ba# i#
   {-# INLINE unsafeIndexMulti #-}
@@ -57,143 +57,143 @@ instance (VPM.Prim a, PrimSIMD f a) => SIMDVector VP.Vector f a where
 -- Unboxed Vectors
 --
 
-instance (KnownSIMDLength f, PrimSIMD f Float) => SIMDMVector VUM.MVector f Float where
+instance MultiPrim f Float => SIMDMVector VUM.MVector f Float where
   unsafeReadMulti (VUB.MV_Float v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Float v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Float) => SIMDVector VU.Vector f Float where
+instance MultiPrim f Float => SIMDVector VU.Vector f Float where
   unsafeIndexMulti (VUB.V_Float v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Double) => SIMDMVector VUM.MVector f Double where
+instance MultiPrim f Double => SIMDMVector VUM.MVector f Double where
   unsafeReadMulti (VUB.MV_Double v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Double v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Double) => SIMDVector VU.Vector f Double where
+instance MultiPrim f Double => SIMDVector VU.Vector f Double where
   unsafeIndexMulti (VUB.V_Double v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int8) => SIMDMVector VUM.MVector f Int8 where
+instance MultiPrim f Int8 => SIMDMVector VUM.MVector f Int8 where
   unsafeReadMulti (VUB.MV_Int8 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Int8 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int8) => SIMDVector VU.Vector f Int8 where
+instance MultiPrim f Int8 => SIMDVector VU.Vector f Int8 where
   unsafeIndexMulti (VUB.V_Int8 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int16) => SIMDMVector VUM.MVector f Int16 where
+instance MultiPrim f Int16 => SIMDMVector VUM.MVector f Int16 where
   unsafeReadMulti (VUB.MV_Int16 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Int16 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int16) => SIMDVector VU.Vector f Int16 where
+instance MultiPrim f Int16 => SIMDVector VU.Vector f Int16 where
   unsafeIndexMulti (VUB.V_Int16 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int32) => SIMDMVector VUM.MVector f Int32 where
+instance MultiPrim f Int32 => SIMDMVector VUM.MVector f Int32 where
   unsafeReadMulti (VUB.MV_Int32 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Int32 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int32) => SIMDVector VU.Vector f Int32 where
+instance MultiPrim f Int32 => SIMDVector VU.Vector f Int32 where
   unsafeIndexMulti (VUB.V_Int32 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int64) => SIMDMVector VUM.MVector f Int64 where
+instance MultiPrim f Int64 => SIMDMVector VUM.MVector f Int64 where
   unsafeReadMulti (VUB.MV_Int64 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Int64 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Int64) => SIMDVector VU.Vector f Int64 where
+instance MultiPrim f Int64 => SIMDVector VU.Vector f Int64 where
   unsafeIndexMulti (VUB.V_Int64 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word8) => SIMDMVector VUM.MVector f Word8 where
+instance MultiPrim f Word8 => SIMDMVector VUM.MVector f Word8 where
   unsafeReadMulti (VUB.MV_Word8 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Word8 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word8) => SIMDVector VU.Vector f Word8 where
+instance MultiPrim f Word8 => SIMDVector VU.Vector f Word8 where
   unsafeIndexMulti (VUB.V_Word8 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word16) => SIMDMVector VUM.MVector f Word16 where
+instance MultiPrim f Word16 => SIMDMVector VUM.MVector f Word16 where
   unsafeReadMulti (VUB.MV_Word16 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Word16 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word16) => SIMDVector VU.Vector f Word16 where
+instance MultiPrim f Word16 => SIMDVector VU.Vector f Word16 where
   unsafeIndexMulti (VUB.V_Word16 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word32) => SIMDMVector VUM.MVector f Word32 where
+instance MultiPrim f Word32 => SIMDMVector VUM.MVector f Word32 where
   unsafeReadMulti (VUB.MV_Word32 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Word32 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word32) => SIMDVector VU.Vector f Word32 where
+instance MultiPrim f Word32 => SIMDVector VU.Vector f Word32 where
   unsafeIndexMulti (VUB.V_Word32 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word64) => SIMDMVector VUM.MVector f Word64 where
+instance MultiPrim f Word64 => SIMDMVector VUM.MVector f Word64 where
   unsafeReadMulti (VUB.MV_Word64 v) = unsafeReadMulti v
   unsafeWriteMulti (VUB.MV_Word64 v) = unsafeWriteMulti v
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Word64) => SIMDVector VU.Vector f Word64 where
+instance MultiPrim f Word64 => SIMDVector VU.Vector f Word64 where
   unsafeIndexMulti (VUB.V_Word64 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDMVector VUM.MVector f (Sum a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDMVector VUM.MVector f (Sum a) where
   unsafeReadMulti (VUB.MV_Sum v) !i = mkSum <$> unsafeReadMulti v i
   unsafeWriteMulti (VUB.MV_Sum v) !i = unsafeWriteMulti v i . getSum'
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDVector VU.Vector f (Sum a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDVector VU.Vector f (Sum a) where
   unsafeIndexMulti (VUB.V_Sum v) = mkSum . unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDMVector VUM.MVector f (Product a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDMVector VUM.MVector f (Product a) where
   unsafeReadMulti (VUB.MV_Product v) !i = mkProduct <$> unsafeReadMulti v i
   unsafeWriteMulti (VUB.MV_Product v) !i = unsafeWriteMulti v i . getProduct'
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDVector VU.Vector f (Product a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDVector VU.Vector f (Product a) where
   unsafeIndexMulti (VUB.V_Product v) = mkProduct . unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDMVector VUM.MVector f (Min a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDMVector VUM.MVector f (Min a) where
   unsafeReadMulti (VUB.MV_Min v) !i = mkMin <$> unsafeReadMulti v i
   unsafeWriteMulti (VUB.MV_Min v) !i = unsafeWriteMulti v i . getMin'
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDVector VU.Vector f (Min a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDVector VU.Vector f (Min a) where
   unsafeIndexMulti (VUB.V_Min v) = mkMin . unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDMVector VUM.MVector f (Max a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDMVector VUM.MVector f (Max a) where
   unsafeReadMulti (VUB.MV_Max v) !i = mkMax <$> unsafeReadMulti v i
   unsafeWriteMulti (VUB.MV_Max v) !i = unsafeWriteMulti v i . getMax'
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDVector VU.Vector f (Max a) where
+instance (LiftConstructor f, MultiUnbox f a) => SIMDVector VU.Vector f (Max a) where
   unsafeIndexMulti (VUB.V_Max v) = mkMax . unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
@@ -207,51 +207,51 @@ instance (KnownSIMDLength f, Broadcast f ()) => SIMDVector VU.Vector f () where
   unsafeIndexMulti (VUB.V_Unit _) _ = broadcast ()
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b) where
+instance (MultiUnbox f a, MultiUnbox f b, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b) where
   unsafeReadMulti (VUB.MV_2 _ va vb) !i = liftA2 mkTuple2 (unsafeReadMulti va i) (unsafeReadMulti vb i)
   unsafeWriteMulti (VUB.MV_2 _ va vb) !i t = case deconstructTuple2 t of
     (a, b) -> unsafeWriteMulti va i a >> unsafeWriteMulti vb i b
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, LiftConstructor f) => SIMDVector VU.Vector f (a, b) where
+instance (MultiUnbox f a, MultiUnbox f b, LiftConstructor f) => SIMDVector VU.Vector f (a, b) where
   unsafeIndexMulti (VUB.V_2 _ va vb) !i = mkTuple2 (unsafeIndexMulti va i) (unsafeIndexMulti vb i)
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b, c) where
+instance (MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b, c) where
   unsafeReadMulti (VUB.MV_3 _ va vb vc) !i = liftA3 mkTuple3 (unsafeReadMulti va i) (unsafeReadMulti vb i) (unsafeReadMulti vc i)
   unsafeWriteMulti (VUB.MV_3 _ va vb vc) !i t = case deconstructTuple3 t of
     (a, b, c) -> unsafeWriteMulti va i a >> unsafeWriteMulti vb i b >> unsafeWriteMulti vc i c
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, LiftConstructor f) => SIMDVector VU.Vector f (a, b, c) where
+instance (MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, LiftConstructor f) => SIMDVector VU.Vector f (a, b, c) where
   unsafeIndexMulti (VUB.V_3 _ va vb vc) !i = mkTuple3 (unsafeIndexMulti va i) (unsafeIndexMulti vb i) (unsafeIndexMulti vc i)
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, SIMDUnbox f d, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b, c, d) where
+instance (MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, MultiUnbox f d, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b, c, d) where
   unsafeReadMulti (VUB.MV_4 _ va vb vc vd) !i = liftM4 mkTuple4 (unsafeReadMulti va i) (unsafeReadMulti vb i) (unsafeReadMulti vc i) (unsafeReadMulti vd i)
   unsafeWriteMulti (VUB.MV_4 _ va vb vc vd) !i t = case deconstructTuple4 t of
     (a, b, c, d) -> unsafeWriteMulti va i a >> unsafeWriteMulti vb i b >> unsafeWriteMulti vc i c >> unsafeWriteMulti vd i d
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, SIMDUnbox f d, LiftConstructor f) => SIMDVector VU.Vector f (a, b, c, d) where
+instance (MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, MultiUnbox f d, LiftConstructor f) => SIMDVector VU.Vector f (a, b, c, d) where
   unsafeIndexMulti (VUB.V_4 _ va vb vc vd) !i = mkTuple4 (unsafeIndexMulti va i) (unsafeIndexMulti vb i) (unsafeIndexMulti vc i) (unsafeIndexMulti vd i)
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, SIMDUnbox f d, SIMDUnbox f e, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b, c, d, e) where
+instance (MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, MultiUnbox f d, MultiUnbox f e, LiftConstructor f) => SIMDMVector VUM.MVector f (a, b, c, d, e) where
   unsafeReadMulti (VUB.MV_5 _ va vb vc vd ve) !i = liftM5 mkTuple5 (unsafeReadMulti va i) (unsafeReadMulti vb i) (unsafeReadMulti vc i) (unsafeReadMulti vd i) (unsafeReadMulti ve i)
   unsafeWriteMulti (VUB.MV_5 _ va vb vc vd ve) !i t = case deconstructTuple5 t of
     (a, b, c, d, e) -> unsafeWriteMulti va i a >> unsafeWriteMulti vb i b >> unsafeWriteMulti vc i c >> unsafeWriteMulti vd i d >> unsafeWriteMulti ve i e
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, SIMDUnbox f d, SIMDUnbox f e, LiftConstructor f) => SIMDVector VU.Vector f (a, b, c, d, e) where
+instance (MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, MultiUnbox f d, MultiUnbox f e, LiftConstructor f) => SIMDVector VU.Vector f (a, b, c, d, e) where
   unsafeIndexMulti (VUB.V_5 _ va vb vc vd ve) !i = mkTuple5 (unsafeIndexMulti va i) (unsafeIndexMulti vb i) (unsafeIndexMulti vc i) (unsafeIndexMulti vd i) (unsafeIndexMulti ve i)
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength v, SIMDUnbox v a, SIMDUnbox v b, SIMDUnbox v c, SIMDUnbox v d, SIMDUnbox v e, SIMDUnbox v f, LiftConstructor v) => SIMDMVector VUM.MVector v (a, b, c, d, e, f) where
+instance (MultiUnbox v a, MultiUnbox v b, MultiUnbox v c, MultiUnbox v d, MultiUnbox v e, MultiUnbox v f, LiftConstructor v) => SIMDMVector VUM.MVector v (a, b, c, d, e, f) where
   unsafeReadMulti (VUB.MV_6 _ va vb vc vd ve vf) !i = do
     !a <- unsafeReadMulti va i
     !b <- unsafeReadMulti vb i
@@ -271,11 +271,11 @@ instance (KnownSIMDLength v, SIMDUnbox v a, SIMDUnbox v b, SIMDUnbox v c, SIMDUn
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength v, SIMDUnbox v a, SIMDUnbox v b, SIMDUnbox v c, SIMDUnbox v d, SIMDUnbox v e, SIMDUnbox v f, LiftConstructor v) => SIMDVector VU.Vector v (a, b, c, d, e, f) where
+instance (MultiUnbox v a, MultiUnbox v b, MultiUnbox v c, MultiUnbox v d, MultiUnbox v e, MultiUnbox v f, LiftConstructor v) => SIMDVector VU.Vector v (a, b, c, d, e, f) where
   unsafeIndexMulti (VUB.V_6 _ va vb vc vd ve vf) !i = mkTuple6 (unsafeIndexMulti va i) (unsafeIndexMulti vb i) (unsafeIndexMulti vc i) (unsafeIndexMulti vd i) (unsafeIndexMulti ve i) (unsafeIndexMulti vf i)
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, LiftConstructor f) => SIMDMVector VUM.MVector f (Complex a) where
+instance (MultiUnbox f a, LiftConstructor f) => SIMDMVector VUM.MVector f (Complex a) where
   unsafeReadMulti (VUB.MV_Complex vt) !i = do
     t <- unsafeReadMulti vt i
     let (!x,!y) = deconstructTuple2 t
@@ -284,43 +284,43 @@ instance (KnownSIMDLength f, SIMDUnbox f a, LiftConstructor f) => SIMDMVector VU
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (KnownSIMDLength f, SIMDUnbox f a, LiftConstructor f) => SIMDVector VU.Vector f (Complex a) where
+instance (MultiUnbox f a, LiftConstructor f) => SIMDVector VU.Vector f (Complex a) where
   unsafeIndexMulti (VUB.V_Complex vt) !i = uncurry mkComplex $ deconstructTuple2 $ unsafeIndexMulti vt i
   {-# INLINE unsafeIndexMulti #-}
 
-instance (KnownSIMDLength f, PrimSIMD f Float) => SIMDUnbox f Float
-instance (KnownSIMDLength f, PrimSIMD f Double) => SIMDUnbox f Double
-instance (KnownSIMDLength f, PrimSIMD f Int8) => SIMDUnbox f Int8
-instance (KnownSIMDLength f, PrimSIMD f Int16) => SIMDUnbox f Int16
-instance (KnownSIMDLength f, PrimSIMD f Int32) => SIMDUnbox f Int32
-instance (KnownSIMDLength f, PrimSIMD f Int64) => SIMDUnbox f Int64
-instance (KnownSIMDLength f, PrimSIMD f Word8) => SIMDUnbox f Word8
-instance (KnownSIMDLength f, PrimSIMD f Word16) => SIMDUnbox f Word16
-instance (KnownSIMDLength f, PrimSIMD f Word32) => SIMDUnbox f Word32
-instance (KnownSIMDLength f, PrimSIMD f Word64) => SIMDUnbox f Word64
-instance (LiftConstructor f, SIMDUnbox f a) => SIMDUnbox f (Sum a)
-instance (LiftConstructor f, SIMDUnbox f a) => SIMDUnbox f (Product a)
-instance (LiftConstructor f, SIMDUnbox f a) => SIMDUnbox f (Min a)
-instance (LiftConstructor f, SIMDUnbox f a) => SIMDUnbox f (Max a)
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a) => SIMDUnbox f (Complex a)
-instance (KnownSIMDLength f, Broadcast f ()) => SIMDUnbox f ()
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a, SIMDUnbox f b) => SIMDUnbox f (a, b)
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c) => SIMDUnbox f (a, b, c)
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, SIMDUnbox f d) => SIMDUnbox f (a, b, c, d)
-instance (KnownSIMDLength f, LiftConstructor f, SIMDUnbox f a, SIMDUnbox f b, SIMDUnbox f c, SIMDUnbox f d, SIMDUnbox f e) => SIMDUnbox f (a, b, c, d, e)
-instance (KnownSIMDLength x, LiftConstructor x, SIMDUnbox x a, SIMDUnbox x b, SIMDUnbox x c, SIMDUnbox x d, SIMDUnbox x e, SIMDUnbox x f) => SIMDUnbox x (a, b, c, d, e, f)
+instance MultiPrim f Float => MultiUnbox f Float
+instance MultiPrim f Double => MultiUnbox f Double
+instance MultiPrim f Int8 => MultiUnbox f Int8
+instance MultiPrim f Int16 => MultiUnbox f Int16
+instance MultiPrim f Int32 => MultiUnbox f Int32
+instance MultiPrim f Int64 => MultiUnbox f Int64
+instance MultiPrim f Word8 => MultiUnbox f Word8
+instance MultiPrim f Word16 => MultiUnbox f Word16
+instance MultiPrim f Word32 => MultiUnbox f Word32
+instance MultiPrim f Word64 => MultiUnbox f Word64
+instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Sum a)
+instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Product a)
+instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Min a)
+instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Max a)
+instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Complex a)
+instance (KnownSIMDLength f, Broadcast f ()) => MultiUnbox f ()
+instance (LiftConstructor f, MultiUnbox f a, MultiUnbox f b) => MultiUnbox f (a, b)
+instance (LiftConstructor f, MultiUnbox f a, MultiUnbox f b, MultiUnbox f c) => MultiUnbox f (a, b, c)
+instance (LiftConstructor f, MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, MultiUnbox f d) => MultiUnbox f (a, b, c, d)
+instance (LiftConstructor f, MultiUnbox f a, MultiUnbox f b, MultiUnbox f c, MultiUnbox f d, MultiUnbox f e) => MultiUnbox f (a, b, c, d, e)
+instance (LiftConstructor x, MultiUnbox x a, MultiUnbox x b, MultiUnbox x c, MultiUnbox x d, MultiUnbox x e, MultiUnbox x f) => MultiUnbox x (a, b, c, d, e, f)
 
 --
 -- Storable Vectors
 --
 
-instance (VSM.Storable a, StorableSIMD f a) => SIMDMVector VSM.MVector f a where
+instance (VSM.Storable a, MultiStorable f a) => SIMDMVector VSM.MVector f a where
   unsafeReadMulti (VSM.MVector _ fp) !i = unsafePrimToST (withForeignPtr fp (\ptr -> peekElemOffSIMD ptr i))
   unsafeWriteMulti (VSM.MVector _ fp) !i !v = unsafePrimToST (withForeignPtr fp (\ptr -> pokeElemOffSIMD ptr i v))
   {-# INLINE unsafeReadMulti #-}
   {-# INLINE unsafeWriteMulti #-}
 
-instance (VSM.Storable a, StorableSIMD f a) => SIMDVector VS.Vector f a where
+instance (VSM.Storable a, MultiStorable f a) => SIMDVector VS.Vector f a where
   -- Data.Vector.Storable uses Control.Monad.Primitive.unsafeInlineIO. Should we copy it?
   unsafeIndexMulti !v i = unsafeDupablePerformIO (VS.unsafeWith v (\ptr -> peekElemOffSIMD ptr i))
   {-# INLINE unsafeIndexMulti #-}
