@@ -188,7 +188,7 @@ __m512 hs_simdy_select_floatx16_densemask(uint16_t mask, __m512 then, __m512 els
 __m512d hs_simdy_select_doublex8_densemask(uint8_t mask, __m512d then, __m512d else_)
 {
     __mmask8 mmask = _cvtu32_mask8(mask); // AVX512DQ
-    return _mm512_mask_mov_ps(else_, mmask, then);
+    return _mm512_mask_mov_pd(else_, mmask, then);
 }
 #endif
 

@@ -11,7 +11,9 @@ maintainer:         minorinoki@gmail.com
 category:           Data
 build-type:         Simple
 extra-doc-files:    CHANGELOG.md
--- extra-source-files:
+extra-source-files: cbits/mask.h
+                    cbits/mask.c
+                    cbits/select.c
 
 flag no-simd
     description: Don't use native vector types
@@ -82,9 +84,16 @@ library
                       cbits/float_minmaxnm.c
                       cbits/double_minmax.c
                       cbits/double_minmaxnm.c
-                      cbits/mask.c
-                      cbits/select.c
                       cbits/int_compare.c
+    if flag(avx512)
+        c-sources:        cbits/mask_avx512.c
+                          cbits/select_avx512.c
+    elif flag(haswell)
+        c-sources:        cbits/mask_haswell.c
+                          cbits/select_haswell.c
+    else
+        c-sources:        cbits/mask_baseline.c
+                          cbits/select_baseline.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.Prim
