@@ -230,10 +230,54 @@ fold' append initial (MkBundle multiStep step s0 n) = loopMulti n s0 initial
                    loopScalar (i - 1) s' acc'
       | otherwise = pure acc
 
--- indexed :: (Monad m, Num i) => Bundle m f a -> Bundle m f (i, a)
+-- INLINE_FUSED
+{-# INLINE [1] indexed #-}
+indexed :: forall f m i a. (Monad m, EnumFromZero f i, LiftConstructor f) => Bundle m f a -> Bundle m f (i, a)
+indexed (MkBundle vf f s0 n) = MkBundle multiStep step (s0, 0, enumFromZero @f @i) n
+  where
+    -- INLINE_INNER
+    {-# INLINE [0] multiStep #-}
+    multiStep (s, !i, !k) = do (s', v) <- vf s
+                               let !i' = i + fromIntegral (simdLength @f)
+                                   !k' = k `plusF` fromIntegerF (toInteger (simdLength @f))
+                               pure ((s', i', k'), mkTuple2 k v)
+    -- INLINE_INNER
+    {-# INLINE [0] step #-}
+    step (s, !i, k) = do (s', x) <- f s
+                         let !i' = i + 1
+                         pure ((s', i', k), (i, x))
+
 -- indexedR :: (Monad m, Num i) => i -> Bundle m f a -> Bundle m f (i, a)
 
--- enumFromStepN :: (Num a, Monad m) -> a -> a -> Int -> Bundle m v a
+-- INLINE_FUSED
+{-# INLINE [1] enumFromN #-}
+enumFromN :: forall f m a. (Monad m, EnumFromZero f a) => a -> Int -> Bundle m f a
+enumFromN i0 !n = MkBundle multiStep step (i0, enumFromZero @f @a `plusF` broadcast i0) n
+  where
+    -- INLINE_INNER
+    {-# INLINE [0] multiStep #-}
+    multiStep (!i, !k) = do let !i' = i + fromIntegral (simdLength @f)
+                                !k' = k `plusF` fromIntegerF (toInteger (simdLength @f))
+                            pure ((i', k'), k)
+    -- INLINE_INNER
+    {-# INLINE [0] step #-}
+    step (!i, k) = do let !i' = i + 1
+                      pure ((i', k), i)
+
+-- INLINE_FUSED
+{-# INLINE [1] enumFromStepN #-}
+enumFromStepN :: forall f m a. (Monad m, EnumFromZero f a) => a -> a -> Int -> Bundle m f a
+enumFromStepN i0 s !n = MkBundle multiStep step (i0, enumFromZero @f @a `plusF` broadcast i0) n
+  where
+    -- INLINE_INNER
+    {-# INLINE [0] multiStep #-}
+    multiStep (!i, !k) = do let !i' = i + s * fromIntegral (simdLength @f)
+                                !k' = k `plusF` broadcast (s * fromIntegral (simdLength @f))
+                            pure ((i', k'), k)
+    -- INLINE_INNER
+    {-# INLINE [0] step #-}
+    step (!i, k) = do let !i' = i + s
+                      pure ((i', k), i)
 
 -- INLINE_FUSED
 {-# INLINE [1] stream #-}

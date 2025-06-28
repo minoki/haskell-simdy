@@ -399,6 +399,22 @@ class NumF f a where
   {-# INLINE signumF #-}
   {-# INLINE fromIntegerF #-}
 
+instance Num a => NumF Identity a where
+  plusF = (Prelude.+)
+  minusF = (Prelude.-)
+  timesF = (Prelude.*)
+  negateF = Prelude.negate
+  absF = Prelude.abs
+  signumF = Prelude.signum
+  fromIntegerF = Prelude.fromInteger
+  {-# INLINE plusF #-}
+  {-# INLINE minusF #-}
+  {-# INLINE timesF #-}
+  {-# INLINE negateF #-}
+  {-# INLINE absF #-}
+  {-# INLINE signumF #-}
+  {-# INLINE fromIntegerF #-}
+
 instance NumF f a => Num (WrappedMulti f a) where
   (+) = coerce (plusF @f @a)
   (-) = coerce (minusF @f @a)
@@ -579,5 +595,14 @@ instance BitsF f a => MiniBits (WrappedMulti f a) where
   {-# INLINE unsafeShiftL #-}
   {-# INLINE shiftR #-}
   {-# INLINE unsafeShiftR #-}
+
+class KnownSIMDLength f => EnumFromZero_ f a where
+  enumFromZero :: f a
+
+instance Num a => EnumFromZero_ Identity a where
+  enumFromZero = Identity 0
+  {-# INLINE enumFromZero #-}
+
+type EnumFromZero f a = (EnumFromZero_ f a, Num a, NumF f a, Broadcast f a)
 
 -- TODO: Add Data.Semigroup and Data.Monoid counterparts

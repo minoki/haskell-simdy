@@ -17,6 +17,7 @@ module Data.Simdy.Internal.SIMD256
   , SIMDFractional
   , SIMDFloating
   , SIMDBits
+  , SIMDEnumFromZero
   , SIMDPrim
   -- , SIMDUnbox
   , SIMDStorable
@@ -184,6 +185,24 @@ instance SIMDBits Word16
 instance SIMDBits Word32
 instance SIMDBits Word64
 
+class ( Num a
+      , EnumFromZero X2 a
+      , EnumFromZero X4 a
+      , EnumFromZero X8 a
+      , EnumFromZero X16 a
+      , EnumFromZero X32 a
+      ) => SIMDEnumFromZero a
+instance SIMDEnumFromZero Float
+instance SIMDEnumFromZero Double
+instance SIMDEnumFromZero Int8
+instance SIMDEnumFromZero Int16
+instance SIMDEnumFromZero Int32
+instance SIMDEnumFromZero Int64
+instance SIMDEnumFromZero Word8
+instance SIMDEnumFromZero Word16
+instance SIMDEnumFromZero Word32
+instance SIMDEnumFromZero Word64
+
 class ( Prim a
       , SIMDElement a
       , MultiPrim X2 a
@@ -273,6 +292,7 @@ class ( KnownSIMDLength f
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
       , forall a. SIMDBits a => MiniBits (f a)
+      , forall a. SIMDEnumFromZero a => EnumFromZero_ f a
       ) => SIMD f where
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a
   (==*) :: SIMDEq a => f a -> f a -> f Bool

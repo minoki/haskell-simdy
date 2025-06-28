@@ -2,7 +2,7 @@
 module Data.Simdy.Vector.Unboxed where
 import           Data.Coerce (coerce)
 import           Data.Functor.Identity (Identity (Identity))
-import           Data.Simdy.Internal.Class (LiftConstructor)
+import           Data.Simdy.Internal.Class (EnumFromZero, LiftConstructor)
 import           Data.Simdy.Internal.Default
 import           Data.Simdy.Vector.Class (MultiUnbox)
 import qualified Data.Simdy.Vector.Generic as G
@@ -10,6 +10,10 @@ import qualified Data.Vector.Unboxed as VU
 -- import qualified Data.Vector.Unboxed.Mutable as VUM
 
 type SIMDUnbox a = (VU.Unbox a, MultiUnbox X2 a, MultiUnbox X4 a, MultiUnbox X8 a, MultiUnbox X16 a, MultiUnbox X32 a)
+
+indexedX :: forall x i a. (SIMD x, MultiUnbox x a, MultiUnbox x i, EnumFromZero x i, LiftConstructor x) => VU.Vector a -> VU.Vector (i, a)
+indexedX = G.indexed @x
+{-# INLINE indexedX #-}
 
 mapX :: forall x a b. (SIMD x, MultiUnbox x a, MultiUnbox x b) => (x a -> x b) -> (a -> b) -> VU.Vector a -> VU.Vector b
 mapX = G.map
@@ -35,6 +39,30 @@ mapX32 :: (MultiUnbox X32 a, MultiUnbox X32 b) => (forall f. SIMD f => f a -> f 
 mapX32 f = mapX @X32 f (coerce (f @Identity))
 {-# INLINE mapX32 #-}
 
+imapX :: forall x i a b. (SIMD x, MultiUnbox x a, MultiUnbox x b, EnumFromZero x i, LiftConstructor x) => (x i -> x a -> x b) -> (i -> a -> b) -> VU.Vector a -> VU.Vector b
+imapX = G.imap
+{-# INLINE imapX #-}
+
+imapX2 :: (MultiUnbox X2 a, MultiUnbox X2 b, EnumFromZero X2 i) => (forall f. SIMD f => f i -> f a -> f b) -> VU.Vector a -> VU.Vector b
+imapX2 f = imapX @X2 f (coerce (f @Identity))
+{-# INLINE imapX2 #-}
+
+imapX4 :: (MultiUnbox X4 a, MultiUnbox X4 b, EnumFromZero X4 i) => (forall f. SIMD f => f i -> f a -> f b) -> VU.Vector a -> VU.Vector b
+imapX4 f = imapX @X4 f (coerce (f @Identity))
+{-# INLINE imapX4 #-}
+
+imapX8 :: (MultiUnbox X8 a, MultiUnbox X8 b, EnumFromZero X8 i) => (forall f. SIMD f => f i -> f a -> f b) -> VU.Vector a -> VU.Vector b
+imapX8 f = imapX @X8 f (coerce (f @Identity))
+{-# INLINE imapX8 #-}
+
+imapX16 :: (MultiUnbox X16 a, MultiUnbox X16 b, EnumFromZero X16 i) => (forall f. SIMD f => f i -> f a -> f b) -> VU.Vector a -> VU.Vector b
+imapX16 f = imapX @X16 f (coerce (f @Identity))
+{-# INLINE imapX16 #-}
+
+imapX32 :: (MultiUnbox X32 a, MultiUnbox X32 b, EnumFromZero X32 i) => (forall f. SIMD f => f i -> f a -> f b) -> VU.Vector a -> VU.Vector b
+imapX32 f = imapX @X32 f (coerce (f @Identity))
+{-# INLINE imapX32 #-}
+
 zipWithX :: forall x a b c. (SIMD x, MultiUnbox x a, MultiUnbox x b, MultiUnbox x c, LiftConstructor x) => (x a -> x b -> x c) -> (a -> b -> c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX = G.zipWith
 {-# INLINE zipWithX #-}
@@ -58,3 +86,27 @@ zipWithX16 f = zipWithX @X16 f (coerce (f @Identity))
 zipWithX32 :: (MultiUnbox X32 a, MultiUnbox X32 b, MultiUnbox X32 c) => (forall f. SIMD f => f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
 zipWithX32 f = zipWithX @X32 f (coerce (f @Identity))
 {-# INLINE zipWithX32 #-}
+
+izipWithX :: forall x i a b c. (SIMD x, MultiUnbox x a, MultiUnbox x b, MultiUnbox x c, EnumFromZero x i, LiftConstructor x) => (x i -> x a -> x b -> x c) -> (i -> a -> b -> c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+izipWithX = G.izipWith
+{-# INLINE izipWithX #-}
+
+izipWithX2 :: (MultiUnbox X2 a, MultiUnbox X2 b, MultiUnbox X2 c, EnumFromZero X2 i) => (forall f. SIMD f => f i -> f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+izipWithX2 f = izipWithX @X2 f (coerce (f @Identity))
+{-# INLINE izipWithX2 #-}
+
+izipWithX4 :: (MultiUnbox X4 a, MultiUnbox X4 b, MultiUnbox X4 c, EnumFromZero X4 i) => (forall f. SIMD f => f i -> f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+izipWithX4 f = izipWithX @X4 f (coerce (f @Identity))
+{-# INLINE izipWithX4 #-}
+
+izipWithX8 :: (MultiUnbox X8 a, MultiUnbox X8 b, MultiUnbox X8 c, EnumFromZero X8 i) => (forall f. SIMD f => f i -> f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+izipWithX8 f = izipWithX @X8 f (coerce (f @Identity))
+{-# INLINE izipWithX8 #-}
+
+izipWithX16 :: (MultiUnbox X16 a, MultiUnbox X16 b, MultiUnbox X16 c, EnumFromZero X16 i) => (forall f. SIMD f => f i -> f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+izipWithX16 f = izipWithX @X16 f (coerce (f @Identity))
+{-# INLINE izipWithX16 #-}
+
+izipWithX32 :: (MultiUnbox X32 a, MultiUnbox X32 b, MultiUnbox X32 c, EnumFromZero X32 i) => (forall f. SIMD f => f i -> f a -> f b -> f c) -> VU.Vector a -> VU.Vector b -> VU.Vector c
+izipWithX32 f = izipWithX @X32 f (coerce (f @Identity))
+{-# INLINE izipWithX32 #-}

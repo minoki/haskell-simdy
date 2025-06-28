@@ -57,28 +57,28 @@ gen !vecCount !maxBits
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
     ]
-    ++ genType "Float" "F#" 32 maxBits [genNum True, genFractional, genFloating, genPrim, genStorable]
-    ++ genType "Double" "D#" 64 maxBits [genNum True, genFractional, genFloating, genPrim, genStorable]
+    ++ genType "Float" "F#" 32 maxBits [genNum True, genFractional, genFloating, genEnumFromZero ".0#", genPrim, genStorable]
+    ++ genType "Double" "D#" 64 maxBits [genNum True, genFractional, genFloating, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
-    ++ genType "Int8" "I8#" 8 maxBits [genNum True, genBits, genPrim, genStorable]
-    ++ genType "Int16" "I16#" 16 maxBits [genNum True, genBits, genPrim, genStorable]
-    ++ genType "Int32" "I32#" 32 maxBits [genNum True, genBits, genPrim, genStorable]
-    ++ genType "Int64" "I64#" 64 maxBits [genNum True, genBits, genPrim, genStorable]
-    ++ genType "Word8" "W8#" 8 maxBits [genNum False, genBits, genPrim, genStorable]
-    ++ genType "Word16" "W16#" 16 maxBits [genNum False, genBits, genPrim, genStorable]
-    ++ genType "Word32" "W32#" 32 maxBits [genNum False, genBits, genPrim, genStorable]
-    ++ genType "Word64" "W64#" 64 maxBits [genNum False, genBits, genPrim, genStorable]
+    ++ genType "Int8" "I8#" 8 maxBits [genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+    ++ genType "Int16" "I16#" 16 maxBits [genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+    ++ genType "Int32" "I32#" 32 maxBits [genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+    ++ genType "Int64" "I64#" 64 maxBits [genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+    ++ genType "Word8" "W8#" 8 maxBits [genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+    ++ genType "Word16" "W16#" 16 maxBits [genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+    ++ genType "Word32" "W32#" 32 maxBits [genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+    ++ genType "Word64" "W64#" 64 maxBits [genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
     ++ (if maxBits == 128
         then ["#else"
              ,"-- The NCG of GHC 9.12 does not support integer vectors"]
-             ++ genType "Int8" "I8#" 8 0 [genNum True, genBits, genPrim, genStorable]
-             ++ genType "Int16" "I16#" 16 0 [genNum True, genBits, genPrim, genStorable]
-             ++ genType "Int32" "I32#" 32 0 [genNum True, genBits, genPrim, genStorable]
-             ++ genType "Int64" "I64#" 64 0 [genNum True, genBits, genPrim, genStorable]
-             ++ genType "Word8" "W8#" 8 0 [genNum False, genBits, genPrim, genStorable]
-             ++ genType "Word16" "W16#" 16 0 [genNum False, genBits, genPrim, genStorable]
-             ++ genType "Word32" "W32#" 32 0 [genNum False, genBits, genPrim, genStorable]
-             ++ genType "Word64" "W64#" 64 0 [genNum False, genBits, genPrim, genStorable]
+             ++ genType "Int8" "I8#" 8 0 [genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+             ++ genType "Int16" "I16#" 16 0 [genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+             ++ genType "Int32" "I32#" 32 0 [genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+             ++ genType "Int64" "I64#" 64 0 [genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+             ++ genType "Word8" "W8#" 8 0 [genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+             ++ genType "Word16" "W16#" 16 0 [genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+             ++ genType "Word32" "W32#" 32 0 [genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+             ++ genType "Word64" "W64#" 64 0 [genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
              ++ ["#endif"]
         else []
        )
@@ -303,6 +303,28 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE shiftLF #-}"
                 ,"  {-# INLINE shiftRF #-}"
                 ]
+    genEnumFromZero litSuffix name primCon !bitsPerElem maxBits
+      = let bitCount = bitsPerElem * vecCount
+            vecBitCount = min bitCount maxBits
+        in if bitCount < 128 || maxBits == 0
+                      then ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
+                           ,"  enumFromZero = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep [show i | i <- [0..vecCount-1]]
+                           ,"  -- {-# INLINE enumFromZero #-}"
+                           ]
+                      else
+                        let shortVecSize = vecBitCount `div` bitsPerElem
+                            shortVecCount = bitCount `div` vecBitCount
+                            shortVecName = name ++ "X" ++ show shortVecSize
+                            suffix | shortVecCount == 1 = ""
+                                   | otherwise = "WithVec" ++ show vecBitCount
+                        in ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
+                           ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
+                           ,"  enumFromZero = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep [show (i * shortVecSize + j) ++ litSuffix | j <- [0..shortVecSize - 1]] ++ " #))" | i <- [0..shortVecCount - 1]]
+                           ,"#else"
+                           ,"  enumFromZero = pack" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
+                           ,"#endif"
+                           ,"  -- {-# INLINE enumFromZero #-}"
+                           ]
     genPrim name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
@@ -584,13 +606,16 @@ genFile moduleName !maxBits
 genFile :: String -> [String] -> Int -> Int -> [String]
 genFile moduleName primModules !n !maxBits
   = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
-    ] ++ ["{-# LANGUAGE CPP #-}" | maxBits == 128] ++
-    ["{-# LANGUAGE DataKinds #-}"
+    ,"{-# LANGUAGE CPP #-}"
+    ,"{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
     ,"{-# LANGUAGE UnboxedTuples #-}"
     ,"{-# LANGUAGE UndecidableInstances #-}"
+    ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
+    ,"{-# LANGUAGE ExtendedLiterals #-}"
+    ,"#endif"
     ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Bits"
