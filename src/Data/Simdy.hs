@@ -10,6 +10,7 @@ module Data.Simdy
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
+  , SIMDBits
   , SIMDPrim
   -- , SIMDUnbox
   , SIMDStorable

@@ -18,6 +18,7 @@ import           Data.Kind (Type, Constraint)
 import           Data.Monoid (Sum, Product)
 import           Data.Primitive (Prim (..))
 import           Data.Semigroup (Min, Max)
+import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class.Generated as M
 import           Data.Word (Word16, Word32, Word64, Word8)
 import           Foreign.Ptr (Ptr)
@@ -222,27 +223,27 @@ class BooleanF f where
   trueF :: f Bool
   falseF :: f Bool
   notF :: f Bool -> f Bool
-  andF :: f Bool -> f Bool -> f Bool
-  orF :: f Bool -> f Bool -> f Bool
+  landF :: f Bool -> f Bool -> f Bool
+  lorF :: f Bool -> f Bool -> f Bool
 
 instance BooleanF Identity where
   trueF = Identity True
   falseF = Identity False
   notF = coerce Prelude.not
-  andF = coerce (Prelude.&&)
-  orF = coerce (Prelude.||)
+  landF = coerce (Prelude.&&)
+  lorF = coerce (Prelude.||)
   {-# INLINE trueF #-}
   {-# INLINE falseF #-}
   {-# INLINE notF #-}
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
+  {-# INLINE landF #-}
+  {-# INLINE lorF #-}
 
 instance BooleanF f => Boolean (WrappedMulti f Bool) where
   true = coerce (trueF @f)
   false = coerce (falseF @f)
   not = coerce (notF @f)
-  (&&) = coerce (andF @f)
-  (||) = coerce (orF @f)
+  (&&) = coerce (landF @f)
+  (||) = coerce (lorF @f)
   {-# INLINE true #-}
   {-# INLINE false #-}
   {-# INLINE not #-}
@@ -547,5 +548,36 @@ instance FloatingF f a => Floating (WrappedMulti f a) where
   {-# INLINE acosh #-}
   {-# INLINE atanh #-}
 
--- TODO: Add Data.Bits counterpart
+class BitsF f a where
+  andF :: f a -> f a -> f a
+  orF :: f a -> f a -> f a
+  xorF :: f a -> f a -> f a
+  complementF :: f a -> f a
+  shiftLF :: f a -> Int -> f a
+  unsafeShiftLF :: f a -> Int -> f a
+  shiftRF :: f a -> Int -> f a
+  unsafeShiftRF :: f a -> Int -> f a
+  unsafeShiftLF = shiftLF
+  unsafeShiftRF = shiftRF
+  {-# INLINE unsafeShiftLF #-}
+  {-# INLINE unsafeShiftRF #-}
+
+instance BitsF f a => MiniBits (WrappedMulti f a) where
+  (.&.) = coerce (andF @f @a)
+  (.|.) = coerce (orF @f @a)
+  xor = coerce (xorF @f @a)
+  complement = coerce (complementF @f @a)
+  shiftL = coerce (shiftLF @f @a)
+  unsafeShiftL = coerce (unsafeShiftLF @f @a)
+  shiftR = coerce (shiftRF @f @a)
+  unsafeShiftR = coerce (unsafeShiftRF @f @a)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
+
 -- TODO: Add Data.Semigroup and Data.Monoid counterparts

@@ -16,16 +16,19 @@ module Data.Simdy.Internal.NoSIMD
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
+  , SIMDBits
   , SIMDPrim
   -- , SIMDUnbox
   , SIMDStorable
   ) where
+import           Data.Bits (Bits)
 import           Data.Coerce (coerce)
 import           Data.Complex
 import           Data.Functor.Identity
 import           Data.Int
 import           Data.Primitive
 import           Data.Semigroup
+import           Data.Simdy.Class.Bits (MiniBits)
 import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
 import qualified Data.Simdy.Internal.Class as I
 import           Data.Simdy.Internal.NoSIMD.HalfVector ()
@@ -161,6 +164,26 @@ instance SIMDFloating Float
 instance SIMDFloating Double
 -- instance (RealFloat a, SIMDFloating a) => SIMDFloating (Complex a)
 
+-- | An instance of 'SIMDBits' has its 'MiniBits' instance lifted to SIMD vector types
+--
+-- @('SIMD' f, 'SIMDBits' a)@ implies @'MiniBits' (f a)@.
+class ( Bits a
+      , MiniBits a
+      , BitsF X2 a
+      , BitsF X4 a
+      , BitsF X8 a
+      , BitsF X16 a
+      , BitsF X32 a
+      ) => SIMDBits a
+instance SIMDBits Int8
+instance SIMDBits Int16
+instance SIMDBits Int32
+instance SIMDBits Int64
+instance SIMDBits Word8
+instance SIMDBits Word16
+instance SIMDBits Word32
+instance SIMDBits Word64
+
 class ( Prim a
       , SIMDElement a
       , MultiPrim X2 a
@@ -249,6 +272,7 @@ class ( KnownSIMDLength f
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
+      , forall a. SIMDBits a => MiniBits (f a)
       ) => SIMD f where
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a
   (==*) :: SIMDEq a => f a -> f a -> f Bool

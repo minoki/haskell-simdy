@@ -141,6 +141,292 @@ foreign import ccall unsafe "hs_simdy_select_floatx4_densemask"
 foreign import ccall unsafe "hs_simdy_select_doublex2_densemask"
   selectDoubleX2# :: Word8 -> DoubleX2# -> DoubleX2# -> DoubleX2#
 
+#if defined(x86_64_HOST_ARCH)
+
+--
+-- Complement (bitwise not)
+--
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementInt8X16# :: Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementInt16X8# :: Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementInt32X4# :: Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementInt64X2# :: Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementWord8X16# :: Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementWord16X8# :: Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementWord32X4# :: Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_complement_int128"
+  complementWord64X2# :: Word64X2# -> Word64X2#
+
+--
+-- Bitwise AND
+--
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_and_int128"
+  andWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+--
+-- Bitwise OR
+--
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_or_int128"
+  orWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+--
+-- Bitwise XOR
+--
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_xor_int128"
+  xorWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+#else
+
+--
+-- Complement (bitwise not)
+--
+
+foreign import ccall unsafe "hs_simdy_complement_int8x16"
+  complementInt8X16# :: Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_complement_int16x8"
+  complementInt16X8# :: Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_complement_int32x4"
+  complementInt32X4# :: Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_complement_int64x2"
+  complementInt64X2# :: Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_complement_word8x16"
+  complementWord8X16# :: Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_complement_word16x8"
+  complementWord16X8# :: Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_complement_word32x4"
+  complementWord32X4# :: Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_complement_word64x2"
+  complementWord64X2# :: Word64X2# -> Word64X2#
+
+--
+-- Bitwise AND
+--
+
+foreign import ccall unsafe "hs_simdy_and_int8x16"
+  andInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_and_int16x8"
+  andInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_and_int32x4"
+  andInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_and_int64x2"
+  andInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_and_word8x16"
+  andWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_and_word16x8"
+  andWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_and_word32x4"
+  andWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_and_word64x2"
+  andWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+--
+-- Bitwise OR
+--
+
+foreign import ccall unsafe "hs_simdy_or_int8x16"
+  orInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_or_int16x8"
+  orInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_or_int32x4"
+  orInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_or_int64x2"
+  orInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_or_word8x16"
+  orWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_or_word16x8"
+  orWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_or_word32x4"
+  orWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_or_word64x2"
+  orWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+--
+-- Bitwise XOR
+--
+
+foreign import ccall unsafe "hs_simdy_xor_int8x16"
+  xorInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_xor_int16x8"
+  xorInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_xor_int32x4"
+  xorInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_xor_int64x2"
+  xorInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_xor_word8x16"
+  xorWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_xor_word16x8"
+  xorWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_xor_word32x4"
+  xorWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_xor_word64x2"
+  xorWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+#endif
+
+--
+-- Left Shift
+--
+
+foreign import ccall unsafe "hs_simdy_shiftL_int8x16"
+  shiftLInt8X16# :: Int8X16# -> Int# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_shiftL_int16x8"
+  shiftLInt16X8# :: Int16X8# -> Int# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_shiftL_int32x4"
+  shiftLInt32X4# :: Int32X4# -> Int# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_shiftL_int64x2"
+  shiftLInt64X2# :: Int64X2# -> Int# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_shiftL_word8x16"
+  shiftLWord8X16# :: Word8X16# -> Int# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_shiftL_word16x8"
+  shiftLWord16X8# :: Word16X8# -> Int# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_shiftL_word32x4"
+  shiftLWord32X4# :: Word32X4# -> Int# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_shiftL_word64x2"
+  shiftLWord64X2# :: Word64X2# -> Int# -> Word64X2#
+
+--
+-- Right Shift (Arithmetic / Logical)
+--
+
+foreign import ccall unsafe "hs_simdy_shiftR_int8x16"
+  shiftRInt8X16# :: Int8X16# -> Int# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_shiftR_int16x8"
+  shiftRInt16X8# :: Int16X8# -> Int# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_shiftR_int32x4"
+  shiftRInt32X4# :: Int32X4# -> Int# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_shiftR_int64x2"
+  shiftRInt64X2# :: Int64X2# -> Int# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_shiftR_word8x16"
+  shiftRWord8X16# :: Word8X16# -> Int# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_shiftR_word16x8"
+  shiftRWord16X8# :: Word16X8# -> Int# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_shiftR_word32x4"
+  shiftRWord32X4# :: Word32X4# -> Int# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_shiftR_word64x2"
+  shiftRWord64X2# :: Word64X2# -> Int# -> Word64X2#
+
 #if defined(USE_AVX512)
 
 foreign import ccall unsafe "hs_simdy_minimum_floatx4_avx512"

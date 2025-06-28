@@ -14,6 +14,7 @@ extra-doc-files:    CHANGELOG.md
 extra-source-files: cbits/mask.h
                     cbits/mask.c
                     cbits/select.c
+                    cbits/bitwise.c
 
 flag no-simd
     description: Don't use native vector types
@@ -60,6 +61,7 @@ library
     import:           warnings
                     , arch-options
     exposed-modules:  Data.Simdy
+                      Data.Simdy.Class.Bits
                       Data.Simdy.Horizontal
                       Data.Simdy.Mask
                       Data.Simdy.Pack
@@ -88,12 +90,15 @@ library
     if flag(avx512)
         c-sources:        cbits/mask_avx512.c
                           cbits/select_avx512.c
+                          cbits/bitwise_avx512.c
     elif flag(haswell)
         c-sources:        cbits/mask_haswell.c
                           cbits/select_haswell.c
+                          cbits/bitwise_haswell.c
     else
         c-sources:        cbits/mask_baseline.c
                           cbits/select_baseline.c
+                          cbits/bitwise_baseline.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.Prim
