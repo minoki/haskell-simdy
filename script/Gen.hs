@@ -538,8 +538,8 @@ genFile moduleName !maxBits
     ] ++ gen 2 maxBits ++ gen 4 maxBits ++ gen 8 maxBits ++ gen 16 maxBits ++ gen 32 maxBits
 -}
 
-genFile :: String -> String -> Int -> Int -> [String]
-genFile moduleName primModule !n !maxBits
+genFile :: String -> [String] -> Int -> Int -> [String]
+genFile moduleName primModules !n !maxBits
   = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ] ++ ["{-# LANGUAGE CPP #-}" | maxBits == 128] ++
     ["{-# LANGUAGE DataKinds #-}"
@@ -556,8 +556,7 @@ genFile moduleName primModule !n !maxBits
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Internal.Class"
-    ] ++ ["import           " ++ primModule | not (null primModule)] ++
-    ["import           Data.Simdy.Internal.PrimExtra" | maxBits > 0] ++
+    ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
     ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#))"
     ,"import           GHC.Int"
@@ -617,10 +616,10 @@ main = do
   createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD256"
   createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD512"
   forM_ [2,4,8,16,32] $ \i -> do
-    writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) "" i 0
-    writeFile ("src/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) "Data.Simdy.Internal.SIMD128.Prim" i 128
-    when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) "Data.Simdy.Internal.SIMD256.Prim" i 256
-    when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) "Data.Simdy.Internal.SIMD512.Prim" i 512
+    writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) [] i 0
+    writeFile ("src/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) ["Data.Simdy.Internal.SIMD128.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra"] i 128
+    when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ["Data.Simdy.Internal.SIMD256.Prim", "Data.Simdy.Internal.SIMD256.PrimExtra"] i 256
+    when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ["Data.Simdy.Internal.SIMD512.Prim", "Data.Simdy.Internal.SIMD512.PrimExtra"] i 512
   writeFile "src/Data/Simdy/Internal/NoSIMD/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.NoSIMD.HalfVector"
     ["Data.Functor.Identity"
     ,"Data.Simdy.Internal.NoSIMD.X2"
