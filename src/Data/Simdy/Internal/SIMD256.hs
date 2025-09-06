@@ -6,13 +6,20 @@ In general, the types and classes exported from this module are not compatible w
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Internal.SIMD256
   ( module M
-  , SIMD (horizontalFold, (==*), (/=*))
+  , SIMD (horizontalFold)
   , SIMDElement
   , broadcast
   , liftSIMD
   , liftSIMD2
+  , selectSIMD
   , SIMDEq
+  , (==^)
+  , (/=^)
   , SIMDOrd
+  , (<^)
+  , (<=^)
+  , (>^)
+  , (>=^)
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
@@ -41,7 +48,7 @@ import           Data.Simdy.Internal.SIMD256.X8 as M
 -- import qualified Data.Vector.Unboxed as VU
 import           Data.Word
 import           Foreign.Storable
-import           Prelude hiding (not)
+import           Prelude hiding (not, (==), (/=), (<), (<=), (>), (>=))
 
 -- | An instance of 'SIMDElement' supports basic SIMD operations (pack\/unpack\/broadcast)
 class ( PackX2 X2 a
@@ -112,7 +119,7 @@ instance SIMDEq Word64
 --
 -- @('SIMD' f, 'SIMDOrd' a)@ implies @'Ordered' (f a)@.
 class ( Ord a
-      , SIMDElement a
+      , SIMDEq a
       , OrderedF X2 a
       , OrderedF X4 a
       , OrderedF X8 a
@@ -290,20 +297,16 @@ instance SIMDStorable Word16
 instance SIMDStorable Word32
 instance SIMDStorable Word64
 
-infix 4 ==*, /=*
-
 -- | SIMD vector types
 class ( KnownSIMDLength f
       , forall a. SIMDElement a => Broadcast f a
       , forall a b. (SIMDElement a, SIMDElement b) => LiftSIMD f a b
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c
       , Boolean (f Bool)
-      , forall a. SIMDElement a => SelectableF f a
+      , forall a. MaskIsLiftedBool f a
       , forall a. SIMDElement a => Selectable (f a)
-      -- , forall a. SIMDEq a => EquatableF f a
-      -- , forall a. SIMDEq a => Equatable (f a)
-      -- , forall a. SIMDOrd a => OrderedF f a
-      -- , forall a. SIMDOrd a => Ordered (f a)
+      , forall a. SIMDEq a => Equatable (f a)
+      , forall a. SIMDOrd a => Ordered (f a)
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
@@ -311,50 +314,24 @@ class ( KnownSIMDLength f
       , forall a. SIMDEnumFromZero a => EnumFromZero_ f a
       ) => SIMD f where
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a
-  (==*) :: SIMDEq a => f a -> f a -> f Bool
-  (/=*) :: SIMDEq a => f a -> f a -> f Bool
 instance SIMD Identity where
   horizontalFold _ = runIdentity
-  (==*) = eqF
-  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
-  {-# INLINE (==*) #-}
-  {-# INLINE (/=*) #-}
 instance SIMD X2 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> runIdentity (op low high)
-  (==*) = eqF
-  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
-  {-# INLINE (==*) #-}
-  {-# INLINE (/=*) #-}
 instance SIMD X4 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
-  (==*) = eqF
-  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
-  {-# INLINE (==*) #-}
-  {-# INLINE (/=*) #-}
 instance SIMD X8 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
-  (==*) = eqF
-  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
-  {-# INLINE (==*) #-}
-  {-# INLINE (/=*) #-}
 instance SIMD X16 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
-  (==*) = eqF
-  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
-  {-# INLINE (==*) #-}
-  {-# INLINE (/=*) #-}
 instance SIMD X32 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
-  (==*) = eqF
-  x /=* y = not (eqF x y)
   {-# INLINE horizontalFold #-}
-  {-# INLINE (==*) #-}
-  {-# INLINE (/=*) #-}
 
 -- | Broadcasts a value to the entire vector.
 --
@@ -376,6 +353,42 @@ liftSIMD = I.liftSIMD
 liftSIMD2 :: (SIMD f, SIMDElement a, SIMDElement b, SIMDElement c) => (a -> b -> c) -> f a -> f b -> f c
 liftSIMD2 = I.liftSIMD2
 {-# INLINE [1] liftSIMD2 #-}
+
+selectSIMD :: (SIMD f, SIMDElement a)
+           => f Bool -- ^ condition
+           -> f a -- ^ then-expression
+           -> f a -- ^ else-expression
+           -> f a
+selectSIMD = select
+{-# INLINE selectSIMD #-}
+
+infix 4 ==^, /=^
+
+(==^) :: (SIMD f, SIMDEq a) => f a -> f a -> f Bool
+(==^) = (==)
+{-# INLINE (==^) #-}
+
+(/=^) :: (SIMD f, SIMDEq a) => f a -> f a -> f Bool
+(/=^) = (/=)
+{-# INLINE (/=^) #-}
+
+infix 4 <^, <=^, >^, >=^
+
+(<^) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
+(<^) = (<)
+{-# INLINE (<^) #-}
+
+(<=^) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
+(<=^) = (<=)
+{-# INLINE (<=^) #-}
+
+(>^) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
+(>^) = (>)
+{-# INLINE (>^) #-}
+
+(>=^) :: (SIMD f, SIMDOrd a) => f a -> f a -> f Bool
+(>=^) = (>=)
+{-# INLINE (>=^) #-}
 
 {-# RULES
 "liftSIMD/Sum/X2"

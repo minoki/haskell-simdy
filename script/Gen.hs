@@ -37,6 +37,7 @@ gen !vecCount !maxBits
     ,"  {-# INLINE simdLength #-}"
     ,"newtype instance " ++ tyCon ++ " Bool = MkBool" ++ tyCon ++ " Word" ++ show (max vecCount 8)
     ,"type instance Mask (" ++ tyCon ++ " a) = " ++ tyCon ++ " Bool"
+    ,"instance MaskIsLiftedBool " ++ tyCon ++ " a"
     ,"instance BooleanF " ++ tyCon ++ " where"
     ,"  trueF = MkBool" ++ tyCon ++ " " ++ show (2^vecCount - 1)
     ,"  falseF = MkBool" ++ tyCon ++ " 0"

@@ -176,6 +176,9 @@ type family Mask a
 type instance Mask (Identity a) = Identity Bool
 type instance Mask (WrappedMulti f a) = f Bool
 
+class Mask (f a) ~ f Bool => MaskIsLiftedBool f a
+instance MaskIsLiftedBool Identity a
+
 class Selectable a where
   select :: Mask a -> a -> a -> a
 
@@ -254,10 +257,10 @@ infix 4 ==, /=, <, <=, >, >=
 
 class Equatable a where
   (==) :: a -> a -> Mask a
-
-(/=) :: (Boolean (Mask a), Equatable a) => a -> a -> Mask a
-x /= y = not (x == y)
-{-# INLINE (/=) #-}
+  (/=) :: a -> a -> Mask a
+  default (/=) :: Boolean (Mask a) => a -> a -> Mask a
+  x /= y = not (x == y)
+  {-# INLINE (/=) #-}
 
 newtype Scalar a = MkScalar a
 
@@ -277,7 +280,9 @@ type instance Mask Double = Bool
 
 instance Eq a => Equatable (Scalar a) where
   (==) = coerce ((Prelude.==) @a)
+  (/=) = coerce ((Prelude./=) @a)
   {-# INLINE (==) #-}
+  {-# INLINE (/=) #-}
 
 deriving via Scalar Int instance Equatable Int
 deriving via Scalar Int8 instance Equatable Int8
@@ -294,9 +299,11 @@ deriving via Scalar Double instance Equatable Double
 
 instance Eq a => Equatable (Identity a) where
   (==) = coerce ((Prelude.==) @a)
+  (/=) = coerce ((Prelude./=) @a)
   {-# INLINE (==) #-}
+  {-# INLINE (/=) #-}
 
-class EquatableF f a where
+class Boolean (f Bool) => EquatableF f a where
   eqF :: f a -> f a -> f Bool
 
 instance Eq a => EquatableF Identity a where
