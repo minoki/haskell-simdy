@@ -38,6 +38,9 @@ flag llvm
 
 common warnings
     ghc-options: -Wall -Wcompat
+    if impl(ghc >= 9.14)
+        -- For Data.Simdy.Tuple
+        ghc-options: -Wno-pattern-namespace-specifier
 
 common arch-options
     if !flag(no-simd)
@@ -135,7 +138,7 @@ library
     else
         hs-source-dirs: vl128
     -- other-extensions:
-    build-depends:    base >=4.18.0.0 && <4.22,
+    build-depends:    base >=4.18.0.0 && <4.23,
                       ghc-prim,
                       primitive ^>=0.9.0.0,
                       vector ^>=0.13.1.0
@@ -151,7 +154,7 @@ test-suite simdy-test
     hs-source-dirs:   test
     main-is:          Main.hs
     build-depends:
-        base >=4.18.0.0 && <4.22,
+        base >=4.18.0.0 && <4.23,
         simdy
 
 test-suite float-minmax-test
@@ -177,7 +180,7 @@ benchmark simdy-benchmark
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     hs-source-dirs:   benchmark
-    build-depends:    base >=4.18.0.0 && <4.22,
+    build-depends:    base >=4.18.0.0 && <4.23,
                       simdy,
                       vector ^>=0.13.1.0,
                       tasty-bench ^>=0.4.1
