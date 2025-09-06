@@ -184,6 +184,33 @@ test-suite double-minmax-test
     main-is:          cbits/test_double_minmax.c
     build-depends:    simdy
 
+library matmul
+    import:           warnings
+                    , arch-options
+    exposed-modules:  MatMul
+    hs-source-dirs:   example/matmul
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      simdy,
+                      vector ^>=0.13.1.0,
+                      deepseq
+    default-language: GHC2021
+
+test-suite simdy-test-matmul
+    import:           warnings
+                    , arch-options
+    default-language: GHC2021
+    -- other-modules:
+    -- other-extensions:
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   example/matmul-test
+    main-is:          Main.hs
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      simdy,
+                      simdy:matmul,
+                      vector ^>=0.13.1.0,
+                      tasty ^>=1.5.3,
+                      tasty-quickcheck ^>=0.11.1
+
 benchmark simdy-benchmark
     import:           warnings
                     , arch-options
@@ -193,5 +220,6 @@ benchmark simdy-benchmark
     hs-source-dirs:   benchmark
     build-depends:    base >=4.18.0.0 && <4.23,
                       simdy,
+                      simdy:matmul,
                       vector ^>=0.13.1.0,
                       tasty-bench ^>=0.4.1

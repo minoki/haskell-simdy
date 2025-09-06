@@ -1,6 +1,9 @@
-import           Data.Simdy (X4, X8, X16, X32)
+{-# LANGUAGE DataKinds #-}
+import           Data.Proxy
+import           Data.Simdy (X16, X32, X4, X8)
 import qualified Data.Simdy.Vector.Generic as V.SIMD
 import qualified Data.Vector.Unboxed as VU
+import           MatMul
 import           Test.Tasty.Bench
 
 dotProdVU :: VU.Vector Float -> VU.Vector Float -> Float
@@ -49,6 +52,20 @@ main = defaultMain
     , bench "X16" $ nf (uncurry dotProdX16_D) (vecA_D, vecB_D)
     , bench "X32" $ nf (uncurry dotProdX32_D) (vecA_D, vecB_D)
     ]
+  , bgroup "matMul 1000 Float"
+    [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat1000A, mat1000B)
+    , bench "matMulSIMD X4" $ nf (uncurry (matMulSIMD (Proxy @X4))) (mat1000A, mat1000B)
+    , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat1000A, mat1000B)
+    , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat1000A, mat1000B)
+    , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat1000A, mat1000B)
+    ]
+  , bgroup "matMul 2000 Float"
+    [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat2000A, mat2000B)
+    , bench "matMulSIMD X4" $ nf (uncurry (matMulSIMD (Proxy @X4))) (mat2000A, mat2000B)
+    , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat2000A, mat2000B)
+    , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat2000A, mat2000B)
+    , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat2000A, mat2000B)
+    ]
   ]
   where
     vecA, vecB :: VU.Vector Float
@@ -57,3 +74,11 @@ main = defaultMain
     vecA_D, vecB_D :: VU.Vector Double
     vecA_D = VU.fromList [0..10000]
     vecB_D = VU.fromList [10000,9999..0]
+    mat1000A :: Mat 1000 1000 Float
+    mat1000A = MkMat (VU.enumFromN 0 (1000 * 1000))
+    mat1000B :: Mat 1000 1000 Float
+    mat1000B = MkMat (VU.enumFromN 0 (1000 * 1000))
+    mat2000A :: Mat 2000 2000 Float
+    mat2000A = MkMat (VU.enumFromN 0 (2000 * 2000))
+    mat2000B :: Mat 2000 2000 Float
+    mat2000B = MkMat (VU.enumFromN 0 (2000 * 2000))
