@@ -114,6 +114,8 @@ instance SIMDEq Word8
 instance SIMDEq Word16
 instance SIMDEq Word32
 instance SIMDEq Word64
+instance SIMDEq Float
+instance SIMDEq Double
 
 -- | Vectors whose element type is an instance of 'SIMDOrd' can be compared using 'Ordered' class
 --
@@ -134,6 +136,8 @@ instance SIMDOrd Word8
 instance SIMDOrd Word16
 instance SIMDOrd Word32
 instance SIMDOrd Word64
+instance SIMDOrd Float
+instance SIMDOrd Double
 
 -- | An instance of 'SIMDNum' has its 'Num' instance lifted to SIMD vector types
 --

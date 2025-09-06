@@ -58,8 +58,8 @@ gen !vecCount !maxBits
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
     ]
-    ++ genType "Float" "F#" 32 maxBits [genNum True, genFractional, genFloating, genEnumFromZero ".0#", genPrim, genStorable]
-    ++ genType "Double" "D#" 64 maxBits [genNum True, genFractional, genFloating, genEnumFromZero ".0##", genPrim, genStorable]
+    ++ genType "Float" "F#" 32 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genEnumFromZero ".0#", genPrim, genStorable]
+    ++ genType "Double" "D#" 64 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
     ++ genType "Int8" "I8#" 8 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
     ++ genType "Int16" "I16#" 16 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
@@ -231,6 +231,36 @@ gen !vecCount !maxBits
                 ,"  leF !x !y = notF (ltF y x)"
                 ,"  gtF !x !y = ltF x y"
                 ,"  geF !x !y = notF (ltF x y)"
+                ,"  {-# INLINE ltF #-}"
+                ,"  {-# INLINE leF #-}"
+                ,"  {-# INLINE gtF #-}"
+                ,"  {-# INLINE geF #-}"
+                ]
+    genOrderedFloat name primCon !bitsPerElem maxBits
+      = let bitCount = bitsPerElem * vecCount
+            vecBitCount = min bitCount maxBits
+        in if bitCount < 128 || maxBits == 0
+           then ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  gtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " > y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  geF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " >= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE ltF #-}"
+                ,"  {-# INLINE leF #-}"
+                ,"  {-# INLINE gtF #-}"
+                ,"  {-# INLINE geF #-}"
+                ]
+           else
+             let shortVecSize = vecBitCount `div` bitsPerElem
+                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecName = name ++ "X" ++ show shortVecSize
+                 suffix | shortVecCount == 1 = ""
+                        | otherwise = "WithVec" ++ show vecBitCount
+             in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  leF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (le" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  gtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (gt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  geF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (ge" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"

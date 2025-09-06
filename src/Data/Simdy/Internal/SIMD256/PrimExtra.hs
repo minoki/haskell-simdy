@@ -386,6 +386,12 @@ foreign import ccall unsafe "hs_simdy_int32x8_eq_densemask"
 foreign import ccall unsafe "hs_simdy_int64x4_eq_densemask"
   eqWord64X4# :: Word64X4# -> Word64X4# -> Word8
 
+foreign import ccall unsafe "hs_simdy_floatx4_eq_densemask"
+  eqFloatX8# :: FloatX8# -> FloatX8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_doublex4_eq_densemask"
+  eqDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
+
 --
 -- Less than
 --
@@ -413,3 +419,49 @@ foreign import ccall unsafe "hs_simdy_word32x8_lt_densemask"
 
 foreign import ccall unsafe "hs_simdy_word64x4_lt_densemask"
   ltWord64X4# :: Word64X4# -> Word64X4# -> Word8
+
+foreign import ccall unsafe "hs_simdy_floatx8_lt_densemask"
+  ltFloatX8# :: FloatX8# -> FloatX8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_doublex4_lt_densemask"
+  ltDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
+
+--
+-- Less than or equal to
+--
+
+foreign import ccall unsafe "hs_simdy_floatx8_le_densemask"
+  leFloatX8# :: FloatX8# -> FloatX8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_doublex4_le_densemask"
+  leDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
+
+--
+-- Greater than
+--
+
+foreign import ccall unsafe "hs_simdy_floatx8_gt_densemask"
+  gtFloatX8# :: FloatX8# -> FloatX8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_doublex4_gt_densemask"
+  gtDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
+
+--
+-- Greater than or equal to
+--
+
+foreign import ccall unsafe "hs_simdy_floatx8_ge_densemask"
+  geFloatX8# :: FloatX8# -> FloatX8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_doublex4_ge_densemask"
+  geDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
+
+--
+-- Unordered
+--
+
+foreign import ccall unsafe "hs_simdy_floatx8_unord_densemask"
+  unordFloatX8# :: FloatX8# -> FloatX8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_doublex4_unord_densemask"
+  unordDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8

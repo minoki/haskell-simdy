@@ -16,6 +16,8 @@ extra-source-files: cbits/mask.h
                     cbits/select.c
                     cbits/bitwise.c
                     cbits/int_compare.c
+                    cbits/float_compare.c
+                    cbits/double_compare.c
 
 flag no-simd
     description: Don't use native vector types
@@ -95,16 +97,22 @@ library
                           cbits/select_avx512.c
                           cbits/bitwise_avx512.c
                           cbits/int_compare_avx512.c
+                          cbits/float_compare_avx512.c
+                          cbits/double_compare_avx512.c
     elif flag(haswell)
         c-sources:        cbits/mask_haswell.c
                           cbits/select_haswell.c
                           cbits/bitwise_haswell.c
                           cbits/int_compare_haswell.c
+                          cbits/float_compare_haswell.c
+                          cbits/double_compare_haswell.c
     else
         c-sources:        cbits/mask_baseline.c
                           cbits/select_baseline.c
                           cbits/bitwise_baseline.c
                           cbits/int_compare_baseline.c
+                          cbits/float_compare_baseline.c
+                          cbits/double_compare_baseline.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.Prim
