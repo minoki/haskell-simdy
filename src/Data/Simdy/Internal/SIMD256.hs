@@ -99,6 +99,14 @@ class ( Eq a
       , EquatableF X16 a
       , EquatableF X32 a
       ) => SIMDEq a
+instance SIMDEq Int8
+instance SIMDEq Int16
+instance SIMDEq Int32
+instance SIMDEq Int64
+instance SIMDEq Word8
+instance SIMDEq Word16
+instance SIMDEq Word32
+instance SIMDEq Word64
 
 -- | Vectors whose element type is an instance of 'SIMDOrd' can be compared using 'Ordered' class
 --
@@ -111,6 +119,14 @@ class ( Ord a
       , OrderedF X16 a
       , OrderedF X32 a
       ) => SIMDOrd a
+instance SIMDOrd Int8
+instance SIMDOrd Int16
+instance SIMDOrd Int32
+instance SIMDOrd Int64
+instance SIMDOrd Word8
+instance SIMDOrd Word16
+instance SIMDOrd Word32
+instance SIMDOrd Word64
 
 -- | An instance of 'SIMDNum' has its 'Num' instance lifted to SIMD vector types
 --

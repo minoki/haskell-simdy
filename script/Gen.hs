@@ -60,25 +60,25 @@ gen !vecCount !maxBits
     ++ genType "Float" "F#" 32 maxBits [genNum True, genFractional, genFloating, genEnumFromZero ".0#", genPrim, genStorable]
     ++ genType "Double" "D#" 64 maxBits [genNum True, genFractional, genFloating, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
-    ++ genType "Int8" "I8#" 8 maxBits [genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-    ++ genType "Int16" "I16#" 16 maxBits [genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-    ++ genType "Int32" "I32#" 32 maxBits [genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-    ++ genType "Int64" "I64#" 64 maxBits [genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-    ++ genType "Word8" "W8#" 8 maxBits [genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-    ++ genType "Word16" "W16#" 16 maxBits [genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-    ++ genType "Word32" "W32#" 32 maxBits [genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-    ++ genType "Word64" "W64#" 64 maxBits [genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+    ++ genType "Int8" "I8#" 8 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+    ++ genType "Int16" "I16#" 16 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+    ++ genType "Int32" "I32#" 32 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+    ++ genType "Int64" "I64#" 64 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+    ++ genType "Word8" "W8#" 8 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+    ++ genType "Word16" "W16#" 16 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+    ++ genType "Word32" "W32#" 32 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+    ++ genType "Word64" "W64#" 64 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
     ++ (if maxBits == 128
         then ["#else"
              ,"-- The NCG of GHC 9.12 does not support integer vectors"]
-             ++ genType "Int8" "I8#" 8 0 [genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-             ++ genType "Int16" "I16#" 16 0 [genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-             ++ genType "Int32" "I32#" 32 0 [genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-             ++ genType "Int64" "I64#" 64 0 [genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-             ++ genType "Word8" "W8#" 8 0 [genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-             ++ genType "Word16" "W16#" 16 0 [genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-             ++ genType "Word32" "W32#" 32 0 [genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-             ++ genType "Word64" "W64#" 64 0 [genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+             ++ genType "Int8" "I8#" 8 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+             ++ genType "Int16" "I16#" 16 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+             ++ genType "Int32" "I32#" 32 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+             ++ genType "Int64" "I64#" 64 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+             ++ genType "Word8" "W8#" 8 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+             ++ genType "Word16" "W16#" 16 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+             ++ genType "Word32" "W32#" 32 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+             ++ genType "Word64" "W64#" 64 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
              ++ ["#endif"]
         else []
        )
@@ -187,6 +187,54 @@ gen !vecCount !maxBits
                            ,"  {-# INLINE selectF #-}"
                            ]
         in mainDef ++ concatMap (\f -> f name primCon bitsPerElem maxBits) others
+    genEquatable name primCon !bitsPerElem maxBits
+      = let bitCount = bitsPerElem * vecCount
+            vecBitCount = min bitCount maxBits
+        in if bitCount < 128 || maxBits == 0
+           then ["instance EquatableF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  eqF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " == y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE eqF #-}"
+                ]
+           else
+             let shortVecSize = vecBitCount `div` bitsPerElem
+                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecName = name ++ "X" ++ show shortVecSize
+                 suffix | shortVecCount == 1 = ""
+                        | otherwise = "WithVec" ++ show vecBitCount
+             in ["instance EquatableF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  eqF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (eq" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  {-# INLINE eqF #-}"
+                ]
+    genOrderedInt name primCon !bitsPerElem maxBits
+      = let bitCount = bitsPerElem * vecCount
+            vecBitCount = min bitCount maxBits
+        in if bitCount < 128 || maxBits == 0
+           then ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  gtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " > y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  geF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " >= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE ltF #-}"
+                ,"  {-# INLINE leF #-}"
+                ,"  {-# INLINE gtF #-}"
+                ,"  {-# INLINE geF #-}"
+                ]
+           else
+             let shortVecSize = vecBitCount `div` bitsPerElem
+                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecName = name ++ "X" ++ show shortVecSize
+                 suffix | shortVecCount == 1 = ""
+                        | otherwise = "WithVec" ++ show vecBitCount
+             in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  leF !x !y = notF (ltF y x)"
+                ,"  gtF !x !y = ltF x y"
+                ,"  geF !x !y = notF (ltF x y)"
+                ,"  {-# INLINE ltF #-}"
+                ,"  {-# INLINE leF #-}"
+                ,"  {-# INLINE gtF #-}"
+                ,"  {-# INLINE geF #-}"
+                ]
     genNum isSigned name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
@@ -632,7 +680,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           GHC.IO"
     ,"import           GHC.Word"
     ,"import qualified Data.Vector.Unboxed.Base as VUB"
-    ,"import           Prelude hiding (not, (&&), (||))"
+    ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=))"
     ] ++ gen n maxBits
 
 genHalfFile :: String -> [String] -> [Int] -> Int -> [String]
@@ -687,8 +735,8 @@ main = do
   forM_ [2,4,8,16,32] $ \i -> do
     writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) [] i 0
     writeFile ("src/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) ["Data.Simdy.Internal.SIMD128.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra"] i 128
-    when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ["Data.Simdy.Internal.SIMD256.Prim", "Data.Simdy.Internal.SIMD256.PrimExtra"] i 256
-    when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ["Data.Simdy.Internal.SIMD512.Prim", "Data.Simdy.Internal.SIMD512.PrimExtra"] i 512
+    when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ["Data.Simdy.Internal.SIMD256.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra"] i 256
+    when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ["Data.Simdy.Internal.SIMD512.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra", "Data.Simdy.Internal.SIMD512.PrimExtra"] i 512
   writeFile "src/Data/Simdy/Internal/NoSIMD/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.NoSIMD.HalfVector"
     ["Data.Functor.Identity"
     ,"Data.Simdy.Internal.NoSIMD.X2"

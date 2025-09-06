@@ -204,7 +204,7 @@ foreign import ccall unsafe "hs_simdy_shiftR_word64x8"
   shiftRWord64X8# :: Word64X8# -> Int# -> Word64X8#
 
 --
--- Floating-point minimum/maximum
+-- Floating-point minimum/maximum (IEEE compliant)
 --
 
 foreign import ccall unsafe "hs_simdy_minimum_floatx16"
@@ -230,3 +230,59 @@ foreign import ccall unsafe "hs_simdy_minimumNumber_doublex8"
 
 foreign import ccall unsafe "hs_simdy_maximumNumber_doublex8"
   maximumNumberDoubleX8# :: DoubleX8# -> DoubleX8# -> DoubleX8#
+
+--
+-- Equality
+--
+
+foreign import ccall unsafe "hs_simdy_int8x64_eq_densemask"
+  eqInt8X64# :: Int8X64# -> Int8X64# -> Word64
+
+foreign import ccall unsafe "hs_simdy_int16x32_eq_densemask"
+  eqInt16X32# :: Int16X32# -> Int16X32# -> Word32
+
+foreign import ccall unsafe "hs_simdy_int32x16_eq_densemask"
+  eqInt32X16# :: Int32X16# -> Int32X16# -> Word16
+
+foreign import ccall unsafe "hs_simdy_int64x8_eq_densemask"
+  eqInt64X8# :: Int64X8# -> Int64X8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_int8x64_eq_densemask"
+  eqWord8X64# :: Word8X64# -> Word8X64# -> Word64
+
+foreign import ccall unsafe "hs_simdy_int16x32_eq_densemask"
+  eqWord16X32# :: Word16X32# -> Word16X32# -> Word32
+
+foreign import ccall unsafe "hs_simdy_int32x16_eq_densemask"
+  eqWord32X16# :: Word32X16# -> Word32X16# -> Word16
+
+foreign import ccall unsafe "hs_simdy_int64x8_eq_densemask"
+  eqWord64X8# :: Word64X8# -> Word64X8# -> Word8
+
+--
+-- Less than
+--
+
+foreign import ccall unsafe "hs_simdy_int8x64_lt_densemask"
+  ltInt8X64# :: Int8X64# -> Int8X64# -> Word64
+
+foreign import ccall unsafe "hs_simdy_int16x32_lt_densemask"
+  ltInt16X32# :: Int16X32# -> Int16X32# -> Word32
+
+foreign import ccall unsafe "hs_simdy_int32x16_lt_densemask"
+  ltInt32X16# :: Int32X16# -> Int32X16# -> Word16
+
+foreign import ccall unsafe "hs_simdy_int64x8_lt_densemask"
+  ltInt64X8# :: Int64X8# -> Int64X8# -> Word8
+
+foreign import ccall unsafe "hs_simdy_word8x64_lt_densemask"
+  ltWord8X64# :: Word8X64# -> Word8X64# -> Word64
+
+foreign import ccall unsafe "hs_simdy_word16x32_lt_densemask"
+  ltWord16X32# :: Word16X32# -> Word16X32# -> Word32
+
+foreign import ccall unsafe "hs_simdy_word32x16_lt_densemask"
+  ltWord32X16# :: Word32X16# -> Word32X16# -> Word16
+
+foreign import ccall unsafe "hs_simdy_word64x8_lt_densemask"
+  ltWord64X8# :: Word64X8# -> Word64X8# -> Word8

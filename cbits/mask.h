@@ -6,6 +6,52 @@
 #include <emmintrin.h>
 #include <immintrin.h>
 
+inline uint16_t hs_simdy_pack_mask8x16(__m128i v)
+{
+    return (uint16_t)_mm_movemask_epi8(v);
+}
+
+inline uint8_t hs_simdy_pack_mask16x8(__m128i v)
+{
+    __m128i zero = _mm_set1_epi16(0);
+    __m128i mask8x16 = _mm_packs_epi16(v, zero);
+    return (uint8_t)_mm_movemask_epi8(mask8x16);
+}
+
+inline uint8_t hs_simdy_pack_mask32x4(__m128 v)
+{
+    return (uint8_t)_mm_movemask_ps(v);
+}
+
+inline uint8_t hs_simdy_pack_mask64x2(__m128d v)
+{
+    return (uint8_t)_mm_movemask_pd(v);
+}
+
+#if defined(__AVX2__)
+inline uint32_t hs_simdy_pack_mask8x32(__m256i v)
+{
+    return (uint32_t)_mm256_movemask_epi8(v);
+}
+
+inline uint16_t hs_simdy_pack_mask16x16(__m256i v)
+{
+    __m256i zero = _mm256_setzero_si256();
+    __m256i mask8x32 = _mm256_packs_epi16(v, zero);
+    return (uint16_t)_mm256_movemask_epi8(mask8x32);
+}
+
+inline uint8_t hs_simdy_pack_mask32x8(__m256 v)
+{
+    return (uint8_t)_mm256_movemask_ps(v);
+}
+
+inline uint8_t hs_simdy_pack_mask64x4(__m256d v)
+{
+    return (uint8_t)_mm256_movemask_pd(v);
+}
+#endif
+
 inline __m128i hs_simdy_unpack_mask8x16(uint16_t i)
 {
     __m128i ii_lo = _mm_set1_epi8(i & 0xFF);
