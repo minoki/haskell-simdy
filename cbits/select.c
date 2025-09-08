@@ -221,4 +221,69 @@ __m512i hs_simdy_select_int64x8_densemask(uint8_t mask, __m512i then, __m512i el
 #endif // defined(__AVX512DQ__)
 #endif // defined(__AVX512F__)
 
+#elif defined(__aarch64__)
+#include <stdint.h>
+#include <arm_neon.h>
+#include "mask.h"
+
+int8x16_t hs_simdy_select_int8x16(uint8x16_t mask, int8x16_t then, int8x16_t else_)
+{
+    return vbslq_s8(mask, then, else_);
+}
+
+int16x8_t hs_simdy_select_int16x8(uint16x8_t mask, int16x8_t then, int16x8_t else_)
+{
+    return vbslq_s16(mask, then, else_);
+}
+
+int32x4_t hs_simdy_select_int32x4(uint32x4_t mask, int32x4_t then, int32x4_t else_)
+{
+    return vbslq_s32(mask, then, else_);
+}
+
+int64x2_t hs_simdy_select_int64x2(uint64x2_t mask, int64x2_t then, int64x2_t else_)
+{
+    return vbslq_s64(mask, then, else_);
+}
+
+int8x16_t hs_simdy_select_int8x16_densemask(uint16_t mask, int8x16_t then, int8x16_t else_)
+{
+    return hs_simdy_select_int8x16(hs_simdy_unpack_mask8x16(mask), then, else_);
+}
+
+int16x8_t hs_simdy_select_int16x8_densemask(uint8_t mask, int16x8_t then, int16x8_t else_)
+{
+    return hs_simdy_select_int16x8(hs_simdy_unpack_mask16x8(mask), then, else_);
+}
+
+int32x4_t hs_simdy_select_int32x4_densemask(uint8_t mask, int32x4_t then, int32x4_t else_)
+{
+    return hs_simdy_select_int32x4(hs_simdy_unpack_mask32x4(mask), then, else_);
+}
+
+int64x2_t hs_simdy_select_int64x2_densemask(uint8_t mask, int64x2_t then, int64x2_t else_)
+{
+    return hs_simdy_select_int64x2(hs_simdy_unpack_mask64x2(mask), then, else_);
+}
+
+float32x4_t hs_simdy_select_floatx4(uint32x4_t mask, float32x4_t then, float32x4_t else_)
+{
+    return vbslq_f32(mask, then, else_);
+}
+
+float32x4_t hs_simdy_select_floatx4_densemask(uint8_t mask, float32x4_t then, float32x4_t else_)
+{
+    return hs_simdy_select_floatx4(hs_simdy_unpack_mask32x4(mask), then, else_);
+}
+
+float64x2_t hs_simdy_select_doublex2(uint64x2_t mask, float64x2_t then, float64x2_t else_)
+{
+    return vbslq_f64(mask, then, else_);
+}
+
+float64x2_t hs_simdy_select_doublex2_densemask(uint8_t mask, float64x2_t then, float64x2_t else_)
+{
+    return hs_simdy_select_doublex2(hs_simdy_unpack_mask64x2(mask), then, else_);
+}
+
 #endif

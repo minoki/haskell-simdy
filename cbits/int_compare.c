@@ -473,5 +473,128 @@ uint8_t hs_simdy_word64x8_lt_densemask(__m512i a, __m512i b)
 #endif
 
 #elif defined(__aarch64__)
+#include <stdint.h>
+#include <arm_neon.h>
+#include "mask.h"
+
+uint8x16_t hs_simdy_int8x16_eq(int8x16_t a, int8x16_t b)
+{
+    return vceqq_s8(a, b);
+}
+
+uint16x8_t hs_simdy_int16x8_eq(int16x8_t a, int16x8_t b)
+{
+    return vceqq_s16(a, b);
+}
+
+uint32x4_t hs_simdy_int32x4_eq(int32x4_t a, int32x4_t b)
+{
+    return vceqq_s32(a, b);
+}
+
+uint64x2_t hs_simdy_int64x2_eq(int64x2_t a, int64x2_t b)
+{
+    return vceqq_s64(a, b);
+}
+
+uint16_t hs_simdy_int8x16_eq_densemask(int8x16_t a, int8x16_t b)
+{
+    return hs_simdy_pack_mask8x16(hs_simdy_int8x16_eq(a, b));
+}
+
+uint8_t hs_simdy_int16x8_eq_densemask(int16x8_t a, int16x8_t b)
+{
+    return hs_simdy_pack_mask16x8(hs_simdy_int16x8_eq(a, b));
+}
+
+uint8_t hs_simdy_int32x4_eq_densemask(int32x4_t a, int32x4_t b)
+{
+    return hs_simdy_pack_mask32x4(hs_simdy_int32x4_eq(a, b));
+}
+
+uint8_t hs_simdy_int64x2_eq_densemask(int64x2_t a, int64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_int64x2_eq(a, b));
+}
+
+uint8x16_t hs_simdy_int8x16_lt(int8x16_t a, int8x16_t b)
+{
+    return vcltq_s8(b, a);
+}
+
+uint16x8_t hs_simdy_int16x8_lt(int16x8_t a, int16x8_t b)
+{
+    return vcltq_s16(b, a);
+}
+
+uint32x4_t hs_simdy_int32x4_lt(int32x4_t a, int32x4_t b)
+{
+    return vcltq_s32(b, a);
+}
+
+uint64x2_t hs_simdy_int64x2_lt(int64x2_t a, int64x2_t b)
+{
+    return vcltq_s64(b, a);
+}
+
+uint16_t hs_simdy_int8x16_lt_densemask(int8x16_t a, int8x16_t b)
+{
+    return hs_simdy_pack_mask8x16(hs_simdy_int8x16_lt(a, b));
+}
+
+uint8_t hs_simdy_int16x8_lt_densemask(int16x8_t a, int16x8_t b)
+{
+    return hs_simdy_pack_mask16x8(hs_simdy_int16x8_lt(a, b));
+}
+
+uint8_t hs_simdy_int32x4_lt_densemask(int32x4_t a, int32x4_t b)
+{
+    return hs_simdy_pack_mask32x4(hs_simdy_int32x4_lt(a, b));
+}
+
+uint8_t hs_simdy_int64x2_lt_densemask(int64x2_t a, int64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_int64x2_lt(a, b));
+}
+
+uint8x16_t hs_simdy_word8x16_lt(uint8x16_t a, uint8x16_t b)
+{
+    return vcltq_u8(a, b);
+}
+
+uint16x8_t hs_simdy_word16x8_lt(uint16x8_t a, uint16x8_t b)
+{
+    return vcltq_u16(a, b);
+}
+
+uint32x4_t hs_simdy_word32x4_lt(uint32x4_t a, uint32x4_t b)
+{
+    return vcltq_u32(a, b);
+}
+
+uint64x2_t hs_simdy_word64x2_lt(uint64x2_t a, uint64x2_t b)
+{
+    return vcltq_u64(a, b);
+}
+
+uint16_t hs_simdy_word8x16_lt_densemask(uint8x16_t a, uint8x16_t b)
+{
+    return hs_simdy_pack_mask8x16(hs_simdy_word8x16_lt(a, b));
+}
+
+uint8_t hs_simdy_word16x8_lt_densemask(uint16x8_t a, uint16x8_t b)
+{
+    return hs_simdy_pack_mask16x8(hs_simdy_word16x8_lt(a, b));
+}
+
+uint8_t hs_simdy_word32x4_lt_densemask(uint32x4_t a, uint32x4_t b)
+{
+    return hs_simdy_pack_mask32x4(hs_simdy_word32x4_lt(a, b));
+}
+
+uint8_t hs_simdy_word64x2_lt_densemask(uint64x2_t a, uint64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_word64x2_lt(a, b));
+}
 
 #endif

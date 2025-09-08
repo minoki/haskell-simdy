@@ -206,4 +206,59 @@ uint8_t hs_simdy_doublex8_unord_densemask(__m512d a, __m512d b)
 }
 #endif
 
+#elif defined(__aarch64__)
+#include <stdint.h>
+#include <arm_neon.h>
+#include "mask.h"
+
+uint64x2_t hs_simdy_doublex2_eq(float64x2_t a, float64x2_t b)
+{
+    return vceqq_f64(a, b);
+}
+
+uint64x2_t hs_simdy_doublex2_lt(float64x2_t a, float64x2_t b)
+{
+    return vcltq_f64(a, b);
+}
+
+uint64x2_t hs_simdy_doublex2_le(float64x2_t a, float64x2_t b)
+{
+    return vcleq_f64(a, b);
+}
+
+uint64x2_t hs_simdy_doublex2_gt(float64x2_t a, float64x2_t b)
+{
+    return vcgtq_f64(a, b);
+}
+
+uint64x2_t hs_simdy_doublex2_ge(float64x2_t a, float64x2_t b)
+{
+    return vcgeq_f64(a, b);
+}
+
+uint8_t hs_simdy_doublex2_eq_densemask(float64x2_t a, float64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_doublex2_eq(a, b));
+}
+
+uint8_t hs_simdy_doublex2_lt_densemask(float64x2_t a, float64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_doublex2_lt(a, b));
+}
+
+uint8_t hs_simdy_doublex2_le_densemask(float64x2_t a, float64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_doublex2_le(a, b));
+}
+
+uint8_t hs_simdy_doublex2_gt_densemask(float64x2_t a, float64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_doublex2_gt(a, b));
+}
+
+uint8_t hs_simdy_doublex2_ge_densemask(float64x2_t a, float64x2_t b)
+{
+    return hs_simdy_pack_mask64x2(hs_simdy_doublex2_ge(a, b));
+}
+
 #endif

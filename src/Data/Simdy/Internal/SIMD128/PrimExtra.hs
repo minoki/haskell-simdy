@@ -583,6 +583,7 @@ foreign import ccall unsafe "hs_simdy_floatx4_ge_densemask"
 foreign import ccall unsafe "hs_simdy_doublex2_ge_densemask"
   geDoubleX2# :: DoubleX2# -> DoubleX2# -> Word8
 
+{-
 --
 -- Unordered
 --
@@ -592,3 +593,4 @@ foreign import ccall unsafe "hs_simdy_floatx4_unord_densemask"
 
 foreign import ccall unsafe "hs_simdy_doublex2_unord_densemask"
   unordDoubleX2# :: DoubleX2# -> DoubleX2# -> Word8
+-}

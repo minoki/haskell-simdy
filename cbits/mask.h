@@ -129,6 +129,82 @@ inline __m256i hs_simdy_unpack_mask64x4(uint8_t i)
 
 #endif
 
-#endif
+#elif defined(__aarch64__)
+#include <stdint.h>
+#include <arm_neon.h>
 
-#endif
+inline uint16_t hs_simdy_pack_mask8x16(uint8x16_t v)
+{
+    static const uint8_t mask_array[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t mask = vld1q_u8(mask_array);
+    uint8x16_t masked = vandq_u8(v, mask);
+    uint8x16_t masked_hi = vextq_u8(masked, masked, 8); // {masked[8], ..., masked[15]}
+    uint8x16_t zipped = vzip1q_u8(masked, masked_hi); // {masked[0], masked_hi[0], masked[1], masked_hi[1], ...}
+    uint16x8_t b = vreinterpretq_u16_u8(zipped);
+    return vaddvq_u16(b);
+}
+
+inline uint8_t hs_simdy_pack_mask16x8(uint16x8_t v)
+{
+    static const uint16_t mask_array[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint16x8_t mask = vld1q_u16(mask_array);
+    uint16x8_t masked = vandq_u16(v, mask);
+    return vaddvq_u16(masked);
+}
+
+inline uint8_t hs_simdy_pack_mask32x4(uint32x4_t v)
+{
+    static const uint32_t mask_array[4] = {0x01, 0x02, 0x04, 0x08};
+    uint32x4_t mask = vld1q_u32(mask_array);
+    uint32x4_t masked = vandq_u32(v, mask);
+    return vaddvq_u32(masked);
+}
+
+inline uint8_t hs_simdy_pack_mask64x2(uint64x2_t v)
+{
+    static const uint64_t mask_array[2] = {0x01, 0x02};
+    uint64x2_t mask = vld1q_u64(mask_array);
+    uint64x2_t masked = vandq_u64(v, mask);
+    return vaddvq_u64(masked);
+}
+
+inline uint8x16_t hs_simdy_unpack_mask8x16(uint16_t i)
+{
+    uint8x16_t ii_lo = vdupq_n_u8(i & 0xFF);
+    uint8x16_t ii_hi = vdupq_n_u8(i >> 8);
+    static const uint8_t mask_lo_array[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0, 0, 0, 0, 0, 0, 0, 0};
+    uint8x16_t mask_lo = vld1q_u8(mask_lo_array);
+    static const uint8_t mask_hi_array[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t mask_hi = vld1q_u8(mask_hi_array);
+    uint8x16_t j_lo = vandq_u8(ii_lo, mask_lo);
+    uint8x16_t j_hi = vandq_u8(ii_hi, mask_hi);
+    uint8x16_t j = vorrq_u8(j_lo, j_hi);
+    static const uint8_t mask_array[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint8x16_t mask = vld1q_u8(mask_array);
+    return vceqq_u8(j, mask);
+}
+
+inline uint16x8_t hs_simdy_unpack_mask16x8(uint8_t i)
+{
+    uint16x8_t ii = vdupq_n_u16(i);
+    static const uint16_t mask_array[16] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+    uint16x8_t mask = vld1q_u16(mask_array);
+    uint16x8_t j = vandq_u16(ii, mask);
+    return vceqq_u16(j, mask);
+}
+
+extern const _Alignas(16) uint32_t hs_simdy_mask32x4_table[4 * 16];
+inline uint32x4_t hs_simdy_unpack_mask32x4(uint8_t i)
+{
+    return vld1q_u32(&hs_simdy_mask32x4_table[(i & 15) * 4]);
+}
+
+extern const _Alignas(16) uint64_t hs_simdy_mask64x2_table[8];
+inline uint64x2_t hs_simdy_unpack_mask64x2(uint8_t i)
+{
+    return vld1q_u64(&hs_simdy_mask64x2_table[(i & 3) * 2]);
+}
+
+#endif // SSE2 / AArch64
+
+#endif // include guard
