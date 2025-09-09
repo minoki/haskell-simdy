@@ -47,6 +47,12 @@ gen !vecCount !maxBits
     ,"deriving via WrappedMulti " ++ tyCon ++ " Bool instance Boolean (" ++ tyCon ++ " Bool)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance EquatableF " ++ tyCon ++ " a => Equatable (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance OrderedF " ++ tyCon ++ " a => Ordered (" ++ tyCon ++ " a)"
+    ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => IsList (" ++ tyCon ++ " a) where"
+    ,"  type Item (" ++ tyCon ++ " a) = a"
+    ,"  toList = toList" ++ tyCon
+    ,"  fromList = fromList" ++ tyCon
+    ,"  {-# INLINE toList #-}"
+    ,"  {-# INLINE fromList #-}"
     ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " Bool where"
     ,"  pack" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = MkBool" ++ tyCon ++ " (" ++ List.intercalate " .|. " ["(if x" ++ show i ++ " then " ++ show (2^i) ++ " else 0)" | i <- [0..vecCount-1]] ++ ")"
     ,"  unpack" ++ tyCon ++ " (MkBool" ++ tyCon ++ " !x) = (" ++ List.intercalate ", " ["testBit x " ++ show i | i <- [0..vecCount-1]] ++ ")"
@@ -706,7 +712,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Simdy.Internal.Class"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
-    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#))"
+    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))"
     ,"import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
@@ -743,6 +749,13 @@ main = do
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
                         ,"  packX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
                         ,"  unpackX" ++ show n ++ " :: f a -> (" ++ commaSep (replicate n "a") ++ ")"
+                        ,"toListX" ++ show n ++ " :: PackX" ++ show n ++ " x a => x a -> [a]"
+                        ,"toListX" ++ show n ++ " v = case unpackX" ++ show n ++ " v of"
+                        ,"  (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") -> [" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ "]"
+                        ,"fromListX" ++ show n ++ " :: PackX" ++ show n ++ " x a => [a] -> x a"
+                        ,"fromListX" ++ show n ++ " [" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ "] = packX" ++ show n ++ concat [" a" ++ show i | i <- [0..n-1]]
+                        ,"fromListX" ++ show n ++ " xs | length xs < " ++ show n ++ " = error \"fromListX" ++ show n ++ ": List too short\""
+                        ,"         " ++ map (const ' ') (show n) ++ "    | otherwise = error \"fromListX" ++ show n ++ ": List too long\""
                         ]) [2,4,8,16,32]
     {-
     ++ ["class MkTuple f where"]
