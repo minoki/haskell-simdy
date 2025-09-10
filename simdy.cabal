@@ -158,15 +158,18 @@ library
 
 test-suite simdy-test
     import:           warnings
+                    , arch-options
     default-language: GHC2021
     -- other-modules:
     -- other-extensions:
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Main.hs
-    build-depends:
-        base >=4.18.0.0 && <4.23,
-        simdy
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      simdy,
+                      tasty ^>=1.5.3,
+                      tasty-quickcheck ^>=0.11.1,
+                      tasty-hunit ^>=0.10.2
 
 test-suite float-minmax-test
     import:           warnings

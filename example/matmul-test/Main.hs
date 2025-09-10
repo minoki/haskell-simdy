@@ -22,6 +22,7 @@ shrinkNat :: Natural -> [Natural]
 shrinkNat n | n <= 1 = []
             | otherwise = [n - 1]
 
+properties :: TestTree
 properties = testGroup "(checked by QuickCheck)"
   [ QC.testProperty "matMulNaive == matMulSIMD X4 Float" $
       QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
