@@ -14,6 +14,8 @@
 //   * propagate NaN
 //   * raise INVALID on signaling NaN
 
+#pragma STDC FENV_ACCESS ON
+
 double hs_simdy_minimum_double(double x, double y)
 {
 #if defined(__aarch64__)

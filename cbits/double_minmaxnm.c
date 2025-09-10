@@ -14,6 +14,8 @@
 //   * NaN is missing data
 //   * raise INVALID on signaling NaN
 
+#pragma STDC FENV_ACCESS ON
+
 // Convert (possible) signaling NaN to quiet one
 #if defined(__SSE2__)
 __attribute__((always_inline)) static inline
