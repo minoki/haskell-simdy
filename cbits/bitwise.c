@@ -270,6 +270,9 @@ __m128i hs_simdy_shiftR_int64x2(__m128i x, HsInt y)
 #else
     _Alignas(16) int64_t buf[2];
     memcpy(buf, &x, 16);
+    if (y >= 64) {
+        y = 63;
+    }
     buf[0] >>= y;
     buf[1] >>= y;
     memcpy(&x, buf, 16);
@@ -339,6 +342,9 @@ __m256i hs_simdy_shiftR_int64x4(__m256i x, HsInt y)
 #else
     _Alignas(16) int64_t buf[4];
     memcpy(buf, &x, 32);
+    if (y >= 64) {
+        y = 63;
+    }
     buf[0] >>= y;
     buf[1] >>= y;
     buf[2] >>= y;
