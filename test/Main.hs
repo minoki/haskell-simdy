@@ -1,10 +1,12 @@
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Main (main) where
+import qualified Data.Bits
 import           Data.Int
 import           Data.Kind
 import           Data.Proxy
 import           Data.Simdy (SIMD, X16, X2, X32, X4, X8)
+import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class as S
 import           Data.Word
 import           GHC.Exts (IsList (Item, fromList, toList))
@@ -139,11 +141,31 @@ testFloating proxy = testGroup "Floating"
   ]
 
 testEnum :: forall x a. (Enum a, EnumFromZero x a, KnownSIMDLength x, ListLike x a, QC.Arbitrary a, Eq a, Show a) => Proxy (x a) -> TestTree
-testEnum proxy = testGroup "Floating"
-  [ testCase "enumFromZero" $ toList (enumFromZero :: x a) @?= [0..fromIntegral n - 1]
-  ]
+testEnum proxy = testCase "enumFromZero" $ toList (enumFromZero :: x a) @?= [0..fromIntegral n - 1]
   where
     n = simdLen proxy
+
+testBits :: forall x a. (Data.Bits.FiniteBits a, MiniBits (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testBits proxy = testGroup "Bits"
+  [ QC.testProperty ".&." $ \a b ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) .&. fromSizedList b) === zipWith (Data.Bits..&.) (unSized a) (unSized b)
+  , QC.testProperty ".|." $ \a b ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) .|. fromSizedList b) === zipWith (Data.Bits..|.) (unSized a) (unSized b)
+  , QC.testProperty "xor" $ \a b ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) `xor` fromSizedList b) === zipWith Data.Bits.xor (unSized a) (unSized b)
+  , QC.testProperty "complement" $ \a ->
+      toList (complement (fromSizedList a `asProxyTypeOf` proxy)) === map Data.Bits.complement (unSized a)
+  , QC.testProperty "shiftL" $ \(QC.NonNegative i) a ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) `shiftL` i) === map (`Data.Bits.shiftL` i) (unSized a)
+  , QC.testProperty "unsafeShiftL" $ QC.forAll (QC.chooseInt (0, bs - 1)) $ \i a ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) `unsafeShiftL` i) === map (`Data.Bits.shiftL` i) (unSized a)
+  , QC.testProperty "shiftR" $ \(QC.NonNegative i) a ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) `shiftR` i) === map (`Data.Bits.shiftR` i) (unSized a)
+  , QC.testProperty "unsafeShiftL" $ QC.forAll (QC.chooseInt (0, bs - 1)) $ \i a ->
+      toList ((fromSizedList a `asProxyTypeOf` proxy) `unsafeShiftR` i) === map (`Data.Bits.shiftR` i) (unSized a)
+  ]
+  where
+    bs = Data.Bits.finiteBitSize (undefined :: a)
 
 properties :: forall x
             . ( SIMD x
@@ -181,6 +203,7 @@ properties _ =
       , testBroadcast proxy
       , testSelect proxy
       -- , testEq proxy
+      -- , testBits proxy
       ]
   , let proxy :: Proxy (x Int8)
         proxy = Proxy
@@ -192,6 +215,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Int16)
         proxy = Proxy
@@ -203,6 +227,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Int32)
         proxy = Proxy
@@ -214,6 +239,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Int64)
         proxy = Proxy
@@ -225,6 +251,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Word8)
         proxy = Proxy
@@ -236,6 +263,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Word16)
         proxy = Proxy
@@ -247,6 +275,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Word32)
         proxy = Proxy
@@ -258,6 +287,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Word64)
         proxy = Proxy
@@ -269,6 +299,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBits proxy
       ]
   , let proxy :: Proxy (x Float)
         proxy = Proxy
