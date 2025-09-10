@@ -235,7 +235,7 @@ gen !vecCount !maxBits
              in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
                 ,"  leF !x !y = notF (ltF y x)"
-                ,"  gtF !x !y = ltF x y"
+                ,"  gtF !x !y = ltF y x"
                 ,"  geF !x !y = notF (ltF x y)"
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
