@@ -5,8 +5,15 @@ module Data.Simdy
   , broadcast
   , liftSIMD
   , liftSIMD2
+  , selectSIMD
   , SIMDEq
+  , (==^)
+  , (/=^)
   , SIMDOrd
+  , (<^)
+  , (<=^)
+  , (>^)
+  , (>=^)
   , SIMDNum
   , SIMDFractional
   , SIMDFloating

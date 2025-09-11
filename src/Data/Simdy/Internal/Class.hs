@@ -14,16 +14,16 @@ import           Data.Coerce (coerce)
 import           Data.Complex (Complex)
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Int (Int16, Int32, Int64, Int8)
-import           Data.Kind (Type, Constraint)
-import           Data.Monoid (Sum, Product)
+import           Data.Kind (Constraint, Type)
+import           Data.Monoid (Product, Sum)
 import           Data.Primitive (Prim (..))
-import           Data.Semigroup (Min, Max)
+import           Data.Semigroup (Max, Min)
 import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class.Generated as M
 import           Data.Word (Word16, Word32, Word64, Word8)
 import           Foreign.Ptr (Ptr)
 import           Foreign.Storable
-import           GHC.Exts (ByteArray#, MutableByteArray#, Int#, State#)
+import           GHC.Exts (ByteArray#, Int#, MutableByteArray#, State#)
 import           GHC.TypeNats (KnownNat, Natural)
 import           Prelude hiding (max, min, not, (&&), (/=), (<), (<=), (==),
                           (>), (>=), (||))
