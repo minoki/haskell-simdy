@@ -2,7 +2,7 @@ module Data.Simdy.Vector.Bundle where
 import           Control.Monad.Primitive (PrimMonad, PrimState, stToPrim)
 import           Control.Monad.ST (ST, runST)
 import           Data.Functor.Identity (Identity (Identity, runIdentity))
-import           Data.Simdy.Internal.Class hiding ((<), (<=), (>), (>=))
+import           Data.Simdy.Internal.Class hiding ((<), (<=), (>), (>=), min)
 import           Data.Simdy.Internal.Default (SIMD (horizontalFold),
                                               SIMDElement)
 import           Data.Simdy.Vector.Class

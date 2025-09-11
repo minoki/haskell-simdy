@@ -25,8 +25,8 @@ import           Foreign.Ptr (Ptr)
 import           Foreign.Storable
 import           GHC.Exts (ByteArray#, MutableByteArray#, Int#, State#)
 import           GHC.TypeNats (KnownNat, Natural)
-import           Prelude hiding (not, (&&), (/=), (<), (<=), (==), (>), (>=),
-                          (||))
+import           Prelude hiding (max, min, not, (&&), (/=), (<), (<=), (==),
+                          (>), (>=), (||))
 import qualified Prelude
 
 type HalfVector :: (Type -> Type) -> Type -> Type
@@ -378,6 +378,89 @@ instance OrderedF f a => Ordered (WrappedMulti f a) where
   {-# INLINE (<=) #-}
   {-# INLINE (>) #-}
   {-# INLINE (>=) #-}
+
+class MinMax a where
+  min :: a -> a -> a
+  max :: a -> a -> a
+  minimumNumber :: a -> a -> a
+  maximumNumber :: a -> a -> a
+
+instance Ord a => MinMax (Scalar a) where
+  min = coerce (Prelude.min @a)
+  max = coerce (Prelude.max @a)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
+
+deriving via Scalar Int instance MinMax Int
+deriving via Scalar Int8 instance MinMax Int8
+deriving via Scalar Int16 instance MinMax Int16
+deriving via Scalar Int32 instance MinMax Int32
+deriving via Scalar Int64 instance MinMax Int64
+deriving via Scalar Word instance MinMax Word
+deriving via Scalar Word8 instance MinMax Word8
+deriving via Scalar Word16 instance MinMax Word16
+deriving via Scalar Word32 instance MinMax Word32
+deriving via Scalar Word64 instance MinMax Word64
+
+foreign import ccall unsafe "hs_simdy_minimum_float"
+  minimumFloat :: Float -> Float -> Float
+
+foreign import ccall unsafe "hs_simdy_maximum_float"
+  maximumFloat :: Float -> Float -> Float
+
+foreign import ccall unsafe "hs_simdy_minimumNumber_float"
+  minimumNumberFloat :: Float -> Float -> Float
+
+foreign import ccall unsafe "hs_simdy_maximumNumber_float"
+  maximumNumberFloat :: Float -> Float -> Float
+
+foreign import ccall unsafe "hs_simdy_minimum_double"
+  minimumDouble :: Double -> Double -> Double
+
+foreign import ccall unsafe "hs_simdy_maximum_double"
+  maximumDouble :: Double -> Double -> Double
+
+foreign import ccall unsafe "hs_simdy_minimumNumber_double"
+  minimumNumberDouble :: Double -> Double -> Double
+
+foreign import ccall unsafe "hs_simdy_maximumNumber_double"
+  maximumNumberDouble :: Double -> Double -> Double
+
+-- | IEEE 754-2019 compliant instance
+instance MinMax Float where
+  min = minimumFloat
+  max = maximumFloat
+  minimumNumber = minimumNumberFloat
+  maximumNumber = maximumNumberFloat
+
+-- | IEEE 754-2019 compliant instance
+instance MinMax Double where
+  min = minimumDouble
+  max = maximumDouble
+  minimumNumber = minimumNumberDouble
+  maximumNumber = maximumNumberDouble
+
+class MinMaxF f a where
+  minF :: f a -> f a -> f a
+  maxF :: f a -> f a -> f a
+  minimumNumberF :: f a -> f a -> f a
+  maximumNumberF :: f a -> f a -> f a
+
+deriving instance MinMax a => MinMax (Identity a)
+
+instance MinMaxF f a => MinMax (WrappedMulti f a) where
+  min = coerce (minF @f @a)
+  max = coerce (maxF @f @a)
+  minimumNumber = coerce (minimumNumberF @f @a)
+  maximumNumber = coerce (maximumNumberF @f @a)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 
 class NumF f a where
   plusF :: f a -> f a -> f a

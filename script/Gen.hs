@@ -153,6 +153,7 @@ gen !vecCount !maxBits
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FractionalF " ++ tyCon ++ " a => Fractional (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FloatingF " ++ tyCon ++ " a => Floating (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BitsF " ++ tyCon ++ " a => MiniBits (" ++ tyCon ++ " a)"]
+    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"]
   where
     tyCon = 'X' : show vecCount
     genType name primCon !bitsPerElem maxBits others
@@ -225,6 +226,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
+                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  minF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  maxF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  minimumNumberF = minF"
+                ,"  maximumNumberF = maxF"
+                ,"  {-# INLINE minF #-}"
+                ,"  {-# INLINE maxF #-}"
+                ,"  {-# INLINE minimumNumberF #-}"
+                ,"  {-# INLINE maximumNumberF #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -241,6 +251,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
+                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  minF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(min" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  maxF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(max" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  minimumNumberF = minF"
+                ,"  maximumNumberF = maxF"
+                ,"  {-# INLINE minF #-}"
+                ,"  {-# INLINE maxF #-}"
+                ,"  {-# INLINE minimumNumberF #-}"
+                ,"  {-# INLINE maximumNumberF #-}"
                 ]
     genOrderedFloat name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -255,6 +274,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
+                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  minF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  maxF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  minimumNumberF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(minimumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  maximumNumberF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(maximumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE minF #-}"
+                ,"  {-# INLINE maxF #-}"
+                ,"  {-# INLINE minimumNumberF #-}"
+                ,"  {-# INLINE maximumNumberF #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -271,6 +299,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
+                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  minF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(minimum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  maxF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(maximum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  minimumNumberF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(minimumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  maximumNumberF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(maximumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE minF #-}"
+                ,"  {-# INLINE maxF #-}"
+                ,"  {-# INLINE minimumNumberF #-}"
+                ,"  {-# INLINE maximumNumberF #-}"
                 ]
     genNum isSigned name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -717,7 +754,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           GHC.IO"
     ,"import           GHC.Word"
     ,"import qualified Data.Vector.Unboxed.Base as VUB"
-    ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=))"
+    ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)"
     ] ++ gen n maxBits
 
 genHalfFile :: String -> [String] -> [Int] -> Int -> [String]

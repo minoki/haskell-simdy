@@ -24,6 +24,7 @@ module Data.Simdy.Internal.SIMD128
   , SIMDFractional
   , SIMDFloating
   , SIMDBits
+  , SIMDMinMax
   , SIMDEnumFromZero
   , SIMDPrim
   -- , SIMDUnbox
@@ -213,6 +214,28 @@ instance SIMDBits Word16
 instance SIMDBits Word32
 instance SIMDBits Word64
 
+-- | Vectors whose element type is an instance of 'SIMDMinMax' can be compared using 'MinMax' class
+--
+-- @('SIMD' f, 'SIMDMinMax' a)@ implies @'MinMax' (f a)@.
+class ( MinMax a
+      , SIMDElement a
+      , MinMaxF X2 a
+      , MinMaxF X4 a
+      , MinMaxF X8 a
+      , MinMaxF X16 a
+      , MinMaxF X32 a
+      ) => SIMDMinMax a
+instance SIMDMinMax Int8
+instance SIMDMinMax Int16
+instance SIMDMinMax Int32
+instance SIMDMinMax Int64
+instance SIMDMinMax Word8
+instance SIMDMinMax Word16
+instance SIMDMinMax Word32
+instance SIMDMinMax Word64
+instance SIMDMinMax Float
+instance SIMDMinMax Double
+
 class ( Num a
       , SIMDElement a
       , EnumFromZero X2 a
@@ -317,6 +340,7 @@ class ( KnownSIMDLength f
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
       , forall a. SIMDBits a => MiniBits (f a)
+      , forall a. SIMDMinMax a => MinMax (f a)
       , forall a. SIMDEnumFromZero a => EnumFromZero_ f a
       ) => SIMD f where
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a

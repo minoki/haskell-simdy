@@ -125,7 +125,7 @@ __m256d hs_simdy_minimum_doublex4(__m256d xx, __m256d yy)
         return _mm256_or_pd(result_ord, result_unord);
     } else {
         // No NaN in input
-        __m256d neq = _mm256_cmp_pd(xx, yy, 0xc); // not-equal, non-signaling
+        __m256d neq = _mm256_cmp_pd(xx, yy, 0x4); // not-equal, non-signaling
         __m256d zz_neq = _mm256_min_pd(xx, yy);
         __m256d zz_eq = _mm256_or_pd(xx, yy);
         // neq ? zz_neq : zz_eq = (neq & zz_neq) | (~neq & zz_eq)
@@ -150,7 +150,7 @@ __m256d hs_simdy_maximum_doublex4(__m256d xx, __m256d yy)
         return _mm256_or_pd(result_ord, result_unord);
     } else {
         // No NaN in input
-        __m256d neq = _mm256_cmp_pd(xx, yy, 0xc); // not-equal, non-signaling
+        __m256d neq = _mm256_cmp_pd(xx, yy, 0x4); // not-equal, non-signaling
         __m256d zz_neq = _mm256_max_pd(xx, yy);
         __m256d zz_eq = _mm256_and_pd(xx, yy);
         // neq ? zz_neq : zz_eq = (neq & zz_neq) | (~neq & zz_eq)
@@ -163,7 +163,14 @@ __m128d hs_simdy_minimum_doublex2_avx512(__m128d xx, __m128d yy)
 {
     __m128d m = _mm_range_pd(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm_mask_add_pd
+    __m128d result = m;
+    asm("vaddpd %3, %2, %0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm_mask_add_pd(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 __attribute__((target("avx512dq,avx512vl")))
@@ -171,7 +178,14 @@ __m128d hs_simdy_maximum_doublex2_avx512(__m128d xx, __m128d yy)
 {
     __m128d m = _mm_range_pd(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm_mask_add_pd
+    __m128d result = m;
+    asm("vaddpd %3, %2, %0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm_mask_add_pd(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 __attribute__((target("avx512dq,avx512vl")))
@@ -179,7 +193,14 @@ __m256d hs_simdy_minimum_doublex4_avx512(__m256d xx, __m256d yy)
 {
     __m256d m = _mm256_range_pd(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm256_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm256_mask_add_pd
+    __m256d result = m;
+    asm("vaddpd %t3, %t2, %t0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm256_mask_add_pd(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 __attribute__((target("avx512dq,avx512vl")))
@@ -187,7 +208,14 @@ __m256d hs_simdy_maximum_doublex4_avx512(__m256d xx, __m256d yy)
 {
     __m256d m = _mm256_range_pd(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm256_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm256_mask_add_pd
+    __m256d result = m;
+    asm("vaddpd %t3, %t2, %t0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm256_mask_add_pd(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 __attribute__((target("avx512dq")))
@@ -195,7 +223,14 @@ __m512d hs_simdy_minimum_doublex8(__m512d xx, __m512d yy)
 {
     __m512d m = _mm512_range_pd(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm512_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm512_mask_add_pd
+    __m512d result = m;
+    asm("vaddpd %g3, %g2, %g0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm512_mask_add_pd(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 __attribute__((target("avx512dq")))
@@ -203,7 +238,14 @@ __m512d hs_simdy_maximum_doublex8(__m512d xx, __m512d yy)
 {
     __m512d m = _mm512_range_pd(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm512_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm512_mask_add_pd
+    __m512d result = m;
+    asm("vaddpd %g3, %g2, %g0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm512_mask_add_pd(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 #elif defined(__aarch64__)

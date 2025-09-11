@@ -10,7 +10,7 @@ import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class as S
 import           Data.Word
 import           GHC.Exts (IsList (Item, fromList, toList))
-import           Prelude hiding ((/=), (<), (<=), (==), (>), (>=))
+import           Prelude hiding ((/=), (<), (<=), (==), (>), (>=), min, max)
 import qualified Prelude
 import           Test.Tasty
 import           Test.Tasty.HUnit
@@ -167,6 +167,18 @@ testBits proxy = testGroup "Bits"
   where
     bs = Data.Bits.finiteBitSize (undefined :: a)
 
+testMinMax :: forall x a. (MinMax a, MinMax (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testMinMax proxy = testGroup "MinMax"
+  [ QC.testProperty "min" $ \a b ->
+      toList (min (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b)) === zipWith min (unSized a) (unSized b)
+  , QC.testProperty "max" $ \a b ->
+      toList (max (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b)) === zipWith max (unSized a) (unSized b)
+  , QC.testProperty "minimumNumber" $ \a b ->
+      toList (minimumNumber (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b)) === zipWith minimumNumber (unSized a) (unSized b)
+  , QC.testProperty "maximumNumber" $ \a b ->
+      toList (maximumNumber (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b)) === zipWith maximumNumber (unSized a) (unSized b)
+  ]
+
 properties :: forall x
             . ( SIMD x
               , ListLike x Bool
@@ -216,6 +228,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Int16)
         proxy = Proxy
@@ -228,6 +241,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Int32)
         proxy = Proxy
@@ -240,6 +254,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Int64)
         proxy = Proxy
@@ -252,6 +267,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Word8)
         proxy = Proxy
@@ -264,6 +280,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Word16)
         proxy = Proxy
@@ -276,6 +293,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Word32)
         proxy = Proxy
@@ -288,6 +306,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Word64)
         proxy = Proxy
@@ -300,6 +319,7 @@ properties _ =
       , testNum proxy
       , testEnum proxy
       , testBits proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Float)
         proxy = Proxy
@@ -313,6 +333,7 @@ properties _ =
       , testFractional proxy
       , testFloating proxy
       , testEnum proxy
+      , testMinMax proxy
       ]
   , let proxy :: Proxy (x Double)
         proxy = Proxy
@@ -326,6 +347,7 @@ properties _ =
       , testFractional proxy
       , testFloating proxy
       , testEnum proxy
+      , testMinMax proxy
       ]
   ]
 

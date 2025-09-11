@@ -300,6 +300,60 @@ foreign import ccall unsafe "hs_simdy_shiftR_word32x8"
 foreign import ccall unsafe "hs_simdy_shiftR_word64x4"
   shiftRWord64X4# :: Word64X4# -> Int# -> Word64X4#
 
+#if !MIN_VERSION_ghc_prim(0, 13, 0)
+--
+-- Integer minimum/maximum
+--
+
+foreign import ccall unsafe "hs_simdy_minInt8X32"
+  minInt8X32# :: Int8X32# -> Int8X32# -> Int8X32#
+
+foreign import ccall unsafe "hs_simdy_minInt16X16"
+  minInt16X16# :: Int16X16# -> Int16X16# -> Int16X16#
+
+foreign import ccall unsafe "hs_simdy_minInt32X8"
+  minInt32X8# :: Int32X8# -> Int32X8# -> Int32X8#
+
+foreign import ccall unsafe "hs_simdy_minInt64X4"
+  minInt64X4# :: Int64X4# -> Int64X4# -> Int64X4#
+
+foreign import ccall unsafe "hs_simdy_minWord8X32"
+  minWord8X32# :: Word8X32# -> Word8X32# -> Word8X32#
+
+foreign import ccall unsafe "hs_simdy_minWord16X16"
+  minWord16X16# :: Word16X16# -> Word16X16# -> Word16X16#
+
+foreign import ccall unsafe "hs_simdy_minWord32X8"
+  minWord32X8# :: Word32X8# -> Word32X8# -> Word32X8#
+
+foreign import ccall unsafe "hs_simdy_minWord64X4"
+  minWord64X4# :: Word64X4# -> Word64X4# -> Word64X4#
+
+foreign import ccall unsafe "hs_simdy_maxInt8X32"
+  maxInt8X32# :: Int8X32# -> Int8X32# -> Int8X32#
+
+foreign import ccall unsafe "hs_simdy_maxInt16X16"
+  maxInt16X16# :: Int16X16# -> Int16X16# -> Int16X16#
+
+foreign import ccall unsafe "hs_simdy_maxInt32X8"
+  maxInt32X8# :: Int32X8# -> Int32X8# -> Int32X8#
+
+foreign import ccall unsafe "hs_simdy_maxInt64X4"
+  maxInt64X4# :: Int64X4# -> Int64X4# -> Int64X4#
+
+foreign import ccall unsafe "hs_simdy_maxWord8X32"
+  maxWord8X32# :: Word8X32# -> Word8X32# -> Word8X32#
+
+foreign import ccall unsafe "hs_simdy_maxWord16X16"
+  maxWord16X16# :: Word16X16# -> Word16X16# -> Word16X16#
+
+foreign import ccall unsafe "hs_simdy_maxWord32X8"
+  maxWord32X8# :: Word32X8# -> Word32X8# -> Word32X8#
+
+foreign import ccall unsafe "hs_simdy_maxWord64X4"
+  maxWord64X4# :: Word64X4# -> Word64X4# -> Word64X4#
+#endif
+
 --
 -- Floating-point minimum/maximum (IEEE compliant)
 --

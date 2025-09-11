@@ -223,7 +223,14 @@ __m128 hs_simdy_minimum_floatx4_avx512(__m128 xx, __m128 yy)
 {
     __m128 m = _mm_range_ps(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm_mask_add_ps
+    __m128 result = m;
+    asm("vaddps %3, %2, %0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm_mask_add_ps(m, unord, xx, yy); // propagate NaN
+#endif
     /*
     __m128 unord = _mm_cmp_ps(xx, yy, 0x3);
     __m128 a = _mm_or_ps(xx, yy); // propagate NaN
@@ -237,7 +244,14 @@ __m128 hs_simdy_maximum_floatx4_avx512(__m128 xx, __m128 yy)
 {
     __m128 m = _mm_range_ps(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm_mask_add_ps
+    __m128 result = m;
+    asm("vaddps %3, %2, %0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm_mask_add_ps(m, unord, xx, yy); // propagate NaN
+#endif
     /*
     __m128 unord = _mm_cmp_ps(xx, yy, 0x3);
     __m128 a = _mm_or_ps(xx, yy); // propagate NaN
@@ -251,7 +265,14 @@ __m256 hs_simdy_minimum_floatx8_avx512(__m256 xx, __m256 yy)
 {
     __m256 m = _mm256_range_ps(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm256_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm256_mask_add_ps
+    __m256 result = m;
+    asm("vaddps %t3, %t2, %t0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm256_mask_add_ps(m, unord, xx, yy); // propagate NaN
+#endif
     /*
     __m256 unord = _mm256_cmp_ps(xx, yy, 0x3);
     __m256 a = _mm256_or_ps(xx, yy); // propagate NaN
@@ -265,7 +286,14 @@ __m256 hs_simdy_maximum_floatx8_avx512(__m256 xx, __m256 yy)
 {
     __m256 m = _mm256_range_ps(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm256_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm256_mask_add_ps
+    __m256 result = m;
+    asm("vaddps %t3, %t2, %t0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm256_mask_add_ps(m, unord, xx, yy); // propagate NaN
+#endif
     /*
     __m256 unord = _mm256_cmp_ps(xx, yy, 0x3);
     __m256 a = _mm256_or_ps(xx, yy); // propagate NaN
@@ -279,7 +307,14 @@ __m512 hs_simdy_minimum_floatx16(__m512 xx, __m512 yy)
 {
     __m512 m = _mm512_range_ps(xx, yy, 4); // NaN is missing data
     __mmask16 unord = _mm512_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm512_mask_add_ps
+    __m512 result = m;
+    asm("vaddps %g3, %g2, %g0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm512_mask_add_ps(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 __attribute__((target("avx512dq")))
@@ -287,7 +322,14 @@ __m512 hs_simdy_maximum_floatx16(__m512 xx, __m512 yy)
 {
     __m512 m = _mm512_range_ps(xx, yy, 5); // NaN is missing data
     __mmask16 unord = _mm512_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
+#if defined(__clang__)
+    // LLVM may emit add+mov for _mm512_mask_add_ps
+    __m512 result = m;
+    asm("vaddps %g3, %g2, %g0 %{%1%}" : "+v"(result) : "Yk"(unord), "v"(xx), "v"(yy));
+    return result;
+#else
     return _mm512_mask_add_ps(m, unord, xx, yy); // propagate NaN
+#endif
 }
 
 #elif defined(__aarch64__)

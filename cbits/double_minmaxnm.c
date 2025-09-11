@@ -166,7 +166,7 @@ __m256d hs_simdy_minimumNumber_doublex4(__m256d xx, __m256d yy)
         return _mm256_blendv_pd(result_ord, result_unord, unord);
     } else {
         // No NaN in input
-        __m256d neq = _mm256_cmp_pd(xx, yy, 0xc); // not-equal, non-signaling
+        __m256d neq = _mm256_cmp_pd(xx, yy, 0x4); // not-equal, non-signaling
         __m256d zz_neq = _mm256_min_pd(xx, yy);
         __m256d zz_eq = _mm256_or_pd(xx, yy);
         // neq ? zz_neq : zz_eq = (neq & zz_neq) | (~neq & zz_eq)
@@ -193,7 +193,7 @@ __m256d hs_simdy_maximumNumber_doublex4(__m256d xx, __m256d yy)
         return _mm256_blendv_pd(result_ord, result_unord, unord);
     } else {
         // No NaN in input
-        __m256d neq = _mm256_cmp_pd(xx, yy, 0xc); // not-equal, non-signaling
+        __m256d neq = _mm256_cmp_pd(xx, yy, 0x4); // not-equal, non-signaling
         __m256d zz_neq = _mm256_max_pd(xx, yy);
         __m256d zz_eq = _mm256_and_pd(xx, yy);
         // neq ? zz_neq : zz_eq = (neq & zz_neq) | (~neq & zz_eq)

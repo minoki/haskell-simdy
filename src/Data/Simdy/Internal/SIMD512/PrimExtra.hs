@@ -203,6 +203,60 @@ foreign import ccall unsafe "hs_simdy_shiftR_word32x16"
 foreign import ccall unsafe "hs_simdy_shiftR_word64x8"
   shiftRWord64X8# :: Word64X8# -> Int# -> Word64X8#
 
+#if !MIN_VERSION_ghc_prim(0, 13, 0)
+--
+-- Integer minimum/maximum
+--
+
+foreign import ccall unsafe "hs_simdy_minInt8X64"
+  minInt8X64# :: Int8X64# -> Int8X64# -> Int8X64#
+
+foreign import ccall unsafe "hs_simdy_minInt16X32"
+  minInt16X32# :: Int16X32# -> Int16X32# -> Int16X32#
+
+foreign import ccall unsafe "hs_simdy_minInt32X16"
+  minInt32X16# :: Int32X16# -> Int32X16# -> Int32X16#
+
+foreign import ccall unsafe "hs_simdy_minInt64X8"
+  minInt64X8# :: Int64X8# -> Int64X8# -> Int64X8#
+
+foreign import ccall unsafe "hs_simdy_minWord8X64"
+  minWord8X64# :: Word8X64# -> Word8X64# -> Word8X64#
+
+foreign import ccall unsafe "hs_simdy_minWord16X32"
+  minWord16X32# :: Word16X32# -> Word16X32# -> Word16X32#
+
+foreign import ccall unsafe "hs_simdy_minWord32X16"
+  minWord32X16# :: Word32X16# -> Word32X16# -> Word32X16#
+
+foreign import ccall unsafe "hs_simdy_minWord64X8"
+  minWord64X8# :: Word64X8# -> Word64X8# -> Word64X8#
+
+foreign import ccall unsafe "hs_simdy_maxInt8X64"
+  maxInt8X64# :: Int8X64# -> Int8X64# -> Int8X64#
+
+foreign import ccall unsafe "hs_simdy_maxInt16X32"
+  maxInt16X32# :: Int16X32# -> Int16X32# -> Int16X32#
+
+foreign import ccall unsafe "hs_simdy_maxInt32X16"
+  maxInt32X16# :: Int32X16# -> Int32X16# -> Int32X16#
+
+foreign import ccall unsafe "hs_simdy_maxInt64X8"
+  maxInt64X8# :: Int64X8# -> Int64X8# -> Int64X8#
+
+foreign import ccall unsafe "hs_simdy_maxWord8X64"
+  maxWord8X64# :: Word8X64# -> Word8X64# -> Word8X64#
+
+foreign import ccall unsafe "hs_simdy_maxWord16X32"
+  maxWord16X32# :: Word16X32# -> Word16X32# -> Word16X32#
+
+foreign import ccall unsafe "hs_simdy_maxWord32X16"
+  maxWord32X16# :: Word32X16# -> Word32X16# -> Word32X16#
+
+foreign import ccall unsafe "hs_simdy_maxWord64X8"
+  maxWord64X8# :: Word64X8# -> Word64X8# -> Word64X8#
+#endif
+
 --
 -- Floating-point minimum/maximum (IEEE compliant)
 --

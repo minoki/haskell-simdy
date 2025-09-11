@@ -19,6 +19,7 @@ extra-source-files: cbits/mask.h
                     cbits/int_compare.c
                     cbits/float_compare.c
                     cbits/double_compare.c
+                    cbits/int_minmax.c
 
 flag no-simd
     description: Don't use native vector types
@@ -71,6 +72,7 @@ library
                       Data.Simdy.Class.Bits
                       Data.Simdy.Horizontal
                       Data.Simdy.Mask
+                      Data.Simdy.MinMax
                       Data.Simdy.Pack
                       Data.Simdy.Split
                       Data.Simdy.Tuple
@@ -100,6 +102,8 @@ library
                           cbits/int_compare_avx512.c
                           cbits/float_compare_avx512.c
                           cbits/double_compare_avx512.c
+        if impl(ghc < 9.12)
+            c-sources:    cbits/int_minmax_avx512.c
     elif flag(haswell)
         c-sources:        cbits/mask_haswell.c
                           cbits/select_haswell.c
@@ -107,6 +111,8 @@ library
                           cbits/int_compare_haswell.c
                           cbits/float_compare_haswell.c
                           cbits/double_compare_haswell.c
+        if impl(ghc < 9.12)
+            c-sources:    cbits/int_minmax_haswell.c
     else
         c-sources:        cbits/mask_baseline.c
                           cbits/select_baseline.c
@@ -114,6 +120,8 @@ library
                           cbits/int_compare_baseline.c
                           cbits/float_compare_baseline.c
                           cbits/double_compare_baseline.c
+        if impl(ghc < 9.12)
+            c-sources:    cbits/int_minmax_baseline.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.Prim

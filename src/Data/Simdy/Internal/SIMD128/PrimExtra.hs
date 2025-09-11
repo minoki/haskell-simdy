@@ -427,6 +427,60 @@ foreign import ccall unsafe "hs_simdy_shiftR_word32x4"
 foreign import ccall unsafe "hs_simdy_shiftR_word64x2"
   shiftRWord64X2# :: Word64X2# -> Int# -> Word64X2#
 
+#if !MIN_VERSION_ghc_prim(0, 13, 0)
+--
+-- Integer minimum/maximum
+--
+
+foreign import ccall unsafe "hs_simdy_minInt8X16"
+  minInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_minInt16X8"
+  minInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_minInt32X4"
+  minInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_minInt64X2"
+  minInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_minWord8X16"
+  minWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_minWord16X8"
+  minWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_minWord32X4"
+  minWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_minWord64X2"
+  minWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+foreign import ccall unsafe "hs_simdy_maxInt8X16"
+  maxInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_maxInt16X8"
+  maxInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_maxInt32X4"
+  maxInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_maxInt64X2"
+  maxInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_maxWord8X16"
+  maxWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_maxWord16X8"
+  maxWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_maxWord32X4"
+  maxWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_maxWord64X2"
+  maxWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+#endif
+
 --
 -- Floating-point minimum/maximum (IEEE compliant)
 --
