@@ -197,6 +197,7 @@ instance SIMDFloating Double
 -- @('SIMD' f, 'SIMDBits' a)@ implies @'MiniBits' (f a)@.
 class ( Bits a
       , MiniBits a
+      , SIMDElement a
       , BitsF X2 a
       , BitsF X4 a
       , BitsF X8 a
@@ -213,6 +214,7 @@ instance SIMDBits Word32
 instance SIMDBits Word64
 
 class ( Num a
+      , SIMDElement a
       , EnumFromZero X2 a
       , EnumFromZero X4 a
       , EnumFromZero X8 a
