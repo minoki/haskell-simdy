@@ -519,22 +519,22 @@ uint8_t hs_simdy_int64x2_eq_densemask(int64x2_t a, int64x2_t b)
 
 uint8x16_t hs_simdy_int8x16_lt(int8x16_t a, int8x16_t b)
 {
-    return vcltq_s8(b, a);
+    return vcltq_s8(a, b);
 }
 
 uint16x8_t hs_simdy_int16x8_lt(int16x8_t a, int16x8_t b)
 {
-    return vcltq_s16(b, a);
+    return vcltq_s16(a, b);
 }
 
 uint32x4_t hs_simdy_int32x4_lt(int32x4_t a, int32x4_t b)
 {
-    return vcltq_s32(b, a);
+    return vcltq_s32(a, b);
 }
 
 uint64x2_t hs_simdy_int64x2_lt(int64x2_t a, int64x2_t b)
 {
-    return vcltq_s64(b, a);
+    return vcltq_s64(a, b);
 }
 
 uint16_t hs_simdy_int8x16_lt_densemask(int8x16_t a, int8x16_t b)
