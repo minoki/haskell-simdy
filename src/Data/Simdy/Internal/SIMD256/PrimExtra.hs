@@ -126,10 +126,10 @@ foreign import ccall unsafe "hs_simdy_select_int32x8_densemask"
 foreign import ccall unsafe "hs_simdy_select_int64x4_densemask"
   selectWord64X4# :: Word8 -> Word64X4# -> Word64X4# -> Word64X4#
 
-foreign import ccall unsafe "hs_simdy_select_floatx8"
+foreign import ccall unsafe "hs_simdy_select_floatx8_densemask"
   selectFloatX8# :: Word8 -> FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_select_doublex4"
+foreign import ccall unsafe "hs_simdy_select_doublex4_densemask"
   selectDoubleX4# :: Word8 -> DoubleX4# -> DoubleX4# -> DoubleX4#
 
 --
@@ -386,7 +386,7 @@ foreign import ccall unsafe "hs_simdy_int32x8_eq_densemask"
 foreign import ccall unsafe "hs_simdy_int64x4_eq_densemask"
   eqWord64X4# :: Word64X4# -> Word64X4# -> Word8
 
-foreign import ccall unsafe "hs_simdy_floatx4_eq_densemask"
+foreign import ccall unsafe "hs_simdy_floatx8_eq_densemask"
   eqFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
 foreign import ccall unsafe "hs_simdy_doublex4_eq_densemask"

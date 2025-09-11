@@ -36,8 +36,9 @@ inline uint32_t hs_simdy_pack_mask8x32(__m256i v)
 
 inline uint16_t hs_simdy_pack_mask16x16(__m256i v)
 {
-    __m256i zero = _mm256_setzero_si256();
-    __m256i mask8x32 = _mm256_packs_epi16(v, zero);
+    __m128i hi128 = _mm256_extracti128_si256(v, 1);
+    __m256i hi = _mm256_zextsi128_si256(hi128);
+    __m256i mask8x32 = _mm256_packs_epi16(v, hi);
     return (uint16_t)_mm256_movemask_epi8(mask8x32);
 }
 
@@ -99,7 +100,7 @@ inline __m256i hs_simdy_unpack_mask8x32(uint32_t i)
     __m128i j2 = _mm_and_si128(ii2, mask_lo);
     __m128i j3 = _mm_and_si128(ii3, mask_hi);
     __m128i k0 = _mm_or_si128(j0, j1);
-    __m128i k1 = _mm_or_si128(j1, j2);
+    __m128i k1 = _mm_or_si128(j2, j3);
     __m256i k = _mm256_set_m128i(k1, k0);
     __m256i mask = _mm256_set_epi8(0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01, 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01);
     return _mm256_cmpeq_epi8(k, mask);
