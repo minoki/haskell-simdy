@@ -102,8 +102,8 @@ library
                           cbits/int_compare_avx512.c
                           cbits/float_compare_avx512.c
                           cbits/double_compare_avx512.c
-        if impl(ghc < 9.12)
-            c-sources:    cbits/int_minmax_avx512.c
+        -- Even if using GHC 9.12, C impl is needed to workaround a bug in LLVM
+        c-sources:        cbits/int_minmax_avx512.c
     elif flag(haswell)
         c-sources:        cbits/mask_haswell.c
                           cbits/select_haswell.c
