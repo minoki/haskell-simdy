@@ -138,7 +138,7 @@ __m256i hs_simdy_select_int256(__m256i mask, __m256i then, __m256i else_)
 __m256i hs_simdy_select_int8x32_densemask(uint32_t mask, __m256i then, __m256i else_)
 {
 #if defined(__AVX512VL__) && defined(__AVX512BW__)
-    __mmask16 mmask = _cvtu32_mask32(mask);
+    __mmask32 mmask = _cvtu32_mask32(mask);
     return _mm256_mask_mov_epi8(else_, mmask, then);
 #else
     return hs_simdy_select_int256(hs_simdy_unpack_mask8x32(mask), then, else_);
@@ -148,7 +148,7 @@ __m256i hs_simdy_select_int8x32_densemask(uint32_t mask, __m256i then, __m256i e
 __m256i hs_simdy_select_int16x16_densemask(uint16_t mask, __m256i then, __m256i else_)
 {
 #if defined(__AVX512VL__)
-    __mmask8 mmask = _cvtu32_mask16(mask);
+    __mmask16 mmask = _cvtu32_mask16(mask);
     return _mm256_mask_mov_epi16(else_, mmask, then);
 #else
     return hs_simdy_select_int256(hs_simdy_unpack_mask16x16(mask), then, else_);

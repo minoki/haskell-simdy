@@ -316,7 +316,7 @@ foreign import ccall unsafe "hs_simdy_int64x8_eq_densemask"
   eqWord64X8# :: Word64X8# -> Word64X8# -> Word8
 
 foreign import ccall unsafe "hs_simdy_floatx16_eq_densemask"
-  eqFloatX16# :: FloatX16# -> FloatX16# -> Word8
+  eqFloatX16# :: FloatX16# -> FloatX16# -> Word16
 
 foreign import ccall unsafe "hs_simdy_doublex8_eq_densemask"
   eqDoubleX8# :: DoubleX8# -> DoubleX8# -> Word8
@@ -350,7 +350,7 @@ foreign import ccall unsafe "hs_simdy_word64x8_lt_densemask"
   ltWord64X8# :: Word64X8# -> Word64X8# -> Word8
 
 foreign import ccall unsafe "hs_simdy_floatx16_lt_densemask"
-  ltFloatX16# :: FloatX16# -> FloatX16# -> Word8
+  ltFloatX16# :: FloatX16# -> FloatX16# -> Word16
 
 foreign import ccall unsafe "hs_simdy_doublex8_lt_densemask"
   ltDoubleX8# :: DoubleX8# -> DoubleX8# -> Word8
@@ -360,7 +360,7 @@ foreign import ccall unsafe "hs_simdy_doublex8_lt_densemask"
 --
 
 foreign import ccall unsafe "hs_simdy_floatx16_le_densemask"
-  leFloatX16# :: FloatX16# -> FloatX16# -> Word8
+  leFloatX16# :: FloatX16# -> FloatX16# -> Word16
 
 foreign import ccall unsafe "hs_simdy_doublex8_le_densemask"
   leDoubleX8# :: DoubleX8# -> DoubleX8# -> Word8
@@ -370,7 +370,7 @@ foreign import ccall unsafe "hs_simdy_doublex8_le_densemask"
 --
 
 foreign import ccall unsafe "hs_simdy_floatx16_gt_densemask"
-  gtFloatX16# :: FloatX16# -> FloatX16# -> Word8
+  gtFloatX16# :: FloatX16# -> FloatX16# -> Word16
 
 foreign import ccall unsafe "hs_simdy_doublex8_gt_densemask"
   gtDoubleX8# :: DoubleX8# -> DoubleX8# -> Word8
@@ -380,7 +380,7 @@ foreign import ccall unsafe "hs_simdy_doublex8_gt_densemask"
 --
 
 foreign import ccall unsafe "hs_simdy_floatx16_ge_densemask"
-  geFloatX16# :: FloatX16# -> FloatX16# -> Word8
+  geFloatX16# :: FloatX16# -> FloatX16# -> Word16
 
 foreign import ccall unsafe "hs_simdy_doublex8_ge_densemask"
   geDoubleX8# :: DoubleX8# -> DoubleX8# -> Word8
@@ -391,7 +391,7 @@ foreign import ccall unsafe "hs_simdy_doublex8_ge_densemask"
 --
 
 foreign import ccall unsafe "hs_simdy_floatx16_unord_densemask"
-  unordFloatX16# :: FloatX16# -> FloatX16# -> Word8
+  unordFloatX16# :: FloatX16# -> FloatX16# -> Word16
 
 foreign import ccall unsafe "hs_simdy_doublex8_unord_densemask"
   unordDoubleX8# :: DoubleX8# -> DoubleX8# -> Word8
