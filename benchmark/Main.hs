@@ -1,6 +1,8 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE MonoLocalBinds #-}
 import           Data.Proxy
 import           Data.Simdy (X16, X32, X4, X8)
+import           Data.Simdy.FMA
 import qualified Data.Simdy.Vector.Generic as V.SIMD
 import qualified Data.Vector.Unboxed as VU
 import           MatMul
@@ -52,20 +54,34 @@ main = defaultMain
     , bench "X16" $ nf (uncurry dotProdX16_D) (vecA_D, vecB_D)
     , bench "X32" $ nf (uncurry dotProdX32_D) (vecA_D, vecB_D)
     ]
-  , bgroup "matMul 1000 Float"
+  , bgroup "matMul 1000 Float" $
     [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat1000A, mat1000B)
     , bench "matMulSIMD X4" $ nf (uncurry (matMulSIMD (Proxy @X4))) (mat1000A, mat1000B)
     , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat1000A, mat1000B)
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat1000A, mat1000B)
     , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat1000A, mat1000B)
-    ]
-  , bgroup "matMul 2000 Float"
+    ] ++ case isFMAAvailable of
+      Just MkFMAWitness ->
+        [ bench "matMulFMA X4" $ nf (uncurry (matMulFMA (Proxy @X4))) (mat1000A, mat1000B)
+        , bench "matMulFMA X8" $ nf (uncurry (matMulFMA (Proxy @X8))) (mat1000A, mat1000B)
+        , bench "matMulFMA X16" $ nf (uncurry (matMulFMA (Proxy @X16))) (mat1000A, mat1000B)
+        , bench "matMulFMA X32" $ nf (uncurry (matMulFMA (Proxy @X32))) (mat1000A, mat1000B)
+        ]
+      Nothing -> []
+  , bgroup "matMul 2000 Float" $
     [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat2000A, mat2000B)
     , bench "matMulSIMD X4" $ nf (uncurry (matMulSIMD (Proxy @X4))) (mat2000A, mat2000B)
     , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat2000A, mat2000B)
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat2000A, mat2000B)
     , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat2000A, mat2000B)
-    ]
+    ] ++ case isFMAAvailable of
+      Just MkFMAWitness ->
+        [ bench "matMulFMA X4" $ nf (uncurry (matMulFMA (Proxy @X4))) (mat2000A, mat2000B)
+        , bench "matMulFMA X8" $ nf (uncurry (matMulFMA (Proxy @X8))) (mat2000A, mat2000B)
+        , bench "matMulFMA X16" $ nf (uncurry (matMulFMA (Proxy @X16))) (mat2000A, mat2000B)
+        , bench "matMulFMA X32" $ nf (uncurry (matMulFMA (Proxy @X32))) (mat2000A, mat2000B)
+        ]
+      Nothing -> []
   ]
   where
     vecA, vecB :: VU.Vector Float

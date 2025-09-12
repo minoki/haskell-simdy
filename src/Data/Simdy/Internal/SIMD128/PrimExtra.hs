@@ -1,5 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedFFITypes #-}
 module Data.Simdy.Internal.SIMD128.PrimExtra where
 import Data.Word
@@ -650,3 +651,50 @@ foreign import ccall unsafe "hs_simdy_floatx4_unord_densemask"
 foreign import ccall unsafe "hs_simdy_doublex2_unord_densemask"
   unordDoubleX2# :: DoubleX2# -> DoubleX2# -> Word8
 -}
+
+--
+-- FMA
+--
+#if !MIN_VERSION_ghc_prim(0, 13, 0)
+#if defined(USE_FMA) && MIN_VERSION_base(4, 19, 0)
+-- GHC 9.8 or later
+-- Let's hope LLVM's optimizer does a good job!
+
+fmaddFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
+fmaddFloatX4# x y z = case unpackFloatX4# x of
+  (# x0, x1, x2, x3 #) ->
+    case unpackFloatX4# y of
+      (# y0, y1, y2, y3 #) ->
+        case unpackFloatX4# z of
+          (# z0, z1, z2, z3 #) ->
+            packFloatX4#
+              (# fmaddFloat# x0 y0 z0
+               , fmaddFloat# x1 y1 z1
+               , fmaddFloat# x2 y2 z2
+               , fmaddFloat# x3 y3 z3
+               #)
+{-# INLINE fmaddFloatX4# #-}
+
+fmaddDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
+fmaddDoubleX2# x y z = case unpackDoubleX2# x of
+  (# x0, x1 #) ->
+    case unpackDoubleX2# y of
+      (# y0, y1 #) ->
+        case unpackDoubleX2# z of
+          (# z0, z1 #) ->
+            packDoubleX2#
+              (# fmaddDouble# x0 y0 z0
+               , fmaddDouble# x1 y1 z1
+               #)
+{-# INLINE fmaddDoubleX2# #-}
+
+#else
+
+foreign import ccall unsafe "hs_simdy_fmaddFloatX4"
+  fmaddFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
+
+foreign import ccall unsafe "hs_simdy_fmaddDoubleX2"
+  fmaddDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
+
+#endif
+#endif

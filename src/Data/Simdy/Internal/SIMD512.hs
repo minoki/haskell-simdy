@@ -3,6 +3,7 @@ This module contains types and classes that use 512-bit vectors (x86 AVX-512).
 
 In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. "Data.Simdy.Internal.NoSIMD", "Data.Simdy.Internal.SIMD128", "Data.Simdy.Internal.SIMD256").
 -}
+{-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Internal.SIMD512
   ( module M
@@ -25,6 +26,7 @@ module Data.Simdy.Internal.SIMD512
   , SIMDFloating
   , SIMDBits
   , SIMDMinMax
+  , SIMDFMA
   , SIMDEnumFromZero
   , SIMDPrim
   -- , SIMDUnbox
@@ -236,6 +238,17 @@ instance SIMDMinMax Word64
 instance SIMDMinMax Float
 instance SIMDMinMax Double
 
+class ( FusedMultiplyAdd a
+      , SIMDNum a
+      , FusedMultiplyAddF X2 a
+      , FusedMultiplyAddF X4 a
+      , FusedMultiplyAddF X8 a
+      , FusedMultiplyAddF X16 a
+      , FusedMultiplyAddF X32 a
+      ) => SIMDFMA a
+instance HasFMA => SIMDFMA Float
+instance HasFMA => SIMDFMA Double
+
 class ( Num a
       , SIMDElement a
       , EnumFromZero X2 a
@@ -341,6 +354,7 @@ class ( KnownSIMDLength f
       , forall a. SIMDFloating a => Floating (f a)
       , forall a. SIMDBits a => MiniBits (f a)
       , forall a. SIMDMinMax a => MinMax (f a)
+      , forall a. SIMDFMA a => FusedMultiplyAdd (f a)
       , forall a. SIMDEnumFromZero a => EnumFromZero_ f a
       ) => SIMD f where
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a

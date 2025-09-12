@@ -1,4 +1,6 @@
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Main (main) where
 import qualified Data.Bits
@@ -179,6 +181,12 @@ testMinMax proxy = testGroup "MinMax"
       toList (maximumNumber (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b)) === zipWith maximumNumber (unSized a) (unSized b)
   ]
 
+testFMA :: forall x a. (FusedMultiplyAdd a, HasFMA => FusedMultiplyAdd (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testFMA proxy = case isFMAAvailable of
+  Just MkFMAWitness -> QC.testProperty "FMA" $ \a b c ->
+    toList (fusedMultiplyAdd (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b) (fromSizedList c)) === zipWith3 fusedMultiplyAdd (unSized a) (unSized b) (unSized c)
+  Nothing -> testGroup "FMA" []
+
 properties :: forall x
             . ( SIMD x
               , ListLike x Bool
@@ -334,6 +342,7 @@ properties _ =
       , testFloating proxy
       , testEnum proxy
       , testMinMax proxy
+      , testFMA proxy
       ]
   , let proxy :: Proxy (x Double)
         proxy = Proxy
@@ -348,6 +357,7 @@ properties _ =
       , testFloating proxy
       , testEnum proxy
       , testMinMax proxy
+      , testFMA proxy
       ]
   ]
 

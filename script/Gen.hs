@@ -64,8 +64,8 @@ gen !vecCount !maxBits
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
     ]
-    ++ genType "Float" "F#" 32 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genEnumFromZero ".0#", genPrim, genStorable]
-    ++ genType "Double" "D#" 64 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genEnumFromZero ".0##", genPrim, genStorable]
+    ++ genType "Float" "F#" 32 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
+    ++ genType "Double" "D#" 64 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
     ++ genType "Int8" "I8#" 8 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
     ++ genType "Int16" "I16#" 16 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
@@ -154,6 +154,7 @@ gen !vecCount !maxBits
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FloatingF " ++ tyCon ++ " a => Floating (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BitsF " ++ tyCon ++ " a => MiniBits (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"]
+    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FusedMultiplyAddF " ++ tyCon ++ " a => FusedMultiplyAdd (" ++ tyCon ++ " a)"]
   where
     tyCon = 'X' : show vecCount
     genType name primCon !bitsPerElem maxBits others
@@ -382,6 +383,32 @@ gen !vecCount !maxBits
              in ["instance FloatingF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  -- sqrtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(sqrt" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  -- Currently. there is no sqrt" ++ shortVecName ++ "#"
+                ]
+    genFMA name primCon !bitsPerElem maxBits
+      = let bitCount = bitsPerElem * vecCount
+            vecBitCount = min bitCount maxBits
+        in if bitCount < 128 || maxBits == 0
+           then ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"#if defined(USE_FMA)"
+                ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["z" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(fusedMultiplyAdd x" ++ show i ++ " y" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE fusedMultiplyAddF #-}"
+                ,"#else"
+                ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
+                ,"#endif"
+                ]
+           else
+             let shortVecSize = vecBitCount `div` bitsPerElem
+                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecName = name ++ "X" ++ show shortVecSize
+                 suffix | shortVecCount == 1 = ""
+                        | otherwise = "WithVec" ++ show vecBitCount
+             in ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"#if defined(USE_FMA)"
+                ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["w" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(fmadd" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE fusedMultiplyAddF #-}"
+                ,"#else"
+                ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
+                ,"#endif"
                 ]
     genBits name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount

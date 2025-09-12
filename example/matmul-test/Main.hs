@@ -1,5 +1,7 @@
+{-# LANGUAGE MonoLocalBinds #-}
 import           Data.Proxy
 import           Data.Simdy
+import           Data.Simdy.FMA
 import qualified Data.Vector.Unboxed as VU
 import           GHC.TypeNats
 import           MatMul
@@ -20,10 +22,10 @@ elemTypeProxy x _ = x
 
 shrinkNat :: Natural -> [Natural]
 shrinkNat n | n <= 1 = []
-            | otherwise = [n - 1]
+            | otherwise = [n `quot` 2, n - 1]
 
 properties :: TestTree
-properties = testGroup "(checked by QuickCheck)"
+properties = testGroup "(checked by QuickCheck)" $
   [ QC.testProperty "matMulNaive == matMulSIMD X4 Float" $
       QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
         SomeNat pl ->
@@ -34,4 +36,17 @@ properties = testGroup "(checked by QuickCheck)"
                   QC.forAll (genMatrix pl pm) $ \a ->
                     QC.forAll (genMatrix pm pn) $ \b ->
                       matMulNaive a b QC.=== (matMulSIMD (Proxy @X4) a b `elemTypeProxy` Proxy @Float)
-  ]
+  ] ++ case isFMAAvailable of
+    Just MkFMAWitness ->
+      [ QC.testProperty "matMulNaive == matMulFMA X4 Float" $
+          QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
+            SomeNat pl ->
+              QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \m -> case someNatVal m of
+                SomeNat pm ->
+                  QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \n -> case someNatVal n of
+                    SomeNat pn ->
+                      QC.forAll (genMatrix pl pm) $ \a ->
+                        QC.forAll (genMatrix pm pn) $ \b ->
+                          matMulNaive a b QC.=== (matMulFMA (Proxy @X4) a b `elemTypeProxy` Proxy @Float)
+      ]
+    Nothing -> []

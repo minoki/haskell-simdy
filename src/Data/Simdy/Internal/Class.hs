@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DerivingVia #-}
@@ -28,6 +29,9 @@ import           GHC.TypeNats (KnownNat, Natural)
 import           Prelude hiding (max, min, not, (&&), (/=), (<), (<=), (==),
                           (>), (>=), (||))
 import qualified Prelude
+#if MIN_VERSION_base(4, 19, 0)
+import           GHC.Exts (Float (F#), Double (D#), fmaddFloat#, fmaddDouble#)
+#endif
 
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f
@@ -685,6 +689,60 @@ instance BitsF f a => MiniBits (WrappedMulti f a) where
   {-# INLINE unsafeShiftL #-}
   {-# INLINE shiftR #-}
   {-# INLINE unsafeShiftR #-}
+
+class Num a => FusedMultiplyAdd a where
+  fusedMultiplyAdd :: a -> a -> a -> a
+
+class HasFMA
+data FMAWitness = HasFMA => MkFMAWitness
+isFMAAvailable :: Maybe FMAWitness
+
+#if defined(USE_FMA)
+instance HasFMA
+isFMAAvailable = Just MkFMAWitness
+#else
+isFMAAvailable = Nothing
+
+fmaIsDisabled :: HasFMA => a
+fmaIsDisabled = error "simdy: FMA is disabled"
+#endif
+
+#if MIN_VERSION_base(4, 19, 0)
+-- GHC 9.8 or later
+instance FusedMultiplyAdd Float where
+  fusedMultiplyAdd (F# x) (F# y) (F# z) = F# (fmaddFloat# x y z)
+  {-# INLINE fusedMultiplyAdd #-}
+
+instance FusedMultiplyAdd Double where
+  fusedMultiplyAdd (D# x) (D# y) (D# z) = D# (fmaddDouble# x y z)
+  {-# INLINE fusedMultiplyAdd #-}
+#else
+-- Should we depend on fp-ieee?
+foreign import ccall unsafe "fmaf"
+  fmaFloat :: Float -> Float -> Float -> Float
+
+foreign import ccall unsafe "fma"
+  fmaDouble :: Double -> Double -> Double -> Double
+
+instance FusedMultiplyAdd Float where
+  fusedMultiplyAdd = fmaFloat
+  {-# INLINE fusedMultiplyAdd #-}
+
+instance FusedMultiplyAdd Double where
+  fusedMultiplyAdd = fmaDouble
+  {-# INLINE fusedMultiplyAdd #-}
+#endif
+
+class NumF f a => FusedMultiplyAddF f a where
+  fusedMultiplyAddF :: f a -> f a -> f a -> f a
+
+instance FusedMultiplyAdd a => FusedMultiplyAdd (Identity a) where
+  fusedMultiplyAdd = coerce (fusedMultiplyAdd @a)
+  {-# INLINE fusedMultiplyAdd #-}
+
+instance FusedMultiplyAddF f a => FusedMultiplyAdd (WrappedMulti f a) where
+  fusedMultiplyAdd = coerce (fusedMultiplyAddF @f @a)
+  {-# INLINE fusedMultiplyAdd #-}
 
 class KnownSIMDLength f => EnumFromZero_ f a where
   enumFromZero :: f a

@@ -20,6 +20,7 @@ extra-source-files: cbits/mask.h
                     cbits/float_compare.c
                     cbits/double_compare.c
                     cbits/int_minmax.c
+                    cbits/fma.c
 
 flag no-simd
     description: Don't use native vector types
@@ -56,6 +57,8 @@ common arch-options
         cc-options: -mavx2 -mfma -mf16c
     if (flag(haswell) || flag(avx512)) && impl(ghc >= 9.8)
         ghc-options: -mfma
+    if flag(haswell) || flag(avx512) || arch(aarch64)
+        cpp-options: -DUSE_FMA
     if flag(avx512)
         ghc-options: -mavx512f
         cpp-options: -DUSE_SIMD512 -DUSE_AVX512
@@ -70,6 +73,7 @@ library
                     , arch-options
     exposed-modules:  Data.Simdy
                       Data.Simdy.Class.Bits
+                      Data.Simdy.FMA
                       Data.Simdy.Horizontal
                       Data.Simdy.Mask
                       Data.Simdy.MinMax
@@ -104,6 +108,8 @@ library
                           cbits/double_compare_avx512.c
         -- Even if using GHC 9.12, C impl is needed to workaround a bug in LLVM
         c-sources:        cbits/int_minmax_avx512.c
+        if impl(ghc < 9.8)
+            c-sources:    cbits/fma_avx512.c
     elif flag(haswell)
         c-sources:        cbits/mask_haswell.c
                           cbits/select_haswell.c
@@ -113,6 +119,8 @@ library
                           cbits/double_compare_haswell.c
         if impl(ghc < 9.12)
             c-sources:    cbits/int_minmax_haswell.c
+        if impl(ghc < 9.8)
+            c-sources:    cbits/fma_haswell.c
     else
         c-sources:        cbits/mask_baseline.c
                           cbits/select_baseline.c
@@ -122,6 +130,8 @@ library
                           cbits/double_compare_baseline.c
         if impl(ghc < 9.12)
             c-sources:    cbits/int_minmax_baseline.c
+        if impl(ghc < 9.8)
+            c-sources:    cbits/fma_baseline.c
     if !flag(no-simd)
         exposed-modules:  Data.Simdy.Internal.SIMD128
         other-modules:    Data.Simdy.Internal.SIMD128.Prim
