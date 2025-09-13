@@ -96,6 +96,9 @@ matMulFMA _ (MkMat !a) (MkMat !b) = MkMat $ VU.create $ do
               loopScalar (k + 1)
       loopVector 0
   pure result
+{-# INLINABLE matMulFMA #-}
+{-
+The SPECIALIZE pragma doesn't work with HasFMA constraint.
 {-# SPECIALIZE matMulFMA :: forall l m n. (HasFMA, KnownNat l, KnownNat m, KnownNat n) => Proxy X4 -> Mat l m Float -> Mat m n Float -> Mat l n Float #-}
 {-# SPECIALIZE matMulFMA :: forall l m n. (HasFMA, KnownNat l, KnownNat m, KnownNat n) => Proxy X8 -> Mat l m Float -> Mat m n Float -> Mat l n Float #-}
 {-# SPECIALIZE matMulFMA :: forall l m n. (HasFMA, KnownNat l, KnownNat m, KnownNat n) => Proxy X16 -> Mat l m Float -> Mat m n Float -> Mat l n Float #-}
@@ -104,3 +107,4 @@ matMulFMA _ (MkMat !a) (MkMat !b) = MkMat $ VU.create $ do
 {-# SPECIALIZE matMulFMA :: forall l m n. (HasFMA, KnownNat l, KnownNat m, KnownNat n) => Proxy X8 -> Mat l m Double -> Mat m n Double -> Mat l n Double #-}
 {-# SPECIALIZE matMulFMA :: forall l m n. (HasFMA, KnownNat l, KnownNat m, KnownNat n) => Proxy X16 -> Mat l m Double -> Mat m n Double -> Mat l n Double #-}
 {-# SPECIALIZE matMulFMA :: forall l m n. (HasFMA, KnownNat l, KnownNat m, KnownNat n) => Proxy X32 -> Mat l m Double -> Mat m n Double -> Mat l n Double #-}
+-}
