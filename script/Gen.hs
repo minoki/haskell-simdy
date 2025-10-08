@@ -14,6 +14,13 @@ maxTupleLen = 6
 maxTupleLenForUnboxedVector :: Int
 maxTupleLenForUnboxedVector = 6
 
+infixr 5 <+>
+(<+>) :: String -> String -> String
+s <+> t = s ++ ' ' : t
+
+parens :: String -> String
+parens s = '(' : s ++ ")"
+
 spaceSep :: [String] -> String
 spaceSep = List.intercalate " "
 
@@ -732,6 +739,25 @@ genHalf !vecCount !maxBits
         ,"  {-# INLINE joinShortVector #-}"
         ]
 
+genHalfReplicated :: Int -> Int -> [String]
+genHalfReplicated !vecCount !baseCount
+  = ["type instance HalfVector " ++ tyCon ++ " = X" ++ show (vecCount `quot` 2)
+    ,"instance SplitShortVector " ++ tyCon ++ " a where"
+    ,"  splitShortVector (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = "
+     ++ if n == 2
+        then "(u0, u1)"
+        else "(" ++ commaSep [halfDataCon ++ " " ++ spaceSep ["u" ++ show (i + j) | j <- [0..(n `quot` 2) - 1]] | i <- [0,n `quot` 2]] ++ ")"
+    ,if n == 2
+     then "  joinShortVector = " ++ dataCon
+     else "  joinShortVector " ++ spaceSep ["(" ++ halfDataCon ++ " " ++ spaceSep ["u" ++ show (i * (n `quot` 2) + j) | j <- [0..(n `quot` 2) - 1]] ++ ")" | i <- [0,1]] ++ " = " ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]]
+    ]
+  where
+    tyCon = 'X' : show vecCount
+    baseTyCon = 'X' : show baseCount
+    n = vecCount `quot` baseCount
+    dataCon = "Mk" ++ tyCon ++ "With" ++ baseTyCon
+    halfDataCon = "MkX" ++ show (vecCount `quot` 2) ++ "With" ++ baseTyCon
+
 {-
 genFile :: String -> Int -> [String]
 genFile moduleName !maxBits
@@ -780,12 +806,191 @@ genFile moduleName primModules !n !maxBits
     ,"import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
-    ,"import qualified Data.Vector.Unboxed.Base as VUB"
+    -- ,"import qualified Data.Vector.Unboxed.Base as VUB"
     ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)"
     ] ++ gen n maxBits
 
-genHalfFile :: String -> [String] -> [Int] -> Int -> [String]
-genHalfFile moduleName imports counts !maxBits
+genReplicatedDef :: String -> [String] -> Int -> Int -> [String]
+genReplicatedDef moduleName imports !vecCount !baseCount
+  = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
+    ,"{-# LANGUAGE CPP #-}"
+    ,"{-# LANGUAGE DataKinds #-}"
+    ,"{-# LANGUAGE DerivingVia #-}"
+    ,"{-# LANGUAGE MagicHash #-}"
+    ,"{-# LANGUAGE TypeFamilies #-}"
+    ,"{-# LANGUAGE UnboxedTuples #-}"
+    ,"{-# LANGUAGE UndecidableInstances #-}"
+    ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
+    ,"{-# LANGUAGE ExtendedLiterals #-}"
+    ,"#endif"
+    ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
+    ,"module " ++ moduleName ++ " where"
+    ,"import           Data.Bits"
+    ,"import           Data.Coerce (coerce)"
+    ,"import           Data.Complex"
+    ,"import           Data.Monoid"
+    ,"import           Data.Primitive (Prim)"
+    ,"import           Data.Semigroup"
+    ,"import           Data.Simdy.Class.Bits (MiniBits)"
+    ,"import           Data.Simdy.Internal.Class"
+    ] ++ ["import           " ++ m | m <- imports] ++
+    ["import           Foreign.Storable (Storable)"
+    ,"import qualified GHC.Exts"
+    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))"
+    ,"import           GHC.Int"
+    ,"import           GHC.IO"
+    ,"import           GHC.Word"
+    ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)"
+    ,"-- | @'" ++ tyCon ++ "' a@ is a fixed-length vector of length " ++ show vecCount ++ "."
+    ,"--"
+    ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Pack" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
+    ,"--"
+    ,"-- You can access the elements by 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
+    ,"data " ++ tyCon ++ " a = " ++ dataCon <+> spaceSep (replicate n ("!(" ++ baseTyCon ++ " a)"))
+    ,"instance KnownSIMDLength " ++ tyCon ++ " where"
+    ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
+    ,"  simdLength = " ++ show vecCount
+    ,"  {-# INLINE simdLength #-}"
+    ,"type instance Mask (" ++ tyCon ++ " a) = " ++ tyCon ++ " Bool"
+    ,"instance MaskIsLiftedBool " ++ tyCon ++ " a"
+    ,"instance BooleanF " ++ tyCon ++ " where"
+    ,"  trueF = " ++ dataCon ++ " " ++ spaceSep (replicate n "trueF")
+    ,"  falseF = " ++ dataCon ++ " " ++ spaceSep (replicate n "falseF")
+    ,"  notF (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(notF v" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"  landF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(landF u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"  lorF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(lorF u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"deriving via WrappedMulti " ++ tyCon ++ " Bool instance Boolean (" ++ tyCon ++ " Bool)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance EquatableF " ++ baseTyCon ++ " a => Equatable (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance OrderedF " ++ baseTyCon ++ " a => Ordered (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance SelectableF " ++ baseTyCon ++ " a => Selectable (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Num a, NumF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Num (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Fractional a, FractionalF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Fractional (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Floating (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance BitsF " ++ tyCon ++ " a => MiniBits (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Num a, FusedMultiplyAddF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FusedMultiplyAdd (" ++ tyCon ++ " a)"
+    ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => IsList (" ++ tyCon ++ " a) where"
+    ,"  type Item (" ++ tyCon ++ " a) = a"
+    ,"  toList = toList" ++ tyCon
+    ,"  fromList = fromList" ++ tyCon
+    ,"  {-# INLINE toList #-}"
+    ,"  {-# INLINE fromList #-}"
+    ,"instance Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a => Pack" ++ tyCon ++ " " ++ tyCon ++ " a where"
+    ,"  pack" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = " ++ dataCon ++ " " ++ spaceSep ["(pack" ++ baseTyCon ++ " " ++ spaceSep ["x" ++ show (i * baseCount + j)| j <- [0..baseCount - 1]] ++ ")" | i <- [0..n-1]]
+    ,"  unpack" ++ tyCon ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = " ++ concat ["case unpack" ++ baseTyCon ++ " u" ++ show i ++ " of (" ++ commaSep ["x" ++ show (i * baseCount + j) | j <- [0..baseCount-1]] ++ ") -> " | i <- [0..n-1]] ++ "(" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ")"
+    ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+    ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
+    ,"instance (Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " b) => LiftSIMD " ++ tyCon ++ " a b where"
+    ,"  liftSIMD f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
+    ,"  {-# INLINE liftSIMD #-}"
+    ,"instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b, Pack" ++ tyCon ++ " " ++ tyCon ++ " c) => LiftSIMD2 " ++ tyCon ++ " a b c where"
+    ,"  liftSIMD2 f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+    ,"  {-# INLINE liftSIMD2 #-}"
+    ,"instance LiftConstructor " ++ baseTyCon ++ " => LiftConstructor " ++ tyCon ++ " where"]
+    ++ ["  mkTuple" ++ show i <+> spaceSep [parens (dataCon <+> spaceSep ["u" ++ show j ++ "_" ++ show k | k <- [0..n-1]]) | j <- [0..i-1]] ++ " = " ++ dataCon <+> spaceSep [parens ("mkTuple" ++ show i <+> spaceSep ["u" ++ show j ++ "_" ++ show k | j <- [0..i-1]]) | k <- [0..n-1]] | i <- [2..maxTupleLen]]
+    ++ ["  deconstructTuple" ++ show i <+> parens (dataCon <+> spaceSep ["u" ++ show j | j <- [0..n-1]]) ++ " = " ++ concat ["case deconstructTuple" ++ show i <+> "u" ++ show j ++ " of " ++ parens (commaSep ["u" ++ show j ++ "_" ++ show k | k <- [0..i-1]]) ++ " -> "| j <- [0..n-1]] ++ parens (commaSep [dataCon <+> spaceSep ["u" ++ show j ++ "_" ++ show k | j <- [0..n-1]] | k <- [0..i-1]]) | i <- [2..maxTupleLen]]
+    ++ [liftUnary name | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ [liftBinary "mkComplex"]
+    ++ ["  deconstructComplex " ++ parens (dataCon <+> spaceSep ["u" ++ show j | j <- [0..n-1]]) ++ " = " ++ concat ["case deconstructComplex u" ++ show j ++ " of " ++ parens ("v" ++ show j ++ ", w" ++ show j) ++ " -> "| j <- [0..n-1]] ++ parens (dataCon <+> spaceSep ["v" ++ show j | j <- [0..n-1]] ++ ", " ++ dataCon <+> spaceSep ["w" ++ show j | j <- [0..n-1]])]
+    ++ ["  {-# INLINE mkTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
+    ++ ["  {-# INLINE deconstructTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
+    ++ ["  {-# INLINE " ++ name ++ " #-}" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ ["  {-# INLINE mkComplex #-}"]
+    ++ ["  {-# INLINE deconstructComplex #-}"
+    ,"instance Broadcast " ++ baseTyCon ++ " a => Broadcast " ++ tyCon ++ " a where"
+    ,"  broadcast !x = let !v = broadcast x in " ++ dataCon ++ " " ++ spaceSep (replicate n "v")
+    ,"  {-# INLINE broadcast #-}"
+    ,"instance SelectableF " ++ baseTyCon ++ " a => SelectableF " ++ tyCon ++ " a where"
+    ,"  selectF (" ++ dataCon ++ " " ++ spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(selectF cond" ++ show i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"  {-# INLINE selectF #-}"
+    ,"instance EquatableF " ++ baseTyCon ++ " a => EquatableF " ++ tyCon ++ " a where"
+    ,liftBinary "eqF"
+    ,"  {-# INLINE eqF #-}"
+    ,"instance OrderedF " ++ baseTyCon ++ " a => OrderedF " ++ tyCon ++ " a where"
+    ,liftBinary "ltF"
+    ,liftBinary "leF"
+    ,liftBinary "gtF"
+    ,liftBinary "geF"
+    ,"  {-# INLINE ltF #-}"
+    ,"  {-# INLINE leF #-}"
+    ,"  {-# INLINE gtF #-}"
+    ,"  {-# INLINE geF #-}"
+    ,"instance MinMaxF " ++ baseTyCon ++ " a => MinMaxF " ++ tyCon ++ " a where"
+    ,liftBinary "minF"
+    ,liftBinary "maxF"
+    ,liftBinary "minimumNumberF"
+    ,liftBinary "maximumNumberF"
+    ,"  {-# INLINE minF #-}"
+    ,"  {-# INLINE maxF #-}"
+    ,"  {-# INLINE minimumNumberF #-}"
+    ,"  {-# INLINE maximumNumberF #-}"
+    ,"instance (Num a, NumF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => NumF " ++ tyCon ++ " a where"
+    ,liftBinary "plusF"
+    ,liftBinary "minusF"
+    ,liftBinary "timesF"
+    ,liftUnary "negateF"
+    ,"  {-# INLINE plusF #-}"
+    ,"  {-# INLINE minusF #-}"
+    ,"  {-# INLINE timesF #-}"
+    ,"  {-# INLINE negateF #-}"
+    ,"instance (Fractional a, FractionalF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FractionalF " ++ tyCon ++ " a where"
+    ,liftBinary "divF"
+    ,liftUnary "recipF"
+    ,"  {-# INLINE divF #-}"
+    ,"  {-# INLINE recipF #-}"
+    ,"instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FloatingF " ++ tyCon ++ " a where"
+    ,liftUnary "sqrtF"
+    ,"  {-# INLINE sqrtF #-}"
+    ,"instance BitsF " ++ baseTyCon ++ " a => BitsF " ++ tyCon ++ " a where"
+    ,liftBinary "andF"
+    ,liftBinary "orF"
+    ,liftBinary "xorF"
+    ,liftUnary "complementF"
+    ,"  shiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  unsafeShiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  shiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  unsafeShiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  {-# INLINE andF #-}"
+    ,"  {-# INLINE orF #-}"
+    ,"  {-# INLINE xorF #-}"
+    ,"  {-# INLINE complementF #-}"
+    ,"  {-# INLINE shiftLF #-}"
+    ,"  {-# INLINE unsafeShiftLF #-}"
+    ,"  {-# INLINE shiftRF #-}"
+    ,"  {-# INLINE unsafeShiftRF #-}"
+    ,"instance (Num a, FusedMultiplyAddF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FusedMultiplyAddF " ++ tyCon ++ " a where"
+    ,"  fusedMultiplyAddF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["w" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(fusedMultiplyAddF u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"  {-# INLINE fusedMultiplyAddF #-}"
+    ,"instance (Num a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => EnumFromZero_ " ++ tyCon ++ " a where"
+    ,"  enumFromZero = pack" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
+    ,"  {-# INLINE enumFromZero #-}"
+    ,"instance (Prim a, MultiPrim " ++ baseTyCon ++ " a) => MultiPrim " ++ tyCon ++ " a where"
+    ,"  indexByteArraySIMD# ba i = " ++ dataCon ++ " " ++ spaceSep ["(indexByteArraySIMD# ba " ++ i_plus (i * baseCount) ++ ")" | i <- [0..n-1]]
+    ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case readByteArraySIMD# mba " ++ i_plus (i * baseCount) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", u" ++ show i ++ " #) -> " | i <- [0..n-1]] ++ "(# s" ++ show n ++ ", " ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ " #)"
+    ,"  writeByteArraySIMD# mba i (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") s0 = " ++ concat ["case writeByteArraySIMD# mba " ++ i_plus i ++ " u" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..n-2]] ++ "writeByteArraySIMD# mba (i +# " ++ show (n - 1) ++ "#) u" ++ show (n - 1) ++ " s" ++ show (n - 1)
+    ,"  {-# INLINE indexByteArraySIMD# #-}"
+    ,"  {-# INLINE readByteArraySIMD# #-}"
+    ,"  {-# INLINE writeByteArraySIMD# #-}"
+    ,"instance (Storable a, MultiStorable " ++ baseTyCon ++ " a) => MultiStorable " ++ tyCon ++ " a where"
+    ,"  peekElemOffSIMD !ptr !i = " ++ dataCon ++ " <$> peekElemOffSIMD ptr i" ++ concat [" <*> peekElemOffSIMD ptr (i + " ++ show k ++ ")" | k <- [1..n-1]]
+    ,"  pokeElemOffSIMD !ptr !i (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = pokeElemOffSIMD ptr i u0" ++ concat [" >> pokeElemOffSIMD ptr (i + " ++ show k ++ ") u" ++ show k | k <- [1..n-1]]
+    ,"  {-# INLINE peekElemOffSIMD #-}"
+    ,"  {-# INLINE pokeElemOffSIMD #-}"
+    ]
+  where
+    tyCon = 'X' : show vecCount
+    gtyCon = 'X' : show vecCount ++ "G"
+    baseTyCon = 'X' : show baseCount
+    n = vecCount `quot` baseCount
+    dataCon = "Mk" ++ tyCon ++ "With" ++ baseTyCon
+    gdataCon = "Mk" ++ gtyCon
+    liftUnary f = "  " ++ f ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(" ++ f ++ " u" ++ show i ++ ")" | i <- [0..n-1]]
+    liftBinary f = "  " ++ f ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(" ++ f ++ " u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
+    i_plus 0 = "i"
+    i_plus k = "(i +# " ++ show k ++ "#)"
+
+genHalfFile :: String -> [String] -> [Int] -> [Int] -> Int -> [String]
+genHalfFile moduleName imports counts repCounts !maxBits
   = ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ] ++ ["{-# LANGUAGE CPP #-}" | maxBits == 128] ++
     ["{-# LANGUAGE TypeFamilies #-}"
@@ -801,6 +1006,7 @@ genHalfFile moduleName imports counts !maxBits
     ,"import           GHC.Word"
     ] ++ ["import           " ++ mod | mod <- imports]
       ++ concat [genHalf n maxBits | n <- counts]
+      ++ concat [genHalfReplicated n (maximum counts) | n <- repCounts]
 
 main :: IO ()
 main = do
@@ -841,7 +1047,11 @@ main = do
   createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD256"
   createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD512"
   forM_ [2,4,8,16,32] $ \i -> do
-    writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) [] i 0
+    writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $
+      if i <= 8 then
+        genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) [] i 0
+      else
+        genReplicatedDef ("Data.Simdy.Internal.NoSIMD.X" ++ show i) ["Data.Simdy.Internal.NoSIMD.X8"] i 8
     writeFile ("src/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) ["Data.Simdy.Internal.SIMD128.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra"] i 128
     when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ["Data.Simdy.Internal.SIMD256.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra"] i 256
     when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ["Data.Simdy.Internal.SIMD512.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra", "Data.Simdy.Internal.SIMD512.PrimExtra"] i 512
@@ -852,7 +1062,7 @@ main = do
     ,"Data.Simdy.Internal.NoSIMD.X8"
     ,"Data.Simdy.Internal.NoSIMD.X16"
     ,"Data.Simdy.Internal.NoSIMD.X32"
-    ] [2,4,8,16,32] 0
+    ] [2,4,8] [16,32] 0
   writeFile "src/Data/Simdy/Internal/SIMD128/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD128.HalfVector"
     ["Data.Functor.Identity"
     ,"Data.Simdy.Internal.SIMD128.X2"
@@ -860,7 +1070,7 @@ main = do
     ,"Data.Simdy.Internal.SIMD128.X8"
     ,"Data.Simdy.Internal.SIMD128.X16"
     ,"Data.Simdy.Internal.SIMD128.X32"
-    ] [2,4,8,16,32] 128
+    ] [2,4,8,16,32] [] 128
   writeFile "src/Data/Simdy/Internal/SIMD256/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD256.HalfVector"
     ["Data.Simdy.Internal.SIMD128.HalfVector ()"
     ,"Data.Simdy.Internal.SIMD128.X2"
@@ -868,11 +1078,11 @@ main = do
     ,"Data.Simdy.Internal.SIMD256.X8"
     ,"Data.Simdy.Internal.SIMD256.X16"
     ,"Data.Simdy.Internal.SIMD256.X32"
-    ] [4,8,16,32] 256
+    ] [4,8,16,32] [] 256
   writeFile "src/Data/Simdy/Internal/SIMD512/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD512.HalfVector"
     ["Data.Simdy.Internal.SIMD256.X4"
     ,"Data.Simdy.Internal.SIMD256.HalfVector ()"
     ,"Data.Simdy.Internal.SIMD512.X8"
     ,"Data.Simdy.Internal.SIMD512.X16"
     ,"Data.Simdy.Internal.SIMD512.X32"
-    ] [8,16,32] 512
+    ] [8,16,32] [] 512
