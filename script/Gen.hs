@@ -36,7 +36,7 @@ gen !vecCount !maxBits
     ,"--"
     ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Pack" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
     ,"--"
-    ,"-- You can access the elements by 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
+    ,"-- You can access the elements by 'mk" ++ tyCon ++ "', 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
     ,"data family " ++ tyCon ++ " a"
     ,"instance KnownSIMDLength " ++ tyCon ++ " where"
     ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
@@ -61,7 +61,7 @@ gen !vecCount !maxBits
     ,"  {-# INLINE toList #-}"
     ,"  {-# INLINE fromList #-}"
     ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " Bool where"
-    ,"  pack" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = MkBool" ++ tyCon ++ " (" ++ List.intercalate " .|. " ["(if x" ++ show i ++ " then " ++ show (2^i) ++ " else 0)" | i <- [0..vecCount-1]] ++ ")"
+    ,"  mk" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = MkBool" ++ tyCon ++ " (" ++ List.intercalate " .|. " ["(if x" ++ show i ++ " then " ++ show (2^i) ++ " else 0)" | i <- [0..vecCount-1]] ++ ")"
     ,"  unpack" ++ tyCon ++ " (MkBool" ++ tyCon ++ " !x) = (" ++ List.intercalate ", " ["testBit x " ++ show i | i <- [0..vecCount-1]] ++ ")"
     ,"instance Broadcast " ++ tyCon ++ " Bool where"
     ,"  broadcast False = falseF"
@@ -102,9 +102,9 @@ gen !vecCount !maxBits
     ++ genNewtype "Max"
     ++ ["data instance " ++ tyCon ++ " (Complex a) = MkComplex" ++ tyCon ++ " !(" ++ tyCon ++ " a) !(" ++ tyCon ++ " a)"
        ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => Pack" ++ tyCon ++ " " ++ tyCon ++ " (Complex a) where"
-       ,"  pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " :+ y" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = MkComplex" ++ tyCon ++ " (pack" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (pack" ++ tyCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ")"
+       ,"  mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " :+ y" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = MkComplex" ++ tyCon ++ " (mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (mk" ++ tyCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ")"
        ,"  unpack" ++ tyCon ++ " (MkComplex" ++ tyCon ++ " s t) = case unpack" ++ tyCon ++ " s of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " t of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> (" ++ commaSep ["x" ++ show i ++ " :+ y" ++ show i | i <- [0..vecCount-1]] ++ ")"
-       ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+       ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
        ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
        ,"instance Broadcast " ++ tyCon ++ " a => Broadcast " ++ tyCon ++ " (Complex a) where"
        ,"  broadcast (x :+ y) = MkComplex" ++ tyCon ++ " (broadcast x) (broadcast y)"
@@ -125,9 +125,9 @@ gen !vecCount !maxBits
     -}
     ++ ["data instance " ++ tyCon ++ " () = MkUnit" ++ tyCon
        ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " () where"
-       ,"  pack" ++ tyCon ++ " " ++ spaceSep (replicate vecCount "_") ++ " = MkUnit" ++ tyCon
+       ,"  mk" ++ tyCon ++ " " ++ spaceSep (replicate vecCount "_") ++ " = MkUnit" ++ tyCon
        ,"  unpack" ++ tyCon ++ " MkUnit" ++ tyCon ++ " = (" ++ commaSep (replicate vecCount "()") ++ ")"
-       ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+       ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
        ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
        ,"instance Broadcast " ++ tyCon ++ " () where"
        ,"  broadcast _ = MkUnit" ++ tyCon
@@ -138,10 +138,10 @@ gen !vecCount !maxBits
        ]
     ++ concatMap genTuple [2..maxTupleLen]
     ++ ["instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b) => LiftSIMD " ++ tyCon ++ " a b where"
-       ,"  liftSIMD f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
+       ,"  liftSIMD f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
        ,"  {-# INLINE liftSIMD #-}"
        ,"instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b, Pack" ++ tyCon ++ " " ++ tyCon ++ " c) => LiftSIMD2 " ++ tyCon ++ " a b c where"
-       ,"  liftSIMD2 f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+       ,"  liftSIMD2 f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
        ,"  {-# INLINE liftSIMD2 #-}"
        ]
     ++ ["instance LiftConstructor " ++ tyCon ++ " where"]
@@ -171,9 +171,9 @@ gen !vecCount !maxBits
             mainDef = if bitCount < 128 || maxBits == 0
                       then ["data instance " ++ tyCon ++ " " ++ name ++ " = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep (replicate vecCount ('!':name))
                            ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " " ++ name ++ " where"
-                           ,"  pack" ++ tyCon ++ " = Mk" ++ name ++ tyCon ++ "WithElems"
+                           ,"  mk" ++ tyCon ++ " = Mk" ++ name ++ tyCon ++ "WithElems"
                            ,"  unpack" ++ tyCon ++ " (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ")"
-                           ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+                           ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
                            ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
                            ,"instance Broadcast " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  broadcast !x = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep (replicate vecCount "x")
@@ -189,9 +189,9 @@ gen !vecCount !maxBits
                                    | otherwise = "WithVec" ++ show vecBitCount
                         in ["data instance " ++ tyCon ++ " " ++ name ++ " = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep (replicate shortVecCount (shortVecName ++ "#"))
                            ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " " ++ name ++ " where"
-                           ,"  pack" ++ tyCon ++ " " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep ["x" ++ show (i * shortVecSize + j) | j <- [0..shortVecSize - 1]] ++ " #))" | i <- [0..shortVecCount - 1]]
+                           ,"  mk" ++ tyCon ++ " " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep ["x" ++ show (i * shortVecSize + j) | j <- [0..shortVecSize - 1]] ++ " #))" | i <- [0..shortVecCount - 1]]
                            ,"  unpack" ++ tyCon ++ " (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = " ++ concat ["case unpack" ++ shortVecName ++ "# v" ++ show i ++ " of (# " ++ commaSep ["x" ++ show (i * shortVecSize + j) | j <- [0..shortVecSize - 1]] ++ " #) -> " | i <- [0..shortVecCount - 1]] ++ "(" ++ commaSep [primCon ++ " x" ++ show i | i <- [0..vecCount-1]] ++ ")"
-                           ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+                           ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
                            ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
                            ,"instance Broadcast " ++ tyCon ++ " " ++ name ++ " where"
                            ,if shortVecCount == 1
@@ -208,7 +208,7 @@ gen !vecCount !maxBits
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
            then ["instance EquatableF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  eqF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " == y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  eqF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " == y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE eqF #-}"
                 ]
            else
@@ -226,10 +226,10 @@ gen !vecCount !maxBits
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
            then ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  gtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " > y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  geF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " >= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  gtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " > y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  geF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " >= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
@@ -274,10 +274,10 @@ gen !vecCount !maxBits
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
            then ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  gtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " > y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  geF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " >= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  gtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " > y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  geF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " >= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
@@ -477,7 +477,7 @@ gen !vecCount !maxBits
                            ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
                            ,"  enumFromZero = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep [show (i * shortVecSize + j) ++ litSuffix | j <- [0..shortVecSize - 1]] ++ " #))" | i <- [0..shortVecCount - 1]]
                            ,"#else"
-                           ,"  enumFromZero = pack" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
+                           ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
                            ,"#endif"
                            ,"  -- {-# INLINE enumFromZero #-}"
                            ]
@@ -536,9 +536,9 @@ gen !vecCount !maxBits
     genTuple !n
       = ["data instance " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["!(" ++ tyCon ++ " a" ++ show i ++ ")" | i <- [0..n-1]]
         ,"instance (" ++ commaSep ["Pack" ++ tyCon ++ " " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => Pack" ++ tyCon ++ " " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
-        ,"  pack" ++ tyCon ++ " " ++ spaceSep ["(" ++ commaSep ["x" ++ show i ++ "_" ++ show j | j <- [0..n-1]] ++ ")" | i <- [0..vecCount-1]] ++ " = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(pack" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i ++ "_" ++ show j | i <- [0..vecCount-1]] ++ ")" | j <- [0..n-1]]
+        ,"  mk" ++ tyCon ++ " " ++ spaceSep ["(" ++ commaSep ["x" ++ show i ++ "_" ++ show j | j <- [0..n-1]] ++ ")" | i <- [0..vecCount-1]] ++ " = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i ++ "_" ++ show j | i <- [0..vecCount-1]] ++ ")" | j <- [0..n-1]]
         ,"  unpack" ++ tyCon ++ " (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ concat ["case unpack" ++ tyCon ++ " v" ++ show i ++ " of (" ++ commaSep ["x" ++ show j ++ "_" ++ show i | j <- [0..vecCount-1]] ++ ") -> " | i <- [0..n-1]] ++ "(" ++ commaSep ["(" ++ commaSep ["x" ++ show i ++ "_" ++ show j | j <- [0..n-1]] ++ ")" | i <- [0..vecCount-1]] ++ ")"
-        ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+        ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
         ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
         ,"instance (" ++ commaSep ["Broadcast " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => Broadcast " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
         ,"  broadcast (" ++ commaSep ["x" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(broadcast x" ++ show i ++ ")" | i <- [0..n-1]]
@@ -559,9 +559,9 @@ gen !vecCount !maxBits
     genNewtype !name
       = ["newtype instance " ++ tyCon ++ " (" ++ name ++ " a) = Mk" ++ name ++ tyCon ++ " (" ++ tyCon ++ " a)"
         ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => Pack" ++ tyCon ++ " " ++ tyCon ++ " (" ++ name ++ " a) where"
-        ,"  pack" ++ tyCon ++ " = coerce (pack" ++ tyCon ++ " @" ++ tyCon ++ " @a)"
+        ,"  mk" ++ tyCon ++ " = coerce (mk" ++ tyCon ++ " @" ++ tyCon ++ " @a)"
         ,"  unpack" ++ tyCon ++ " = coerce (unpack" ++ tyCon ++ " @" ++ tyCon ++ " @a)"
-        ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+        ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
         ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
         ,"instance Broadcast " ++ tyCon ++ " a => Broadcast " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  broadcast = coerce (broadcast @" ++ tyCon ++ " @a)"
@@ -684,7 +684,7 @@ genHalf !vecCount !maxBits
              in if vecCount == 2
                 then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
                      ,"  splitShortVector v = coerce (unpack" ++ tyCon ++ " v)"
-                     ,"  joinShortVector (Identity x0) (Identity x1) = pack" ++ tyCon ++ " x0 x1"
+                     ,"  joinShortVector (Identity x0) (Identity x1) = mk" ++ tyCon ++ " x0 x1"
                      ,"  {-# INLINE splitShortVector #-}"
                      ,"  {-# INLINE joinShortVector #-}"
                      ]
@@ -693,7 +693,7 @@ genHalf !vecCount !maxBits
                   in if halfVecBitCount < 128
                      then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
                           ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
-                          ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") = pack" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
+                          ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
                           ,"  {-# INLINE splitShortVector #-}"
                           ,"  {-# INLINE joinShortVector #-}"
                           ]
@@ -701,8 +701,8 @@ genHalf !vecCount !maxBits
                        if shortVecCount == 1
                        then
                          ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
-                         ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (pack" ++ halfTyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", pack" ++ halfTyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
-                         ,"  joinShortVector v0 v1 = case unpack" ++ halfTyCon ++ " v0 of (" ++ commaSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") -> case unpack" ++ halfTyCon ++ " v1 of (" ++ commaSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
+                         ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (mk" ++ halfTyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", mk" ++ halfTyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
+                         ,"  joinShortVector v0 v1 = case unpack" ++ halfTyCon ++ " v0 of (" ++ commaSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") -> case unpack" ++ halfTyCon ++ " v1 of (" ++ commaSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
                          ,"  {-# INLINE splitShortVector #-}"
                          ,"  {-# INLINE joinShortVector #-}"
                          ]
@@ -845,7 +845,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"--"
     ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Pack" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
     ,"--"
-    ,"-- You can access the elements by 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
+    ,"-- You can access the elements by 'mk" ++ tyCon ++ "', 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
     ,"data " ++ tyCon ++ " a = " ++ dataCon <+> spaceSep (replicate n ("!(" ++ baseTyCon ++ " a)"))
     ,"instance KnownSIMDLength " ++ tyCon ++ " where"
     ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
@@ -876,15 +876,15 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  {-# INLINE toList #-}"
     ,"  {-# INLINE fromList #-}"
     ,"instance Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a => Pack" ++ tyCon ++ " " ++ tyCon ++ " a where"
-    ,"  pack" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = " ++ dataCon ++ " " ++ spaceSep ["(pack" ++ baseTyCon ++ " " ++ spaceSep ["x" ++ show (i * baseCount + j)| j <- [0..baseCount - 1]] ++ ")" | i <- [0..n-1]]
+    ,"  mk" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = " ++ dataCon ++ " " ++ spaceSep ["(mk" ++ baseTyCon ++ " " ++ spaceSep ["x" ++ show (i * baseCount + j)| j <- [0..baseCount - 1]] ++ ")" | i <- [0..n-1]]
     ,"  unpack" ++ tyCon ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = " ++ concat ["case unpack" ++ baseTyCon ++ " u" ++ show i ++ " of (" ++ commaSep ["x" ++ show (i * baseCount + j) | j <- [0..baseCount-1]] ++ ") -> " | i <- [0..n-1]] ++ "(" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ")"
-    ,"  {-# INLINE pack" ++ tyCon ++ " #-}"
+    ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
     ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
     ,"instance (Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " b) => LiftSIMD " ++ tyCon ++ " a b where"
-    ,"  liftSIMD f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
+    ,"  liftSIMD f !v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ ")" | i <- [0..vecCount-1]]
     ,"  {-# INLINE liftSIMD #-}"
     ,"instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b, Pack" ++ tyCon ++ " " ++ tyCon ++ " c) => LiftSIMD2 " ++ tyCon ++ " a b c where"
-    ,"  liftSIMD2 f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> pack" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+    ,"  liftSIMD2 f !u !v = case unpack" ++ tyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["(f x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
     ,"  {-# INLINE liftSIMD2 #-}"
     ,"instance LiftConstructor " ++ baseTyCon ++ " => LiftConstructor " ++ tyCon ++ " where"]
     ++ ["  mkTuple" ++ show i <+> spaceSep [parens (dataCon <+> spaceSep ["u" ++ show j ++ "_" ++ show k | k <- [0..n-1]]) | j <- [0..i-1]] ++ " = " ++ dataCon <+> spaceSep [parens ("mkTuple" ++ show i <+> spaceSep ["u" ++ show j ++ "_" ++ show k | j <- [0..i-1]]) | k <- [0..n-1]] | i <- [2..maxTupleLen]]
@@ -962,7 +962,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  fusedMultiplyAddF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["w" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(fusedMultiplyAddF u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..n-1]]
     ,"  {-# INLINE fusedMultiplyAddF #-}"
     ,"instance (Num a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => EnumFromZero_ " ++ tyCon ++ " a where"
-    ,"  enumFromZero = pack" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
+    ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
     ,"  {-# INLINE enumFromZero #-}"
     ,"instance (Prim a, MultiPrim " ++ baseTyCon ++ " a) => MultiPrim " ++ tyCon ++ " a where"
     ,"  indexByteArraySIMD# ba i = " ++ dataCon ++ " " ++ spaceSep ["(indexByteArraySIMD# ba " ++ i_plus (i * baseCount) ++ ")" | i <- [0..n-1]]
@@ -1017,13 +1017,15 @@ main = do
     -- ,"{-# LANGUAGE ViewPatterns #-}"
     ,"module Data.Simdy.Internal.Class.Generated where"]
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
-                        ,"  packX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
+                        ,"  mkX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
                         ,"  unpackX" ++ show n ++ " :: f a -> (" ++ commaSep (replicate n "a") ++ ")"
+                        ,"packX" ++ show n ++ " :: PackX" ++ show n ++ " x a => (" ++ commaSep (replicate n "a") ++ ") -> x a"
+                        ,"packX" ++ show n ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") = mkX" ++ show n ++ concat [" a" ++ show i | i <- [0..n-1]]
                         ,"toListX" ++ show n ++ " :: PackX" ++ show n ++ " x a => x a -> [a]"
                         ,"toListX" ++ show n ++ " v = case unpackX" ++ show n ++ " v of"
                         ,"  (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") -> [" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ "]"
                         ,"fromListX" ++ show n ++ " :: PackX" ++ show n ++ " x a => [a] -> x a"
-                        ,"fromListX" ++ show n ++ " [" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ "] = packX" ++ show n ++ concat [" a" ++ show i | i <- [0..n-1]]
+                        ,"fromListX" ++ show n ++ " [" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ "] = mkX" ++ show n ++ concat [" a" ++ show i | i <- [0..n-1]]
                         ,"fromListX" ++ show n ++ " xs | length xs < " ++ show n ++ " = error \"fromListX" ++ show n ++ ": List too short\""
                         ,"         " ++ map (const ' ') (show n) ++ "    | otherwise = error \"fromListX" ++ show n ++ ": List too long\""
                         ]) [2,4,8,16,32]

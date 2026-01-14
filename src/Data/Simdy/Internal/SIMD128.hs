@@ -379,7 +379,7 @@ instance SIMD X32 where
 
 -- | Broadcasts a value to the entire vector.
 --
--- Conceptually, @'broadcast' x = packXN x x x ... x@.
+-- Conceptually, @'broadcast' x = mkXN x x x ... x@.
 broadcast :: (SIMD f, SIMDElement a) => a -> f a
 broadcast = I.broadcast
 {-# INLINE broadcast #-}
