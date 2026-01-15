@@ -1013,12 +1013,15 @@ main = do
   createDirectoryIfMissing True "src/Data/Simdy/Internal/Class"
   writeFile "src/Data/Simdy/Internal/Class/Generated.hs" $ unlines $
     ["-- This file was created by script/Gen.hs. Do not edit by hand!"
-    -- ,"{-# LANGUAGE PatternSynonyms #-}"
-    -- ,"{-# LANGUAGE ViewPatterns #-}"
+    ,"{-# LANGUAGE PatternSynonyms #-}"
+    ,"{-# LANGUAGE ViewPatterns #-}"
     ,"module Data.Simdy.Internal.Class.Generated where"]
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
                         ,"  mkX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
                         ,"  unpackX" ++ show n ++ " :: f a -> (" ++ commaSep (replicate n "a") ++ ")"
+                        ,"pattern MkX" ++ show n ++ " :: PackX" ++ show n ++ " x a => " ++ concat (replicate n "a -> ") ++ "x a"
+                        ,"pattern MkX" ++ show n ++ concat [" x" ++ show i | i <- [0..n-1]] ++ " <- (unpackX" ++ show n ++ " -> " ++ parens (commaSep ["x" ++ show i | i <- [0..n-1]]) ++ ") where"
+                        ,"  MkX" ++ show n ++ " = mkX" ++ show n
                         ,"packX" ++ show n ++ " :: PackX" ++ show n ++ " x a => (" ++ commaSep (replicate n "a") ++ ") -> x a"
                         ,"packX" ++ show n ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") = mkX" ++ show n ++ concat [" a" ++ show i | i <- [0..n-1]]
                         ,"toListX" ++ show n ++ " :: PackX" ++ show n ++ " x a => x a -> [a]"

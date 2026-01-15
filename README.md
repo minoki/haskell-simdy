@@ -40,22 +40,27 @@ module Data.Simdy.Pack where
 mkX2 :: a -> a -> X2 a
 packX2 :: (a, a) -> X2 a
 unpackX2 :: X2 a -> (a, a)
+pattern MkX2 :: a -> a -> X2 a
 
 mkX4 :: a -> a -> a -> a -> X4 a
 packX4 :: (a, a, a, a) -> X4 a
 unpackX4 :: X4 a -> (a, a, a, a)
+pattern MkX4 :: a -> a -> a -> a -> X4 a
 
 mkX8 :: a -> a -> a -> a -> a -> a -> a -> a -> X8 a
 packX8 :: (a, a, a, a, a, a, a, a) -> X8 a
 unpackX8 :: X8 a -> (a, a, a, a, a, a, a, a)
+pattern MkX8 :: a -> a -> a -> a -> a -> a -> a -> a -> X8 a
 
 mkX16 :: a -> ... -> a -> X16 a
 packX16 :: (a, ..., a) -> X16 a
 unpackX16 :: X16 a -> (a, ..., a)
+pattern MkX16 :: a -> ... -> a -> X16 a
 
 mkX32 :: a -> ... -> a -> X32 a
 packX32 :: (a, ..., a) -> X32 a
 unpackX32 :: X32 a -> (a, ..., a)
+pattern MkX32 :: a -> ... -> a -> X32 a
 ```
 
 ## Operations
