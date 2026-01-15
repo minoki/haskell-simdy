@@ -24,6 +24,7 @@ module Data.Simdy.Internal.NoSIMD
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
+  , SIMDBoolean
   , SIMDBits
   , SIMDMinMax
   , SIMDFMA
@@ -39,7 +40,7 @@ import           Data.Functor.Identity
 import           Data.Int
 import           Data.Primitive
 import           Data.Semigroup
-import           Data.Simdy.Class.Bits (MiniBits)
+import           Data.Simdy.Class.Bits (Boolean, BitShift)
 import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
 import qualified Data.Simdy.Internal.Class as I
 import           Data.Simdy.Internal.NoSIMD.HalfVector ()
@@ -195,17 +196,39 @@ instance SIMDFloating Float
 instance SIMDFloating Double
 -- instance (RealFloat a, SIMDFloating a) => SIMDFloating (Complex a)
 
--- | An instance of 'SIMDBits' has its 'MiniBits' instance lifted to SIMD vector types
+-- | An instance of 'SIMDBoolean' has its 'Boolean' instance lifted to SIMD vector types
 --
--- @('SIMD' f, 'SIMDBits' a)@ implies @'MiniBits' (f a)@.
+-- @('SIMD' f, 'SIMDBoolean' a)@ implies @'Boolean' (f a)@.
 class ( Bits a
-      , MiniBits a
+      , Boolean a
       , SIMDElement a
-      , BitsF X2 a
-      , BitsF X4 a
-      , BitsF X8 a
-      , BitsF X16 a
-      , BitsF X32 a
+      , BooleanF X2 a
+      , BooleanF X4 a
+      , BooleanF X8 a
+      , BooleanF X16 a
+      , BooleanF X32 a
+      ) => SIMDBoolean a
+instance SIMDBoolean Bool
+instance SIMDBoolean Int8
+instance SIMDBoolean Int16
+instance SIMDBoolean Int32
+instance SIMDBoolean Int64
+instance SIMDBoolean Word8
+instance SIMDBoolean Word16
+instance SIMDBoolean Word32
+instance SIMDBoolean Word64
+
+-- | An instance of 'SIMDBits' has its 'BitShift' instance lifted to SIMD vector types
+--
+-- @('SIMD' f, 'SIMDBits' a)@ implies @'BitShift' (f a)@.
+class ( Bits a
+      , BitShift a
+      , SIMDBoolean a
+      , BitShiftF X2 a
+      , BitShiftF X4 a
+      , BitShiftF X8 a
+      , BitShiftF X16 a
+      , BitShiftF X32 a
       ) => SIMDBits a
 instance SIMDBits Int8
 instance SIMDBits Int16
@@ -344,7 +367,6 @@ class ( KnownSIMDLength f
       , forall a. SIMDElement a => Broadcast f a
       , forall a b. (SIMDElement a, SIMDElement b) => LiftSIMD f a b
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c
-      , Boolean (f Bool)
       , forall a. MaskIsLiftedBool f a
       , forall a. SIMDElement a => Selectable (f a)
       , forall a. SIMDEq a => Equatable (f a)
@@ -352,7 +374,8 @@ class ( KnownSIMDLength f
       , forall a. SIMDNum a => Num (f a)
       , forall a. SIMDFractional a => Fractional (f a)
       , forall a. SIMDFloating a => Floating (f a)
-      , forall a. SIMDBits a => MiniBits (f a)
+      , forall a. SIMDBoolean a => Boolean (f a)
+      , forall a. SIMDBits a => BitShift (f a)
       , forall a. SIMDMinMax a => MinMax (f a)
       , forall a. SIMDFMA a => FusedMultiplyAdd (f a)
       , forall a. SIMDEnumFromZero a => EnumFromZero_ f a

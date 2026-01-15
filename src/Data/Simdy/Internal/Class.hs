@@ -202,68 +202,13 @@ instance SelectableF f a => Selectable (WrappedMulti f a) where
   select = coerce (selectF @f @a)
   {-# INLINE select #-}
 
-infixr 3 &&
-infixr 2 ||
-
-class Boolean a where
-  true :: a
-  false :: a
-  not :: a -> a
-  (&&) :: a -> a -> a
-  (||) :: a -> a -> a
-
-instance Boolean Bool where
-  true = True
-  false = False
-  not = Prelude.not
-  (&&) = (Prelude.&&)
-  (||) = (Prelude.||)
-  {-# INLINE true #-}
-  {-# INLINE false #-}
-  {-# INLINE not #-}
-  {-# INLINE (&&) #-}
-  {-# INLINE (||) #-}
-
-deriving via Bool instance Boolean (Identity Bool)
-
-class BooleanF f where
-  trueF :: f Bool
-  falseF :: f Bool
-  notF :: f Bool -> f Bool
-  landF :: f Bool -> f Bool -> f Bool
-  lorF :: f Bool -> f Bool -> f Bool
-
-instance BooleanF Identity where
-  trueF = Identity True
-  falseF = Identity False
-  notF = coerce Prelude.not
-  landF = coerce (Prelude.&&)
-  lorF = coerce (Prelude.||)
-  {-# INLINE trueF #-}
-  {-# INLINE falseF #-}
-  {-# INLINE notF #-}
-  {-# INLINE landF #-}
-  {-# INLINE lorF #-}
-
-instance BooleanF f => Boolean (WrappedMulti f Bool) where
-  true = coerce (trueF @f)
-  false = coerce (falseF @f)
-  not = coerce (notF @f)
-  (&&) = coerce (landF @f)
-  (||) = coerce (lorF @f)
-  {-# INLINE true #-}
-  {-# INLINE false #-}
-  {-# INLINE not #-}
-  {-# INLINE (&&) #-}
-  {-# INLINE (||) #-}
-
 infix 4 ==, /=, <, <=, >, >=
 
 class Equatable a where
   (==) :: a -> a -> Mask a
   (/=) :: a -> a -> Mask a
   default (/=) :: Boolean (Mask a) => a -> a -> Mask a
-  x /= y = not (x == y)
+  x /= y = complement (x == y)
   {-# INLINE (/=) #-}
 
 newtype Scalar a = MkScalar a
@@ -658,11 +603,13 @@ instance FloatingF f a => Floating (WrappedMulti f a) where
   {-# INLINE acosh #-}
   {-# INLINE atanh #-}
 
-class BitsF f a where
+class BooleanF f a where
   andF :: f a -> f a -> f a
   orF :: f a -> f a -> f a
   xorF :: f a -> f a -> f a
   complementF :: f a -> f a
+
+class BooleanF f a => BitShiftF f a where
   shiftLF :: f a -> Int -> f a
   unsafeShiftLF :: f a -> Int -> f a
   shiftRF :: f a -> Int -> f a
@@ -672,19 +619,21 @@ class BitsF f a where
   {-# INLINE unsafeShiftLF #-}
   {-# INLINE unsafeShiftRF #-}
 
-instance BitsF f a => MiniBits (WrappedMulti f a) where
+instance BooleanF f a => Boolean (WrappedMulti f a) where
   (.&.) = coerce (andF @f @a)
   (.|.) = coerce (orF @f @a)
   xor = coerce (xorF @f @a)
   complement = coerce (complementF @f @a)
-  shiftL = coerce (shiftLF @f @a)
-  unsafeShiftL = coerce (unsafeShiftLF @f @a)
-  shiftR = coerce (shiftRF @f @a)
-  unsafeShiftR = coerce (unsafeShiftRF @f @a)
   {-# INLINE (.&.) #-}
   {-# INLINE (.|.) #-}
   {-# INLINE xor #-}
   {-# INLINE complement #-}
+
+instance BitShiftF f a => BitShift (WrappedMulti f a) where
+  shiftL = coerce (shiftLF @f @a)
+  unsafeShiftL = coerce (unsafeShiftLF @f @a)
+  shiftR = coerce (shiftRF @f @a)
+  unsafeShiftR = coerce (unsafeShiftRF @f @a)
   {-# INLINE shiftL #-}
   {-# INLINE unsafeShiftL #-}
   {-# INLINE shiftR #-}

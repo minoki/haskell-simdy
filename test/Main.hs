@@ -147,8 +147,8 @@ testEnum proxy = testCase "enumFromZero" $ toList (enumFromZero :: x a) @?= [0..
   where
     n = simdLen proxy
 
-testBits :: forall x a. (Data.Bits.FiniteBits a, MiniBits (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
-testBits proxy = testGroup "Bits"
+testBoolean :: forall x a. (Data.Bits.Bits a, Boolean (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testBoolean proxy = testGroup "Boolean"
   [ QC.testProperty ".&." $ \a b ->
       toList ((fromSizedList a `asProxyTypeOf` proxy) .&. fromSizedList b) === zipWith (Data.Bits..&.) (unSized a) (unSized b)
   , QC.testProperty ".|." $ \a b ->
@@ -157,7 +157,11 @@ testBits proxy = testGroup "Bits"
       toList ((fromSizedList a `asProxyTypeOf` proxy) `xor` fromSizedList b) === zipWith Data.Bits.xor (unSized a) (unSized b)
   , QC.testProperty "complement" $ \a ->
       toList (complement (fromSizedList a `asProxyTypeOf` proxy)) === map Data.Bits.complement (unSized a)
-  , QC.testProperty "shiftL" $ \(QC.NonNegative i) a ->
+  ]
+
+testBits :: forall x a. (Data.Bits.FiniteBits a, BitShift (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testBits proxy = testGroup "Bits"
+  [ QC.testProperty "shiftL" $ \(QC.NonNegative i) a ->
       toList ((fromSizedList a `asProxyTypeOf` proxy) `shiftL` i) === map (`Data.Bits.shiftL` i) (unSized a)
   , QC.testProperty "unsafeShiftL" $ QC.forAll (QC.chooseInt (0, bs - 1)) $ \i a ->
       toList ((fromSizedList a `asProxyTypeOf` proxy) `unsafeShiftL` i) === map (`Data.Bits.shiftL` i) (unSized a)
@@ -223,7 +227,7 @@ properties _ =
       , testBroadcast proxy
       , testSelect proxy
       -- , testEq proxy
-      -- , testBits proxy
+      , testBoolean proxy
       ]
   , let proxy :: Proxy (x Int8)
         proxy = Proxy
@@ -235,6 +239,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -248,6 +253,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -261,6 +267,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -274,6 +281,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -287,6 +295,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -300,6 +309,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -313,6 +323,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]
@@ -326,6 +337,7 @@ properties _ =
       , testOrd proxy
       , testNum proxy
       , testEnum proxy
+      , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
       ]

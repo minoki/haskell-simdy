@@ -109,16 +109,18 @@ class SIMDFractional a => SIMDFloating a
 instance (SIMD f, SIMDFloating a) => Floating (f a) -- pseudocode
 ```
 
-For bitwise operations, the library defines a subset of the `Bits` class as `MiniBits`:
+For bitwise operations, the library defines a subset of the `Bits` class as `Boolean` and `BitShift`:
 
 ```haskell
 module Data.Simdy.Class.Bits where
 
-class MiniBits a where
+class Boolean a where
   (.&.) :: a -> a -> a
   (.|.) :: a -> a -> a
   xor :: a -> a -> a
   complement :: a -> a
+
+class Boolean a => BitShift a where
   shiftL :: a -> Int -> a
   unsafeShiftL :: a -> Int -> a
   shiftR :: a -> Int -> a
@@ -126,8 +128,11 @@ class MiniBits a where
 
 module Data.Simdy where
 
+class SIMDElement a => SIMDBoolean a
+instance (SIMD f, SIMDBoolean a) => Boolean (f a) -- pseudocode
+
 class SIMDElement a => SIMDBits a
-instance (SIMD f, SIMDBits a) => MiniBits (f a) -- pseudocode
+instance (SIMD f, SIMDBits a) => BitShift (f a) -- pseudocode
 ```
 
 ## Supported compilers and architectures

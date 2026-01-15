@@ -12,5 +12,6 @@ module Data.Simdy.Mask
   , (>^)
   , (>=^)
   ) where
+import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Default

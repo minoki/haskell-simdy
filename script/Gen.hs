@@ -45,13 +45,11 @@ gen !vecCount !maxBits
     ,"newtype instance " ++ tyCon ++ " Bool = MkBool" ++ tyCon ++ " Word" ++ show (max vecCount 8)
     ,"type instance Mask (" ++ tyCon ++ " a) = " ++ tyCon ++ " Bool"
     ,"instance MaskIsLiftedBool " ++ tyCon ++ " a"
-    ,"instance BooleanF " ++ tyCon ++ " where"
-    ,"  trueF = MkBool" ++ tyCon ++ " " ++ show (2^vecCount - 1)
-    ,"  falseF = MkBool" ++ tyCon ++ " 0"
-    ,"  notF (MkBool" ++ tyCon ++ " x) = MkBool" ++ tyCon ++ " (" ++ show (2^vecCount - 1) ++ " - x)"
-    ,"  landF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .&. y)"
-    ,"  lorF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .|. y)"
-    ,"deriving via WrappedMulti " ++ tyCon ++ " Bool instance Boolean (" ++ tyCon ++ " Bool)"
+    ,"instance BooleanF " ++ tyCon ++ " Bool where"
+    ,"  andF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .&. y)"
+    ,"  orF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .|. y)"
+    ,"  xorF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (xor x y)"
+    ,"  complementF (MkBool" ++ tyCon ++ " x) = MkBool" ++ tyCon ++ " (" ++ show (2^vecCount - 1) ++ " - x)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance EquatableF " ++ tyCon ++ " a => Equatable (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance OrderedF " ++ tyCon ++ " a => Ordered (" ++ tyCon ++ " a)"
     ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => IsList (" ++ tyCon ++ " a) where"
@@ -64,8 +62,8 @@ gen !vecCount !maxBits
     ,"  mk" ++ tyCon ++ concat [" !x" ++ show i | i <- [0..vecCount-1]] ++ " = MkBool" ++ tyCon ++ " (" ++ List.intercalate " .|. " ["(if x" ++ show i ++ " then " ++ show (2^i) ++ " else 0)" | i <- [0..vecCount-1]] ++ ")"
     ,"  unpack" ++ tyCon ++ " (MkBool" ++ tyCon ++ " !x) = (" ++ List.intercalate ", " ["testBit x " ++ show i | i <- [0..vecCount-1]] ++ ")"
     ,"instance Broadcast " ++ tyCon ++ " Bool where"
-    ,"  broadcast False = falseF"
-    ,"  broadcast True = trueF"
+    ,"  broadcast False = MkBool" ++ tyCon ++ " 0"
+    ,"  broadcast True = MkBool" ++ tyCon <+> show (2^vecCount-1)
     ,"  {-# INLINE broadcast #-}"
     ,"instance SelectableF " ++ tyCon ++ " Bool where"
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
@@ -159,7 +157,8 @@ gen !vecCount !maxBits
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance NumF " ++ tyCon ++ " a => Num (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FractionalF " ++ tyCon ++ " a => Fractional (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FloatingF " ++ tyCon ++ " a => Floating (" ++ tyCon ++ " a)"]
-    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BitsF " ++ tyCon ++ " a => MiniBits (" ++ tyCon ++ " a)"]
+    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BooleanF " ++ tyCon ++ " a => Boolean (" ++ tyCon ++ " a)"]
+    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BitShiftF " ++ tyCon ++ " a => BitShift (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FusedMultiplyAddF " ++ tyCon ++ " a => FusedMultiplyAdd (" ++ tyCon ++ " a)"]
   where
@@ -252,9 +251,9 @@ gen !vecCount !maxBits
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
-                ,"  leF !x !y = notF (ltF y x)"
+                ,"  leF !x !y = complementF (ltF y x)"
                 ,"  gtF !x !y = ltF y x"
-                ,"  geF !x !y = notF (ltF x y)"
+                ,"  geF !x !y = complementF (ltF x y)"
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
@@ -421,19 +420,20 @@ gen !vecCount !maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
-           then ["instance BitsF " ++ tyCon ++ " " ++ name ++ " where"
+           then ["instance BooleanF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  andF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .&. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  orF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .|. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  xorF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(xor x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  complementF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(complement x" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  shiftLF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  unsafeShiftLF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  shiftRF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  unsafeShiftRF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE andF #-}"
                 ,"  {-# INLINE orF #-}"
                 ,"  {-# INLINE xorF #-}"
                 ,"  {-# INLINE complementF #-}"
+                ,"instance BitShiftF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  shiftLF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  unsafeShiftLF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  shiftRF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  unsafeShiftRF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE shiftLF #-}"
                 ,"  {-# INLINE unsafeShiftLF #-}"
                 ,"  {-# INLINE shiftRF #-}"
@@ -445,17 +445,18 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance BitsF " ++ tyCon ++ " " ++ name ++ " where"
+             in ["instance BooleanF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  andF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(and" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  orF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(or" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  xorF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(xor" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  complementF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(complement" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  shiftLF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftL" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
-                ,"  shiftRF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftR" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
                 ,"  {-# INLINE andF #-}"
                 ,"  {-# INLINE orF #-}"
                 ,"  {-# INLINE xorF #-}"
                 ,"  {-# INLINE complementF #-}"
+                ,"instance BitShiftF " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  shiftLF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftL" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
+                ,"  shiftRF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftR" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
                 ,"  {-# INLINE shiftLF #-}"
                 ,"  {-# INLINE shiftRF #-}"
                 ]
@@ -798,7 +799,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Complex"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
-    ,"import           Data.Simdy.Class.Bits (MiniBits)"
+    ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
@@ -831,7 +832,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"import           Data.Monoid"
     ,"import           Data.Primitive (Prim)"
     ,"import           Data.Semigroup"
-    ,"import           Data.Simdy.Class.Bits (MiniBits)"
+    ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
     ] ++ ["import           " ++ m | m <- imports] ++
     ["import           Foreign.Storable (Storable)"
@@ -853,20 +854,14 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  {-# INLINE simdLength #-}"
     ,"type instance Mask (" ++ tyCon ++ " a) = " ++ tyCon ++ " Bool"
     ,"instance MaskIsLiftedBool " ++ tyCon ++ " a"
-    ,"instance BooleanF " ++ tyCon ++ " where"
-    ,"  trueF = " ++ dataCon ++ " " ++ spaceSep (replicate n "trueF")
-    ,"  falseF = " ++ dataCon ++ " " ++ spaceSep (replicate n "falseF")
-    ,"  notF (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(notF v" ++ show i ++ ")" | i <- [0..n-1]]
-    ,"  landF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(landF u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
-    ,"  lorF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(lorF u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
-    ,"deriving via WrappedMulti " ++ tyCon ++ " Bool instance Boolean (" ++ tyCon ++ " Bool)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance EquatableF " ++ baseTyCon ++ " a => Equatable (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance OrderedF " ++ baseTyCon ++ " a => Ordered (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance SelectableF " ++ baseTyCon ++ " a => Selectable (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Num a, NumF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Num (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Fractional a, FractionalF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Fractional (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Floating (" ++ tyCon ++ " a)"
-    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance BitsF " ++ tyCon ++ " a => MiniBits (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance BooleanF " ++ tyCon ++ " a => Boolean (" ++ tyCon ++ " a)"
+    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance BitShiftF " ++ tyCon ++ " a => BitShift (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Num a, FusedMultiplyAddF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FusedMultiplyAdd (" ++ tyCon ++ " a)"
     ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => IsList (" ++ tyCon ++ " a) where"
@@ -941,19 +936,20 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FloatingF " ++ tyCon ++ " a where"
     ,liftUnary "sqrtF"
     ,"  {-# INLINE sqrtF #-}"
-    ,"instance BitsF " ++ baseTyCon ++ " a => BitsF " ++ tyCon ++ " a where"
+    ,"instance BooleanF " ++ baseTyCon ++ " a => BooleanF " ++ tyCon ++ " a where"
     ,liftBinary "andF"
     ,liftBinary "orF"
     ,liftBinary "xorF"
     ,liftUnary "complementF"
-    ,"  shiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  unsafeShiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  shiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  unsafeShiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
     ,"  {-# INLINE andF #-}"
     ,"  {-# INLINE orF #-}"
     ,"  {-# INLINE xorF #-}"
     ,"  {-# INLINE complementF #-}"
+    ,"instance BitShiftF " ++ baseTyCon ++ " a => BitShiftF " ++ tyCon ++ " a where"
+    ,"  shiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  unsafeShiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  shiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  unsafeShiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
     ,"  {-# INLINE shiftLF #-}"
     ,"  {-# INLINE unsafeShiftLF #-}"
     ,"  {-# INLINE shiftRF #-}"
