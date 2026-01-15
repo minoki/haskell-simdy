@@ -358,9 +358,9 @@ gen !vecCount !maxBits
             vecBitCount = min bitCount maxBits
         in if bitCount < 128 || maxBits == 0
            then ["instance FractionalF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  divF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " / y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  divideF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " / y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  recipF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(recip x" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  {-# INLINE divF #-}"
+                ,"  {-# INLINE divideF #-}"
                 ,"  {-# INLINE recipF #-}"
                 ]
            else
@@ -370,8 +370,8 @@ gen !vecCount !maxBits
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance FractionalF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  divF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(divide" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  {-# INLINE divF #-}"
+                ,"  divideF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(divide" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE divideF #-}"
                 ]
     genFloating name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -934,9 +934,9 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  {-# INLINE timesF #-}"
     ,"  {-# INLINE negateF #-}"
     ,"instance (Fractional a, FractionalF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FractionalF " ++ tyCon ++ " a where"
-    ,liftBinary "divF"
+    ,liftBinary "divideF"
     ,liftUnary "recipF"
-    ,"  {-# INLINE divF #-}"
+    ,"  {-# INLINE divideF #-}"
     ,"  {-# INLINE recipF #-}"
     ,"instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FloatingF " ++ tyCon ++ " a where"
     ,liftUnary "sqrtF"

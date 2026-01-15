@@ -526,12 +526,12 @@ instance NumF f a => Num (WrappedMulti f a) where
   {-# INLINE fromInteger #-}
 
 class NumF f a => FractionalF f a where
-  divF :: f a -> f a -> f a
-  -- default divF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
-  -- divF = liftSIMD2 (/)
+  divideF :: f a -> f a -> f a
+  -- default divideF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
+  -- divideF = liftSIMD2 (/)
   recipF :: f a -> f a
   default recipF :: (Num a, Broadcast f a) => f a -> f a
-  recipF = divF (broadcast 1)
+  recipF = divideF (broadcast 1)
   fromRationalF :: Rational -> f a
   default fromRationalF :: (Fractional a, Broadcast f a) => Rational -> f a
   fromRationalF = broadcast . fromRational
@@ -539,7 +539,7 @@ class NumF f a => FractionalF f a where
   {-# INLINE fromRationalF #-}
 
 instance FractionalF f a => Fractional (WrappedMulti f a) where
-  (/) = coerce (divF @f @a)
+  (/) = coerce (divideF @f @a)
   recip = coerce (recipF @f @a)
   fromRational = coerce (fromRationalF @f @a)
   {-# INLINE (/) #-}
