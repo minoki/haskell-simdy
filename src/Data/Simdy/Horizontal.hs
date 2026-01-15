@@ -6,7 +6,11 @@ module Data.Simdy.Horizontal
   , horizontalMax
   , horizontalMinimumNumber
   , horizontalMaximumNumber
+  , horizontalAnd
+  , horizontalOr
+  , horizontalXor
   ) where
+import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Default
 import           Prelude hiding (min, max)
@@ -35,4 +39,14 @@ horizontalMaximumNumber :: (SIMD f, SIMDMinMax a) => f a -> a
 horizontalMaximumNumber = horizontalFold maximumNumber
 {-# INLINE horizontalMaximumNumber #-}
 
--- TODO: and, or, bitand, bitor, bitxor
+horizontalAnd :: (SIMD f, SIMDBoolean a) => f a -> a
+horizontalAnd = horizontalFold (.&.)
+{-# INLINE horizontalAnd #-}
+
+horizontalOr :: (SIMD f, SIMDBoolean a) => f a -> a
+horizontalOr = horizontalFold (.|.)
+{-# INLINE horizontalOr #-}
+
+horizontalXor :: (SIMD f, SIMDBoolean a) => f a -> a
+horizontalXor = horizontalFold xor
+{-# INLINE horizontalXor #-}
