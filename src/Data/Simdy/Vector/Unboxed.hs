@@ -1,15 +1,41 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE QuantifiedConstraints #-}
 module Data.Simdy.Vector.Unboxed where
 import           Data.Coerce (coerce)
+import           Data.Complex (Complex)
 import           Data.Functor.Identity (Identity (Identity))
+import           Data.Int (Int16, Int32, Int64, Int8)
+import           Data.Monoid (Product, Sum)
+import           Data.Semigroup (Max, Min)
 import           Data.Simdy.Internal.Class (EnumFromZero, LiftConstructor)
 import           Data.Simdy.Internal.Default
 import           Data.Simdy.Vector.Class (MultiUnbox)
 import qualified Data.Simdy.Vector.Generic as G
 import qualified Data.Vector.Unboxed as VU
--- import qualified Data.Vector.Unboxed.Mutable as VUM
+import           Data.Word (Word16, Word32, Word64, Word8)
 
-type SIMDUnbox a = (VU.Unbox a, MultiUnbox X2 a, MultiUnbox X4 a, MultiUnbox X8 a, MultiUnbox X16 a, MultiUnbox X32 a)
+class (forall f. SIMD f => MultiUnbox f a, VU.Unbox a) => SIMDUnbox a
+instance SIMDUnbox Float
+instance SIMDUnbox Double
+instance SIMDUnbox Int8
+instance SIMDUnbox Int16
+instance SIMDUnbox Int32
+instance SIMDUnbox Int64
+instance SIMDUnbox Word8
+instance SIMDUnbox Word16
+instance SIMDUnbox Word32
+instance SIMDUnbox Word64
+instance SIMDUnbox a => SIMDUnbox (Sum a)
+instance SIMDUnbox a => SIMDUnbox (Product a)
+instance SIMDUnbox a => SIMDUnbox (Min a)
+instance SIMDUnbox a => SIMDUnbox (Max a)
+instance SIMDUnbox a => SIMDUnbox (Complex a)
+instance SIMDUnbox ()
+instance (SIMDUnbox a, SIMDUnbox b) => SIMDUnbox (a, b)
+instance (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c) => SIMDUnbox (a, b, c)
+instance (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c, SIMDUnbox d) => SIMDUnbox (a, b, c, d)
+instance (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c, SIMDUnbox d, SIMDUnbox e) => SIMDUnbox (a, b, c, d, e)
+instance (SIMDUnbox a, SIMDUnbox b, SIMDUnbox c, SIMDUnbox d, SIMDUnbox e, SIMDUnbox f) => SIMDUnbox (a, b, c, d, e, f)
 
 indexedX :: forall x i a. (SIMD x, MultiUnbox x a, MultiUnbox x i, EnumFromZero x i, LiftConstructor x) => VU.Vector a -> VU.Vector (i, a)
 indexedX = G.indexed @x
