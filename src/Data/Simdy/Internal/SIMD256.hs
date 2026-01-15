@@ -364,6 +364,7 @@ instance SIMDStorable Word64
 
 -- | SIMD vector types
 class ( KnownSIMDLength f
+      , LiftConstructor f
       , forall a. SIMDElement a => Broadcast f a
       , forall a b. (SIMDElement a, SIMDElement b) => LiftSIMD f a b
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c

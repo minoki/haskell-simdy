@@ -12,13 +12,13 @@
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Data.Coerce (coerce)
-import           Data.Complex (Complex)
+import           Data.Complex (Complex (..))
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Kind (Constraint, Type)
-import           Data.Monoid (Product, Sum)
+import           Data.Monoid (Product (..), Sum (..))
 import           Data.Primitive (Prim (..))
-import           Data.Semigroup (Max, Min)
+import           Data.Semigroup (Max (..), Min (..))
 import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class.Generated as M
 import           Data.Word (Word16, Word32, Word64, Word8)
@@ -88,6 +88,48 @@ class LiftConstructor f where
   -}
   mkComplex :: f a -> f a -> f (Complex a)
   deconstructComplex :: f (Complex a) -> (f a, f a)
+
+instance LiftConstructor Identity where
+  mkTuple2 (Identity x0) (Identity x1) = Identity (x0, x1)
+  mkTuple3 (Identity x0) (Identity x1) (Identity x2) = Identity (x0, x1, x2)
+  mkTuple4 (Identity x0) (Identity x1) (Identity x2) (Identity x3) = Identity (x0, x1, x2, x3)
+  mkTuple5 (Identity x0) (Identity x1) (Identity x2) (Identity x3) (Identity x4) = Identity (x0, x1, x2, x3, x4)
+  mkTuple6 (Identity x0) (Identity x1) (Identity x2) (Identity x3) (Identity x4) (Identity x6) = Identity (x0, x1, x2, x3, x4, x6)
+  deconstructTuple2 = coerce
+  deconstructTuple3 = coerce
+  deconstructTuple4 = coerce
+  deconstructTuple5 = coerce
+  deconstructTuple6 = coerce
+  mkSum = coerce
+  getSum' = coerce
+  mkProduct = coerce
+  getProduct' = coerce
+  mkMin = coerce
+  getMin' = coerce
+  mkMax = coerce
+  getMax' = coerce
+  mkComplex (Identity x) (Identity y) = Identity (x :+ y)
+  deconstructComplex (Identity (x :+ y)) = (Identity x, Identity y)
+  {-# INLINE mkTuple2 #-}
+  {-# INLINE mkTuple3 #-}
+  {-# INLINE mkTuple4 #-}
+  {-# INLINE mkTuple5 #-}
+  {-# INLINE mkTuple6 #-}
+  {-# INLINE deconstructTuple2 #-}
+  {-# INLINE deconstructTuple3 #-}
+  {-# INLINE deconstructTuple4 #-}
+  {-# INLINE deconstructTuple5 #-}
+  {-# INLINE deconstructTuple6 #-}
+  {-# INLINE mkSum #-}
+  {-# INLINE getSum' #-}
+  {-# INLINE mkProduct #-}
+  {-# INLINE getProduct' #-}
+  {-# INLINE mkMin #-}
+  {-# INLINE getMin' #-}
+  {-# INLINE mkMax #-}
+  {-# INLINE getMax' #-}
+  {-# INLINE mkComplex #-}
+  {-# INLINE deconstructComplex #-}
 
 pattern MkTuple2 :: LiftConstructor f => f a0 -> f a1 -> f (a0, a1)
 pattern MkTuple2 x0 x1 <- (deconstructTuple2 -> (x0, x1)) where
