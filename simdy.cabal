@@ -75,12 +75,12 @@ library common
                       Data.Simdy.Internal.Class
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.PrimExtra
-    c-sources:        cbits/float_minmax.c
-                      cbits/float_minmaxnm.c
-                      cbits/double_minmax.c
-                      cbits/double_minmaxnm.c
     if flag(avx512)
-        c-sources:        cbits/mask_avx512.c
+        c-sources:        cbits/float_minmax_avx512.c
+                          cbits/float_minmaxnm_avx512.c
+                          cbits/double_minmax_avx512.c
+                          cbits/double_minmaxnm_avx512.c
+                          cbits/mask_avx512.c
                           cbits/select_avx512.c
                           cbits/bitwise_avx512.c
                           cbits/int_compare_avx512.c
@@ -91,7 +91,11 @@ library common
         if impl(ghc < 9.8)
             c-sources:    cbits/fma_avx512.c
     elif flag(haswell)
-        c-sources:        cbits/mask_haswell.c
+        c-sources:        cbits/float_minmax_haswell.c
+                          cbits/float_minmaxnm_haswell.c
+                          cbits/double_minmax_haswell.c
+                          cbits/double_minmaxnm_haswell.c
+                          cbits/mask_haswell.c
                           cbits/select_haswell.c
                           cbits/bitwise_haswell.c
                           cbits/int_compare_haswell.c
@@ -102,7 +106,11 @@ library common
         if impl(ghc < 9.8)
             c-sources:    cbits/fma_haswell.c
     else
-        c-sources:        cbits/mask_baseline.c
+        c-sources:        cbits/float_minmax_baseline.c
+                          cbits/float_minmaxnm_baseline.c
+                          cbits/double_minmax_baseline.c
+                          cbits/double_minmaxnm_baseline.c
+                          cbits/mask_baseline.c
                           cbits/select_baseline.c
                           cbits/bitwise_baseline.c
                           cbits/int_compare_baseline.c

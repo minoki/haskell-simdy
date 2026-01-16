@@ -146,7 +146,7 @@ __m128d hs_simdy_maximumNumber_doublex2(__m128d x, __m128d y)
     return _mm_or_pd(result_ord, _mm_andnot_pd(ord, result_unord));
 }
 
-__attribute__((target("avx")))
+#if defined(__AVX__)
 __m256d hs_simdy_minimumNumber_doublex4(__m256d xx, __m256d yy)
 {
     __m256d unord = _mm256_cmp_pd(xx, yy, 3); // non-signaling UNORD compare
@@ -174,7 +174,6 @@ __m256d hs_simdy_minimumNumber_doublex4(__m256d xx, __m256d yy)
     }
 }
 
-__attribute__((target("avx")))
 __m256d hs_simdy_maximumNumber_doublex4(__m256d xx, __m256d yy)
 {
     __m256d unord = _mm256_cmp_pd(xx, yy, 3); // non-signaling UNORD compare
@@ -200,8 +199,9 @@ __m256d hs_simdy_maximumNumber_doublex4(__m256d xx, __m256d yy)
         return _mm256_blendv_pd(zz_eq, zz_neq, neq);
     }
 }
+#endif
 
-__attribute__((target("avx512dq,avx512vl")))
+#if defined(__AVX512DQ__) && defined(__AVX512VL__)
 __m128d hs_simdy_minimumNumber_doublex2_avx512(__m128d xx, __m128d yy)
 {
     // Convert (possible) signaling NaN to quiet one
@@ -211,7 +211,6 @@ __m128d hs_simdy_minimumNumber_doublex2_avx512(__m128d xx, __m128d yy)
     return _mm_range_pd(xx, yy, 4); // NaN is missing data
 }
 
-__attribute__((target("avx512dq,avx512vl")))
 __m128d hs_simdy_maximumNumber_doublex2_avx512(__m128d xx, __m128d yy)
 {
     // Convert (possible) signaling NaN to quiet one
@@ -221,7 +220,6 @@ __m128d hs_simdy_maximumNumber_doublex2_avx512(__m128d xx, __m128d yy)
     return _mm_range_pd(xx, yy, 5); // NaN is missing data
 }
 
-__attribute__((target("avx512dq,avx512vl")))
 __m256d hs_simdy_minimumNumber_doublex4_avx512(__m256d xx, __m256d yy)
 {
     // Convert (possible) signaling NaN to quiet one
@@ -231,7 +229,6 @@ __m256d hs_simdy_minimumNumber_doublex4_avx512(__m256d xx, __m256d yy)
     return _mm256_range_pd(xx, yy, 4); // NaN is missing data
 }
 
-__attribute__((target("avx512dq,avx512vl")))
 __m256d hs_simdy_maximumNumber_doublex4_avx512(__m256d xx, __m256d yy)
 {
     // Convert (possible) signaling NaN to quiet one
@@ -240,8 +237,9 @@ __m256d hs_simdy_maximumNumber_doublex4_avx512(__m256d xx, __m256d yy)
     asm volatile("vmulpd %t1, %t0, %t0" : "+v"(yy) : "v"(one));
     return _mm256_range_pd(xx, yy, 5); // NaN is missing data
 }
+#endif
 
-__attribute__((target("avx512dq")))
+#if defined(__AVX512DQ__)
 __m512d hs_simdy_minimumNumber_doublex8(__m512d xx, __m512d yy)
 {
     // Convert (possible) signaling NaN to quiet one
@@ -251,7 +249,6 @@ __m512d hs_simdy_minimumNumber_doublex8(__m512d xx, __m512d yy)
     return _mm512_range_pd(xx, yy, 4); // NaN is missing data
 }
 
-__attribute__((target("avx512dq")))
 __m512d hs_simdy_maximumNumber_doublex8(__m512d xx, __m512d yy)
 {
     // Convert (possible) signaling NaN to quiet one
@@ -260,6 +257,7 @@ __m512d hs_simdy_maximumNumber_doublex8(__m512d xx, __m512d yy)
     asm volatile("vmulpd %g1, %g0, %g0" : "+v"(yy) : "v"(one));
     return _mm512_range_pd(xx, yy, 5); // NaN is missing data
 }
+#endif
 
 #elif defined(__aarch64__)
 

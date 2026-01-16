@@ -167,7 +167,7 @@ __m128 hs_simdy_maximum_floatx4_avx(__m128 xx, __m128 yy)
 }
 #endif
 
-__attribute__((target("avx")))
+#if defined(__AVX__)
 __m256 hs_simdy_minimum_floatx8(__m256 xx, __m256 yy)
 {
     __m256 unord = _mm256_cmp_ps(xx, yy, 3); // non-signaling UNORD compare
@@ -193,7 +193,6 @@ __m256 hs_simdy_minimum_floatx8(__m256 xx, __m256 yy)
     }
 }
 
-__attribute__((target("avx")))
 __m256 hs_simdy_maximum_floatx8(__m256 xx, __m256 yy)
 {
     __m256 unord = _mm256_cmp_ps(xx, yy, 3); // non-signaling UNORD compare
@@ -217,8 +216,9 @@ __m256 hs_simdy_maximum_floatx8(__m256 xx, __m256 yy)
         return _mm256_blendv_ps(zz_eq, zz_neq, neq);
     }
 }
+#endif
 
-__attribute__((target("avx512dq,avx512vl")))
+#if defined(__AVX512DQ__) && defined(__AVX512VL__)
 __m128 hs_simdy_minimum_floatx4_avx512(__m128 xx, __m128 yy)
 {
     __m128 m = _mm_range_ps(xx, yy, 4); // NaN is missing data
@@ -239,7 +239,6 @@ __m128 hs_simdy_minimum_floatx4_avx512(__m128 xx, __m128 yy)
     */
 }
 
-__attribute__((target("avx512dq,avx512vl")))
 __m128 hs_simdy_maximum_floatx4_avx512(__m128 xx, __m128 yy)
 {
     __m128 m = _mm_range_ps(xx, yy, 5); // NaN is missing data
@@ -260,7 +259,6 @@ __m128 hs_simdy_maximum_floatx4_avx512(__m128 xx, __m128 yy)
     */
 }
 
-__attribute__((target("avx512dq,avx512vl")))
 __m256 hs_simdy_minimum_floatx8_avx512(__m256 xx, __m256 yy)
 {
     __m256 m = _mm256_range_ps(xx, yy, 4); // NaN is missing data
@@ -281,7 +279,6 @@ __m256 hs_simdy_minimum_floatx8_avx512(__m256 xx, __m256 yy)
     */
 }
 
-__attribute__((target("avx512dq,avx512vl")))
 __m256 hs_simdy_maximum_floatx8_avx512(__m256 xx, __m256 yy)
 {
     __m256 m = _mm256_range_ps(xx, yy, 5); // NaN is missing data
@@ -301,8 +298,9 @@ __m256 hs_simdy_maximum_floatx8_avx512(__m256 xx, __m256 yy)
     return _mm256_blendv_ps(m, a, unord);
     */
 }
+#endif
 
-__attribute__((target("avx512dq")))
+#if defined(__AVX512DQ__)
 __m512 hs_simdy_minimum_floatx16(__m512 xx, __m512 yy)
 {
     __m512 m = _mm512_range_ps(xx, yy, 4); // NaN is missing data
@@ -317,7 +315,6 @@ __m512 hs_simdy_minimum_floatx16(__m512 xx, __m512 yy)
 #endif
 }
 
-__attribute__((target("avx512dq")))
 __m512 hs_simdy_maximum_floatx16(__m512 xx, __m512 yy)
 {
     __m512 m = _mm512_range_ps(xx, yy, 5); // NaN is missing data
@@ -331,6 +328,7 @@ __m512 hs_simdy_maximum_floatx16(__m512 xx, __m512 yy)
     return _mm512_mask_add_ps(m, unord, xx, yy); // propagate NaN
 #endif
 }
+#endif
 
 #elif defined(__aarch64__)
 
