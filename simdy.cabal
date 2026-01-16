@@ -67,6 +67,10 @@ common arch-options
         ghc-options: -fllvm
         cpp-options: -DUSE_LLVM_BACKEND
         -- __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
+    if flag(llvm) && flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        -- You need `-optlc -mattr=+evex512` if using GHC 9.12.<4 or 9.14.<2 with LLVM 18 or newer
+        -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+        ghc-options: -optlc -mattr=+evex512
 
 library common
     import:           warnings
