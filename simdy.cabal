@@ -57,11 +57,8 @@ common warnings
         ghc-options: -Wno-pattern-namespace-specifier
 
 common arch-options
-    if !flag(no-simd)
-        cpp-options: -DUSE_SIMD128
     if flag(haswell) || flag(avx512)
         ghc-options: -msse4.2 -mavx2
-        cpp-options: -DUSE_SIMD256
         cc-options: -mavx2 -mfma -mf16c
     if (flag(haswell) || flag(avx512)) && impl(ghc >= 9.8)
         ghc-options: -mfma
@@ -69,7 +66,7 @@ common arch-options
         cpp-options: -DUSE_FMA
     if flag(avx512)
         ghc-options: -mavx512f
-        cpp-options: -DUSE_SIMD512 -DUSE_AVX512
+        cpp-options: -DUSE_AVX512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
     if flag(llvm)
         ghc-options: -fllvm
