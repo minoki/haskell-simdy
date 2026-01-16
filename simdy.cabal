@@ -22,6 +22,14 @@ extra-source-files: cbits/mask.h
                     cbits/int_minmax.c
                     cbits/fma.c
 
+-- The versions of GHC and core libraries:
+--
+-- * GHC 9.6.* / base-4.18.* / ghc-prim 0.10.*
+-- * GHC 9.8.* / base-4.19.* / ghc-prim 0.11.*
+-- * GHC 9.10.* / base-4.20.* / ghc-prim 0.12.*
+-- * GHC 9.12.* / base-4.21.* / ghc-prim 0.13.* / ghc-internal 9.12##.* / ghc-experimental 9.12##.*
+-- * GHC 9.14.* / base-4.22.* / ghc-prim 0.13.* / ghc-internal 9.14##.* / ghc-experimental 9.14##.*
+
 flag no-simd
     description: Don't use native vector types
     manual: True
