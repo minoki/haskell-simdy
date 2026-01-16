@@ -12,11 +12,21 @@ import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class as S
 import           Data.Word
 import           GHC.Exts (IsList (Item, fromList, toList))
-import           Prelude hiding ((/=), (<), (<=), (==), (>), (>=), min, max)
+import           Prelude hiding (max, min, (/=), (<), (<=), (==), (>), (>=))
 import qualified Prelude
 import           Test.Tasty
 import           Test.Tasty.HUnit
+import           Test.Tasty.Providers (IsTest (..))
+import           Test.Tasty.Providers.ConsoleFormat (noResultDetails)
 import qualified Test.Tasty.QuickCheck as QC
+import           Test.Tasty.Runners (Outcome (Success), Result (..),
+                                     TestTree (SingleTest))
+
+newtype Report = Report String
+
+instance IsTest Report where
+  run _ (Report message) _callback = pure $ Result Success message "OK" 0.0 noResultDetails
+  testOptions = pure []
 
 type SizedList :: (Type -> Type) -> Type -> Type
 newtype SizedList x a = MkSizedList { unSized :: [a] } deriving Show
@@ -193,6 +203,7 @@ testFMA proxy = case isFMAAvailable of
 
 properties :: forall x
             . ( SIMD x
+              , ImplementationDescription x
               , ListLike x Bool
               , ListLike x Int8
               , ListLike x Int16
@@ -219,8 +230,9 @@ properties :: forall x
               , FloatingF x Float
               , FloatingF x Double
               ) => Proxy x -> [TestTree]
-properties _ =
-  [ let proxy :: Proxy (x Bool)
+properties proxyX =
+  [ SingleTest "implementation description" $ Report (implementationDescription proxyX)
+  , let proxy :: Proxy (x Bool)
         proxy = Proxy
     in testGroup "Bool"
       [ testPackUnpack proxy

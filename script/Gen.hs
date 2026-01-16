@@ -72,6 +72,9 @@ gen !vecCount !maxBits
     ++ genType "Float" "F#" 32 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
     ++ genType "Double" "D#" 64 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
+    ++ ["instance ImplementationDescription " ++ tyCon ++ " where"
+       ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits=" ++ show maxBits ++ "\""
+       ]
     ++ genType "Int8" "I8#" 8 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
     ++ genType "Int16" "I16#" 16 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
     ++ genType "Int32" "I32#" 32 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
@@ -82,7 +85,10 @@ gen !vecCount !maxBits
     ++ genType "Word64" "W64#" 64 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
     ++ (if maxBits == 128
         then ["#else"
-             ,"-- The NCG of GHC 9.12 does not support integer vectors"]
+             ,"-- The NCG of GHC 9.12 does not support integer vectors"
+             ,"instance ImplementationDescription " ++ tyCon ++ " where"
+             ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits(Float,Double)=" ++ show maxBits ++ ",maxBits(other)=0\""
+             ]
              ++ genType "Int8" "I8#" 8 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
              ++ genType "Int16" "I16#" 16 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
              ++ genType "Int32" "I32#" 32 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
@@ -848,6 +854,8 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"--"
     ,"-- You can access the elements by 'mk" ++ tyCon ++ "', 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
     ,"data " ++ tyCon ++ " a = " ++ dataCon <+> spaceSep (replicate n ("!(" ++ baseTyCon ++ " a)"))
+    ,"instance ImplementationDescription " ++ tyCon ++ " where"
+    ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits=0\""
     ,"instance KnownSIMDLength " ++ tyCon ++ " where"
     ,"  type SIMDLength " ++ tyCon ++ " = " ++ show vecCount
     ,"  simdLength = " ++ show vecCount

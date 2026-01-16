@@ -18,6 +18,7 @@ import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Kind (Constraint, Type)
 import           Data.Monoid (Product (..), Sum (..))
 import           Data.Primitive (Prim (..))
+import           Data.Proxy (Proxy)
 import           Data.Semigroup (Max (..), Min (..))
 import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class.Generated as M
@@ -32,6 +33,13 @@ import qualified Prelude
 #if MIN_VERSION_base(4, 19, 0)
 import           GHC.Exts (Float (F#), Double (D#), fmaddFloat#, fmaddDouble#)
 #endif
+
+type ImplementationDescription :: (Type -> Type) -> Constraint
+class ImplementationDescription f where
+  implementationDescription :: Proxy f -> String
+
+instance ImplementationDescription Identity where
+  implementationDescription _ = "Identity (scalar)"
 
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f
