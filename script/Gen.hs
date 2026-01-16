@@ -1006,8 +1006,8 @@ genHalfFile moduleName imports counts repCounts !maxBits
 
 main :: IO ()
 main = do
-  createDirectoryIfMissing True "src/Data/Simdy/Internal/Class"
-  writeFile "src/Data/Simdy/Internal/Class/Generated.hs" $ unlines $
+  createDirectoryIfMissing True "src-common/Data/Simdy/Internal/Class"
+  writeFile "src-common/Data/Simdy/Internal/Class/Generated.hs" $ unlines $
     ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE PatternSynonyms #-}"
     ,"{-# LANGUAGE ViewPatterns #-}"
@@ -1043,20 +1043,20 @@ main = do
   writeFile "src/Data/Simdy/Internal/SIMD256.hs" $ unlines $ genFile "Data.Simdy.Internal.SIMD256" 256
   writeFile "src/Data/Simdy/Internal/SIMD512.hs" $ unlines $ genFile "Data.Simdy.Internal.SIMD512" 512
   -}
-  createDirectoryIfMissing True "src/Data/Simdy/Internal/NoSIMD"
-  createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD128"
-  createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD256"
-  createDirectoryIfMissing True "src/Data/Simdy/Internal/SIMD512"
+  createDirectoryIfMissing True "src-no-simd/Data/Simdy/Internal/NoSIMD"
+  createDirectoryIfMissing True "src-vl128/Data/Simdy/Internal/SIMD128"
+  createDirectoryIfMissing True "src-vl256/Data/Simdy/Internal/SIMD256"
+  createDirectoryIfMissing True "src-vl512/Data/Simdy/Internal/SIMD512"
   forM_ [2,4,8,16,32] $ \i -> do
-    writeFile ("src/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $
+    writeFile ("src-no-simd/Data/Simdy/Internal/NoSIMD/X" ++ show i ++ ".hs") $ unlines $
       if i <= 8 then
         genFile ("Data.Simdy.Internal.NoSIMD.X" ++ show i) [] i 0
       else
         genReplicatedDef ("Data.Simdy.Internal.NoSIMD.X" ++ show i) ["Data.Simdy.Internal.NoSIMD.X8"] i 8
-    writeFile ("src/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) ["Data.Simdy.Internal.SIMD128.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra"] i 128
-    when (i * 64 > 128) $ writeFile ("src/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ["Data.Simdy.Internal.SIMD256.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra"] i 256
-    when (i * 64 > 256) $ writeFile ("src/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ["Data.Simdy.Internal.SIMD512.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra", "Data.Simdy.Internal.SIMD512.PrimExtra"] i 512
-  writeFile "src/Data/Simdy/Internal/NoSIMD/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.NoSIMD.HalfVector"
+    writeFile ("src-vl128/Data/Simdy/Internal/SIMD128/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD128.X" ++ show i) ["Data.Simdy.Internal.SIMD128.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra"] i 128
+    when (i * 64 > 128) $ writeFile ("src-vl256/Data/Simdy/Internal/SIMD256/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD256.X" ++ show i) ["Data.Simdy.Internal.SIMD256.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra"] i 256
+    when (i * 64 > 256) $ writeFile ("src-vl512/Data/Simdy/Internal/SIMD512/X" ++ show i ++ ".hs") $ unlines $ genFile ("Data.Simdy.Internal.SIMD512.X" ++ show i) ["Data.Simdy.Internal.SIMD512.Prim", "Data.Simdy.Internal.SIMD128.PrimExtra", "Data.Simdy.Internal.SIMD256.PrimExtra", "Data.Simdy.Internal.SIMD512.PrimExtra"] i 512
+  writeFile "src-no-simd/Data/Simdy/Internal/NoSIMD/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.NoSIMD.HalfVector"
     ["Data.Functor.Identity"
     ,"Data.Simdy.Internal.NoSIMD.X2"
     ,"Data.Simdy.Internal.NoSIMD.X4"
@@ -1064,7 +1064,7 @@ main = do
     ,"Data.Simdy.Internal.NoSIMD.X16"
     ,"Data.Simdy.Internal.NoSIMD.X32"
     ] [2,4,8] [16,32] 0
-  writeFile "src/Data/Simdy/Internal/SIMD128/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD128.HalfVector"
+  writeFile "src-vl128/Data/Simdy/Internal/SIMD128/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD128.HalfVector"
     ["Data.Functor.Identity"
     ,"Data.Simdy.Internal.SIMD128.X2"
     ,"Data.Simdy.Internal.SIMD128.X4"
@@ -1072,7 +1072,7 @@ main = do
     ,"Data.Simdy.Internal.SIMD128.X16"
     ,"Data.Simdy.Internal.SIMD128.X32"
     ] [2,4,8,16,32] [] 128
-  writeFile "src/Data/Simdy/Internal/SIMD256/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD256.HalfVector"
+  writeFile "src-vl256/Data/Simdy/Internal/SIMD256/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD256.HalfVector"
     ["Data.Simdy.Internal.SIMD128.HalfVector ()"
     ,"Data.Simdy.Internal.SIMD128.X2"
     ,"Data.Simdy.Internal.SIMD256.X4"
@@ -1080,7 +1080,7 @@ main = do
     ,"Data.Simdy.Internal.SIMD256.X16"
     ,"Data.Simdy.Internal.SIMD256.X32"
     ] [4,8,16,32] [] 256
-  writeFile "src/Data/Simdy/Internal/SIMD512/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD512.HalfVector"
+  writeFile "src-vl512/Data/Simdy/Internal/SIMD512/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD512.HalfVector"
     ["Data.Simdy.Internal.SIMD256.X4"
     ,"Data.Simdy.Internal.SIMD256.HalfVector ()"
     ,"Data.Simdy.Internal.SIMD512.X8"

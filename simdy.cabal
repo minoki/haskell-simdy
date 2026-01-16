@@ -68,33 +68,13 @@ common arch-options
         cpp-options: -DUSE_LLVM_BACKEND
         -- __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
 
-library
+library common
     import:           warnings
                     , arch-options
-    exposed-modules:  Data.Simdy
-                      Data.Simdy.Class.Bits
-                      Data.Simdy.FMA
-                      Data.Simdy.Horizontal
-                      Data.Simdy.Mask
-                      Data.Simdy.MinMax
-                      Data.Simdy.Pack
-                      Data.Simdy.Split
-                      Data.Simdy.Tuple
+    exposed-modules:  Data.Simdy.Class.Bits
                       Data.Simdy.Internal.Class
-                      Data.Simdy.Internal.Default
-                      Data.Simdy.Internal.NoSIMD
-                      Data.Simdy.Vector.Bundle
-                      Data.Simdy.Vector.Class
-                      Data.Simdy.Vector.Generic
-                      Data.Simdy.Vector.Unboxed
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.PrimExtra
-                      Data.Simdy.Internal.NoSIMD.X2
-                      Data.Simdy.Internal.NoSIMD.X4
-                      Data.Simdy.Internal.NoSIMD.X8
-                      Data.Simdy.Internal.NoSIMD.X16
-                      Data.Simdy.Internal.NoSIMD.X32
-                      Data.Simdy.Internal.NoSIMD.HalfVector
     c-sources:        cbits/float_minmax.c
                       cbits/float_minmaxnm.c
                       cbits/double_minmax.c
@@ -132,33 +112,118 @@ library
             c-sources:    cbits/int_minmax_baseline.c
         if impl(ghc < 9.8)
             c-sources:    cbits/fma_baseline.c
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      primitive ^>=0.9.0.0
+    hs-source-dirs:   src-common
+    default-language: GHC2021
+
+library no-simd
+    import:           warnings
+                    , arch-options
+    exposed-modules:  Data.Simdy.Internal.NoSIMD
+    other-modules:    Data.Simdy.Internal.NoSIMD.X2
+                      Data.Simdy.Internal.NoSIMD.X4
+                      Data.Simdy.Internal.NoSIMD.X8
+                      Data.Simdy.Internal.NoSIMD.X16
+                      Data.Simdy.Internal.NoSIMD.X32
+                      Data.Simdy.Internal.NoSIMD.HalfVector
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      primitive ^>=0.9.0.0,
+                      simdy:common
+    hs-source-dirs:   src-no-simd
+    default-language: GHC2021
+
+library vl128
+    import:           warnings
+                    , arch-options
+    exposed-modules:  Data.Simdy.Internal.SIMD128
+                      Data.Simdy.Internal.SIMD128.Prim
+                      Data.Simdy.Internal.SIMD128.PrimExtra
+                      Data.Simdy.Internal.SIMD128.X2
+                      Data.Simdy.Internal.SIMD128.X4
+                      Data.Simdy.Internal.SIMD128.X8
+                      Data.Simdy.Internal.SIMD128.X16
+                      Data.Simdy.Internal.SIMD128.X32
+                      Data.Simdy.Internal.SIMD128.HalfVector
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      ghc-prim,
+                      primitive ^>=0.9.0.0,
+                      simdy:common
+    hs-source-dirs:   src-vl128
+    default-language: GHC2021
+    if flag(no-simd)
+        buildable: False
+
+library vl256
+    import:           warnings
+                    , arch-options
+    exposed-modules:  Data.Simdy.Internal.SIMD256
+                      Data.Simdy.Internal.SIMD256.Prim
+                      Data.Simdy.Internal.SIMD256.PrimExtra
+                      Data.Simdy.Internal.SIMD256.X4
+                      Data.Simdy.Internal.SIMD256.X8
+                      Data.Simdy.Internal.SIMD256.X16
+                      Data.Simdy.Internal.SIMD256.X32
+                      Data.Simdy.Internal.SIMD256.HalfVector
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      ghc-prim,
+                      primitive ^>=0.9.0.0,
+                      simdy:common,
+                      simdy:vl128
+    hs-source-dirs:   src-vl256
+    default-language: GHC2021
+    if flag(no-simd) || !(flag(haswell) || flag(avx512))
+        buildable: False
+
+library vl512
+    import:           warnings
+                    , arch-options
+    exposed-modules:  Data.Simdy.Internal.SIMD512
+    other-modules:    Data.Simdy.Internal.SIMD512.Prim
+                      Data.Simdy.Internal.SIMD512.PrimExtra
+                      Data.Simdy.Internal.SIMD512.X8
+                      Data.Simdy.Internal.SIMD512.X16
+                      Data.Simdy.Internal.SIMD512.X32
+                      Data.Simdy.Internal.SIMD512.HalfVector
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      ghc-prim,
+                      primitive ^>=0.9.0.0,
+                      simdy:common,
+                      simdy:vl128,
+                      simdy:vl256
+    hs-source-dirs:   src-vl512
+    default-language: GHC2021
+    if flag(no-simd) || !flag(avx512)
+        buildable: False
+
+library
+    import:           warnings
+                    , arch-options
+    exposed-modules:  Data.Simdy
+                      Data.Simdy.FMA
+                      Data.Simdy.Horizontal
+                      Data.Simdy.Mask
+                      Data.Simdy.MinMax
+                      Data.Simdy.Pack
+                      Data.Simdy.Split
+                      Data.Simdy.Tuple
+                      Data.Simdy.Internal.Default
+                      Data.Simdy.Vector.Bundle
+                      Data.Simdy.Vector.Class
+                      Data.Simdy.Vector.Generic
+                      Data.Simdy.Vector.Unboxed
+    reexported-modules: Data.Simdy.Class.Bits
+                      , Data.Simdy.Internal.Class
+                      , Data.Simdy.Internal.NoSIMD
     if !flag(no-simd)
-        exposed-modules:  Data.Simdy.Internal.SIMD128
-        other-modules:    Data.Simdy.Internal.SIMD128.Prim
-                          Data.Simdy.Internal.SIMD128.PrimExtra
-                          Data.Simdy.Internal.SIMD128.X2
-                          Data.Simdy.Internal.SIMD128.X4
-                          Data.Simdy.Internal.SIMD128.X8
-                          Data.Simdy.Internal.SIMD128.X16
-                          Data.Simdy.Internal.SIMD128.X32
-                          Data.Simdy.Internal.SIMD128.HalfVector
+        reexported-modules: Data.Simdy.Internal.SIMD128
+        build-depends: simdy:vl128
     if flag(haswell) || flag(avx512)
-        exposed-modules:  Data.Simdy.Internal.SIMD256
-        other-modules:    Data.Simdy.Internal.SIMD256.Prim
-                          Data.Simdy.Internal.SIMD256.PrimExtra
-                          Data.Simdy.Internal.SIMD256.X4
-                          Data.Simdy.Internal.SIMD256.X8
-                          Data.Simdy.Internal.SIMD256.X16
-                          Data.Simdy.Internal.SIMD256.X32
-                          Data.Simdy.Internal.SIMD256.HalfVector
+        reexported-modules: Data.Simdy.Internal.SIMD256
+        build-depends: simdy:vl256
     if flag(avx512)
-        exposed-modules:  Data.Simdy.Internal.SIMD512
-        other-modules:    Data.Simdy.Internal.SIMD512.Prim
-                          Data.Simdy.Internal.SIMD512.PrimExtra
-                          Data.Simdy.Internal.SIMD512.X8
-                          Data.Simdy.Internal.SIMD512.X16
-                          Data.Simdy.Internal.SIMD512.X32
-                          Data.Simdy.Internal.SIMD512.HalfVector
+        reexported-modules: Data.Simdy.Internal.SIMD512
+        build-depends: simdy:vl512
     if flag(no-simd)
         hs-source-dirs: no-simd
     elif flag(avx512)
@@ -171,7 +236,9 @@ library
     build-depends:    base >=4.18.0.0 && <4.23,
                       ghc-prim,
                       primitive ^>=0.9.0.0,
-                      vector ^>=0.13.1.0
+                      vector ^>=0.13.1.0,
+                      simdy:common,
+                      simdy:no-simd
     hs-source-dirs:   src
     default-language: GHC2021
 
