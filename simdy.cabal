@@ -1,4 +1,4 @@
-cabal-version:      3.0
+cabal-version:      3.4
 name:               simdy
 version:            0.1.0.0
 synopsis:           Wrappers around GHC's SIMD primitives.
@@ -26,22 +26,34 @@ extra-source-files: cbits/mask.h
 --
 -- * GHC 9.6.* / base-4.18.* / ghc-prim 0.10.*
 -- * GHC 9.8.* / base-4.19.* / ghc-prim 0.11.*
+--     * GHC 9.8.1 and 9.8.2 are not supported because the FMA primitive is broken and I don't think it is worth working around it.
+--     * GHC 9.8.1 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
+--     * GHC 9.8.2 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
 -- * GHC 9.10.* / base-4.20.* / ghc-prim 0.12.*
 -- * GHC 9.12.* / base-4.21.* / ghc-prim 0.13.* / ghc-internal 9.12##.* / ghc-experimental 9.12##.*
+--     * I'd like to drop support for 9.12.1/9.12.2/9.12.3 once 9.12.4 is out, because of broadcast and +evex512 and NCG spill issue.
+--     * Broadcast issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
+--     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+--     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411
 -- * GHC 9.14.* / base-4.22.* / ghc-prim 0.13.* / ghc-internal 9.14##.* / ghc-experimental 9.14##.*
+--     * I'd like to drop support for 9.14.1 once 9.14.2 is out, because of +evex512 and NCG spill issue.
+--     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+--     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411
 
 flag no-simd
     description: Don't use native vector types
     manual: True
     default: False
 
+-- Setting the `avx512` flag should enable the functionality of `haswell`.
+-- To achieve this, we should use `flag(haswell) || flag(avx512)` instead of just `flag(haswell)`
 flag haswell
-    description: Enable 256-bit vector via AVX2+FMA+F16C (Intel: Haswell or later, AMD: Zen or later)
+    description: Enable AVX2+FMA+F16C (Intel: Haswell or later, AMD: Zen or later). Try to use 256-bit vectors if supported by the backend.
     manual: True
     default: False
 
 flag avx512
-    description: Enable 512-bit vector via AVX-512 (F+VL+BW+DQ)
+    description: Enable AVX-512 (F+VL+BW+DQ). Try to use 512-bit vectors if supported by the backend.
     manual: True
     default: False
 
@@ -57,6 +69,10 @@ common warnings
         ghc-options: -Wno-pattern-namespace-specifier
 
 common arch-options
+    if impl(ghc == 9.8.1) || impl(ghc == 9.8.2)
+        -- GHC 9.8.1 has the FMA primitive broken: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
+        -- GHC 9.8.2 has the FMA primitive broken: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
+        buildable: False
     if flag(haswell) || flag(avx512)
         ghc-options: -msse4.2 -mavx2
         cc-options: -mavx2 -mfma -mf16c
@@ -65,6 +81,7 @@ common arch-options
     if flag(haswell) || flag(avx512) || arch(aarch64)
         cpp-options: -DUSE_FMA
     if flag(avx512)
+        -- We might be able to add `ghc-options: -mavx512vl -mavx512bw -mavx512dq` on future GHC versions: https://gitlab.haskell.org/ghc/ghc/-/issues/26406
         ghc-options: -mavx512f
         cpp-options: -DUSE_AVX512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
@@ -72,11 +89,12 @@ common arch-options
         ghc-options: -fllvm
         -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
         -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
-        -- So we define a custom macro
+        -- So we define a custom macro.
+        -- I'd like to drop support for these versions once 9.12.4 is out.
         if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
             cpp-options: -DBROADCAST_IS_BROKEN
     if flag(llvm) && flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
-        -- You need `-optlc -mattr=+evex512` if using GHC 9.12.<4 or 9.14.<2 with LLVM 18 or newer
+        -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
         -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
         ghc-options: -optlc -mattr=+evex512
 
@@ -87,6 +105,10 @@ library common
                       Data.Simdy.Internal.Class
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.PrimExtra
+
+    -- We use separate C sources for the baseline ISA/Haswell/AVX-512 because
+    --   1) We want to make sure the C sources are recompiled when we re-build this package with different flags
+    --   2) We don't want to rely on __attribute__((target)) because LLVM is buggy: https://github.com/llvm/llvm-project/issues/64706
     if flag(avx512)
         c-sources:        cbits/float_minmax_avx512.c
                           cbits/float_minmaxnm_avx512.c
@@ -132,6 +154,7 @@ library common
             c-sources:    cbits/int_minmax_baseline.c
         if impl(ghc < 9.8)
             c-sources:    cbits/fma_baseline.c
+
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0
     hs-source-dirs:   src-common
@@ -171,7 +194,8 @@ library vl128
                       simdy:common
     hs-source-dirs:   src-vl128
     default-language: GHC2021
-    if flag(no-simd)
+    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)))
+        -- vl128 requires !no-simd && (llvm || (ghc >= 9.12 && x86_64))
         buildable: False
 
 library vl256
@@ -192,7 +216,8 @@ library vl256
                       simdy:vl128
     hs-source-dirs:   src-vl256
     default-language: GHC2021
-    if flag(no-simd) || !(flag(haswell) || flag(avx512))
+    if flag(no-simd) || !(flag(haswell) || flag(avx512)) || !flag(llvm)
+        -- vl256 requires !no-simd && (haswell || avx512) && llvm
         buildable: False
 
 library vl512
@@ -213,7 +238,8 @@ library vl512
                       simdy:vl256
     hs-source-dirs:   src-vl512
     default-language: GHC2021
-    if flag(no-simd) || !flag(avx512)
+    if flag(no-simd) || !flag(avx512) || !flag(llvm)
+        -- vl512 requires !no-simd && avx512 && llvm
         buildable: False
 
 library
@@ -227,7 +253,6 @@ library
                       Data.Simdy.Pack
                       Data.Simdy.Split
                       Data.Simdy.Tuple
-                      Data.Simdy.Internal.Default
                       Data.Simdy.Vector.Bundle
                       Data.Simdy.Vector.Class
                       Data.Simdy.Vector.Generic
@@ -235,23 +260,27 @@ library
     reexported-modules: Data.Simdy.Class.Bits
                       , Data.Simdy.Internal.Class
                       , Data.Simdy.Internal.NoSIMD
-    if !flag(no-simd)
+
+    if !flag(no-simd) && (flag(llvm) || (impl(ghc >= 9.12) && arch(x86_64)))
         reexported-modules: Data.Simdy.Internal.SIMD128
         build-depends: simdy:vl128
-    if flag(haswell) || flag(avx512)
+    if !flag(no-simd) && (flag(haswell) || flag(avx512)) && flag(llvm)
         reexported-modules: Data.Simdy.Internal.SIMD256
         build-depends: simdy:vl256
-    if flag(avx512)
+    if !flag(no-simd) && flag(avx512) && flag(llvm)
         reexported-modules: Data.Simdy.Internal.SIMD512
         build-depends: simdy:vl512
-    if flag(no-simd)
-        hs-source-dirs: no-simd
-    elif flag(avx512)
-        hs-source-dirs: vl512
-    elif flag(haswell)
-        hs-source-dirs: vl256
+
+    -- Choose the default vector length (Data.Simdy.Internal.Default) based on the flags.
+    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)))
+        mixins: simdy:no-simd (Data.Simdy.Internal.NoSIMD, Data.Simdy.Internal.NoSIMD as Data.Simdy.Internal.Default)
+    elif flag(avx512) && flag(llvm)
+        mixins: simdy:vl512 (Data.Simdy.Internal.SIMD512, Data.Simdy.Internal.SIMD512 as Data.Simdy.Internal.Default)
+    elif flag(haswell) && flag(llvm)
+        mixins: simdy:vl256 (Data.Simdy.Internal.SIMD256, Data.Simdy.Internal.SIMD256 as Data.Simdy.Internal.Default)
     else
-        hs-source-dirs: vl128
+        mixins: simdy:vl128 (Data.Simdy.Internal.SIMD128, Data.Simdy.Internal.SIMD128 as Data.Simdy.Internal.Default)
+
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.23,
                       ghc-prim,
