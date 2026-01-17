@@ -270,7 +270,7 @@ module Data.Simdy.Internal.SIMD512.Prim
   ) where
 import           Data.Simdy.Internal.SIMD256.Prim
 
-#if __GLASGOW_HASKELL__ == 912 && !MIN_VERSION_GLASGOW_HASKELL(9, 12, 3, 0) && defined(USE_LLVM_BACKEND)
+#if defined(BROADCAST_IS_BROKEN)
 -- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
 
 import qualified GHC.Prim as M
