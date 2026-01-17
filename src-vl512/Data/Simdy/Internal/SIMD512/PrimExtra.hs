@@ -204,9 +204,7 @@ foreign import ccall unsafe "hs_simdy_shiftR_word32x16"
 foreign import ccall unsafe "hs_simdy_shiftR_word64x8"
   shiftRWord64X8# :: Word64X8# -> Int# -> Word64X8#
 
--- Workaround a bug in LLVM
--- #if !MIN_VERSION_ghc_prim(0, 13, 0) || (defined(USE_AVX512) && defined(__GLASGOW_HASKELL_LLVM__) && __GLASGOW_HASKELL_LLVM__ < 2200)
-#if !MIN_VERSION_ghc_prim(0, 13, 0) || defined(USE_AVX512)
+#if !MIN_VERSION_ghc_prim(0, 13, 0)
 --
 -- Integer minimum/maximum
 --

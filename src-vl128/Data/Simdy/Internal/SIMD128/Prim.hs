@@ -245,7 +245,6 @@ module Data.Simdy.Internal.SIMD128.Prim
   , M.shuffleWord64X2#
   , M.shuffleFloatX4#
   , M.shuffleDoubleX2#
-#if !defined(USE_AVX512)
   , M.minInt8X16#
   , M.minInt16X8#
   , M.minInt32X4#
@@ -254,10 +253,8 @@ module Data.Simdy.Internal.SIMD128.Prim
   , M.minWord16X8#
   , M.minWord32X4#
   , M.minWord64X2#
-#endif
   , M.minFloatX4#
   , M.minDoubleX2#
-#if !defined(USE_AVX512)
   , M.maxInt8X16#
   , M.maxInt16X8#
   , M.maxInt32X4#
@@ -266,7 +263,6 @@ module Data.Simdy.Internal.SIMD128.Prim
   , M.maxWord16X8#
   , M.maxWord32X4#
   , M.maxWord64X2#
-#endif
   , M.maxFloatX4#
   , M.maxDoubleX2#
 #endif
