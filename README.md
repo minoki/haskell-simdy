@@ -14,6 +14,7 @@ data X4 a
 data X8 a
 data X16 a
 data X32 a
+data X64 a
 ```
 
 Conceptually, these types are fixed-length lists, but with more efficient representations. For example, `X4 a` is isomorphic to `(a, a, a, a)`.
@@ -30,6 +31,7 @@ instance SIMD X4
 instance SIMD X8
 instance SIMD X16
 instance SIMD X32
+instance SIMD X64
 ```
 
 Vector types can be constructed using functions from `Data.Simdy.Pack`:
@@ -61,6 +63,11 @@ mkX32 :: a -> ... -> a -> X32 a
 packX32 :: (a, ..., a) -> X32 a
 unpackX32 :: X32 a -> (a, ..., a)
 pattern MkX32 :: a -> ... -> a -> X32 a
+
+mkX64 :: a -> ... -> a -> X64 a
+packX64 :: (a, ..., a) -> X64 a
+unpackX64 :: X64 a -> (a, ..., a)
+pattern MkX64 :: a -> ... -> a -> X64 a
 ```
 
 ## Operations

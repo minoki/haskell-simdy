@@ -48,6 +48,7 @@ import           Data.Simdy.Internal.SIMD128.X16 as M
 import           Data.Simdy.Internal.SIMD128.X2 as M
 import           Data.Simdy.Internal.SIMD128.X32 as M
 import           Data.Simdy.Internal.SIMD128.X4 as M
+import           Data.Simdy.Internal.SIMD128.X64 as M
 import           Data.Simdy.Internal.SIMD128.X8 as M
 -- import qualified Data.Vector.Unboxed as VU
 import           Data.Word
@@ -60,21 +61,25 @@ class ( PackX2 X2 a
       , PackX8 X8 a
       , PackX16 X16 a
       , PackX32 X32 a
+      , PackX64 X64 a
       , Broadcast X2 a
       , Broadcast X4 a
       , Broadcast X8 a
       , Broadcast X16 a
       , Broadcast X32 a
+      , Broadcast X64 a
       , SplitShortVector X2 a
       , SplitShortVector X4 a
       , SplitShortVector X8 a
       , SplitShortVector X16 a
       , SplitShortVector X32 a
+      , SplitShortVector X64 a
       , SelectableF X2 a
       , SelectableF X4 a
       , SelectableF X8 a
       , SelectableF X16 a
       , SelectableF X32 a
+      , SelectableF X64 a
       ) => SIMDElement a
 instance SIMDElement Bool
 instance SIMDElement Float
@@ -109,6 +114,7 @@ class ( Eq a
       , EquatableF X8 a
       , EquatableF X16 a
       , EquatableF X32 a
+      , EquatableF X64 a
       ) => SIMDEq a
 instance SIMDEq Int8
 instance SIMDEq Int16
@@ -131,6 +137,7 @@ class ( Ord a
       , OrderedF X8 a
       , OrderedF X16 a
       , OrderedF X32 a
+      , OrderedF X64 a
       ) => SIMDOrd a
 instance SIMDOrd Int8
 instance SIMDOrd Int16
@@ -153,6 +160,7 @@ class ( Num a
       , NumF X8 a
       , NumF X16 a
       , NumF X32 a
+      , NumF X64 a
       ) => SIMDNum a
 instance SIMDNum Float
 instance SIMDNum Double
@@ -176,6 +184,7 @@ class ( Fractional a
       , FractionalF X8 a
       , FractionalF X16 a
       , FractionalF X32 a
+      , FractionalF X64 a
       ) => SIMDFractional a
 instance SIMDFractional Float
 instance SIMDFractional Double
@@ -191,6 +200,7 @@ class ( Floating a
       , FloatingF X8 a
       , FloatingF X16 a
       , FloatingF X32 a
+      , FloatingF X64 a
       ) => SIMDFloating a
 instance SIMDFloating Float
 instance SIMDFloating Double
@@ -207,6 +217,7 @@ class ( Bits a
       , BooleanF X8 a
       , BooleanF X16 a
       , BooleanF X32 a
+      , BooleanF X64 a
       ) => SIMDBoolean a
 instance SIMDBoolean Bool
 instance SIMDBoolean Int8
@@ -229,6 +240,7 @@ class ( Bits a
       , BitShiftF X8 a
       , BitShiftF X16 a
       , BitShiftF X32 a
+      , BitShiftF X64 a
       ) => SIMDBits a
 instance SIMDBits Int8
 instance SIMDBits Int16
@@ -249,6 +261,7 @@ class ( MinMax a
       , MinMaxF X8 a
       , MinMaxF X16 a
       , MinMaxF X32 a
+      , MinMaxF X64 a
       ) => SIMDMinMax a
 instance SIMDMinMax Int8
 instance SIMDMinMax Int16
@@ -268,6 +281,7 @@ class ( FusedMultiplyAdd a
       , FusedMultiplyAddF X8 a
       , FusedMultiplyAddF X16 a
       , FusedMultiplyAddF X32 a
+      , FusedMultiplyAddF X64 a
       ) => SIMDFMA a
 instance HasFMA => SIMDFMA Float
 instance HasFMA => SIMDFMA Double
@@ -279,6 +293,7 @@ class ( Num a
       , EnumFromZero X8 a
       , EnumFromZero X16 a
       , EnumFromZero X32 a
+      , EnumFromZero X64 a
       ) => SIMDEnumFromZero a
 instance SIMDEnumFromZero Float
 instance SIMDEnumFromZero Double
@@ -298,6 +313,7 @@ class ( Prim a
       , MultiPrim X8 a
       , MultiPrim X16 a
       , MultiPrim X32 a
+      , MultiPrim X64 a
       ) => SIMDPrim a
 instance SIMDPrim Float
 instance SIMDPrim Double
@@ -319,6 +335,7 @@ class ( VU.Unbox a
       , UnboxSIMD X8 a
       , UnboxSIMD X16 a
       , UnboxSIMD X32 a
+      , UnboxSIMD X64 a
       ) => SIMDUnbox a
 instance SIMDUnbox Float
 instance SIMDUnbox Double
@@ -350,6 +367,7 @@ class ( Storable a
       , MultiStorable X8 a
       , MultiStorable X16 a
       , MultiStorable X32 a
+      , MultiStorable X64 a
       ) => SIMDStorable a
 instance SIMDStorable Float
 instance SIMDStorable Double
@@ -400,6 +418,9 @@ instance SIMD X16 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
   {-# INLINE horizontalFold #-}
 instance SIMD X32 where
+  horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
+  {-# INLINE horizontalFold #-}
+instance SIMD X64 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
   {-# INLINE horizontalFold #-}
 
@@ -471,6 +492,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = mkSum @X16
 "liftSIMD/Sum/X32"
   liftSIMD coerce = mkSum @X32
+"liftSIMD/Sum/X64"
+  liftSIMD coerce = mkSum @X64
 "liftSIMD/getSum/X2"
   liftSIMD coerce = getSum' @X2
 "liftSIMD/getSum/X4"
@@ -481,6 +504,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = getSum' @X16
 "liftSIMD/getSum/X32"
   liftSIMD coerce = getSum' @X32
+"liftSIMD/getSum/X64"
+  liftSIMD coerce = getSum' @X64
 "liftSIMD/Product/X2"
   liftSIMD coerce = mkProduct @X2
 "liftSIMD/Product/X4"
@@ -491,6 +516,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = mkProduct @X16
 "liftSIMD/Product/X32"
   liftSIMD coerce = mkProduct @X32
+"liftSIMD/Product/X64"
+  liftSIMD coerce = mkProduct @X64
 "liftSIMD/getProduct/X2"
   liftSIMD coerce = getProduct' @X2
 "liftSIMD/getProduct/X4"
@@ -501,6 +528,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = getProduct' @X16
 "liftSIMD/getProduct/X32"
   liftSIMD coerce = getProduct' @X32
+"liftSIMD/getProduct/X64"
+  liftSIMD coerce = getProduct' @X64
 "liftSIMD/Min/X2"
   liftSIMD coerce = mkMin @X2
 "liftSIMD/Min/X4"
@@ -511,6 +540,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = mkMin @X16
 "liftSIMD/Min/X32"
   liftSIMD coerce = mkMin @X32
+"liftSIMD/Min/X64"
+  liftSIMD coerce = mkMin @X64
 "liftSIMD/getMin/X2"
   liftSIMD coerce = getMin' @X2
 "liftSIMD/getMin/X4"
@@ -521,6 +552,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = getMin' @X16
 "liftSIMD/getMin/X32"
   liftSIMD coerce = getMin' @X32
+"liftSIMD/getMin/X64"
+  liftSIMD coerce = getMin' @X64
 "liftSIMD/Max/X2"
   liftSIMD coerce = mkMax @X2
 "liftSIMD/Max/X4"
@@ -531,6 +564,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = mkMax @X16
 "liftSIMD/Max/X32"
   liftSIMD coerce = mkMax @X32
+"liftSIMD/Max/X64"
+  liftSIMD coerce = mkMax @X64
 "liftSIMD/getMax/X2"
   liftSIMD coerce = getMax' @X2
 "liftSIMD/getMax/X4"
@@ -541,6 +576,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD coerce = getMax' @X16
 "liftSIMD/getMax/X32"
   liftSIMD coerce = getMax' @X32
+"liftSIMD/getMax/X64"
+  liftSIMD coerce = getMax' @X64
 "liftSIMD2/Complex/X2"
   liftSIMD2 (:+) = mkComplex @X2
 "liftSIMD2/Complex/X4"
@@ -551,6 +588,8 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD2 (:+) = mkComplex @X16
 "liftSIMD2/Complex/X32"
   liftSIMD2 (:+) = mkComplex @X32
+"liftSIMD2/Complex/X64"
+  liftSIMD2 (:+) = mkComplex @X64
 "liftSIMD2/(,)/X2"
   liftSIMD2 (,) = mkTuple2 @X2
 "liftSIMD2/(,)/X4"
@@ -561,4 +600,6 @@ infix 4 <^, <=^, >^, >=^
   liftSIMD2 (,) = mkTuple2 @X16
 "liftSIMD2/(,)/X32"
   liftSIMD2 (,) = mkTuple2 @X32
+"liftSIMD2/(,)/X64"
+  liftSIMD2 (,) = mkTuple2 @X64
   #-}

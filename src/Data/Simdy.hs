@@ -28,6 +28,7 @@ module Data.Simdy
   , X8
   , X16
   , X32
+  , X64
   , Identity (Identity)
   ) where
 import           Data.Functor.Identity (Identity (Identity))

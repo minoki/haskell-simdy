@@ -169,6 +169,7 @@ library no-simd
                       Data.Simdy.Internal.NoSIMD.X8
                       Data.Simdy.Internal.NoSIMD.X16
                       Data.Simdy.Internal.NoSIMD.X32
+                      Data.Simdy.Internal.NoSIMD.X64
                       Data.Simdy.Internal.NoSIMD.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0,
@@ -187,6 +188,7 @@ library vl128
                       Data.Simdy.Internal.SIMD128.X8
                       Data.Simdy.Internal.SIMD128.X16
                       Data.Simdy.Internal.SIMD128.X32
+                      Data.Simdy.Internal.SIMD128.X64
                       Data.Simdy.Internal.SIMD128.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       ghc-prim,
@@ -208,6 +210,7 @@ library vl256
                       Data.Simdy.Internal.SIMD256.X8
                       Data.Simdy.Internal.SIMD256.X16
                       Data.Simdy.Internal.SIMD256.X32
+                      Data.Simdy.Internal.SIMD256.X64
                       Data.Simdy.Internal.SIMD256.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       ghc-prim,
@@ -229,6 +232,7 @@ library vl512
                       Data.Simdy.Internal.SIMD512.X8
                       Data.Simdy.Internal.SIMD512.X16
                       Data.Simdy.Internal.SIMD512.X32
+                      Data.Simdy.Internal.SIMD512.X64
                       Data.Simdy.Internal.SIMD512.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       ghc-prim,

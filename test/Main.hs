@@ -7,7 +7,7 @@ import qualified Data.Bits
 import           Data.Int
 import           Data.Kind
 import           Data.Proxy
-import           Data.Simdy (SIMD, X16, X2, X32, X4, X8)
+import           Data.Simdy (SIMD, X16, X2, X32, X4, X64, X8)
 import           Data.Simdy.Class.Bits
 import           Data.Simdy.Internal.Class as S
 import           Data.Word
@@ -43,6 +43,7 @@ instance PackX4 X4 a => ListLike X4 a
 instance PackX8 X8 a => ListLike X8 a
 instance PackX16 X16 a => ListLike X16 a
 instance PackX32 X32 a => ListLike X32 a
+instance PackX64 X64 a => ListLike X64 a
 
 infix 4 ===
 
@@ -392,6 +393,7 @@ tests = testGroup "Tests"
   , testGroup "X8" (properties (Proxy @X8))
   , testGroup "X16" (properties (Proxy @X16))
   , testGroup "X32" (properties (Proxy @X32))
+  , testGroup "X64" (properties (Proxy @X64))
   ]
 
 main :: IO ()

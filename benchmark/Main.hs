@@ -23,6 +23,9 @@ dotProdX16 a b = V.SIMD.fold' @X16 (+) 0 (V.SIMD.zipWith @X16 (*) (*) a b)
 dotProdX32 :: VU.Vector Float -> VU.Vector Float -> Float
 dotProdX32 a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) (*) a b)
 
+dotProdX64 :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdX64 a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) (*) a b)
+
 dotProdVU_D :: VU.Vector Double -> VU.Vector Double -> Double
 dotProdVU_D a b = VU.foldl' (+) 0 (VU.zipWith (*) a b)
 
@@ -38,6 +41,9 @@ dotProdX16_D a b = V.SIMD.fold' @X16 (+) 0 (V.SIMD.zipWith @X16 (*) (*) a b)
 dotProdX32_D :: VU.Vector Double -> VU.Vector Double -> Double
 dotProdX32_D a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) (*) a b)
 
+dotProdX64_D :: VU.Vector Double -> VU.Vector Double -> Double
+dotProdX64_D a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) (*) a b)
+
 main :: IO ()
 main = defaultMain
   [ bgroup "dotProd (Float)"
@@ -46,6 +52,7 @@ main = defaultMain
     , bench "X8" $ nf (uncurry dotProdX8) (vecA, vecB)
     , bench "X16" $ nf (uncurry dotProdX16) (vecA, vecB)
     , bench "X32" $ nf (uncurry dotProdX32) (vecA, vecB)
+    , bench "X64" $ nf (uncurry dotProdX64) (vecA, vecB)
     ]
   , bgroup "dotProd (Double)"
     [ bench "baseline" $ nf (uncurry dotProdVU_D) (vecA_D, vecB_D)
@@ -53,6 +60,7 @@ main = defaultMain
     , bench "X8" $ nf (uncurry dotProdX8_D) (vecA_D, vecB_D)
     , bench "X16" $ nf (uncurry dotProdX16_D) (vecA_D, vecB_D)
     , bench "X32" $ nf (uncurry dotProdX32_D) (vecA_D, vecB_D)
+    , bench "X64" $ nf (uncurry dotProdX64_D) (vecA_D, vecB_D)
     ]
   , bgroup "matMul 1000 Float" $
     [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat1000A, mat1000B)
@@ -60,12 +68,14 @@ main = defaultMain
     , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat1000A, mat1000B)
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat1000A, mat1000B)
     , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat1000A, mat1000B)
+    , bench "matMulSIMD X64" $ nf (uncurry (matMulSIMD (Proxy @X64))) (mat1000A, mat1000B)
     ] ++ case isFMAAvailable of
       Just MkFMAWitness ->
         [ bench "matMulFMA X4" $ nf (uncurry (matMulFMA (Proxy @X4))) (mat1000A, mat1000B)
         , bench "matMulFMA X8" $ nf (uncurry (matMulFMA (Proxy @X8))) (mat1000A, mat1000B)
         , bench "matMulFMA X16" $ nf (uncurry (matMulFMA (Proxy @X16))) (mat1000A, mat1000B)
         , bench "matMulFMA X32" $ nf (uncurry (matMulFMA (Proxy @X32))) (mat1000A, mat1000B)
+        , bench "matMulFMA X64" $ nf (uncurry (matMulFMA (Proxy @X64))) (mat1000A, mat1000B)
         ]
       Nothing -> []
   , bgroup "matMul 2000 Float" $
@@ -74,12 +84,14 @@ main = defaultMain
     , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat2000A, mat2000B)
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat2000A, mat2000B)
     , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat2000A, mat2000B)
+    , bench "matMulSIMD X64" $ nf (uncurry (matMulSIMD (Proxy @X64))) (mat2000A, mat2000B)
     ] ++ case isFMAAvailable of
       Just MkFMAWitness ->
         [ bench "matMulFMA X4" $ nf (uncurry (matMulFMA (Proxy @X4))) (mat2000A, mat2000B)
         , bench "matMulFMA X8" $ nf (uncurry (matMulFMA (Proxy @X8))) (mat2000A, mat2000B)
         , bench "matMulFMA X16" $ nf (uncurry (matMulFMA (Proxy @X16))) (mat2000A, mat2000B)
         , bench "matMulFMA X32" $ nf (uncurry (matMulFMA (Proxy @X32))) (mat2000A, mat2000B)
+        , bench "matMulFMA X64" $ nf (uncurry (matMulFMA (Proxy @X64))) (mat2000A, mat2000B)
         ]
       Nothing -> []
   ]

@@ -15,5 +15,8 @@ module Data.Simdy.Pack
   , PackX32 (mkX32, unpackX32)
   , pattern MkX32
   , packX32
+  , PackX64 (mkX64, unpackX64)
+  , pattern MkX64
+  , packX64
   ) where
 import           Data.Simdy.Internal.Class
