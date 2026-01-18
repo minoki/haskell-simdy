@@ -17,7 +17,9 @@ module Data.Simdy
   , SIMDNum
   , SIMDFractional
   , SIMDFloating
+  , SIMDBoolean
   , SIMDBits
+  , SIMDMinMax
   , SIMDPrim
   -- , SIMDUnbox
   , SIMDStorable
