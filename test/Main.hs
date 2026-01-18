@@ -6,9 +6,12 @@ module Main (main) where
 import qualified Data.Bits
 import           Data.Int
 import           Data.Kind
+import           Data.List (foldl1')
 import           Data.Proxy
-import           Data.Simdy (SIMD, X16, X2, X32, X4, X64, X8)
+import           Data.Simdy (SIMD, SIMDNum, SIMDBoolean, X16, X2, X32, X4, X64, X8)
 import           Data.Simdy.Class.Bits
+import           Data.Simdy.Horizontal
+import           Data.Simdy.MinMax
 import           Data.Simdy.Internal.Class as S
 import           Data.Word
 import           GHC.Exts (IsList (Item, fromList, toList))
@@ -158,7 +161,7 @@ testEnum proxy = testCase "enumFromZero" $ toList (enumFromZero :: x a) @?= [0..
   where
     n = simdLen proxy
 
-testBoolean :: forall x a. (Data.Bits.Bits a, Boolean (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testBoolean :: forall x a. (Data.Bits.Bits a, SIMDBoolean a, SIMD x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
 testBoolean proxy = testGroup "Boolean"
   [ QC.testProperty ".&." $ \a b ->
       toList ((fromSizedList a `asProxyTypeOf` proxy) .&. fromSizedList b) === zipWith (Data.Bits..&.) (unSized a) (unSized b)
@@ -168,6 +171,12 @@ testBoolean proxy = testGroup "Boolean"
       toList ((fromSizedList a `asProxyTypeOf` proxy) `xor` fromSizedList b) === zipWith Data.Bits.xor (unSized a) (unSized b)
   , QC.testProperty "complement" $ \a ->
       toList (complement (fromSizedList a `asProxyTypeOf` proxy)) === map Data.Bits.complement (unSized a)
+  , QC.testProperty "horizontalAnd" $ \a ->
+      horizontalAnd (fromSizedList a `asProxyTypeOf` proxy) === foldl1' (.&.) (unSized a)
+  , QC.testProperty "horizontalOr" $ \a ->
+      horizontalOr (fromSizedList a `asProxyTypeOf` proxy) === foldl1' (.|.) (unSized a)
+  , QC.testProperty "horizontalXor" $ \a ->
+      horizontalXor (fromSizedList a `asProxyTypeOf` proxy) === foldl1' xor (unSized a)
   ]
 
 testBits :: forall x a. (Data.Bits.FiniteBits a, BitShift (x a), KnownSIMDLength x, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
@@ -201,6 +210,44 @@ testFMA proxy = case isFMAAvailable of
   Just MkFMAWitness -> QC.testProperty "FMA" $ \a b c ->
     toList (fusedMultiplyAdd (fromSizedList a `asProxyTypeOf` proxy) (fromSizedList b) (fromSizedList c)) === zipWith3 fusedMultiplyAdd (unSized a) (unSized b) (unSized c)
   Nothing -> testGroup "FMA" []
+
+testHorizontalIntegral :: forall x a. (SIMD x, SIMDNum a, SIMDMinMax a, SIMDBoolean a, Boolean a, Ord a, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testHorizontalIntegral proxy = testGroup "Horizontal(Integral)"
+  [ QC.testProperty "sum" $ \a ->
+      horizontalSum (fromSizedList a `asProxyTypeOf` proxy) === sum (unSized a)
+  , QC.testProperty "product" $ \a ->
+      horizontalProduct (fromSizedList a `asProxyTypeOf` proxy) === product (unSized a)
+  , QC.testProperty "min" $ \a ->
+      horizontalMin (fromSizedList a `asProxyTypeOf` proxy) === minimum (unSized a)
+  , QC.testProperty "max" $ \a ->
+      horizontalMax (fromSizedList a `asProxyTypeOf` proxy) === maximum (unSized a)
+  , QC.testProperty "minimumNumber" $ \a ->
+      horizontalMinimumNumber (fromSizedList a `asProxyTypeOf` proxy) === minimum (unSized a)
+  , QC.testProperty "maximumNumber" $ \a ->
+      horizontalMaximumNumber (fromSizedList a `asProxyTypeOf` proxy) === maximum (unSized a)
+  , QC.testProperty "and" $ \a ->
+      horizontalAnd (fromSizedList a `asProxyTypeOf` proxy) === foldl1' (.&.) (unSized a)
+  , QC.testProperty "or" $ \a ->
+      horizontalOr (fromSizedList a `asProxyTypeOf` proxy) === foldl1' (.|.) (unSized a)
+  , QC.testProperty "xor" $ \a ->
+      horizontalXor (fromSizedList a `asProxyTypeOf` proxy) === foldl1' xor (unSized a)
+  ]
+
+testHorizontalFloating :: forall x a. (SIMD x, SIMDNum a, SIMDMinMax a, RealFloat a, Enum a, ListLike x a, QC.Arbitrary a, SameValue a, Show a) => Proxy (x a) -> TestTree
+testHorizontalFloating proxy = testGroup "Horizontal(Floating)"
+  [ QC.testProperty "sum" $ QC.forAll (fmap MkSizedList . QC.vectorOf (simdLength @x) $ QC.chooseEnum (-10, 10)) $ \a ->
+      horizontalSum (fromSizedList a `asProxyTypeOf` proxy) === sum (unSized a)
+  , QC.testProperty "product" $ QC.forAll (fmap MkSizedList . QC.vectorOf (simdLength @x) $ QC.elements [-8,-4,-2,-1,1,2,4,8]) $ \a ->
+      horizontalProduct (fromSizedList a `asProxyTypeOf` proxy) === product (unSized a)
+  , QC.testProperty "min" $ \a ->
+      horizontalMin (fromSizedList a `asProxyTypeOf` proxy) === foldl1' S.min (unSized a)
+  , QC.testProperty "max" $ \a ->
+      horizontalMax (fromSizedList a `asProxyTypeOf` proxy) === foldl1' S.max (unSized a)
+  , QC.testProperty "minimumNumber" $ \a ->
+      horizontalMinimumNumber (fromSizedList a `asProxyTypeOf` proxy) === foldl1' S.minimumNumber (unSized a)
+  , QC.testProperty "maximumNumber" $ \a ->
+      horizontalMaximumNumber (fromSizedList a `asProxyTypeOf` proxy) === foldl1' S.maximumNumber (unSized a)
+  ]
 
 properties :: forall x
             . ( SIMD x
@@ -255,6 +302,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Int16)
         proxy = Proxy
@@ -269,6 +317,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Int32)
         proxy = Proxy
@@ -283,6 +332,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Int64)
         proxy = Proxy
@@ -297,6 +347,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Word8)
         proxy = Proxy
@@ -311,6 +362,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Word16)
         proxy = Proxy
@@ -325,6 +377,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Word32)
         proxy = Proxy
@@ -339,6 +392,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Word64)
         proxy = Proxy
@@ -353,6 +407,7 @@ properties proxyX =
       , testBoolean proxy
       , testBits proxy
       , testMinMax proxy
+      , testHorizontalIntegral proxy
       ]
   , let proxy :: Proxy (x Float)
         proxy = Proxy
@@ -368,6 +423,7 @@ properties proxyX =
       , testEnum proxy
       , testMinMax proxy
       , testFMA proxy
+      , testHorizontalFloating proxy
       ]
   , let proxy :: Proxy (x Double)
         proxy = Proxy
@@ -383,6 +439,7 @@ properties proxyX =
       , testEnum proxy
       , testMinMax proxy
       , testFMA proxy
+      , testHorizontalFloating proxy
       ]
   ]
 
