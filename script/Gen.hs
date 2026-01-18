@@ -7,6 +7,7 @@ import System.IO
 import qualified Data.List as List
 import Control.Monad
 import System.Directory (createDirectoryIfMissing)
+import Numeric
 
 maxTupleLen :: Int
 maxTupleLen = 6
@@ -595,7 +596,7 @@ genHalf !vecCount !maxBits
     ,"instance SplitShortVector " ++ tyCon ++ " Bool where"
     ,if vecCount == 2
      then "  splitShortVector (MkBool" ++ tyCon ++ " !x) = (Identity (testBit x 0), Identity (testBit x 1))"
-     else "  splitShortVector (MkBool" ++ tyCon ++ " !x) = (MkBoolX" ++ show (vecCount `quot` 2) ++ " $ fromIntegral $ x .&. " ++ show (2^(vecCount `quot` 2)) ++ ", MkBoolX" ++ show (vecCount `quot` 2) ++ " $ fromIntegral $ x `unsafeShiftR` " ++ show (vecCount `quot` 2) ++ ")"
+     else "  splitShortVector (MkBool" ++ tyCon ++ " !x) = (MkBoolX" ++ show (vecCount `quot` 2) ++ " $ fromIntegral $ x .&. 0x" ++ showHex (2^(vecCount `quot` 2) - 1) ", MkBoolX" ++ show (vecCount `quot` 2) ++ " $ fromIntegral $ x `unsafeShiftR` " ++ show (vecCount `quot` 2) ++ ")"
     ,if vecCount == 2
      then "  joinShortVector (Identity !x) (Identity !y) = MkBool" ++ tyCon ++ " ((if x then 1 else 0) .|. (if y then 2 else 0))"
      else "  joinShortVector (MkBoolX" ++ show (vecCount `quot` 2) ++ " !x) (MkBoolX" ++ show (vecCount `quot` 2) ++ " !y) = MkBool" ++ tyCon ++ " (fromIntegral x .|. (fromIntegral y `unsafeShiftL` " ++ show (vecCount `quot` 2) ++ "))"
