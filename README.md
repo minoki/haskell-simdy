@@ -17,7 +17,7 @@ data X32 a
 data X64 a
 ```
 
-Conceptually, these types are fixed-length lists, but with more efficient representations. For example, `X4 a` is isomorphic to `(a, a, a, a)`.
+Conceptually, these types are fixed-length lists, but with more efficient representations. For example, `X4 a` is isomorphic to `(a, a, a, a)`, but `X4 Float` may use `FloatX4#` and `X4 Double` may use two `DoubleX2#`s internally.
 
 They are instances of the `SIMD` type class:
 
@@ -72,7 +72,7 @@ pattern MkX64 :: a -> ... -> a -> X64 a
 
 ## Operations
 
-Element types such as `Float` and `Word16` are instances of the `SIMDElement` class. Basic operations are provided, including `broadcast` (similar to `replicate n x`), `liftSIMD` (lifting a unary function to a vector), `liftSIMD2` (lifting a binary function to a vector).
+Element types such as `Float` and `Word16` are instances of the `SIMDElement` class. Basic operations are provided, including `broadcast` (similar to `replicate n x`), `liftSIMD` (lifting a unary function to a vector; similar to `map`), `liftSIMD2` (lifting a binary function to a vector; similar to `zipWith`).
 
 ```haskell
 module Data.Simdy where
@@ -138,13 +138,13 @@ module Data.Simdy where
 class SIMDElement a => SIMDBoolean a
 instance (SIMD f, SIMDBoolean a) => Boolean (f a) -- pseudocode
 
-class SIMDElement a => SIMDBits a
+class SIMDBoolean a => SIMDBits a
 instance (SIMD f, SIMDBits a) => BitShift (f a) -- pseudocode
 ```
 
 ## Supported compilers and architectures
 
-This library requires a modern GHC (9.6 at minimum). SIMD functionality is only available on certain architectures. However, you can always use non-SIMD implementation of the data types by enabling the `no-simd` package flag.
+This library requires a modern GHC (9.6 at minimum). SIMD functionality is only available on certain architectures. However, you can always use a non-SIMD implementation of the data types by enabling the `no-simd` package flag.
 
 Supported architectures are:
 
@@ -165,7 +165,7 @@ This library uses 128-bit SIMD vectors by default (SSE2 on x86, ASIMD on AArch64
     * Disable the use of native vector types.
 * `haswell` (default: false)
     * Enable 256-bit vectors via AVX2. Also enables FMA.
-    * Requires a CPU no older than Intel Haswell or AMD Ryzen.
+    * Requires Intel Haswell / AMD Ryzen or newer.
 * `avx512` (default: false)
     * Enable 512-bit vectors via AVX-512 (F+VL+BW+DQ are required).
 * `llvm` (default: true)
