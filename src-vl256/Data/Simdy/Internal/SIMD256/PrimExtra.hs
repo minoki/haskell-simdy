@@ -301,7 +301,7 @@ foreign import ccall unsafe "hs_simdy_shiftR_word32x8"
 foreign import ccall unsafe "hs_simdy_shiftR_word64x4"
   shiftRWord64X4# :: Word64X4# -> Int# -> Word64X4#
 
-#if !MIN_VERSION_ghc_prim(0, 13, 0)
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 --
 -- Integer minimum/maximum
 --
@@ -526,7 +526,7 @@ foreign import ccall unsafe "hs_simdy_doublex4_unord_densemask"
 --
 -- FMA
 --
-#if !MIN_VERSION_ghc_prim(0, 13, 0)
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 #if defined(USE_FMA) && MIN_VERSION_base(4, 19, 0)
 -- GHC 9.8 or later
 -- Let's hope LLVM's optimizer does a good job!

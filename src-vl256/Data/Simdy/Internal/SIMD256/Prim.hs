@@ -226,7 +226,7 @@ module Data.Simdy.Internal.SIMD256.Prim
   , M.writeWord64OffAddrAsWord64X4#
   , M.writeFloatOffAddrAsFloatX8#
   , M.writeDoubleOffAddrAsDoubleX4#
-#if MIN_VERSION_ghc_prim(0, 13, 0)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
   , M.fmaddFloatX8#
   , M.fmaddDoubleX4#
   , M.fmsubFloatX8#
@@ -273,8 +273,8 @@ import           Data.Simdy.Internal.SIMD128.Prim
 #if defined(BROADCAST_IS_BROKEN)
 -- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
 
-import qualified GHC.Prim as M
-import           GHC.Prim (Float#, Double#, Int8#, Int16#, Int32#, Int64#, Word8#, Word16#, Word32#, Word64#, FloatX8#, DoubleX4#, Int8X32#, Int16X16#, Int32X8#, Int64X4#, Word8X32#, Word16X16#, Word32X8#, Word64X4#)
+import qualified GHC.PrimOps as M
+import           GHC.PrimOps (Float#, Double#, Int8#, Int16#, Int32#, Int64#, Word8#, Word16#, Word32#, Word64#, FloatX8#, DoubleX4#, Int8X32#, Int16X16#, Int32X8#, Int64X4#, Word8X32#, Word16X16#, Word32X8#, Word64X4#)
 
 broadcastFloatX8# :: Float# -> FloatX8#
 broadcastFloatX8# x = M.packFloatX8# (# x, x, x, x, x, x, x, x #)
@@ -316,8 +316,13 @@ broadcastWord64X4# :: Word64# -> Word64X4#
 broadcastWord64X4# x = M.packWord64X4# (# x, x, x, x #)
 {-# INLINE broadcastWord64X4# #-}
 
+#elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+
+-- from ghc-experimental
+import           GHC.PrimOps as M
+
 #else
 
-import           GHC.Prim as M
+import           GHC.Exts as M
 
 #endif

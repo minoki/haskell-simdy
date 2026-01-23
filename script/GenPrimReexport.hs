@@ -75,7 +75,7 @@ main = do
     ,[p ++ "read" ++ s ++ "OffAddrAs" ++ t ++ "#" | (t, s, _, p) <- types]
     ,[p ++ "write" ++ s ++ "OffAddrAs" ++ t ++ "#" | (t, s, _, p) <- types]
     -- GHC 9.12 or later
-    ,["#if MIN_VERSION_ghc_prim(0, 13, 0)"]
+    ,["#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)"]
     ,[p ++ "fmadd" ++ t ++ "#" | (t, _, k, p) <- types, k == FLOAT]
     ,[p ++ "fmsub" ++ t ++ "#" | (t, _, k, p) <- types, k == FLOAT]
     ,[p ++ "fnmadd" ++ t ++ "#" | (t, _, k, p) <- types, k == FLOAT]

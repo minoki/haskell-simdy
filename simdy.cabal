@@ -191,9 +191,10 @@ library vl128
                       Data.Simdy.Internal.SIMD128.X64
                       Data.Simdy.Internal.SIMD128.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
-                      ghc-prim,
                       primitive ^>=0.9.0.0,
                       simdy:common
+    if impl(ghc >= 9.12)
+        build-depends: ghc-experimental
     hs-source-dirs:   src-vl128
     default-language: GHC2021
     if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)))
@@ -213,10 +214,11 @@ library vl256
                       Data.Simdy.Internal.SIMD256.X64
                       Data.Simdy.Internal.SIMD256.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
-                      ghc-prim,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128
+    if impl(ghc >= 9.12)
+        build-depends: ghc-experimental
     hs-source-dirs:   src-vl256
     default-language: GHC2021
     if flag(no-simd) || !(flag(haswell) || flag(avx512)) || !flag(llvm)
@@ -235,11 +237,12 @@ library vl512
                       Data.Simdy.Internal.SIMD512.X64
                       Data.Simdy.Internal.SIMD512.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
-                      ghc-prim,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128,
                       simdy:vl256
+    if impl(ghc >= 9.12)
+        build-depends: ghc-experimental
     hs-source-dirs:   src-vl512
     default-language: GHC2021
     if flag(no-simd) || !flag(avx512) || !flag(llvm)
@@ -287,7 +290,6 @@ library
 
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.23,
-                      ghc-prim,
                       primitive ^>=0.9.0.0,
                       vector ^>=0.13.1.0,
                       simdy:common,
