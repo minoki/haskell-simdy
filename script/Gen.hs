@@ -348,17 +348,20 @@ gen !vecCount !maxBits
                 ,"  minusF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(minus" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  timesF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(times" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ]
-                ++ if isSigned
-                   then ["  negateF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(negate" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                        ,"  -- Currently, there is no abs" ++ shortVecName ++ "#"
-                        ]
-                   else ["  -- Currently, there is no negate" ++ shortVecName ++ "#, abs" ++ shortVecName ++ "#"
-                        ]
+                ++ (if isSigned
+                    then ["  negateF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(negate" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                         ,"  absF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(abs" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                         ]
+                    else ["  -- Currently, there is no negate" ++ shortVecName ++ "#"
+                         ,"  absF x = x"
+                         ]
+                   )
                 ++ ["  {-# INLINE plusF #-}"
                    ,"  {-# INLINE minusF #-}"
                    ,"  {-# INLINE timesF #-}"
                    ]
                 ++ ["  {-# INLINE negateF #-}" | isSigned]
+                ++ ["  {-# INLINE absF #-}"]
     genFractional name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min bitCount maxBits
@@ -394,8 +397,8 @@ gen !vecCount !maxBits
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance FloatingF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  -- sqrtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(sqrt" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  -- Currently. there is no sqrt" ++ shortVecName ++ "#"
+                ,"  sqrtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(sqrt" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE sqrtF #-}"
                 ]
     genFMA name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
