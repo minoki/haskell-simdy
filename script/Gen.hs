@@ -35,7 +35,7 @@ gen :: Int -> Int -> [String]
 gen !vecCount !maxBits
   = ["-- | @'" ++ tyCon ++ "' a@ is a fixed-length vector of length " ++ show vecCount ++ "."
     ,"--"
-    ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Pack" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
+    ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Mk" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
     ,"--"
     ,"-- You can access the elements by 'mk" ++ tyCon ++ "', 'pack" ++ tyCon ++ "' and 'unpack" ++ tyCon ++ "'."
     ,"data family " ++ tyCon ++ " a"
@@ -70,34 +70,34 @@ gen !vecCount !maxBits
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
     ]
-    ++ genType "Float" "F#" 32 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
-    ++ genType "Double" "D#" 64 maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
+    ++ genType "Float" "F#" 32 "0.0#" maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
+    ++ genType "Double" "D#" 64 "0.0##" maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
     ++ ["instance ImplementationDescription " ++ tyCon ++ " where"
        ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits=" ++ show maxBits ++ "\""
        ]
-    ++ genType "Int8" "I8#" 8 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-    ++ genType "Int16" "I16#" 16 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-    ++ genType "Int32" "I32#" 32 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-    ++ genType "Int64" "I64#" 64 maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-    ++ genType "Word8" "W8#" 8 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-    ++ genType "Word16" "W16#" 16 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-    ++ genType "Word32" "W32#" 32 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-    ++ genType "Word64" "W64#" 64 maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+    ++ genType "Int8" "I8#" 8 "intToInt8# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+    ++ genType "Int16" "I16#" 16 "intToInt16# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+    ++ genType "Int32" "I32#" 32 "intToInt32# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+    ++ genType "Int64" "I64#" 64 "intToInt64# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+    ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+    ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+    ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+    ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
     ++ (if maxBits == 128
         then ["#else"
              ,"-- The NCG of GHC 9.12 does not support integer vectors"
              ,"instance ImplementationDescription " ++ tyCon ++ " where"
              ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits(Float,Double)=" ++ show maxBits ++ ",maxBits(other)=0\""
              ]
-             ++ genType "Int8" "I8#" 8 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-             ++ genType "Int16" "I16#" 16 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-             ++ genType "Int32" "I32#" 32 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-             ++ genType "Int64" "I64#" 64 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-             ++ genType "Word8" "W8#" 8 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-             ++ genType "Word16" "W16#" 16 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-             ++ genType "Word32" "W32#" 32 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-             ++ genType "Word64" "W64#" 64 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+             ++ genType "Int8" "I8#" 8 "intToInt8# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+             ++ genType "Int16" "I16#" 16 "intToInt16# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+             ++ genType "Int32" "I32#" 32 "intToInt32# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+             ++ genType "Int64" "I64#" 64 "intToInt64# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+             ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+             ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+             ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+             ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
              ++ ["#endif"]
         else []
        )
@@ -170,11 +170,11 @@ gen !vecCount !maxBits
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FusedMultiplyAddF " ++ tyCon ++ " a => FusedMultiplyAdd (" ++ tyCon ++ " a)"]
   where
     tyCon = 'X' : show vecCount
-    genType name primCon !bitsPerElem maxBits others
+    genType name primCon !bitsPerElem zero maxBits others
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
+            vecBitCount = min (max bitCount 128) maxBits
             halfTyCon = if vecCount == 2 then "Identity" else "X" ++ show (vecCount `quot` 2)
-            mainDef = if bitCount < 128 || maxBits == 0
+            mainDef = if maxBits == 0
                       then ["data instance " ++ tyCon ++ " " ++ name ++ " = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep (replicate vecCount ('!':name))
                            ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  mk" ++ tyCon ++ " = Mk" ++ name ++ tyCon ++ "WithElems"
@@ -189,14 +189,14 @@ gen !vecCount !maxBits
                            ]
                       else
                         let shortVecSize = vecBitCount `div` bitsPerElem
-                            shortVecCount = bitCount `div` vecBitCount
+                            shortVecCount = max bitCount 128 `div` vecBitCount
                             shortVecName = name ++ "X" ++ show shortVecSize
                             suffix | shortVecCount == 1 = ""
                                    | otherwise = "WithVec" ++ show vecBitCount
                         in ["data instance " ++ tyCon ++ " " ++ name ++ " = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep (replicate shortVecCount (shortVecName ++ "#"))
                            ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " " ++ name ++ " where"
-                           ,"  mk" ++ tyCon ++ " " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep ["x" ++ show (i * shortVecSize + j) | j <- [0..shortVecSize - 1]] ++ " #))" | i <- [0..shortVecCount - 1]]
-                           ,"  unpack" ++ tyCon ++ " (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = " ++ concat ["case unpack" ++ shortVecName ++ "# v" ++ show i ++ " of (# " ++ commaSep ["x" ++ show (i * shortVecSize + j) | j <- [0..shortVecSize - 1]] ++ " #) -> " | i <- [0..shortVecCount - 1]] ++ "(" ++ commaSep [primCon ++ " x" ++ show i | i <- [0..vecCount-1]] ++ ")"
+                           ,"  mk" ++ tyCon <+> spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep [if k < vecCount then "x" ++ show k else zero | j <- [0..shortVecSize - 1], let k = i * shortVecSize + j] ++ " #))" | i <- [0..shortVecCount - 1]]
+                           ,"  unpack" ++ tyCon ++ " (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = " ++ concat ["case unpack" ++ shortVecName ++ "# v" ++ show i ++ " of (# " ++ commaSep [if k < vecCount then "x" ++ show k else "_" | j <- [0..shortVecSize - 1], let k = i * shortVecSize + j] ++ " #) -> " | i <- [0..shortVecCount - 1]] ++ "(" ++ commaSep [primCon ++ " x" ++ show i | i <- [0..vecCount-1]] ++ ")"
                            ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
                            ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
                            ,"instance Broadcast " ++ tyCon ++ " " ++ name ++ " where"
@@ -205,32 +205,32 @@ gen !vecCount !maxBits
                             else "  broadcast (" ++ primCon ++ " x) = let !v = broadcast" ++ name ++ "X" ++ show shortVecSize ++ "# x in Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep (replicate shortVecCount "v")
                            ,"  {-# INLINE broadcast #-}"
                            ,"instance SelectableF " ++ tyCon ++ " " ++ name ++ " where"
-                           ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["y" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(select" ++ shortVecName ++ "# " ++ cond_i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..shortVecCount-1], let cond_i = if shortVecCount == 1 then "cond" else "(" ++ (if max 8 shortVecSize == max 8 vecCount then "" else "fromIntegral $ ") ++ "cond `unsafeShiftR` " ++ show (i * shortVecSize) ++ ")" ]
+                           ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["y" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(select" ++ shortVecName ++ "# " ++ cond_i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..shortVecCount-1], let cond_i = if shortVecCount == 1 then if max 8 shortVecSize == max 8 vecCount then "cond" else "(fromIntegral cond)" else "(" ++ (if max 8 shortVecSize == max 8 vecCount then "" else "fromIntegral $ ") ++ "cond `unsafeShiftR` " ++ show (i * shortVecSize) ++ ")" ]
                            ,"  {-# INLINE selectF #-}"
                            ]
-        in mainDef ++ concatMap (\f -> f name primCon bitsPerElem maxBits) others
-    genEquatable name primCon !bitsPerElem maxBits
+        in mainDef ++ concatMap (\f -> f name primCon bitsPerElem zero maxBits) others
+    genEquatable name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance EquatableF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  eqF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " == y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE eqF #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance EquatableF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  eqF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (eq" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  eqF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (eq" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
                 ,"  {-# INLINE eqF #-}"
                 ]
-    genOrderedInt name primCon !bitsPerElem maxBits
+    genOrderedInt name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -252,12 +252,12 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
                 ,"  leF !x !y = complementF (ltF y x)"
                 ,"  gtF !x !y = ltF y x"
                 ,"  geF !x !y = complementF (ltF x y)"
@@ -275,10 +275,10 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE minimumNumberF #-}"
                 ,"  {-# INLINE maximumNumberF #-}"
                 ]
-    genOrderedFloat name primCon !bitsPerElem maxBits
+    genOrderedFloat name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  ltF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " < y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  leF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " <= y" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -300,15 +300,15 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
-                ,"  leF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (le" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
-                ,"  gtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (gt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
-                ,"  geF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (ge" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize)]
+                ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
+                ,"  leF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (le" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
+                ,"  gtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (gt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
+                ,"  geF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (ge" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
@@ -323,10 +323,10 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE minimumNumberF #-}"
                 ,"  {-# INLINE maximumNumberF #-}"
                 ]
-    genNum isSigned name primCon !bitsPerElem maxBits
+    genNum isSigned name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance NumF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  plusF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " + y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  minusF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " - y" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -339,7 +339,7 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
@@ -362,10 +362,10 @@ gen !vecCount !maxBits
                    ]
                 ++ ["  {-# INLINE negateF #-}" | isSigned]
                 ++ ["  {-# INLINE absF #-}"]
-    genFractional name primCon !bitsPerElem maxBits
+    genFractional name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance FractionalF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  divideF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " / y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  recipF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(recip x" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -374,7 +374,7 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
@@ -382,17 +382,17 @@ gen !vecCount !maxBits
                 ,"  divideF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(divide" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  {-# INLINE divideF #-}"
                 ]
-    genFloating name primCon !bitsPerElem maxBits
+    genFloating name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance FloatingF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  sqrtF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(sqrt x" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  {-# INLINE sqrtF #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
@@ -400,10 +400,10 @@ gen !vecCount !maxBits
                 ,"  sqrtF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(sqrt" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  {-# INLINE sqrtF #-}"
                 ]
-    genFMA name primCon !bitsPerElem maxBits
+    genFMA name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"#if defined(USE_FMA)"
                 ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["z" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(fusedMultiplyAdd x" ++ show i ++ " y" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -414,7 +414,7 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
@@ -426,10 +426,10 @@ gen !vecCount !maxBits
                 ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
                 ,"#endif"
                 ]
-    genBits name primCon !bitsPerElem maxBits
+    genBits name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
            then ["instance BooleanF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  andF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .&. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  orF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .|. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -451,7 +451,7 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
@@ -470,34 +470,34 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE shiftLF #-}"
                 ,"  {-# INLINE shiftRF #-}"
                 ]
-    genEnumFromZero litSuffix name primCon !bitsPerElem maxBits
+    genEnumFromZero litSuffix name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
-        in if bitCount < 128 || maxBits == 0
-                      then ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
-                           ,"  enumFromZero = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep [show i | i <- [0..vecCount-1]]
-                           ,"  -- {-# INLINE enumFromZero #-}"
-                           ]
-                      else
-                        let shortVecSize = vecBitCount `div` bitsPerElem
-                            shortVecCount = bitCount `div` vecBitCount
-                            shortVecName = name ++ "X" ++ show shortVecSize
-                            suffix | shortVecCount == 1 = ""
-                                   | otherwise = "WithVec" ++ show vecBitCount
-                        in ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
-                           ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
-                           ,"  enumFromZero = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep [show (i * shortVecSize + j) ++ litSuffix | j <- [0..shortVecSize - 1]] ++ " #))" | i <- [0..shortVecCount - 1]]
-                           ,"#else"
-                           ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
-                           ,"#endif"
-                           ,"  -- {-# INLINE enumFromZero #-}"
-                           ]
-    genPrim name primCon !bitsPerElem maxBits
+            vecBitCount = min (max bitCount 128) maxBits
+        in if maxBits == 0
+           then ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
+                ,"  enumFromZero = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep [show i | i <- [0..vecCount-1]]
+                ,"  -- {-# INLINE enumFromZero #-}"
+                ]
+           else
+             let shortVecSize = vecBitCount `div` bitsPerElem
+                 shortVecCount = max bitCount 128 `div` vecBitCount
+                 shortVecName = name ++ "X" ++ show shortVecSize
+                 suffix | shortVecCount == 1 = ""
+                        | otherwise = "WithVec" ++ show vecBitCount
+             in ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
+                ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
+                ,"  enumFromZero = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep [(if k < vecCount then show k else "0") ++ litSuffix | j <- [0..shortVecSize - 1], let k = i * shortVecSize + j] ++ " #))" | i <- [0..shortVecCount - 1]]
+                ,"#else"
+                ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
+                ,"#endif"
+                ,"  -- {-# INLINE enumFromZero #-}"
+                ]
+    genPrim name primCon !bitsPerElem zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
+            vecBitCount = min (max bitCount 128) maxBits
             i_plus 0 = "i"
             i_plus k = "(i +# " ++ show k ++ "#)"
-        in if bitCount < 128 || maxBits == 0
+        in if maxBits == 0
            then ["instance MultiPrim " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " (GHC.Exts.index" ++ name ++ "Array# ba " ++ i_plus i ++ "))" | i <- [0..vecCount-1]]
                 ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case GHC.Exts.read" ++ name ++ "Array# mba " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #)"
@@ -508,24 +508,67 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
+                 makeRead s i readAcc vecAcc
+                   | i >= vecCount = (reverse readAcc, reverse vecAcc, s)
+                   | i + shortVecSize <= vecCount
+                   = let s' = s + 1
+                         vi = i `quot` shortVecSize
+                         read = "case read" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus i ++ " s" ++ show s ++ " of (# s" ++ show s' ++ ", v" ++ show vi ++ " #) -> "
+                         pack = "v" ++ show vi
+                     in makeRead s' (i + shortVecSize) (read : readAcc) (pack : vecAcc)
+                   | otherwise
+                   = let lastLoop s i readAcc elems
+                           | i < vecCount = let s' = s + 1
+                                                read = "case GHC.Exts.read" ++ name ++ "Array# mba " ++ i_plus i ++ " s" ++ show s ++ " of (# s" ++ show s' ++ ", x" ++ show i ++ " #) -> "
+                                            in lastLoop s' (i + 1) (read : readAcc) (("x" ++ show i) : elems)
+                           | otherwise = let pack = "(pack" ++ shortVecName ++ "# (# " ++ commaSep (reverse elems ++ replicate (shortVecSize - length elems) zero) ++ " #))"
+                                         in (reverse readAcc, reverse (pack : vecAcc), s)
+                     in lastLoop s i readAcc []
+                 makeWrite s i writesAcc
+                   | i >= vecCount = reverse writesAcc
+                   | i + shortVecSize == vecCount
+                   = let s' = s + 1
+                         vi = i `quot` shortVecSize
+                         write = "write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus i ++ " v" ++ show vi ++ " s" ++ show s
+                     in reverse (write : writesAcc)
+                   | i + shortVecSize < vecCount
+                   = let s' = s + 1
+                         vi = i `quot` shortVecSize
+                         write = "case write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus i ++ " v" ++ show vi ++ " s" ++ show s ++ " of s" ++ show s' ++ " -> "
+                     in makeWrite s' (i + shortVecSize) (write : writesAcc)
+                   | otherwise
+                   = let lastLoop s i scalarWriteAcc patternAcc
+                           | i < vecCount - 1 = let s' = s + 1
+                                                    write = "case GHC.Exts.write" ++ name ++ "Array# mba " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show s ++ " of s" ++ show s' ++ " -> "
+                                                in lastLoop s' (i + 1) (write : scalarWriteAcc) (("x" ++ show i) : patternAcc)
+                           | otherwise = let unpack = "case unpack" ++ shortVecName ++ "# v" ++ show (i `quot` shortVecSize) ++ " of (# " ++ commaSep (reverse (("x" ++ show i) : patternAcc) ++ replicate (shortVecSize - length patternAcc - 1) "_") ++ " #) -> "
+                                             lastWrite = "GHC.Exts.write" ++ name ++ "Array# mba " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show s
+                                         in reverse writesAcc ++ unpack : reverse (lastWrite : scalarWriteAcc)
+                     in lastLoop s i [] []
              in ["instance MultiPrim " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(index" ++ name ++ "ArrayAs" ++ shortVecName ++ "# ba " ++ i_plus (i * shortVecSize) ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  readByteArraySIMD# mba i s0 = " ++ concat ["case read" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #)"
-                ,"  writeByteArraySIMD# mba i (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") s0 = " ++ concat ["case write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "write" ++ name ++ "ArrayAs" ++ shortVecName ++ "# mba " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1)
+                ,"  indexByteArraySIMD# ba i = Mk" ++ name ++ tyCon ++ suffix <+>
+                   spaceSep [if i * shortVecSize + shortVecSize <= vecCount
+                             then "(index" ++ name ++ "ArrayAs" ++ shortVecName ++ "# ba " ++ i_plus (i * shortVecSize) ++ ")"
+                             else "(pack" ++ shortVecName ++ "# (# " ++ commaSep [if k < vecCount then "GHC.Exts.index" ++ name ++ "Array# ba " ++ i_plus k else zero | j <- [0..shortVecSize - 1], let k = i * shortVecSize + j] ++ " #))"
+                            | i <- [0..shortVecCount-1]]
+                ,case makeRead 0 0 [] [] of
+                   (reads, vecs, s) -> "  readByteArraySIMD# mba i s0 = " ++ concat reads ++ "(# s" ++ show s ++ ", Mk" ++ name ++ tyCon ++ suffix <+> spaceSep vecs ++ " #)"
+                ,case makeWrite 0 0 [] of
+                   writes -> "  writeByteArraySIMD# mba i (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") s0 = " ++ concat writes
                 ,"  {-# INLINE indexByteArraySIMD# #-}"
                 ,"  {-# INLINE readByteArraySIMD# #-}"
                 ,"  {-# INLINE writeByteArraySIMD# #-}"
                 ]
-    genStorable name primCon !bitsPerElem maxBits
+    genStorable name primCon !bitsPerElem zero maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
+            vecBitCount = min (max bitCount 128) maxBits
             i_plus 0 = "i"
             i_plus k = "(i +# " ++ show k ++ "#)"
-        in if bitCount < 128 || maxBits == 0
+        in if maxBits == 0
            then ["instance MultiStorable " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case GHC.Exts.read" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", x" ++ show i ++ " #) -> " | i <- [0..vecCount-1]] ++ "(# s" ++ show vecCount ++ ", Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " #))"
                 ,"  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(" ++ primCon ++ " x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case GHC.Exts.write" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..vecCount-2]] ++ "(# GHC.Exts.write" ++ name ++ "OffAddr# addr (i +# " ++ show (vecCount - 1) ++ "#) x" ++ show (vecCount - 1) ++ " s" ++ show (vecCount - 1) ++ ", () #))"
@@ -534,13 +577,46 @@ gen !vecCount !maxBits
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = bitCount `div` vecBitCount
+                 shortVecCount = max bitCount 128 `div` vecBitCount
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
+                 makeRead s i readAcc vecAcc
+                   | i >= vecCount = (reverse readAcc, reverse vecAcc, s)
+                   | i + shortVecSize <= vecCount
+                   = let s' = s + 1
+                         vi = i `quot` shortVecSize
+                         read = "case read" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus i ++ " s" ++ show s ++ " of (# s" ++ show s' ++ ", v" ++ show vi ++ " #) -> "
+                         pack = "v" ++ show vi
+                     in makeRead s' (i + shortVecSize) (read : readAcc) (pack : vecAcc)
+                   | otherwise
+                   = let lastLoop s i readAcc elems
+                           | i < vecCount = let s' = s + 1
+                                                read = "case GHC.Exts.read" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " s" ++ show s ++ " of (# s" ++ show s' ++ ", x" ++ show i ++ " #) -> "
+                                            in lastLoop s' (i + 1) (read : readAcc) (("x" ++ show i) : elems)
+                           | otherwise = let pack = "(pack" ++ shortVecName ++ "# (# " ++ commaSep (reverse elems ++ replicate (shortVecSize - length elems) zero) ++ " #))"
+                                         in (reverse readAcc, reverse (pack : vecAcc), s)
+                     in lastLoop s i readAcc []
+                 makeWrite s i writesAcc
+                   | i >= vecCount = (reverse writesAcc, s)
+                   | i + shortVecSize <= vecCount
+                   = let s' = s + 1
+                         vi = i `quot` shortVecSize
+                         write = "case write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus i ++ " v" ++ show vi ++ " s" ++ show s ++ " of s" ++ show s' ++ " -> "
+                     in makeWrite s' (i + shortVecSize) (write : writesAcc)
+                   | otherwise
+                   = let lastLoop s i scalarWriteAcc patternAcc
+                           | i < vecCount = let s' = s + 1
+                                                write = "case GHC.Exts.write" ++ name ++ "OffAddr# addr " ++ i_plus i ++ " x" ++ show i ++ " s" ++ show s ++ " of s" ++ show s' ++ " -> "
+                                            in lastLoop s' (i + 1) (write : scalarWriteAcc) (("x" ++ show i) : patternAcc)
+                           | otherwise = let unpack = "case unpack" ++ shortVecName ++ "# v" ++ show (i `quot` shortVecSize) ++ " of (# " ++ commaSep (reverse patternAcc ++ replicate (shortVecSize - length patternAcc) "_") ++ " #) -> "
+                                         in (reverse writesAcc ++ unpack : reverse scalarWriteAcc, s)
+                     in lastLoop s i [] []
              in ["instance MultiStorable " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat ["case read" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " s" ++ show i ++ " of (# s" ++ show (i + 1) ++ ", v" ++ show i ++ " #) -> " | i <- [0..shortVecCount-1]] ++ "(# s" ++ show shortVecCount ++ ", Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ " #))"
-                ,"  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = IO (\\s0 -> " ++ concat ["case write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus (i * shortVecSize) ++ " v" ++ show i ++ " s" ++ show i ++ " of s" ++ show (i + 1) ++ " -> " | i <- [0..shortVecCount-2]] ++ "(# write" ++ name ++ "OffAddrAs" ++ shortVecName ++ "# addr " ++ i_plus ((shortVecCount - 1) * shortVecSize) ++ " v" ++ show (shortVecCount - 1) ++ " s" ++ show (shortVecCount - 1) ++ ", () #))"
+                ,case makeRead 0 0 [] [] of
+                   (reads, vecs, s) -> "  peekElemOffSIMD (Ptr addr) (I# i) = IO (\\s0 -> " ++ concat reads ++ "(# s" ++ show s ++ ", Mk" ++ name ++ tyCon ++ suffix <+> spaceSep vecs ++ " #))"
+                ,case makeWrite 0 0 [] of
+                    (writes, s) -> "  pokeElemOffSIMD (Ptr addr) (I# i) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = IO (\\s0 -> " ++ concat writes ++"(# s" ++ show s ++ ", () #))"
                 ,"  {-# INLINE peekElemOffSIMD #-}"
                 ,"  {-# INLINE pokeElemOffSIMD #-}"
                 ]
@@ -670,9 +746,9 @@ genHalf !vecCount !maxBits
     tyCon = 'X' : show vecCount
     genType name primCon !bitsPerElem maxBits
       = let bitCount = bitsPerElem * vecCount
-            vecBitCount = min bitCount maxBits
+            vecBitCount = min (max bitCount 128) maxBits
             halfTyCon = if vecCount == 2 then "Identity" else "X" ++ show (vecCount `quot` 2)
-        in if bitCount < 128 || maxBits == 0
+        in if maxBits == 0
            then if vecCount == 2
                 then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
                      ,"  splitShortVector (Mk" ++ name ++ tyCon ++ "WithElems x0 x1) = (Identity x0, Identity x1)"
@@ -701,31 +777,22 @@ genHalf !vecCount !maxBits
                      ]
                 else
                   let halfVecBitCount = min (bitsPerElem * vecCount `div` 2) maxBits
-                  in if halfVecBitCount < 128
+                  in if halfVecBitCount < 128 || shortVecCount == 1
                      then ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
-                          ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
-                          ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") = mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
+                          ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (mk" ++ halfTyCon <+> spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", mk" ++ halfTyCon <+> spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
+                          ,"  joinShortVector u v = case unpack" ++ halfTyCon ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") -> case unpack" ++ halfTyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
                           ,"  {-# INLINE splitShortVector #-}"
                           ,"  {-# INLINE joinShortVector #-}"
                           ]
                      else
-                       if shortVecCount == 1
-                       then
-                         ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
-                         ,"  splitShortVector v = case unpack" ++ tyCon ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> (mk" ++ halfTyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ", mk" ++ halfTyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ")"
-                         ,"  joinShortVector v0 v1 = case unpack" ++ halfTyCon ++ " v0 of (" ++ commaSep ["x" ++ show i | i <- [0..(vecCount `quot` 2)-1]] ++ ") -> case unpack" ++ halfTyCon ++ " v1 of (" ++ commaSep ["x" ++ show i | i <- [vecCount `quot` 2..vecCount-1]] ++ ") -> mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]]
-                         ,"  {-# INLINE splitShortVector #-}"
-                         ,"  {-# INLINE joinShortVector #-}"
-                         ]
-                       else
-                         let halfSuffix | shortVecCount == 2 = ""
-                                        | otherwise = "WithVec" ++ show halfVecBitCount
-                         in ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
-                            ,"  splitShortVector (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..(shortVecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [shortVecCount `quot` 2..shortVecCount-1]] ++ ")"
-                            ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..(shortVecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [shortVecCount `quot` 2..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]]
-                            ,"  {-# INLINE splitShortVector #-}"
-                            ,"  {-# INLINE joinShortVector #-}"
-                            ]
+                       let halfSuffix | shortVecCount == 2 = ""
+                                      | otherwise = "WithVec" ++ show halfVecBitCount
+                       in ["instance SplitShortVector " ++ tyCon ++ " " ++ name ++ " where"
+                          ,"  splitShortVector (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..(shortVecCount `quot` 2)-1]] ++ ", Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [shortVecCount `quot` 2..shortVecCount-1]] ++ ")"
+                          ,"  joinShortVector (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..(shortVecCount `quot` 2)-1]] ++ ") (Mk" ++ name ++ halfTyCon ++ halfSuffix ++ " " ++ spaceSep ["v" ++ show i | i <- [shortVecCount `quot` 2..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]]
+                          ,"  {-# INLINE splitShortVector #-}"
+                          ,"  {-# INLINE joinShortVector #-}"
+                          ]
     genTuple !n
       = if vecCount == 2
         then ["instance (" ++ commaSep ["SplitShortVector " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => SplitShortVector " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
@@ -813,7 +880,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Simdy.Internal.Class"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
-    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))"
+    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), intToInt8#, intToInt16#, intToInt32#, intToInt64#, wordToWord8#, wordToWord16#, wordToWord32#, wordToWord64#)"
     ,"import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
