@@ -24,38 +24,28 @@ extern __m128 hs_simdy_minimum_floatx4(__m128 x, __m128 y);
 extern __m128 hs_simdy_maximum_floatx4(__m128 x, __m128 y);
 extern __m128 hs_simdy_minimumNumber_floatx4(__m128 x, __m128 y);
 extern __m128 hs_simdy_maximumNumber_floatx4(__m128 x, __m128 y);
-__attribute__((target("avx")))
+#if defined(__AVX__)
 extern __m256 hs_simdy_minimum_floatx8(__m256 x, __m256 y);
-__attribute__((target("avx")))
 extern __m256 hs_simdy_maximum_floatx8(__m256 x, __m256 y);
-__attribute__((target("avx")))
 extern __m256 hs_simdy_minimumNumber_floatx8(__m256 x, __m256 y);
-__attribute__((target("avx")))
 extern __m256 hs_simdy_maximumNumber_floatx8(__m256 x, __m256 y);
-__attribute__((target("avx512dq,avx512vl")))
+#endif
+#if defined(__AVX512DQ__) && defined(__AVX512VL__)
 extern __m128 hs_simdy_minimum_floatx4_avx512(__m128 x, __m128 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m128 hs_simdy_maximum_floatx4_avx512(__m128 x, __m128 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m128 hs_simdy_minimumNumber_floatx4_avx512(__m128 x, __m128 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m128 hs_simdy_maximumNumber_floatx4_avx512(__m128 x, __m128 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256 hs_simdy_minimum_floatx8_avx512(__m256 x, __m256 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256 hs_simdy_maximum_floatx8_avx512(__m256 x, __m256 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256 hs_simdy_minimumNumber_floatx8_avx512(__m256 x, __m256 y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256 hs_simdy_maximumNumber_floatx8_avx512(__m256 x, __m256 y);
-__attribute__((target("avx512dq")))
+#endif
+#if defined(__AVX512DQ__)
 extern __m512 hs_simdy_minimum_floatx16(__m512 x, __m512 y);
-__attribute__((target("avx512dq")))
 extern __m512 hs_simdy_maximum_floatx16(__m512 x, __m512 y);
-__attribute__((target("avx512dq")))
 extern __m512 hs_simdy_minimumNumber_floatx16(__m512 x, __m512 y);
-__attribute__((target("avx512dq")))
 extern __m512 hs_simdy_maximumNumber_floatx16(__m512 x, __m512 y);
+#endif
 #elif defined(__aarch64__)
 float32x4_t hs_simdy_minimum_floatx4(float32x4_t x, float32x4_t y);
 float32x4_t hs_simdy_maximum_floatx4(float32x4_t x, float32x4_t y);

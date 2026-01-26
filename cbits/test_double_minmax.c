@@ -24,38 +24,28 @@ extern __m128d hs_simdy_minimum_doublex2(__m128d x, __m128d y);
 extern __m128d hs_simdy_maximum_doublex2(__m128d x, __m128d y);
 extern __m128d hs_simdy_minimumNumber_doublex2(__m128d x, __m128d y);
 extern __m128d hs_simdy_maximumNumber_doublex2(__m128d x, __m128d y);
-__attribute__((target("avx")))
+#if defined(__AVX__)
 extern __m256d hs_simdy_minimum_doublex4(__m256d x, __m256d y);
-__attribute__((target("avx")))
 extern __m256d hs_simdy_maximum_doublex4(__m256d x, __m256d y);
-__attribute__((target("avx")))
 extern __m256d hs_simdy_minimumNumber_doublex4(__m256d x, __m256d y);
-__attribute__((target("avx")))
 extern __m256d hs_simdy_maximumNumber_doublex4(__m256d x, __m256d y);
-__attribute__((target("avx512dq,avx512vl")))
+#endif
+#if defined(__AVX512DQ__) && defined(__AVX512VL__)
 extern __m128d hs_simdy_minimum_doublex2_avx512(__m128d x, __m128d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m128d hs_simdy_maximum_doublex2_avx512(__m128d x, __m128d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m128d hs_simdy_minimumNumber_doublex2_avx512(__m128d x, __m128d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m128d hs_simdy_maximumNumber_doublex2_avx512(__m128d x, __m128d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256d hs_simdy_minimum_doublex4_avx512(__m256d x, __m256d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256d hs_simdy_maximum_doublex4_avx512(__m256d x, __m256d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256d hs_simdy_minimumNumber_doublex4_avx512(__m256d x, __m256d y);
-__attribute__((target("avx512dq,avx512vl")))
 extern __m256d hs_simdy_maximumNumber_doublex4_avx512(__m256d x, __m256d y);
-__attribute__((target("avx512dq")))
+#endif
+#if defined(__AVX512DQ__)
 extern __m512d hs_simdy_minimum_doublex8(__m512d x, __m512d y);
-__attribute__((target("avx512dq")))
 extern __m512d hs_simdy_maximum_doublex8(__m512d x, __m512d y);
-__attribute__((target("avx512dq")))
 extern __m512d hs_simdy_minimumNumber_doublex8(__m512d x, __m512d y);
-__attribute__((target("avx512dq")))
 extern __m512d hs_simdy_maximumNumber_doublex8(__m512d x, __m512d y);
+#endif
 #elif defined(__aarch64__)
 float64x2_t hs_simdy_minimum_doublex2(float64x2_t x, float64x2_t y);
 float64x2_t hs_simdy_maximum_doublex2(float64x2_t x, float64x2_t y);
