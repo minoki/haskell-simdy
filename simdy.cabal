@@ -113,6 +113,7 @@ library common
                     , arch-options
     exposed-modules:  Data.Simdy.Class.Bits
                       Data.Simdy.Internal.Class
+                      Data.Simdy.Internal.Shuffle
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.PrimExtra
 
@@ -259,6 +260,19 @@ library vl512
         -- vl512 requires !no-simd && avx512 && llvm
         buildable: False
 
+library plugin
+    import:           warnings
+                    , arch-options
+    visibility:       public
+    exposed-modules:  Data.Simdy.Shuffle.Plugin
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      simdy:common,
+                      ghc-experimental,
+                      ghc >=9.6 && <9.15,
+                      ghc-tcplugin-api ^>=0.18.2
+    hs-source-dirs:   src-plugin
+    default-language: GHC2021
+
 library
     import:           warnings
                     , arch-options
@@ -268,6 +282,7 @@ library
                       Data.Simdy.Mask
                       Data.Simdy.MinMax
                       Data.Simdy.Pack
+                      Data.Simdy.Shuffle
                       Data.Simdy.Split
                       Data.Simdy.Tuple
                       Data.Simdy.Vector.Bundle
@@ -321,6 +336,21 @@ test-suite simdy-test
                       tasty ^>=1.5.3,
                       tasty-quickcheck ^>=0.11.1,
                       tasty-hunit ^>=0.10.2
+
+test-suite shuffle-test
+    import:           warnings
+                    , arch-options
+    default-language: GHC2021
+    type:             exitcode-stdio-1.0
+    hs-source-dirs:   test-shuffle
+    main-is:          ShuffleTest.hs
+    build-depends:    base >=4.18.0.0 && <4.23,
+                      simdy,
+                      simdy:plugin,
+                      tasty ^>=1.5.3,
+                      tasty-quickcheck ^>=0.11.1,
+                      tasty-hunit ^>=0.10.2
+    ghc-options:      -dlint
 
 test-suite float-minmax-test
     import:           warnings

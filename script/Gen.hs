@@ -207,7 +207,25 @@ gen !vecCount !maxBits
                            ,"instance SelectableF " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["y" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(select" ++ shortVecName ++ "# " ++ cond_i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..shortVecCount-1], let cond_i = if shortVecCount == 1 then if max 8 shortVecSize == max 8 vecCount then "cond" else "(fromIntegral cond)" else "(" ++ (if max 8 shortVecSize == max 8 vecCount then "" else "fromIntegral $ ") ++ "cond `unsafeShiftR` " ++ show (i * shortVecSize) ++ ")" ]
                            ,"  {-# INLINE selectF #-}"
+                           ] ++
+                           (if shortVecCount == 1
+                           then
+                             ["instance (AllLessThan indices " ++ show vecCount ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => UnaryShuffle indices " ++ tyCon <+> name ++ " where"
+                             ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> "x) = Mk" ++ name ++ tyCon ++ suffix ++ " (shuffleMany# @_ @_ @indices (\\_ -> x))"
+                             ,"  {-# INLINE unaryShuffle #-}"
+                             ,"instance (AllLessThan indices " ++ show (2 * vecCount) ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => BinaryShuffle indices " ++ tyCon <+> name ++ " where"
+                             ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> "x0) (Mk" ++ name ++ tyCon ++ suffix <+> "x1) = Mk" ++ name ++ tyCon ++ suffix ++ " (shuffleMany# @_ @_ @indices (\\case { 0 -> x0; _ -> x1 }))"
+                             ,"  {-# INLINE binaryShuffle #-}"
                            ]
+                           else
+                             ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => UnaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                             ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == shortVecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..shortVecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" ++ " sources)" | g <- [0..shortVecCount-1]]
+                             ,"  {-# INLINE unaryShuffle #-}"
+                             ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => BinaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                             ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [shortVecCount..2*shortVecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == 2 * shortVecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..2*shortVecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "] sources)" | g <- [0..shortVecCount-1]]
+                             ,"  {-# INLINE binaryShuffle #-}"
+                             ]
+                           )
         in mainDef ++ concatMap (\f -> f name primCon bitsPerElem zero maxBits) others
     genEquatable name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -862,6 +880,7 @@ genFile moduleName primModules !n !maxBits
     ,"{-# LANGUAGE CPP #-}"
     ,"{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
+    ,"{-# LANGUAGE LambdaCase #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
     ,"{-# LANGUAGE UnboxedTuples #-}"
@@ -878,6 +897,8 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
+    ,"import           Data.Simdy.Internal.Shuffle"
+    ,"import           Data.Type.Ord (type (<))"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
     ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), intToInt8#, intToInt16#, intToInt32#, intToInt64#, wordToWord8#, wordToWord16#, wordToWord32#, wordToWord64#)"
