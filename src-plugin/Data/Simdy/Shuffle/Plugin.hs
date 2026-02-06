@@ -8,7 +8,7 @@ import           Control.Applicative ((<|>))
 import           Control.Monad (forM, guard, replicateM)
 import           Data.Either (partitionEithers)
 import           Data.List (nub)
-import           Data.Maybe (fromJust, fromMaybe)
+import           Data.Maybe (fromMaybe)
 import           Data.Simdy.Internal.Shuffle (ShuffleMany)
 import qualified GHC.Builtin.Types as B
 import qualified GHC.Builtin.Types.Prim as B
@@ -23,7 +23,6 @@ import qualified GHC.Plugins as GHC (Alt (Alt), AltCon (DataAlt),
                                      mkCoreConApps, mkLitInt, mkLocalId,
                                      mkSystemName, mkTyConApp, purePlugin,
                                      tupleDataCon)
-import           GHC.PrimOps
 import           GHC.TcPlugin.API
 import           GHC.TcPlugin.API.Internal (unsafeLiftTcM)
 import           GHC.Types.Literal (mkLitDouble, mkLitFloat, mkLitInt16,
@@ -31,6 +30,11 @@ import           GHC.Types.Literal (mkLitDouble, mkLitFloat, mkLitInt16,
                                     mkLitWord16, mkLitWord32, mkLitWord64,
                                     mkLitWord8)
 -- import GHC.Utils.Outputable -- for debugging
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+import           GHC.PrimOps
+#else
+import           GHC.Exts
+#endif
 
 #if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0)
 import           GHC.Tc.Types.Evidence (evUnaryDictAppE)
@@ -362,12 +366,20 @@ buildShuffleWithPack :: DynFlags -> VectorTypeDefs -> CoreExpr -> [(Integer, (In
 buildShuffleWithPack dynflags (MkVectorTypeDefs {..}) vExp pairs =
   let n = numberOfElements
       platform = targetPlatform dynflags
-      go [] _ vars = let args = [GHC.Var (fromJust (lookup dst vars)) | dst <- [0..n-1]]
-                   in pure $ GHC.App (GHC.Var packId) (GHC.mkCoreConApps (GHC.tupleDataCon GHC.Unboxed n) $ replicate n (GHC.Type scalarRepDataConTy) ++ replicate n (GHC.Type $ mkTyConTy scalarTyCon) ++ args)
+      go [] _ vars =
+        let defaultExpr = case vars of
+              (_, e:_):_ -> GHC.Var e
+              _ -> zeroExpr
+            args = [ case lookup dst pairs of
+                       Nothing -> defaultExpr
+                       Just (srcVec, srcLane) -> GHC.Var (fromMaybe (panic "no srcVec") (lookup srcVec vars) !! fromInteger srcLane)
+                   | dst <- [0..toInteger n-1]
+                   ]
+        in pure $ GHC.App (GHC.Var packId) (GHC.mkCoreConApps (GHC.tupleDataCon GHC.Unboxed n) $ replicate n (GHC.Type scalarRepDataConTy) ++ replicate n (GHC.Type $ mkTyConTy scalarTyCon) ++ args)
       go (srcVec : vecs) k vars = do
         v <- freshId "v" $ GHC.mkTyConApp (B.tupleTyCon GHC.Unboxed n) $ replicate n scalarRepDataConTy ++ replicate n (mkTyConTy scalarTyCon)
         elems <- replicateM n (freshId "x" $ mkTyConTy scalarTyCon)
-        rest <- go vecs (k + n) (zip [k..] elems ++ vars)
+        rest <- go vecs (k + n) ((srcVec, elems) : vars)
         let vecTy = GHC.mkTyConApp tyCon []
         pure $ GHC.Case (GHC.App (GHC.Var unpackId) (GHC.App vExp $ mkNaturalExpr platform srcVec)) v vecTy [GHC.Alt (GHC.DataAlt (GHC.tupleDataCon GHC.Unboxed n)) elems rest]
   in go (nub [srcVec | (_, (srcVec, _)) <- pairs]) 0 []

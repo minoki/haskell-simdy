@@ -267,9 +267,10 @@ library plugin
     exposed-modules:  Data.Simdy.Shuffle.Plugin
     build-depends:    base >=4.18.0.0 && <4.23,
                       simdy:common,
-                      ghc-experimental,
                       ghc >=9.6 && <9.15,
                       ghc-tcplugin-api ^>=0.18.2
+    if impl(ghc >= 9.12)
+        build-depends: ghc-experimental
     hs-source-dirs:   src-plugin
     default-language: GHC2021
 
