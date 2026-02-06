@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE MonoLocalBinds #-}
 import           Data.Proxy
-import           Data.Simdy (X16, X32, X4, X8)
+import           Data.Simdy (X16, X32, X4, X64, X8)
 import           Data.Simdy.FMA
 import qualified Data.Simdy.Vector.Generic as V.SIMD
 import qualified Data.Vector.Unboxed as VU
