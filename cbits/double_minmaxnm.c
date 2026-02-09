@@ -265,8 +265,8 @@ float64x2_t hs_simdy_minimumNumber_doublex2(float64x2_t x, float64x2_t y)
 {
     // Convert (possible) signaling NaN to quiet one
     float64x2_t one = vdupq_n_f64(1.0);
-    asm volatile("fmul.2d %0, %0, %1" : "+w"(x) : "w"(one));
-    asm volatile("fmul.2d %0, %0, %1" : "+w"(y) : "w"(one));
+    asm volatile("fmul %0.2d, %0.2d, %1.2d" : "+w"(x) : "w"(one));
+    asm volatile("fmul %0.2d, %0.2d, %1.2d" : "+w"(y) : "w"(one));
     // x = vmulq_f32(x, one);
     // y = vmulq_f32(y, one);
     return vminnmq_f64(x, y);
@@ -276,8 +276,8 @@ float64x2_t hs_simdy_maximumNumber_doublex2(float64x2_t x, float64x2_t y)
 {
     // Convert (possible) signaling NaN to quiet one
     float64x2_t one = vdupq_n_f64(1.0);
-    asm volatile("fmul.2d %0, %0, %1" : "+w"(x) : "w"(one));
-    asm volatile("fmul.2d %0, %0, %1" : "+w"(y) : "w"(one));
+    asm volatile("fmul %0.2d, %0.2d, %1.2d" : "+w"(x) : "w"(one));
+    asm volatile("fmul %0.2d, %0.2d, %1.2d" : "+w"(y) : "w"(one));
     // x = vmulq_f32(x, one);
     // y = vmulq_f32(y, one);
     return vmaxnmq_f64(x, y);
