@@ -70,34 +70,34 @@ gen !vecCount !maxBits
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
     ]
-    ++ genType "Float" "F#" 32 "0.0#" maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
-    ++ genType "Double" "D#" 64 "0.0##" maxBits [genEquatable, genOrderedFloat, genNum True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
+    ++ genType "Float" "F#" 32 "0.0#" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
+    ++ genType "Double" "D#" 64 "0.0##" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
     ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
     ++ ["instance ImplementationDescription " ++ tyCon ++ " where"
        ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits=" ++ show maxBits ++ "\""
        ]
-    ++ genType "Int8" "I8#" 8 "intToInt8# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-    ++ genType "Int16" "I16#" 16 "intToInt16# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-    ++ genType "Int32" "I32#" 32 "intToInt32# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-    ++ genType "Int64" "I64#" 64 "intToInt64# 0#" maxBits [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-    ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-    ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-    ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-    ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" maxBits [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+    ++ genType "Int8" "I8#" 8 "intToInt8# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+    ++ genType "Int16" "I16#" 16 "intToInt16# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+    ++ genType "Int32" "I32#" 32 "intToInt32# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+    ++ genType "Int64" "I64#" 64 "intToInt64# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+    ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+    ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+    ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+    ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
     ++ (if maxBits == 128
         then ["#else"
              ,"-- The NCG of GHC 9.12 does not support integer vectors"
              ,"instance ImplementationDescription " ++ tyCon ++ " where"
              ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits(Float,Double)=" ++ show maxBits ++ ",maxBits(other)=0\""
              ]
-             ++ genType "Int8" "I8#" 8 "intToInt8# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-             ++ genType "Int16" "I16#" 16 "intToInt16# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-             ++ genType "Int32" "I32#" 32 "intToInt32# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-             ++ genType "Int64" "I64#" 64 "intToInt64# 0#" 0 [genEquatable, genOrderedInt, genNum True, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-             ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-             ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-             ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-             ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" 0 [genEquatable, genOrderedInt, genNum False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+             ++ genType "Int8" "I8#" 8 "intToInt8# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+             ++ genType "Int16" "I16#" 16 "intToInt16# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+             ++ genType "Int32" "I32#" 32 "intToInt32# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+             ++ genType "Int64" "I64#" 64 "intToInt64# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+             ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+             ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+             ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+             ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
              ++ ["#endif"]
         else []
        )
@@ -341,16 +341,31 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE minimumNumberF #-}"
                 ,"  {-# INLINE maximumNumberF #-}"
                 ]
-    genNum isSigned name primCon !bitsPerElem _zero maxBits
+    genNum isSigned isFloating name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min (max bitCount 128) maxBits
         in if maxBits == 0
-           then ["instance NumF " ++ tyCon ++ " " ++ name ++ " where"
+           then (if isFloating
+                 then ["negate" ++ tyCon ++ name ++ " :: " ++ tyCon <+> name ++ " -> " ++ tyCon <+> name
+                      ,"negate" ++ tyCon ++ name ++ " (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(- x" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                      ,"#if defined(USE_FMA)"
+                      ,"{-# INLINE [0] negate" ++ tyCon ++ name ++ " #-}"
+                      ,"#else"
+                      ,"{-# INLINE negate" ++ tyCon ++ name ++ " #-}"
+                      ,"#endif"
+                      ]
+                 else []
+                ) ++
+                ["instance NumF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  plusF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " + y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  minusF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " - y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  timesF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " * y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  negateF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(- x" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  {-# INLINE plusF #-}"
+                ] ++
+                (if isFloating
+                 then ["  negateF = negate" ++ tyCon ++ name]
+                 else ["  negateF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(- x" ++ show i ++ ")" | i <- [0..vecCount-1]]]
+                ) ++
+                ["  {-# INLINE plusF #-}"
                 ,"  {-# INLINE minusF #-}"
                 ,"  {-# INLINE timesF #-}"
                 ,"  {-# INLINE negateF #-}"
@@ -361,15 +376,28 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance NumF " ++ tyCon ++ " " ++ name ++ " where"
+             in (if isFloating
+                 then ["negate" ++ tyCon ++ name ++ " :: " ++ tyCon <+> name ++ " -> " ++ tyCon <+> name
+                      ,"negate" ++ tyCon ++ name ++ " (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(negate" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                      ,"#if defined(USE_FMA)"
+                      ,"{-# INLINE [0] negate" ++ tyCon ++ name ++ " #-}"
+                      ,"#else"
+                      ,"{-# INLINE negate" ++ tyCon ++ name ++ " #-}"
+                      ,"#endif"
+                      ]
+                 else []
+                ) ++
+                ["instance NumF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  plusF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(plus" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  minusF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(minus" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  timesF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(times" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ]
                 ++ (if isSigned
-                    then ["  negateF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(negate" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                         ,"  absF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(abs" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                         ]
+                    then (if isFloating
+                          then ["  negateF = negate" ++ tyCon ++ name]
+                          else ["  negateF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(negate" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]]
+                         ) ++
+                         ["  absF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(abs" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]]
                     else ["  -- Currently, there is no negate" ++ shortVecName ++ "#"
                          ,"  absF x = x"
                          ]
@@ -421,29 +449,47 @@ gen !vecCount !maxBits
     genFMA name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min (max bitCount 128) maxBits
-        in if maxBits == 0
-           then ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"#if defined(USE_FMA)"
-                ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["z" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(fusedMultiplyAdd x" ++ show i ++ " y" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  {-# INLINE fusedMultiplyAddF #-}"
-                ,"#else"
-                ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
-                ,"#endif"
-                ]
-           else
-             let shortVecSize = vecBitCount `div` bitsPerElem
-                 shortVecCount = max bitCount 128 `div` vecBitCount
-                 shortVecName = name ++ "X" ++ show shortVecSize
-                 suffix | shortVecCount == 1 = ""
-                        | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"#if defined(USE_FMA)"
-                ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["w" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(fmadd" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  {-# INLINE fusedMultiplyAddF #-}"
-                ,"#else"
-                ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
-                ,"#endif"
-                ]
+        in (if maxBits == 0
+            then ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
+                 ,"#if defined(USE_FMA)"
+                 ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["z" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(fusedMultiplyAdd x" ++ show i ++ " y" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                 ,"  {-# INLINE fusedMultiplyAddF #-}"
+                 ,"#else"
+                 ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
+                 ,"#endif"
+                 ]
+            else
+              let shortVecSize = vecBitCount `div` bitsPerElem
+                  shortVecCount = max bitCount 128 `div` vecBitCount
+                  shortVecName = name ++ "X" ++ show shortVecSize
+                  suffix | shortVecCount == 1 = ""
+                         | otherwise = "WithVec" ++ show vecBitCount
+              in ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
+                 ,"#if defined(USE_FMA)"
+                 ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["w" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(fmadd" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                 ,"  {-# INLINE fusedMultiplyAddF #-}"
+                 ,"#else"
+                 ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
+                 ,"#endif"
+                 ]
+           ) ++
+           ["#if defined(USE_FMA)"
+           ,"{-# RULES"
+           ,"\"Fusible/*+/" ++ tyCon <+> name ++ "\" forall a b c."
+           ,"  a F.* b F.+ c = fusedMultiplyAdd a b c :: " ++ tyCon <+> name
+           ,"\"Fusible/*-/" ++ tyCon <+> name ++ "\" forall a b c."
+           ,"  a F.* b F.- c = fusedMultiplyAdd a b (-c) :: " ++ tyCon <+> name
+           ,"\"Fusible/-*+/" ++ tyCon <+> name ++ "\" forall a b c."
+           ,"  negate" ++ tyCon ++ name ++ " (a F.* b) F.+ c = fusedMultiplyAdd (-a) b c :: " ++ tyCon <+> name
+           ,"\"Fusible/-*-/" ++ tyCon <+> name ++ "\" forall a b c."
+           ,"  negate" ++ tyCon ++ name ++ " (a F.* b) F.- c = fusedMultiplyAdd (-a) b (-c) :: " ++ tyCon <+> name
+           ,"\"Fusible/+*/" ++ tyCon <+> name ++ "\" forall a b c."
+           ,"  a F.+ b F.* c = fusedMultiplyAdd b c a :: " ++ tyCon <+> name
+           ,"\"Fusible/-*/" ++ tyCon <+> name ++ "\" forall a b c."
+           ,"  a F.- b F.* c = fusedMultiplyAdd (-b) c a :: " ++ tyCon <+> name
+           ,"  #-}"
+           ,"#endif"
+           ]
     genBits name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min (max bitCount 128) maxBits
@@ -897,6 +943,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
+    ,"import qualified Data.Simdy.Internal.Fusible as F"
     ,"import           Data.Simdy.Internal.Shuffle"
     ,"import           Data.Type.Ord (type (<))"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++

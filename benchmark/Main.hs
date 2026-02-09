@@ -3,6 +3,7 @@
 import           Data.Proxy
 import           Data.Simdy (X16, X32, X4, X64, X8)
 import           Data.Simdy.FMA
+import qualified Data.Simdy.Fusible as F
 import qualified Data.Simdy.Vector.Generic as V.SIMD
 import qualified Data.Vector.Unboxed as VU
 import           MatMul
@@ -25,6 +26,24 @@ dotProdX32 a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) (*) a b)
 
 dotProdX64 :: VU.Vector Float -> VU.Vector Float -> Float
 dotProdX64 a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) (*) a b)
+
+dotProdFVU :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdFVU a b = VU.foldl' (F.+) 0 (VU.zipWith (F.*) a b)
+
+dotProdFX4 :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdFX4 a b = V.SIMD.fold' @X4 (F.+) 0 (V.SIMD.zipWith @X4 (F.*) (F.*) a b)
+
+dotProdFX8 :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdFX8 a b = V.SIMD.fold' @X8 (F.+) 0 (V.SIMD.zipWith @X8 (F.*) (F.*) a b)
+
+dotProdFX16 :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdFX16 a b = V.SIMD.fold' @X16 (F.+) 0 (V.SIMD.zipWith @X16 (F.*) (F.*) a b)
+
+dotProdFX32 :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdFX32 a b = V.SIMD.fold' @X32 (F.+) 0 (V.SIMD.zipWith @X32 (F.*) (F.*) a b)
+
+dotProdFX64 :: VU.Vector Float -> VU.Vector Float -> Float
+dotProdFX64 a b = V.SIMD.fold' @X64 (F.+) 0 (V.SIMD.zipWith @X64 (F.*) (F.*) a b)
 
 dotProdVU_D :: VU.Vector Double -> VU.Vector Double -> Double
 dotProdVU_D a b = VU.foldl' (+) 0 (VU.zipWith (*) a b)
@@ -53,6 +72,14 @@ main = defaultMain
     , bench "X16" $ nf (uncurry dotProdX16) (vecA, vecB)
     , bench "X32" $ nf (uncurry dotProdX32) (vecA, vecB)
     , bench "X64" $ nf (uncurry dotProdX64) (vecA, vecB)
+    ]
+  , bgroup "dotProd (Float, may use FMA)"
+    [ bench "baseline" $ nf (uncurry dotProdFVU) (vecA, vecB)
+    , bench "X4" $ nf (uncurry dotProdFX4) (vecA, vecB)
+    , bench "X8" $ nf (uncurry dotProdFX8) (vecA, vecB)
+    , bench "X16" $ nf (uncurry dotProdFX16) (vecA, vecB)
+    , bench "X32" $ nf (uncurry dotProdFX32) (vecA, vecB)
+    , bench "X64" $ nf (uncurry dotProdFX64) (vecA, vecB)
     ]
   , bgroup "dotProd (Double)"
     [ bench "baseline" $ nf (uncurry dotProdVU_D) (vecA_D, vecB_D)
