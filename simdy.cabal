@@ -33,10 +33,10 @@ extra-source-files: cbits/mask.h
 --     * GHC 9.8.1 and 9.8.2 are not supported because the FMA primitive is broken and I don't think it is worth working around it.
 --     * GHC 9.8.1 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
 --     * GHC 9.8.2 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
---     * There seems to be an issue with FFI on AArch64.
+--     * FFI issue on AArch64: https://gitlab.haskell.org/ghc/ghc/-/issues/26907
 -- * GHC 9.10.* / base-4.20.* / ghc-prim 0.12.*
 --     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606, fixed in 9.10.2
---     * There seems to be an issue with FFI on AArch64.
+--     * FFI issue on AArch64: https://gitlab.haskell.org/ghc/ghc/-/issues/26907
 -- * GHC 9.12.* / base-4.21.* / ghc-prim 0.13.* / ghc-internal 9.12##.* / ghc-experimental 9.12##.*
 --     * I'd like to drop support for 9.12.1/9.12.2/9.12.3 once 9.12.4 is out, because of multiple issues.
 --     * Broadcast issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25561, fixed in 9.12.3
