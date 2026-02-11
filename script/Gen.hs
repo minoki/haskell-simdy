@@ -473,20 +473,23 @@ gen !vecCount !maxBits
                  ,"#endif"
                  ]
            ) ++
+           -- Be careful to use specialized 'negate' function on the right hand side.
+           -- Otherwise, GHC will consider that the dictionaries 'Num Float' and 'Num Double'
+           -- are recursive and will refuse to inline them.
            ["#if defined(USE_FMA)"
            ,"{-# RULES"
            ,"\"Fusible/*+/" ++ tyCon <+> name ++ "\" forall a b c."
            ,"  a F.* b F.+ c = fusedMultiplyAdd a b c :: " ++ tyCon <+> name
            ,"\"Fusible/*-/" ++ tyCon <+> name ++ "\" forall a b c."
-           ,"  a F.* b F.- c = fusedMultiplyAdd a b (-c) :: " ++ tyCon <+> name
+           ,"  a F.* b F.- c = fusedMultiplyAdd a b (negate" ++ tyCon ++ name ++ " c) :: " ++ tyCon <+> name
            ,"\"Fusible/-*+/" ++ tyCon <+> name ++ "\" forall a b c."
-           ,"  negate" ++ tyCon ++ name ++ " (a F.* b) F.+ c = fusedMultiplyAdd (-a) b c :: " ++ tyCon <+> name
+           ,"  negate" ++ tyCon ++ name ++ " (a F.* b) F.+ c = fusedMultiplyAdd (negate" ++ tyCon ++ name ++ " a) b c :: " ++ tyCon <+> name
            ,"\"Fusible/-*-/" ++ tyCon <+> name ++ "\" forall a b c."
-           ,"  negate" ++ tyCon ++ name ++ " (a F.* b) F.- c = fusedMultiplyAdd (-a) b (-c) :: " ++ tyCon <+> name
+           ,"  negate" ++ tyCon ++ name ++ " (a F.* b) F.- c = fusedMultiplyAdd (negate" ++ tyCon ++ name ++ " a) b (negate" ++ tyCon ++ name ++ " c) :: " ++ tyCon <+> name
            ,"\"Fusible/+*/" ++ tyCon <+> name ++ "\" forall a b c."
            ,"  a F.+ b F.* c = fusedMultiplyAdd b c a :: " ++ tyCon <+> name
            ,"\"Fusible/-*/" ++ tyCon <+> name ++ "\" forall a b c."
-           ,"  a F.- b F.* c = fusedMultiplyAdd (-b) c a :: " ++ tyCon <+> name
+           ,"  a F.- b F.* c = fusedMultiplyAdd (negate" ++ tyCon ++ name ++ " b) c a :: " ++ tyCon <+> name
            ,"  #-}"
            ,"#endif"
            ]
