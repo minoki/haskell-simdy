@@ -3,6 +3,11 @@
 #if MIN_VERSION_base(4, 19, 0)
 {-# LANGUAGE MagicHash #-}
 #endif
+-- |
+-- Fused multiply-add (FMA) support.
+--
+-- FMA computes @x * y + z@ in a single operation with only one rounding step,
+-- which is both faster and more accurate than separate multiply and add.
 module Data.Simdy.Internal.FMA where
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Coerce
@@ -10,11 +15,19 @@ import           Data.Coerce
 import           GHC.Exts
 #endif
 
+-- | Types that support fused multiply-add: @fusedMultiplyAdd x y z = x * y + z@
+-- with a single rounding step.
 class Num a => FusedMultiplyAdd a where
+  -- | @fusedMultiplyAdd x y z@ computes @x * y + z@ with a single rounding.
   fusedMultiplyAdd :: a -> a -> a -> a
 
+-- | Constraint that is satisfiable only when FMA hardware support is enabled via the package flag.
 class HasFMA
+-- | A witness that FMA hardware support is available. Pattern match on 'MkFMAWitness'
+-- to bring the 'HasFMA' constraint into scope.
 data FMAWitness = HasFMA => MkFMAWitness
+-- | Returns @'Just' 'MkFMAWitness'@ if FMA is available, 'Nothing' otherwise.
+-- Use this to write code that conditionally uses FMA at runtime.
 isFMAAvailable :: Maybe FMAWitness
 
 #if defined(USE_FMA)

@@ -1,20 +1,40 @@
 {-# LANGUAGE PatternSynonyms #-}
+-- |
+-- Pack and unpack individual scalar elements into\/from SIMD vectors.
+--
+-- Each vector width has:
+--
+-- * A class (e.g. 'PackX4') with 'mkX4' (pack from a tuple) and 'unpackX4' (unpack to a tuple).
+-- * A pattern synonym (e.g. 'MkX4') for bidirectional matching.
+-- * A function (e.g. 'packX4') taking a tuple.
 module Data.Simdy.Pack
-  ( PackX2 (mkX2, unpackX2)
+  ( -- * 2-lane vectors
+    -- | Pack\/unpack 2-lane SIMD vectors from\/to individual scalar elements.
+    PackX2 (mkX2, unpackX2)
   , pattern MkX2
   , packX2
+    -- * 4-lane vectors
+    -- | Pack\/unpack 4-lane SIMD vectors from\/to individual scalar elements.
   , PackX4 (mkX4, unpackX4)
   , pattern MkX4
   , packX4
+    -- * 8-lane vectors
+    -- | Pack\/unpack 8-lane SIMD vectors from\/to individual scalar elements.
   , PackX8 (mkX8, unpackX8)
   , pattern MkX8
   , packX8
+    -- * 16-lane vectors
+    -- | Pack\/unpack 16-lane SIMD vectors from\/to individual scalar elements.
   , PackX16 (mkX16, unpackX16)
   , pattern MkX16
   , packX16
+    -- * 32-lane vectors
+    -- | Pack\/unpack 32-lane SIMD vectors from\/to individual scalar elements.
   , PackX32 (mkX32, unpackX32)
   , pattern MkX32
   , packX32
+    -- * 64-lane vectors
+    -- | Pack\/unpack 64-lane SIMD vectors from\/to individual scalar elements.
   , PackX64 (mkX64, unpackX64)
   , pattern MkX64
   , packX64

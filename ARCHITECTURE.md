@@ -24,8 +24,6 @@ and available instruction sets.
 - **Type families** associate related types:
   `type family Mask a` maps element types to their mask representation,
   and `type family HalfVector f` maps vector types to their half-width counterparts.
-- Type-level list operations (`AllLessThan`, `Take`, `Drop`) enforce shuffle
-  index bounds at compile time.
 
 ### QuantifiedConstraints
 

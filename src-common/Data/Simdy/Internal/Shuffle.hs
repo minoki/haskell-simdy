@@ -3,15 +3,25 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- |
+-- Shuffle operations for SIMD vectors.
+--
+-- Shuffles rearrange the lanes of one or two vectors according to compile-time index lists.
+-- The indices are specified as type-level lists of 'GHC.TypeNats.Natural's.
+--
+-- The 'ShuffleMany' class has no hand-written instances; they are solved by
+-- the compiler plugin ("Data.Simdy.Shuffle.Plugin").
 module Data.Simdy.Internal.Shuffle where
 import GHC.TypeNats
 import GHC.Exts (TYPE)
 import Data.Type.Ord
 import Data.Kind (Type, Constraint)
 
--- | Magic type class
+-- | Low-level shuffle primitive.
 --
--- The instance of this class is defined by the compiler plugin.
+-- Instances are solved by the compiler plugin ("Data.Simdy.Shuffle.Plugin"),
+-- not defined by hand. The plugin reads the type-level @indices@ and emits
+-- the appropriate GHC shuffle primop or pack\/unpack fallback.
 type ShuffleMany :: forall rep. TYPE rep -> [Natural] -> Constraint
 class ShuffleMany v indices where
   shuffleMany# :: (Natural -> v) -> v
@@ -21,10 +31,13 @@ type family AllLessThan indices n where
   AllLessThan '[] _ = ()
   AllLessThan (x : xs) y = (x < y, AllLessThan xs y)
 
+-- | Rearrange lanes of a single vector according to compile-time @indices@.
 type UnaryShuffle :: [Natural] -> (Type -> Type) -> Type -> Constraint
 class UnaryShuffle indices x a where
   unaryShuffle :: x a -> x a
 
+-- | Select lanes from two concatenated vectors according to compile-time @indices@.
+-- Indices @0..n-1@ select from the first vector, @n..2n-1@ from the second.
 type BinaryShuffle :: [Natural] -> (Type -> Type) -> Type -> Constraint
 class BinaryShuffle indices x a where
   binaryShuffle :: x a -> x a -> x a

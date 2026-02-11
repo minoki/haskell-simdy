@@ -1,5 +1,12 @@
 {-# LANGUAGE CPP #-}
 {-# OPTIONS_GHC -Wno-inline-rule-shadowing #-}
+-- |
+-- Arithmetic operators that enable automatic FMA fusion via rewrite rules.
+--
+-- Import this module instead of using 'Prelude' arithmetic operators to allow
+-- GHC rewrite rules to fuse @a * b + c@ into 'Data.Simdy.Internal.FMA.fusedMultiplyAdd'.
+-- The operators are only fused when FMA hardware support is enabled at compile time;
+-- otherwise they behave identically to their 'Prelude' counterparts.
 module Data.Simdy.Internal.Fusible where
 import           Prelude hiding ((+), (-), (*))
 import qualified Prelude

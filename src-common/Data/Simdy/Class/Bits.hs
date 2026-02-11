@@ -1,4 +1,12 @@
 {-# LANGUAGE DerivingVia #-}
+-- |
+-- Bitwise operation classes for SIMD vectors and scalar types.
+--
+-- 'Boolean' provides bitwise AND, OR, XOR, and complement.
+-- 'BitShift' extends 'Boolean' with shift operations.
+--
+-- These classes mirror "Data.Bits" but are designed to work uniformly
+-- across scalar types and SIMD vector types.
 module Data.Simdy.Class.Bits where
 import qualified Data.Bits as B
 import           Data.Int
@@ -12,16 +20,29 @@ infixl 5 .|.
 infixl 6 `xor`
 infixl 8 `shiftL`, `shiftR`, `unsafeShiftL`, `unsafeShiftR`
 
+-- | Bitwise logic operations.
+--
+-- Instances are provided for standard integral types (via "Data.Bits"),
+-- 'Data.Functor.Identity.Identity', and SIMD vector types.
 class Boolean a where
+  -- | Bitwise AND.
   (.&.) :: a -> a -> a
+  -- | Bitwise OR.
   (.|.) :: a -> a -> a
+  -- | Bitwise XOR.
   xor :: a -> a -> a
+  -- | Bitwise complement (flip all bits).
   complement :: a -> a
 
+-- | Bitwise shift operations.
 class Boolean a => BitShift a where
+  -- | Shift left by the given number of bits.
   shiftL :: a -> Int -> a
+  -- | Shift left without bounds checking.
   unsafeShiftL :: a -> Int -> a
+  -- | Shift right by the given number of bits.
   shiftR :: a -> Int -> a
+  -- | Shift right without bounds checking.
   unsafeShiftR :: a -> Int -> a
   -- shift :: a -> Int -> a
   -- zeroBits :: a

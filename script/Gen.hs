@@ -938,6 +938,7 @@ genFile moduleName primModules !n !maxBits
     ,"{-# LANGUAGE ExtendedLiterals #-}"
     ,"#endif"
     ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
+    ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Bits"
     ,"import           Data.Coerce (coerce)"
@@ -973,6 +974,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"{-# LANGUAGE ExtendedLiterals #-}"
     ,"#endif"
     ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
+    ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Bits"
     ,"import           Data.Coerce (coerce)"
@@ -1141,6 +1143,7 @@ genHalfFile moduleName imports counts repCounts !maxBits
     ] ++ ["{-# LANGUAGE CPP #-}" | maxBits == 128] ++
     ["{-# LANGUAGE TypeFamilies #-}"
     ,"{-# OPTIONS_GHC -Wno-orphans #-}"
+    ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Bits"
     ,"import           Data.Complex"
@@ -1161,6 +1164,7 @@ main = do
     ["-- This file was created by script/Gen.hs. Do not edit by hand!"
     ,"{-# LANGUAGE PatternSynonyms #-}"
     ,"{-# LANGUAGE ViewPatterns #-}"
+    ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module Data.Simdy.Internal.Class.Generated where"]
     ++ concatMap (\n -> ["class PackX" ++ show n ++ " f a where"
                         ,"  mkX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"

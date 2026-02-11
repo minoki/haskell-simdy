@@ -8,7 +8,7 @@
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ViewPatterns #-}
-{-# OPTIONS_HADDOCK hide #-}
+{-# OPTIONS_HADDOCK not-home #-}
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Data.Coerce (coerce)
 import           Data.Complex (Complex (..))
@@ -31,6 +31,7 @@ import           Prelude hiding (max, min, not, (&&), (/=), (<), (<=), (==),
                           (>), (>=), (||))
 import qualified Prelude
 
+-- | Provides a human-readable description of the SIMD backend (e.g. @\"X8;maxBits=128\"@).
 type ImplementationDescription :: (Type -> Type) -> Constraint
 class ImplementationDescription f where
   implementationDescription :: Proxy f -> String
@@ -38,13 +39,23 @@ class ImplementationDescription f where
 instance ImplementationDescription Identity where
   implementationDescription _ = "Identity (scalar)"
 
+-- | Maps a SIMD vector type to its half-width counterpart.
+--
+-- For example, @HalfVector X8 = X4@ and @HalfVector X4 = X2@.
+-- Used by 'SplitShortVector' and 'horizontalFold'.
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f
 
+-- | Split a SIMD vector into two halves or join two halves into one.
 class SplitShortVector f a where
+  -- | Split a vector into its low and high halves.
   splitShortVector :: f a -> (HalfVector f a, HalfVector f a)
+  -- | Join two half-width vectors into a full-width vector.
   joinShortVector :: HalfVector f a -> HalfVector f a -> f a
 
+-- | Create a SIMD vector with all lanes set to the same value.
+--
+-- @broadcast x@ fills every element of the vector with @x@.
 class Broadcast f a where
   broadcast :: a -> f a
 
@@ -52,6 +63,7 @@ instance Broadcast Identity a where
   broadcast = Identity
   {-# INLINE broadcast #-}
 
+-- | Apply a scalar function element-wise to a SIMD vector.
 class LiftSIMD f a b where
   liftSIMD :: (a -> b) -> f a -> f b
 
@@ -59,6 +71,7 @@ instance LiftSIMD Identity a b where
   liftSIMD = coerce
   {-# INLINE liftSIMD #-}
 
+-- | Apply a binary scalar function element-wise to two SIMD vectors.
 class LiftSIMD2 f a b c where
   liftSIMD2 :: (a -> b -> c) -> f a -> f b -> f c
 
@@ -66,6 +79,10 @@ instance LiftSIMD2 Identity a b c where
   liftSIMD2 = coerce
   {-# INLINE liftSIMD2 #-}
 
+-- | Lift newtype constructors and tuple constructors over SIMD vectors.
+--
+-- This class enables working with tuples, 'Data.Monoid.Sum', 'Data.Monoid.Product',
+-- 'Data.Semigroup.Min', 'Data.Semigroup.Max', and 'Data.Complex.Complex' inside SIMD vectors.
 class LiftConstructor f where
   mkTuple2 :: f a0 -> f a1 -> f (a0, a1)
   mkTuple3 :: f a0 -> f a1 -> f a2 -> f (a0, a1, a2)
@@ -186,9 +203,14 @@ pattern MkComplex :: LiftConstructor f => f a -> f a -> f (Complex a)
 pattern MkComplex x0 x1 <- (deconstructComplex -> (x0, x1)) where
   MkComplex = mkComplex
 
+-- | SIMD vector types with a statically known number of lanes.
+--
+-- @'simdLength' \@f@ returns the number of elements in a vector of type @f a@.
 type KnownSIMDLength :: (Type -> Type) -> Constraint
 class KnownNat (SIMDLength f) => KnownSIMDLength f where
+  -- | The number of lanes as a type-level natural.
   type SIMDLength f :: Natural
+  -- | The number of lanes as a term-level 'Int'. Use with @TypeApplications@: @simdLength \@X4 == 4@.
   simdLength :: Int
 
 instance KnownSIMDLength Identity where
@@ -196,6 +218,7 @@ instance KnownSIMDLength Identity where
   simdLength = 1
   {-# INLINE simdLength #-}
 
+-- | Low-level interface for reading\/writing SIMD vectors from\/to byte arrays.
 class (KnownSIMDLength f, Prim a) => MultiPrim f a where
   indexByteArraySIMD# :: ByteArray# -> Int# -> f a
   readByteArraySIMD# :: MutableByteArray# s -> Int# -> State# s -> (# State# s, f a #)
@@ -209,6 +232,7 @@ instance Prim a => MultiPrim Identity a where
   {-# INLINE readByteArraySIMD# #-}
   {-# INLINE writeByteArraySIMD# #-}
 
+-- | Low-level interface for reading\/writing SIMD vectors via 'Ptr'.
 class (KnownSIMDLength f, Storable a) => MultiStorable f a where
   peekElemOffSIMD :: Ptr a -> Int -> IO (f a)
   pokeElemOffSIMD :: Ptr a -> Int -> f a -> IO ()
@@ -219,9 +243,15 @@ instance Storable a => MultiStorable Identity a where
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
 
+-- | Newtype wrapper that bridges the F-suffixed type classes (e.g. 'NumF', 'EquatableF')
+-- to standard Haskell type classes (e.g. 'Num', 'Eq') via @DerivingVia@.
 type WrappedMulti :: (Type -> Type) -> Type -> Type
 newtype WrappedMulti f a = MkWrappedMulti (f a)
 
+-- | Maps a type to its corresponding mask type for comparison results.
+--
+-- For scalar types, @Mask a = Bool@.
+-- For SIMD vector types, @Mask (f a) = f Bool@ (a vector of booleans).
 type Mask :: Type -> Type
 type family Mask a
 type instance Mask (Identity a) = Identity Bool
@@ -230,6 +260,10 @@ type instance Mask (WrappedMulti f a) = f Bool
 class Mask (f a) ~ f Bool => MaskIsLiftedBool f a
 instance MaskIsLiftedBool Identity a
 
+-- | Lane-wise conditional selection using a mask.
+--
+-- @select mask trueVal falseVal@ picks from @trueVal@ where the mask is true
+-- and from @falseVal@ where the mask is false.
 class Selectable a where
   select :: Mask a -> a -> a -> a
 
@@ -251,6 +285,10 @@ instance SelectableF f a => Selectable (WrappedMulti f a) where
 
 infix 4 ==, /=, <, <=, >, >=
 
+-- | Lane-wise equality comparison, returning a 'Mask'.
+--
+-- For scalar types this behaves like 'Prelude.Eq'.
+-- For SIMD vectors, comparison is performed element-wise and returns a vector of booleans.
 class Equatable a where
   (==) :: a -> a -> Mask a
   (/=) :: a -> a -> Mask a
@@ -310,6 +348,10 @@ instance EquatableF f a => Equatable (WrappedMulti f a) where
   (==) = coerce (eqF @f @a)
   {-# INLINE (==) #-}
 
+-- | Lane-wise ordering comparison, returning a 'Mask'.
+--
+-- For scalar types this behaves like 'Prelude.Ord'.
+-- For SIMD vectors, comparison is performed element-wise.
 class Equatable a => Ordered a where
   (<) :: a -> a -> Mask a
   (<=) :: a -> a -> Mask a
@@ -375,10 +417,17 @@ instance OrderedF f a => Ordered (WrappedMulti f a) where
   {-# INLINE (>) #-}
   {-# INLINE (>=) #-}
 
+-- | Lane-wise minimum and maximum.
+--
+-- For floating-point types, 'min' and 'max' follow IEEE 754-2019 semantics
+-- (propagating NaN), while 'minimumNumber' and 'maximumNumber' prefer numeric
+-- values over NaN.
 class MinMax a where
   min :: a -> a -> a
   max :: a -> a -> a
+  -- | Like 'min', but returns the numeric value if one argument is NaN.
   minimumNumber :: a -> a -> a
+  -- | Like 'max', but returns the numeric value if one argument is NaN.
   maximumNumber :: a -> a -> a
 
 instance Ord a => MinMax (Scalar a) where
@@ -458,6 +507,9 @@ instance MinMaxF f a => MinMax (WrappedMulti f a) where
   {-# INLINE minimumNumber #-}
   {-# INLINE maximumNumber #-}
 
+-- | Lane-wise numeric operations on SIMD vectors.
+-- This is the internal (F-suffixed) version; standard 'Num' instances are
+-- derived via 'WrappedMulti'.
 class NumF f a where
   plusF :: f a -> f a -> f a
   -- default plusF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
@@ -517,6 +569,7 @@ instance NumF f a => Num (WrappedMulti f a) where
   {-# INLINE signum #-}
   {-# INLINE fromInteger #-}
 
+-- | Lane-wise fractional operations. Derives 'Fractional' via 'WrappedMulti'.
 class NumF f a => FractionalF f a where
   divideF :: f a -> f a -> f a
   -- default divideF :: (Num a, LiftSIMD2 f a a a) => f a -> f a -> f a
@@ -538,6 +591,7 @@ instance FractionalF f a => Fractional (WrappedMulti f a) where
   {-# INLINE recip #-}
   {-# INLINE fromRational #-}
 
+-- | Lane-wise floating-point operations. Derives 'Floating' via 'WrappedMulti'.
 class FractionalF f a => FloatingF f a where
   piF :: f a
   default piF :: (Floating a, Broadcast f a) => f a
@@ -650,12 +704,14 @@ instance FloatingF f a => Floating (WrappedMulti f a) where
   {-# INLINE acosh #-}
   {-# INLINE atanh #-}
 
+-- | Lane-wise bitwise logic on SIMD vectors. Derives 'Boolean' via 'WrappedMulti'.
 class BooleanF f a where
   andF :: f a -> f a -> f a
   orF :: f a -> f a -> f a
   xorF :: f a -> f a -> f a
   complementF :: f a -> f a
 
+-- | Lane-wise bitwise shifts on SIMD vectors. Derives 'BitShift' via 'WrappedMulti'.
 class BooleanF f a => BitShiftF f a where
   shiftLF :: f a -> Int -> f a
   unsafeShiftLF :: f a -> Int -> f a
@@ -686,7 +742,9 @@ instance BitShiftF f a => BitShift (WrappedMulti f a) where
   {-# INLINE shiftR #-}
   {-# INLINE unsafeShiftR #-}
 
+-- | Lane-wise fused multiply-add on SIMD vectors.
 class NumF f a => FusedMultiplyAddF f a where
+  -- | @fusedMultiplyAddF x y z = x * y + z@ (single rounding per lane).
   fusedMultiplyAddF :: f a -> f a -> f a -> f a
 
 instance FusedMultiplyAddF f a => FusedMultiplyAdd (WrappedMulti f a) where
@@ -700,6 +758,8 @@ instance Num a => EnumFromZero_ Identity a where
   enumFromZero = Identity 0
   {-# INLINE enumFromZero #-}
 
+-- | Constraint alias for types that support generating @[0, 1, 2, ...]@ SIMD vectors.
+-- Used by 'indexed' and related functions.
 type EnumFromZero f a = (EnumFromZero_ f a, Num a, NumF f a, Broadcast f a)
 
 -- TODO: Add Data.Semigroup and Data.Monoid counterparts

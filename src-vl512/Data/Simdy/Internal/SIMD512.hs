@@ -87,7 +87,10 @@ import           Data.Word
 import           Foreign.Storable
 import           Prelude hiding (not, (==), (/=), (<), (<=), (>), (>=))
 
--- | An instance of 'SIMDElement' supports basic SIMD operations (pack\/unpack\/broadcast)
+-- | Constraint on element types that can be stored in SIMD vectors
+-- (e.g. 'Int32', 'Float', 'Double').
+--
+-- An instance of 'SIMDElement' supports basic SIMD operations (pack\/unpack\/broadcast)
 class ( PackX2 X2 a
       , PackX4 X4 a
       , PackX8 X8 a
@@ -136,7 +139,7 @@ instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3) => SIM
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4) => SIMDElement (a0, a1, a2, a3, a4)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2, SIMDElement a3, SIMDElement a4, SIMDElement a5) => SIMDElement (a0, a1, a2, a3, a4, a5)
 
--- | Vectors whose element type is an instance of 'SIMDEq' can be compared using 'Equatable' class
+-- | Constraint for element types that support lane-wise equality comparison.
 --
 -- @('SIMD' f, 'SIMDEq' a)@ implies @'Equatable' (f a)@.
 class ( Eq a
@@ -159,7 +162,7 @@ instance SIMDEq Word64
 instance SIMDEq Float
 instance SIMDEq Double
 
--- | Vectors whose element type is an instance of 'SIMDOrd' can be compared using 'Ordered' class
+-- | Constraint for element types that support lane-wise ordering comparison.
 --
 -- @('SIMD' f, 'SIMDOrd' a)@ implies @'Ordered' (f a)@.
 class ( Ord a
@@ -182,7 +185,7 @@ instance SIMDOrd Word64
 instance SIMDOrd Float
 instance SIMDOrd Double
 
--- | An instance of 'SIMDNum' has its 'Num' instance lifted to SIMD vector types
+-- | Constraint for element types that support lane-wise arithmetic ('Num').
 --
 -- @('SIMD' f, 'SIMDNum' a)@ implies @'Num' (f a)@.
 class ( Num a
@@ -206,7 +209,7 @@ instance SIMDNum Float
 instance SIMDNum Double
 -- instance (RealFloat a, SIMDNum a) => SIMDNum (Complex a)
 
--- | An instance of 'SIMDFractional' has its 'Fractional' instance lifted to SIMD vector types
+-- | Constraint for element types that support lane-wise 'Fractional' operations.
 --
 -- @('SIMD' f, 'SIMDFractional' a)@ implies @'Fractional' (f a)@.
 class ( Fractional a
@@ -222,7 +225,7 @@ instance SIMDFractional Float
 instance SIMDFractional Double
 -- instance (RealFloat a, SIMDFractional a) => SIMDFractional (Complex a)
 
--- | An instance of 'SIMDFloating' has its 'Floating' instance lifted to SIMD vector types
+-- | Constraint for element types that support lane-wise 'Floating' operations.
 --
 -- @('SIMD' f, 'SIMDFloating' a)@ implies @'Floating' (f a)@.
 class ( Floating a
@@ -238,7 +241,7 @@ instance SIMDFloating Float
 instance SIMDFloating Double
 -- instance (RealFloat a, SIMDFloating a) => SIMDFloating (Complex a)
 
--- | An instance of 'SIMDBoolean' has its 'Boolean' instance lifted to SIMD vector types
+-- | Constraint for element types that support lane-wise bitwise logic ('Boolean').
 --
 -- @('SIMD' f, 'SIMDBoolean' a)@ implies @'Boolean' (f a)@.
 class ( Bits a
@@ -261,7 +264,7 @@ instance SIMDBoolean Word16
 instance SIMDBoolean Word32
 instance SIMDBoolean Word64
 
--- | An instance of 'SIMDBits' has its 'BitShift' instance lifted to SIMD vector types
+-- | Constraint for element types that support lane-wise bit shifts ('BitShift').
 --
 -- @('SIMD' f, 'SIMDBits' a)@ implies @'BitShift' (f a)@.
 class ( Bits a
@@ -283,7 +286,7 @@ instance SIMDBits Word16
 instance SIMDBits Word32
 instance SIMDBits Word64
 
--- | Vectors whose element type is an instance of 'SIMDMinMax' can be compared using 'MinMax' class
+-- | Constraint for element types that support lane-wise 'MinMax'.
 --
 -- @('SIMD' f, 'SIMDMinMax' a)@ implies @'MinMax' (f a)@.
 class ( MinMax a
@@ -306,6 +309,7 @@ instance SIMDMinMax Word64
 instance SIMDMinMax Float
 instance SIMDMinMax Double
 
+-- | Constraint for element types that support lane-wise FMA in SIMD vectors.
 class ( FusedMultiplyAdd a
       , SIMDNum a
       , FusedMultiplyAddF X2 a
@@ -338,6 +342,7 @@ instance SIMDEnumFromZero Word64
 instance SIMDEnumFromZero Float
 instance SIMDEnumFromZero Double
 
+-- | Constraint for element types that support reading\/writing via 'Data.Primitive.Prim'.
 class ( Prim a
       , SIMDElement a
       , MultiPrim X2 a
@@ -358,6 +363,7 @@ instance SIMDPrim Word64
 instance SIMDPrim Float
 instance SIMDPrim Double
 
+-- | Constraint for element types that support reading\/writing via 'Foreign.Storable.Storable'.
 class ( Storable a
       , SIMDElement a
       , MultiStorable X2 a
@@ -378,7 +384,8 @@ instance SIMDStorable Word64
 instance SIMDStorable Float
 instance SIMDStorable Double
 
--- | SIMD vector types
+-- | SIMD vector types. @SIMD f@ implies that @f@
+-- supports broadcasting, element-wise lifting, comparison, arithmetic, etc.
 class ( KnownSIMDLength f
       , LiftConstructor f
       , forall a. SIMDElement a => Broadcast f a
@@ -399,6 +406,9 @@ class ( KnownSIMDLength f
       , forall a. SIMDPrim a => MultiPrim f a
       , forall a. SIMDStorable a => MultiStorable f a
       ) => SIMD f where
+  -- | Reduce all lanes of a SIMD vector using a binary combining function.
+  -- The function is applied via recursive halving (splitting the vector in half
+  -- and combining until a scalar remains).
   horizontalFold :: SIMDElement a => (forall g. SIMD g => g a -> g a -> g a) -> f a -> a
 instance SIMD Identity where
   horizontalFold _ = runIdentity
@@ -422,27 +432,31 @@ instance SIMD X64 where
   horizontalFold op !v = case splitShortVector v of (low, high) -> horizontalFold op (op low high)
   {-# INLINE horizontalFold #-}
 
--- | Broadcasts a value to the entire vector.
+-- | Create a SIMD vector with all lanes set to the same value.
 --
--- Conceptually, @'broadcast' x = mkXN x x x ... x@.
+-- Conceptually, @'broadcast' x = mkX/N/ x x x ... x@.
 broadcast :: (SIMD f, SIMDElement a) => a -> f a
 broadcast = I.broadcast
 {-# INLINE broadcast #-}
 
--- | Lifts a unary function to the vector.
+-- | Apply a scalar function element-wise to a SIMD vector.
 --
 -- In general, the resulting function does not use SIMD instructions.
 liftSIMD :: (SIMD f, SIMDElement a, SIMDElement b) => (a -> b) -> f a -> f b
 liftSIMD = I.liftSIMD
 {-# INLINE [1] liftSIMD #-}
 
--- | Lifts a binary function to the vector.
+-- | Apply a binary scalar function element-wise to two SIMD vectors.
 --
 -- In general, the resulting function does not use SIMD instructions.
 liftSIMD2 :: (SIMD f, SIMDElement a, SIMDElement b, SIMDElement c) => (a -> b -> c) -> f a -> f b -> f c
 liftSIMD2 = I.liftSIMD2
 {-# INLINE [1] liftSIMD2 #-}
 
+-- | Lane-wise conditional selection
+--
+-- @selectSIMD mask trueVec falseVec@ picks lanes from @trueVec@ where
+-- the mask is true and from @falseVec@ where it is false.
 selectSIMD :: (SIMD f, SIMDElement a)
            => f Bool -- ^ condition
            -> f a -- ^ then-expression

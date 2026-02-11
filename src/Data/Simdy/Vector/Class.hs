@@ -2,6 +2,12 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
+-- |
+-- Type classes connecting SIMD operations with the @vector@ library.
+--
+-- 'SIMDMVector' and 'SIMDVector' extend 'Data.Vector.Generic.Mutable.MVector'
+-- and 'Data.Vector.Generic.Vector' with multi-element (SIMD-width) read\/write operations.
+-- 'MultiUnbox' bundles these for 'Data.Vector.Unboxed.Unbox' vectors.
 module Data.Simdy.Vector.Class where
 import           Control.Applicative (liftA3)
 import           Control.Monad (liftM4, liftM5)
@@ -27,13 +33,19 @@ import           GHC.Int (Int (I#))
 import           GHC.ST (ST (..))
 import           System.IO.Unsafe (unsafeDupablePerformIO)
 
+-- | Mutable vectors that support SIMD-width read and write.
 class (VGM.MVector v a, KnownSIMDLength f) => SIMDMVector v f a where
+  -- | Read a SIMD vector starting at the given index. The index is in elements, not vectors.
   unsafeReadMulti :: v s a -> Int -> ST s (f a)
+  -- | Write a SIMD vector starting at the given index.
   unsafeWriteMulti :: v s a -> Int -> f a -> ST s ()
 
+-- | Immutable vectors that support SIMD-width indexing.
 class (VG.Vector v a, SIMDMVector (VG.Mutable v) f a) => SIMDVector v f a where
+  -- | Index a SIMD vector starting at the given element offset.
   unsafeIndexMulti :: v a -> Int -> f a
 
+-- | Convenience class bundling 'SIMDVector' and 'SIMDMVector' for 'Data.Vector.Unboxed.Unbox' types.
 class (SIMDVector VU.Vector f a, SIMDMVector VUM.MVector f a, VU.Unbox a) => MultiUnbox f a
 
 --
