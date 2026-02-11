@@ -129,7 +129,8 @@ content moduleName width types reexports =
         ,["sqrt" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ] ++ ["module " ++ mod | mod <- reexports]
   in
-    [ "{-# LANGUAGE CPP #-}"
+    [ "-- This file was created by script/GenPrim.hs. Do not edit by hand!"
+    , "{-# LANGUAGE CPP #-}"
     , "{-# LANGUAGE MagicHash #-}"
     , "{-# LANGUAGE UnboxedTuples #-}"
     , "module " ++ moduleName

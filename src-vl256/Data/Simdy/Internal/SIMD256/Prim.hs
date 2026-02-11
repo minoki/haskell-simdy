@@ -1,3 +1,4 @@
+-- This file was created by script/GenPrim.hs. Do not edit by hand!
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
