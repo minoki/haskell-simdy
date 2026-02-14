@@ -6,11 +6,7 @@
 -- * 'min' \/ 'max' propagate NaN.
 -- * 'minimumNumber' \/ 'maximumNumber' prefer numeric values over NaN.
 module Data.Simdy.MinMax
-  ( -- | Lane-wise minimum and maximum. For floating-point types, 'min'\/'max'
-    -- follow IEEE 754-2019 semantics (propagating NaN), while
-    -- 'minimumNumber'\/'maximumNumber' prefer numeric values over NaN.
-    MinMax (..)
-    -- | Constraint for element types that support lane-wise min\/max in SIMD vectors.
+  ( MinMax (..)
   , SIMDMinMax
   ) where
 import           Data.Simdy.Internal.Class
