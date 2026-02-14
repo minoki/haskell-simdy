@@ -946,8 +946,8 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
+    ,"import qualified Data.Simdy.Fusible as F"
     ,"import           Data.Simdy.Internal.Class"
-    ,"import qualified Data.Simdy.Internal.Fusible as F"
     ,"import           Data.Simdy.Internal.Shuffle"
     ,"import           Data.Type.Ord (type (<))"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++

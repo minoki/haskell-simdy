@@ -7,7 +7,7 @@
 -- GHC rewrite rules to fuse @a * b + c@ into 'Data.Simdy.Internal.FMA.fusedMultiplyAdd'.
 -- The operators are only fused when FMA hardware support is enabled at compile time;
 -- otherwise they behave identically to their 'Prelude' counterparts.
-module Data.Simdy.Internal.Fusible where
+module Data.Simdy.Fusible where
 import           Prelude hiding ((+), (-), (*))
 import qualified Prelude
 #if defined(USE_FMA)

@@ -112,8 +112,8 @@ library common
     import:           warnings
                     , arch-options
     exposed-modules:  Data.Simdy.Class.Bits
+                      Data.Simdy.Fusible
                       Data.Simdy.Internal.Class
-                      Data.Simdy.Internal.Fusible
                       Data.Simdy.Internal.Shuffle
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.FMA
@@ -293,9 +293,9 @@ library
                       Data.Simdy.Vector.Generic
                       Data.Simdy.Vector.Unboxed
     reexported-modules: Data.Simdy.Class.Bits
+                      , Data.Simdy.Fusible
                       , Data.Simdy.Internal.Class
                       , Data.Simdy.Internal.NoSIMD
-                      , Data.Simdy.Internal.Fusible as Data.Simdy.Fusible
 
     if !flag(no-simd) && (flag(llvm) || (impl(ghc >= 9.12) && arch(x86_64)))
         reexported-modules: Data.Simdy.Internal.SIMD128
