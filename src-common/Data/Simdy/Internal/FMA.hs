@@ -21,13 +21,16 @@ class Num a => FusedMultiplyAdd a where
   -- | @fusedMultiplyAdd x y z@ computes @x * y + z@ with a single rounding.
   fusedMultiplyAdd :: a -> a -> a -> a
 
--- | Constraint that is satisfiable only when FMA hardware support is enabled via the package flag.
+-- | Constraint that is satisfiable only when FMA support was enabled at compile time
+-- via Cabal package flags (@haswell@, @avx512@) or target architecture (@aarch64@).
+-- This is __not__ a runtime CPUID check.
 class HasFMA
--- | A witness that FMA hardware support is available. Pattern match on 'MkFMAWitness'
+-- | A witness that FMA support is available. Pattern match on 'MkFMAWitness'
 -- to bring the 'HasFMA' constraint into scope.
 data FMAWitness = HasFMA => MkFMAWitness
--- | Returns @'Just' 'MkFMAWitness'@ if FMA is available, 'Nothing' otherwise.
--- Use this to write code that conditionally uses FMA at runtime.
+-- | Returns @'Just' 'MkFMAWitness'@ if FMA support was enabled at compile time,
+-- 'Nothing' otherwise.  This is determined by Cabal package flags, not by runtime
+-- CPU feature detection.
 isFMAAvailable :: Maybe FMAWitness
 
 #if defined(USE_FMA)
