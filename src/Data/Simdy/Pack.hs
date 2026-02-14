@@ -4,7 +4,7 @@
 --
 -- Each vector width has:
 --
--- * A class (e.g. 'PackX4') with 'mkX4' (pack from a tuple) and 'unpackX4' (unpack to a tuple).
+-- * A class (e.g. 'PackX4') with 'mkX4' (pack from values) and 'unpackX4' (unpack to a tuple).
 -- * A pattern synonym (e.g. 'MkX4') for bidirectional matching.
 -- * A function (e.g. 'packX4') taking a tuple.
 module Data.Simdy.Pack
