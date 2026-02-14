@@ -40,6 +40,23 @@ module Data.Simdy.Shuffle
     -- * Unary shuffle (proxy-based)
     -- | Rearrange lanes of a single vector using a proxy to specify indices.
     -- Works on all supported GHC versions.
+    --
+    -- The index function receives a tuple of proxies representing lane positions
+    -- and returns a tuple selecting which lane to place at each output position.
+    --
+    -- @
+    -- -- Reverse the 4 lanes of an X4 vector:
+    -- --   [a, b, c, d] -> [d, c, b, a]
+    -- unaryShuffleWithX4 (\\(x0, x1, x2, x3) -> (x3, x2, x1, x0)) vec
+    --
+    -- -- Broadcast lane 0 to all positions:
+    -- --   [a, b, c, d] -> [a, a, a, a]
+    -- unaryShuffleWithX4 (\\(x0, _x1, _x2, _x3) -> (x0, x0, x0, x0)) vec
+    --
+    -- -- Swap adjacent pairs:
+    -- --   [a, b, c, d] -> [b, a, d, c]
+    -- unaryShuffleWithX4 (\\(x0, x1, x2, x3) -> (x1, x0, x3, x2)) vec
+    -- @
     unaryShuffleWithX2
   , unaryShuffleWithX4
   , unaryShuffleWithX8
@@ -48,6 +65,33 @@ module Data.Simdy.Shuffle
   , unaryShuffleWithX64
     -- * Binary shuffle (proxy-based)
     -- | Select lanes from two concatenated vectors using a proxy to specify indices.
+    -- The index function receives two tuples of proxies: the first represents lanes
+    -- of the first vector (@0..n-1@), and the second represents lanes of the second
+    -- vector (@n..2n-1@). It returns a tuple selecting which lanes to place at each
+    -- output position.
+    --
+    -- @
+    -- -- Interleave lanes from two X4 vectors:
+    -- --   [a, b, c, d] [e, f, g, h] -> [a, e, b, f]
+    -- binaryShuffleWithX4
+    --   (\\(x0, x1, _x2, _x3) (x4, x5, _x6, _x7) -> (x0, x4, x1, x5)) u v
+    -- @
+    --
+    -- Note: for X4, the first tuple @(Proxy 0, Proxy 1, Proxy 2, Proxy 3)@
+    -- represents lanes of the first vector and the second tuple
+    -- @(Proxy 4, Proxy 5, Proxy 6, Proxy 7)@ represents lanes of the second.
+    --
+    -- @
+    -- -- Interleave even-indexed lanes:
+    -- --   [a, b, c, d] [e, f, g, h] -> [a, e, c, g]
+    -- binaryShuffleWithX4
+    --   (\\(x0, _x1, x2, _x3) (x4, _x5, x6, _x7) -> (x0, x4, x2, x6)) u v
+    --
+    -- -- Concatenate the second halves:
+    -- --   [a, b, c, d] [e, f, g, h] -> [c, d, g, h]
+    -- binaryShuffleWithX4
+    --   (\\(_x0, _x1, x2, x3) (_x4, _x5, x6, x7) -> (x2, x3, x6, x7)) u v
+    -- @
   , binaryShuffleWithX2
   , binaryShuffleWithX4
   , binaryShuffleWithX8
