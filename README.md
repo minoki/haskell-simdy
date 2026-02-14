@@ -164,10 +164,12 @@ This library uses 128-bit SIMD vectors by default (SSE2 on x86, ASIMD on AArch64
 * `no-simd` (default: false)
     * Disable the use of native vector types.
 * `haswell` (default: false)
-    * Enable 256-bit vectors via AVX2. Also enables FMA.
+    * Enable AVX2 and FMA.
+    * Enable 256-bit vectors with the LLVM backend.
     * Requires Intel Haswell / AMD Ryzen or newer.
 * `avx512` (default: false)
-    * Enable 512-bit vectors via AVX-512 (F+VL+BW+DQ are required).
+    * Enable AVX-512 (F+VL+BW+DQ are required).
+    * Enable 512-bit vectors with the LLVM backend.
 * `llvm` (default: true)
     * Use the LLVM backend.
 
