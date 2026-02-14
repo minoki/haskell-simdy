@@ -280,6 +280,7 @@ library
     import:           warnings
                     , arch-options
     exposed-modules:  Data.Simdy
+                      Data.Simdy.Backend
                       Data.Simdy.Bits
                       Data.Simdy.FMA
                       Data.Simdy.Horizontal
