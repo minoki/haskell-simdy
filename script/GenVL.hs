@@ -69,7 +69,7 @@ genMod name imports comment = unlines $
   ,"import           Data.Primitive"
   ,"import           Data.Proxy (Proxy)"
   ,"import           Data.Semigroup"
-  ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
+  ,"import           Data.Simdy.Internal.Bits (Boolean, BitShift)"
   ,"import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)"
   ,"import qualified Data.Simdy.Internal.Class as I"
   ,"import           Data.Simdy.Internal.Shuffle"

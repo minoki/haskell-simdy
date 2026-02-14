@@ -111,8 +111,8 @@ common arch-options
 library common
     import:           warnings
                     , arch-options
-    exposed-modules:  Data.Simdy.Class.Bits
-                      Data.Simdy.Fusible
+    exposed-modules:  Data.Simdy.Fusible
+                      Data.Simdy.Internal.Bits
                       Data.Simdy.Internal.Class
                       Data.Simdy.Internal.Shuffle
     other-modules:    Data.Simdy.Internal.Class.Generated
@@ -280,6 +280,7 @@ library
     import:           warnings
                     , arch-options
     exposed-modules:  Data.Simdy
+                      Data.Simdy.Bits
                       Data.Simdy.FMA
                       Data.Simdy.Horizontal
                       Data.Simdy.Mask
@@ -292,8 +293,7 @@ library
                       Data.Simdy.Vector.Class
                       Data.Simdy.Vector.Generic
                       Data.Simdy.Vector.Unboxed
-    reexported-modules: Data.Simdy.Class.Bits
-                      , Data.Simdy.Fusible
+    reexported-modules: Data.Simdy.Fusible
                       , Data.Simdy.Internal.Class
                       , Data.Simdy.Internal.NoSIMD
 

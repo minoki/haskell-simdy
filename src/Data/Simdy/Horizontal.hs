@@ -19,7 +19,7 @@ module Data.Simdy.Horizontal
   , horizontalOr
   , horizontalXor
   ) where
-import           Data.Simdy.Class.Bits
+import           Data.Simdy.Internal.Bits
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Default
 import           Prelude hiding (min, max)

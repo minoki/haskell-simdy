@@ -1,19 +1,11 @@
 {-# LANGUAGE DerivingVia #-}
--- |
--- Bitwise operation classes for SIMD vectors and scalar types.
---
--- 'Boolean' provides bitwise AND, OR, XOR, and complement.
--- 'BitShift' extends 'Boolean' with shift operations.
---
--- These classes mirror "Data.Bits" but are designed to work uniformly
--- across scalar types and SIMD vector types.
-module Data.Simdy.Class.Bits where
+module Data.Simdy.Internal.Bits where
 import qualified Data.Bits as B
+import           Data.Coerce
+import           Data.Functor.Identity
 import           Data.Int
 import           Data.Word
-import Data.Functor.Identity
-import Numeric.Natural
-import Data.Coerce
+import           Numeric.Natural
 
 infixl 7 .&.
 infixl 5 .|.

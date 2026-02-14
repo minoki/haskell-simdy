@@ -19,7 +19,7 @@ import           Data.Monoid (Product (..), Sum (..))
 import           Data.Primitive (Prim (..))
 import           Data.Proxy (Proxy)
 import           Data.Semigroup (Max (..), Min (..))
-import           Data.Simdy.Class.Bits
+import           Data.Simdy.Internal.Bits
 import           Data.Simdy.Internal.Class.Generated as M
 import           Data.Simdy.Internal.FMA as M
 import           Data.Word (Word16, Word32, Word64, Word8)

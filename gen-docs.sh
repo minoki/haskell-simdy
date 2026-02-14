@@ -6,6 +6,7 @@ cabal haddock \
   --haddock-option=--use-index=../doc-index.html \
   --haddock-option=--use-contents=../index.html \
   --haddock-option=--base-url=.. \
+  --haddock-option=--hide=Data.Simdy.Internal.Bits \
   --haddock-option=--hide=Data.Simdy.Internal.FMA \
   --haddock-option=--hide=Data.Simdy.Internal.PrimExtra \
   --haddock-option=--hide=Data.Simdy.Internal.Shuffle \

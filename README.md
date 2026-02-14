@@ -119,7 +119,7 @@ instance (SIMD f, SIMDFloating a) => Floating (f a) -- pseudocode
 For bitwise operations, the library defines a subset of the `Bits` class as `Boolean` and `BitShift`:
 
 ```haskell
-module Data.Simdy.Class.Bits where
+module Data.Simdy.Bits where
 
 class Boolean a where
   (.&.) :: a -> a -> a

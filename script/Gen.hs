@@ -945,8 +945,8 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Complex"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
-    ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
     ,"import qualified Data.Simdy.Fusible as F"
+    ,"import           Data.Simdy.Internal.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
     ,"import           Data.Simdy.Internal.Shuffle"
     ,"import           Data.Type.Ord (type (<))"
@@ -982,7 +982,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"import           Data.Monoid"
     ,"import           Data.Primitive (Prim)"
     ,"import           Data.Semigroup"
-    ,"import           Data.Simdy.Class.Bits (Boolean, BitShift)"
+    ,"import           Data.Simdy.Internal.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
     ] ++ ["import           " ++ m | m <- imports] ++
     ["import           Foreign.Storable (Storable)"
