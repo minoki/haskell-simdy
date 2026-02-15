@@ -99,10 +99,7 @@ module Data.Simdy.Shuffle
   , binaryShuffleWithX32
   , binaryShuffleWithX64
     -- * Shuffle classes
-    -- | Rearrange lanes of a single vector according to compile-time indices.
   , UnaryShuffle (..)
-    -- | Select lanes from two concatenated vectors according to compile-time indices.
-    -- Indices @0..n-1@ select from the first vector, @n..2n-1@ from the second.
   , BinaryShuffle (..)
   ) where
 import           Data.Simdy.Internal.Default
