@@ -9,7 +9,7 @@ import           Control.Monad (forM, guard, replicateM)
 import           Data.Either (partitionEithers)
 import           Data.List (nub)
 import           Data.Maybe (fromMaybe)
-import           Data.Simdy.Internal.Shuffle (ShuffleMany)
+import           Data.Simdy.Internal.Shuffle (ShuffleMany, Pick)
 import qualified GHC.Builtin.Types as B
 import qualified GHC.Builtin.Types.Prim as B
 import           GHC.Core.Make (mkCoreApps, mkNaturalExpr)
@@ -73,6 +73,7 @@ data VectorTypeDefs = MkVectorTypeDefs
 
 data PluginDefs = MkPluginDefs
   { shuffleManyClass :: Class
+  , pickClass :: Class
   {-
   , promotedNothingDataCon :: TyCon
   , promotedJustDataCon :: TyCon
@@ -85,6 +86,7 @@ data PluginDefs = MkPluginDefs
 pluginInit :: TcPluginM Init PluginDefs
 pluginInit = do
   shuffleManyClass <- lookupTHName ''ShuffleMany >>= tcLookupClass
+  pickClass <- lookupTHName ''Pick >>= tcLookupClass
 #if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
   shuffleFloatX4Prim <- lookupTHName 'shuffleFloatX4# >>= tcLookupId
   shuffleDoubleX2Prim <- lookupTHName 'shuffleDoubleX2# >>= tcLookupId
@@ -405,6 +407,14 @@ pluginSolve (MkPluginDefs {..}) _givens wanteds = do
                 Nothing -> buildShuffleWithPack dynflags vectorTypeDefs (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
               pure [Right (EvExpr (evUnaryDictAppE cls typeArgs $ GHC.Lam vVar body), ct)]
             else pure [Left ct]
+      ClassPred cls typeArgs@[ty, typeIndex]
+        | cls == pickClass
+        , Just i <- isNumLitTy typeIndex
+        , 0 <= i -> do
+          vVar <- freshId "v" (mkVisFunTyMany B.naturalTy ty)
+          let platform = targetPlatform dynflags
+              body = GHC.App (GHC.Var vVar) $ mkNaturalExpr platform i
+          pure [Right (EvExpr (evUnaryDictAppE cls typeArgs $ GHC.Lam vVar body), ct)]
       _ -> pure []
   if null insoluble
     then pure $ TcPluginOk solved []

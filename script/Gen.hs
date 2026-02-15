@@ -186,6 +186,12 @@ gen !vecCount !maxBits
                            ,"  {-# INLINE broadcast #-}"
                            ,"instance SelectableF " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(if testBit cond " ++ show i ++ " then x" ++ show i ++ " else y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                           ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => UnaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                           ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == vecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..vecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(pick @_ @i" ++ show i ++ " sources)" | i <- [0..vecCount-1]]
+                           ,"  {-# INLINE unaryShuffle #-}"
+                           ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => BinaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                           ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount..2*vecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == 2 * vecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..2*vecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(pick @_ @i" ++ show i ++ " sources)" | i <- [0..vecCount-1]]
+                           ,"  {-# INLINE binaryShuffle #-}"
                            ]
                       else
                         let shortVecSize = vecBitCount `div` bitsPerElem
