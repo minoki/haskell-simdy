@@ -299,14 +299,6 @@ module Data.Simdy.Internal.SIMD128.Prim
   , xorFloatX4#
   , xorDoubleX2#
 #endif
-  , complementInt8X16#
-  , complementInt16X8#
-  , complementInt32X4#
-  , complementInt64X2#
-  , complementWord8X16#
-  , complementWord16X8#
-  , complementWord32X4#
-  , complementWord64X2#
   , absInt8X16#
   , absInt16X8#
   , absInt32X4#
@@ -315,6 +307,14 @@ module Data.Simdy.Internal.SIMD128.Prim
   , absDoubleX2#
   , sqrtFloatX4#
   , sqrtDoubleX2#
+  , complementInt8X16#
+  , complementInt16X8#
+  , complementInt32X4#
+  , complementInt64X2#
+  , complementWord8X16#
+  , complementWord16X8#
+  , complementWord32X4#
+  , complementWord64X2#
   ) where
 
 #if defined(BROADCAST_IS_BROKEN)
@@ -572,6 +572,8 @@ maxWord64X2# u v = case unpackWord64X2# u of (# u0, u1 #) -> case unpackWord64X2
 
 #endif
 
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)
+
 absInt8X16# :: Int8X16# -> Int8X16#
 absInt8X16# u = case unpackInt8X16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15 #) -> packInt8X16# (# case ltInt8# u0 (intToInt8# 0#) of { 0# -> u0; _ -> negateInt8# u0 }, case ltInt8# u1 (intToInt8# 0#) of { 0# -> u1; _ -> negateInt8# u1 }, case ltInt8# u2 (intToInt8# 0#) of { 0# -> u2; _ -> negateInt8# u2 }, case ltInt8# u3 (intToInt8# 0#) of { 0# -> u3; _ -> negateInt8# u3 }, case ltInt8# u4 (intToInt8# 0#) of { 0# -> u4; _ -> negateInt8# u4 }, case ltInt8# u5 (intToInt8# 0#) of { 0# -> u5; _ -> negateInt8# u5 }, case ltInt8# u6 (intToInt8# 0#) of { 0# -> u6; _ -> negateInt8# u6 }, case ltInt8# u7 (intToInt8# 0#) of { 0# -> u7; _ -> negateInt8# u7 }, case ltInt8# u8 (intToInt8# 0#) of { 0# -> u8; _ -> negateInt8# u8 }, case ltInt8# u9 (intToInt8# 0#) of { 0# -> u9; _ -> negateInt8# u9 }, case ltInt8# u10 (intToInt8# 0#) of { 0# -> u10; _ -> negateInt8# u10 }, case ltInt8# u11 (intToInt8# 0#) of { 0# -> u11; _ -> negateInt8# u11 }, case ltInt8# u12 (intToInt8# 0#) of { 0# -> u12; _ -> negateInt8# u12 }, case ltInt8# u13 (intToInt8# 0#) of { 0# -> u13; _ -> negateInt8# u13 }, case ltInt8# u14 (intToInt8# 0#) of { 0# -> u14; _ -> negateInt8# u14 }, case ltInt8# u15 (intToInt8# 0#) of { 0# -> u15; _ -> negateInt8# u15 } #)
 {-# INLINE [0] absInt8X16# #-}
@@ -603,3 +605,5 @@ sqrtFloatX4# u = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> packFloatX4# (
 sqrtDoubleX2# :: DoubleX2# -> DoubleX2#
 sqrtDoubleX2# u = case unpackDoubleX2# u of (# u0, u1 #) -> packDoubleX2# (# sqrtDouble# u0, sqrtDouble# u1 #)
 {-# INLINE [0] sqrtDoubleX2# #-}
+
+#endif

@@ -299,14 +299,6 @@ module Data.Simdy.Internal.SIMD256.Prim
   , xorFloatX8#
   , xorDoubleX4#
 #endif
-  , complementInt8X32#
-  , complementInt16X16#
-  , complementInt32X8#
-  , complementInt64X4#
-  , complementWord8X32#
-  , complementWord16X16#
-  , complementWord32X8#
-  , complementWord64X4#
   , absInt8X32#
   , absInt16X16#
   , absInt32X8#
@@ -315,6 +307,14 @@ module Data.Simdy.Internal.SIMD256.Prim
   , absDoubleX4#
   , sqrtFloatX8#
   , sqrtDoubleX4#
+  , complementInt8X32#
+  , complementInt16X16#
+  , complementInt32X8#
+  , complementInt64X4#
+  , complementWord8X32#
+  , complementWord16X16#
+  , complementWord32X8#
+  , complementWord64X4#
   , module Data.Simdy.Internal.SIMD128.Prim
   ) where
 import           Data.Simdy.Internal.SIMD128.Prim
@@ -574,6 +574,8 @@ maxWord64X4# u v = case unpackWord64X4# u of (# u0, u1, u2, u3 #) -> case unpack
 
 #endif
 
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)
+
 absInt8X32# :: Int8X32# -> Int8X32#
 absInt8X32# u = case unpackInt8X32# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15, u16, u17, u18, u19, u20, u21, u22, u23, u24, u25, u26, u27, u28, u29, u30, u31 #) -> packInt8X32# (# case ltInt8# u0 (intToInt8# 0#) of { 0# -> u0; _ -> negateInt8# u0 }, case ltInt8# u1 (intToInt8# 0#) of { 0# -> u1; _ -> negateInt8# u1 }, case ltInt8# u2 (intToInt8# 0#) of { 0# -> u2; _ -> negateInt8# u2 }, case ltInt8# u3 (intToInt8# 0#) of { 0# -> u3; _ -> negateInt8# u3 }, case ltInt8# u4 (intToInt8# 0#) of { 0# -> u4; _ -> negateInt8# u4 }, case ltInt8# u5 (intToInt8# 0#) of { 0# -> u5; _ -> negateInt8# u5 }, case ltInt8# u6 (intToInt8# 0#) of { 0# -> u6; _ -> negateInt8# u6 }, case ltInt8# u7 (intToInt8# 0#) of { 0# -> u7; _ -> negateInt8# u7 }, case ltInt8# u8 (intToInt8# 0#) of { 0# -> u8; _ -> negateInt8# u8 }, case ltInt8# u9 (intToInt8# 0#) of { 0# -> u9; _ -> negateInt8# u9 }, case ltInt8# u10 (intToInt8# 0#) of { 0# -> u10; _ -> negateInt8# u10 }, case ltInt8# u11 (intToInt8# 0#) of { 0# -> u11; _ -> negateInt8# u11 }, case ltInt8# u12 (intToInt8# 0#) of { 0# -> u12; _ -> negateInt8# u12 }, case ltInt8# u13 (intToInt8# 0#) of { 0# -> u13; _ -> negateInt8# u13 }, case ltInt8# u14 (intToInt8# 0#) of { 0# -> u14; _ -> negateInt8# u14 }, case ltInt8# u15 (intToInt8# 0#) of { 0# -> u15; _ -> negateInt8# u15 }, case ltInt8# u16 (intToInt8# 0#) of { 0# -> u16; _ -> negateInt8# u16 }, case ltInt8# u17 (intToInt8# 0#) of { 0# -> u17; _ -> negateInt8# u17 }, case ltInt8# u18 (intToInt8# 0#) of { 0# -> u18; _ -> negateInt8# u18 }, case ltInt8# u19 (intToInt8# 0#) of { 0# -> u19; _ -> negateInt8# u19 }, case ltInt8# u20 (intToInt8# 0#) of { 0# -> u20; _ -> negateInt8# u20 }, case ltInt8# u21 (intToInt8# 0#) of { 0# -> u21; _ -> negateInt8# u21 }, case ltInt8# u22 (intToInt8# 0#) of { 0# -> u22; _ -> negateInt8# u22 }, case ltInt8# u23 (intToInt8# 0#) of { 0# -> u23; _ -> negateInt8# u23 }, case ltInt8# u24 (intToInt8# 0#) of { 0# -> u24; _ -> negateInt8# u24 }, case ltInt8# u25 (intToInt8# 0#) of { 0# -> u25; _ -> negateInt8# u25 }, case ltInt8# u26 (intToInt8# 0#) of { 0# -> u26; _ -> negateInt8# u26 }, case ltInt8# u27 (intToInt8# 0#) of { 0# -> u27; _ -> negateInt8# u27 }, case ltInt8# u28 (intToInt8# 0#) of { 0# -> u28; _ -> negateInt8# u28 }, case ltInt8# u29 (intToInt8# 0#) of { 0# -> u29; _ -> negateInt8# u29 }, case ltInt8# u30 (intToInt8# 0#) of { 0# -> u30; _ -> negateInt8# u30 }, case ltInt8# u31 (intToInt8# 0#) of { 0# -> u31; _ -> negateInt8# u31 } #)
 {-# INLINE [0] absInt8X32# #-}
@@ -605,3 +607,5 @@ sqrtFloatX8# u = case unpackFloatX8# u of (# u0, u1, u2, u3, u4, u5, u6, u7 #) -
 sqrtDoubleX4# :: DoubleX4# -> DoubleX4#
 sqrtDoubleX4# u = case unpackDoubleX4# u of (# u0, u1, u2, u3 #) -> packDoubleX4# (# sqrtDouble# u0, sqrtDouble# u1, sqrtDouble# u2, sqrtDouble# u3 #)
 {-# INLINE [0] sqrtDoubleX4# #-}
+
+#endif

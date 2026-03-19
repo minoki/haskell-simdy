@@ -34,19 +34,23 @@ extra-source-files: cbits/mask.h
 --     * GHC 9.8.1 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
 --     * GHC 9.8.2 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
 --     * FFI issue on AArch64: https://gitlab.haskell.org/ghc/ghc/-/issues/26907
+--     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 -- * GHC 9.10.* / base-4.20.* / ghc-prim 0.12.*
 --     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606, fixed in 9.10.2
 --     * FFI issue on AArch64: https://gitlab.haskell.org/ghc/ghc/-/issues/26907
+--     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 -- * GHC 9.12.* / base-4.21.* / ghc-prim 0.13.* / ghc-internal 9.12##.* / ghc-experimental 9.12##.*
 --     * I'd like to drop support for 9.12.1/9.12.2/9.12.3 once 9.12.4 is out, because of multiple issues.
 --     * Broadcast issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25561, fixed in 9.12.3
 --     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606, fixed in 9.12.3
 --     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410
 --     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411
+--     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 -- * GHC 9.14.* / base-4.22.* / ghc-prim 0.13.* / ghc-internal 9.14##.* / ghc-experimental 9.14##.*
 --     * I'd like to drop support for 9.14.1 once 9.14.2 is out, because of +evex512 and NCG spill issue.
 --     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410
 --     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411
+--     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 
 flag no-simd
     description: Don't use native vector types
@@ -83,7 +87,7 @@ common arch-options
         buildable: False
     if flag(haswell) || flag(avx512)
         -- Traditionally, -mavx didn't imply -msse4.2: https://gitlab.haskell.org/ghc/ghc/-/issues/24989
-        -- GHC 9.16 will have the new behavior.
+        -- GHC 10.0 introduces the new behavior.
         ghc-options: -msse4.2 -mavx -mavx2
         cc-options: -mavx2 -mfma -mf16c
     if (flag(haswell) || flag(avx512)) && impl(ghc >= 9.8)
@@ -91,8 +95,12 @@ common arch-options
     if flag(haswell) || flag(avx512) || arch(aarch64)
         cpp-options: -DUSE_FMA
     if flag(avx512)
-        -- We might be able to add `ghc-options: -mavx512vl -mavx512bw -mavx512dq` on future GHC versions: https://gitlab.haskell.org/ghc/ghc/-/issues/26406
         ghc-options: -mavx512f
+        if impl(ghc >= 9.15)
+            -- New feature in GHC 10.0: https://gitlab.haskell.org/ghc/ghc/-/issues/26406
+            ghc-options: -mavx512vl -mavx512bw -mavx512dq
+        else
+            ghc-options: -optlc -mattr=+avx512bw,+avx512dq,+avx512vl
         cpp-options: -DUSE_AVX512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
     if flag(llvm)
@@ -210,8 +218,8 @@ library vl128
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl128
     default-language: GHC2021
-    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)))
-        -- vl128 requires !no-simd && (llvm || (ghc >= 9.12 && x86_64))
+    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64)))
+        -- vl128 requires !no-simd && (llvm || (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64))
         buildable: False
 
 library vl256
@@ -298,7 +306,7 @@ library
                       , Data.Simdy.Internal.Class
                       , Data.Simdy.Internal.NoSIMD
 
-    if !flag(no-simd) && (flag(llvm) || (impl(ghc >= 9.12) && arch(x86_64)))
+    if !flag(no-simd) && (flag(llvm) || (impl(ghc >= 9.12) && arch(x86_64)) || (impl(ghc >= 9.15) && arch(aarch64)))
         reexported-modules: Data.Simdy.Internal.SIMD128
         build-depends: simdy:vl128
     if !flag(no-simd) && (flag(haswell) || flag(avx512)) && flag(llvm)
@@ -309,7 +317,7 @@ library
         build-depends: simdy:vl512
 
     -- Choose the default vector length (Data.Simdy.Internal.Default) based on the flags.
-    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)))
+    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64)))
         mixins: simdy:no-simd (Data.Simdy.Internal.NoSIMD, Data.Simdy.Internal.NoSIMD as Data.Simdy.Internal.Default)
     elif flag(avx512) && flag(llvm)
         mixins: simdy:vl512 (Data.Simdy.Internal.SIMD512, Data.Simdy.Internal.SIMD512 as Data.Simdy.Internal.Default)

@@ -123,10 +123,10 @@ content moduleName width types reexports =
         ,["or" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ,["xor" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ,["#endif"]
-        -- Future
-        ,["complement" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]
         ,["abs" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT || k == INT]
         ,["sqrt" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
+        -- Future
+        ,["complement" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]
         ] ++ ["module " ++ mod | mod <- reexports]
   in
     [ "-- This file was created by script/GenPrim.hs. Do not edit by hand!"
@@ -217,6 +217,7 @@ content moduleName width types reexports =
       , mkBinary word64 "max" (\u v -> "case ltWord64# " ++ u <+> v ++ " of { 0# -> " ++ u ++ "; _ -> " ++ v ++ " }")
       , ["#endif"]
       -- ExtendLiterals is not available on GHC 9.6
+      , ["#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)"]
       , mkUnary int8 "abs" (\u -> "case ltInt8# " ++ u ++ " (intToInt8# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt8# " ++ u ++ " }")
       , mkUnary int16 "abs" (\u -> "case ltInt16# " ++ u ++ " (intToInt16# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt16# " ++ u ++ " }")
       , mkUnary int32 "abs" (\u -> "case ltInt32# " ++ u ++ " (intToInt32# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt32# " ++ u ++ " }")
@@ -225,6 +226,7 @@ content moduleName width types reexports =
       , mkUnary double "abs" (\u -> "fabsDouble# " ++ u)
       , mkUnary float "sqrt" (\u -> "sqrtFloat# " ++ u)
       , mkUnary double "sqrt" (\u -> "sqrtDouble# " ++ u)
+      , ["#endif"]
       ])
 
 main :: IO ()
