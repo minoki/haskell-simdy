@@ -43,6 +43,7 @@ extra-source-files: cbits/mask.h
 --     * I'd like to drop support for 9.12.1/9.12.2/9.12.3 once 9.12.4 is out, because of multiple issues.
 --     * Broadcast issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25561, fixed in 9.12.3
 --     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606, fixed in 9.12.3
+--     * FFI issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25730, fixed in 9.12.3
 --     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410
 --     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411
 --     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
@@ -70,7 +71,7 @@ flag avx512
     default: False
 
 flag llvm
-    description: Use LLVM backend
+    description: Use the LLVM backend
     manual: True
     default: True
 
@@ -103,18 +104,6 @@ common arch-options
             ghc-options: -optlc -mattr=+avx512bw,+avx512dq,+avx512vl
         cpp-options: -DUSE_AVX512
         cc-options: -mavx512f -mavx512vl -mavx512bw -mavx512dq
-    if flag(llvm)
-        ghc-options: -fllvm
-        -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-        -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
-        -- So we define a custom macro.
-        -- I'd like to drop support for these versions once 9.12.4 is out.
-        if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
-            cpp-options: -DBROADCAST_IS_BROKEN
-    if flag(llvm) && flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
-        -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
-        -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
-        ghc-options: -optlc -mattr=+evex512
 
 library common
     import:           warnings
@@ -218,8 +207,20 @@ library vl128
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl128
     default-language: GHC2021
-    if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64)))
-        -- vl128 requires !no-simd && (llvm || (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64))
+
+    if flag(llvm) || !((impl(ghc >= 9.12) && arch(x86_64)) || (impl(ghc >= 9.15) && arch(aarch64)))
+        -- We need the LLVM backend unless (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
+        ghc-options: -fllvm
+
+        -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
+        -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
+        -- So we define a custom macro.
+        -- I'd like to drop support for these versions once 9.12.4 is out.
+        if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
+            cpp-options: -DBROADCAST_IS_BROKEN
+
+    if !flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64))
+        -- vl128 requires llvm || (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
         buildable: False
 
 library vl256
@@ -242,8 +243,19 @@ library vl256
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl256
     default-language: GHC2021
-    if flag(no-simd) || !(flag(haswell) || flag(avx512)) || !flag(llvm)
-        -- vl256 requires !no-simd && (haswell || avx512) && llvm
+
+    -- We need the LLVM backend, so just enable it
+    ghc-options: -fllvm
+
+    -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
+    -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
+    -- So we define a custom macro.
+    -- I'd like to drop support for these versions once 9.12.4 is out.
+    if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
+        cpp-options: -DBROADCAST_IS_BROKEN
+
+    if !(flag(haswell) || flag(avx512))
+        -- vl256 requires (haswell || avx512) && llvm
         buildable: False
 
 library vl512
@@ -266,8 +278,24 @@ library vl512
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl512
     default-language: GHC2021
-    if flag(no-simd) || !flag(avx512) || !flag(llvm)
-        -- vl512 requires !no-simd && avx512 && llvm
+
+    -- We need the LLVM backend, so just enable it
+    ghc-options: -fllvm
+
+    -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
+    -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
+    -- So we define a custom macro.
+    -- I'd like to drop support for these versions once 9.12.4 is out.
+    if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
+        cpp-options: -DBROADCAST_IS_BROKEN
+
+    if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
+        -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+        ghc-options: -optlc -mattr=+evex512
+
+    if !flag(avx512)
+        -- vl512 requires avx512 && llvm
         buildable: False
 
 library plugin
@@ -350,6 +378,9 @@ test-suite simdy-test
                       tasty-quickcheck ^>=0.11.1,
                       tasty-hunit ^>=0.10.2
 
+    if flag(llvm)
+        ghc-options: -fllvm
+
 test-suite shuffle-test
     import:           warnings
                     , arch-options
@@ -364,6 +395,9 @@ test-suite shuffle-test
                       tasty-quickcheck ^>=0.11.1,
                       tasty-hunit ^>=0.10.2
     ghc-options:      -dlint
+
+    if flag(llvm)
+        ghc-options: -fllvm
 
 test-suite float-minmax-test
     import:           warnings
@@ -392,6 +426,9 @@ library matmul
                       deepseq
     default-language: GHC2021
 
+    if flag(llvm)
+        ghc-options: -fllvm
+
 test-suite simdy-test-matmul
     import:           warnings
                     , arch-options
@@ -408,6 +445,9 @@ test-suite simdy-test-matmul
                       tasty ^>=1.5.3,
                       tasty-quickcheck ^>=0.11.1
 
+    if flag(llvm)
+        ghc-options: -fllvm
+
 benchmark simdy-benchmark
     import:           warnings
                     , arch-options
@@ -420,3 +460,6 @@ benchmark simdy-benchmark
                       simdy:matmul,
                       vector ^>=0.13.1.0,
                       tasty-bench ^>=0.4.1
+
+    if flag(llvm)
+        ghc-options: -fllvm
