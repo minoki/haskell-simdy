@@ -2,6 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE UnliftedFFITypes #-}
 module Data.Simdy.Internal.SIMD512.Prim
   ( Int8X64#
   , Int16X32#
@@ -591,6 +592,10 @@ absInt32X16# u = case unpackInt32X16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8
 absInt64X8# :: Int64X8# -> Int64X8#
 absInt64X8# u = case unpackInt64X8# u of (# u0, u1, u2, u3, u4, u5, u6, u7 #) -> packInt64X8# (# case ltInt64# u0 (intToInt64# 0#) of { 0# -> u0; _ -> negateInt64# u0 }, case ltInt64# u1 (intToInt64# 0#) of { 0# -> u1; _ -> negateInt64# u1 }, case ltInt64# u2 (intToInt64# 0#) of { 0# -> u2; _ -> negateInt64# u2 }, case ltInt64# u3 (intToInt64# 0#) of { 0# -> u3; _ -> negateInt64# u3 }, case ltInt64# u4 (intToInt64# 0#) of { 0# -> u4; _ -> negateInt64# u4 }, case ltInt64# u5 (intToInt64# 0#) of { 0# -> u5; _ -> negateInt64# u5 }, case ltInt64# u6 (intToInt64# 0#) of { 0# -> u6; _ -> negateInt64# u6 }, case ltInt64# u7 (intToInt64# 0#) of { 0# -> u7; _ -> negateInt64# u7 } #)
 {-# INLINE [0] absInt64X8# #-}
+
+#endif
+
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)
 
 absFloatX16# :: FloatX16# -> FloatX16#
 absFloatX16# u = case unpackFloatX16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15 #) -> packFloatX16# (# fabsFloat# u0, fabsFloat# u1, fabsFloat# u2, fabsFloat# u3, fabsFloat# u4, fabsFloat# u5, fabsFloat# u6, fabsFloat# u7, fabsFloat# u8, fabsFloat# u9, fabsFloat# u10, fabsFloat# u11, fabsFloat# u12, fabsFloat# u13, fabsFloat# u14, fabsFloat# u15 #)

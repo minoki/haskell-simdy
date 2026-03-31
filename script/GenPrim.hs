@@ -65,6 +65,22 @@ mkBinary (typename, n) name scalarOp =
      , "{-# INLINE [0] " ++ name ++ vecTy ++ " #-}"
      ]
 
+mkForeignUnary :: (String, Int) -> String -> [String]
+mkForeignUnary (typename, n) name =
+  let vecTySymbol = typename ++ "X" ++ show n
+      vecTy = typename ++ "X" ++ shows n "#"
+  in [ "foreign import ccall unsafe \"hs_simdy_" ++ name ++ vecTySymbol ++ "\""
+     , "  " ++ name ++ vecTy ++ " :: " ++ vecTy ++ " -> " ++ vecTy
+     ]
+
+mkForeignBinary :: (String, Int) -> String -> [String]
+mkForeignBinary (typename, n) name =
+  let vecTySymbol = typename ++ "X" ++ show n
+      vecTy = typename ++ "X" ++ shows n "#"
+  in [ "foreign import ccall unsafe \"hs_simdy_" ++ name ++ vecTySymbol ++ "\""
+     , "  " ++ name ++ vecTy ++ " :: " ++ vecTy ++ " -> " ++ vecTy ++ " -> " ++ vecTy
+     ]
+
 content :: String -> Int -> [(String, String, T, Int)] -> [String] -> [String]
 content moduleName width types reexports =
   let int8 = ("Int8", width `quot` 8)
@@ -133,6 +149,7 @@ content moduleName width types reexports =
     , "{-# LANGUAGE CPP #-}"
     , "{-# LANGUAGE MagicHash #-}"
     , "{-# LANGUAGE UnboxedTuples #-}"
+    , "{-# LANGUAGE UnliftedFFITypes #-}"
     , "module " ++ moduleName
     ]
     ++ zipWith (\i ident -> case ident of '#':_ -> ident; _ -> if i == 0 then "  ( " ++ ident else "  , " ++ ident) [0..] exports
@@ -163,7 +180,8 @@ content moduleName width types reexports =
        , "#endif"
        , ""
        ]
-    ++ concat (intersperse [""]
+    ++ concat (intersperse [""] $
+      [["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)"] | width == 128] ++
       [ mkUnary int8 "complement" (\u -> "intToInt8# (notI# (int8ToInt# " ++ u ++ "))")
       , mkUnary int16 "complement" (\u -> "intToInt16# (notI# (int16ToInt# " ++ u ++ "))")
       , mkUnary int32 "complement" (\u -> "intToInt32# (notI# (int32ToInt# " ++ u ++ "))")
@@ -222,6 +240,54 @@ content moduleName width types reexports =
       , mkUnary int16 "abs" (\u -> "case ltInt16# " ++ u ++ " (intToInt16# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt16# " ++ u ++ " }")
       , mkUnary int32 "abs" (\u -> "case ltInt32# " ++ u ++ " (intToInt32# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt32# " ++ u ++ " }")
       , mkUnary int64 "abs" (\u -> "case ltInt64# " ++ u ++ " (intToInt64# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt64# " ++ u ++ " }")
+      , ["#endif"]
+      ] ++
+      (if width == 128
+       then
+        [ ["#else"] -- GHC >= 9.14 || LLVM
+        , mkForeignUnary int8 "complement"
+        , mkForeignUnary int16 "complement"
+        , mkForeignUnary int32 "complement"
+        , mkForeignUnary int64 "complement"
+        , mkForeignUnary word8 "complement"
+        , mkForeignUnary word16 "complement"
+        , mkForeignUnary word32 "complement"
+        , mkForeignUnary word64 "complement"
+        , ["#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)"]
+        , mkForeignBinary int8 "and"
+        , mkForeignBinary int16 "and"
+        , mkForeignBinary int32 "and"
+        , mkForeignBinary int64 "and"
+        , mkForeignBinary word8 "and"
+        , mkForeignBinary word16 "and"
+        , mkForeignBinary word32 "and"
+        , mkForeignBinary word64 "and"
+        , mkForeignBinary int8 "or"
+        , mkForeignBinary int16 "or"
+        , mkForeignBinary int32 "or"
+        , mkForeignBinary int64 "or"
+        , mkForeignBinary word8 "or"
+        , mkForeignBinary word16 "or"
+        , mkForeignBinary word32 "or"
+        , mkForeignBinary word64 "or"
+        , mkForeignBinary int8 "xor"
+        , mkForeignBinary int16 "xor"
+        , mkForeignBinary int32 "xor"
+        , mkForeignBinary int64 "xor"
+        , mkForeignBinary word8 "xor"
+        , mkForeignBinary word16 "xor"
+        , mkForeignBinary word32 "xor"
+        , mkForeignBinary word64 "xor"
+        -- We are using GHC 9.12, so we have min/max primops
+        , mkForeignUnary int8 "abs"
+        , mkForeignUnary int16 "abs"
+        , mkForeignUnary int32 "abs"
+        , mkForeignUnary int64 "abs"
+        , ["#endif"
+          ,"#endif"] -- GHC >= 9.14 || LLVM
+        ]
+       else []) ++
+      [ ["#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)"]
       , mkUnary float "abs" (\u -> "fabsFloat# " ++ u)
       , mkUnary double "abs" (\u -> "fabsDouble# " ++ u)
       , mkUnary float "sqrt" (\u -> "sqrtFloat# " ++ u)

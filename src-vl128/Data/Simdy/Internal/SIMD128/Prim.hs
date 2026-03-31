@@ -2,6 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE UnliftedFFITypes #-}
 module Data.Simdy.Internal.SIMD128.Prim
   ( Int8X16#
   , Int16X8#
@@ -372,6 +373,8 @@ import           GHC.Exts
 
 #endif
 
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+
 complementInt8X16# :: Int8X16# -> Int8X16#
 complementInt8X16# u = case unpackInt8X16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15 #) -> packInt8X16# (# intToInt8# (notI# (int8ToInt# u0)), intToInt8# (notI# (int8ToInt# u1)), intToInt8# (notI# (int8ToInt# u2)), intToInt8# (notI# (int8ToInt# u3)), intToInt8# (notI# (int8ToInt# u4)), intToInt8# (notI# (int8ToInt# u5)), intToInt8# (notI# (int8ToInt# u6)), intToInt8# (notI# (int8ToInt# u7)), intToInt8# (notI# (int8ToInt# u8)), intToInt8# (notI# (int8ToInt# u9)), intToInt8# (notI# (int8ToInt# u10)), intToInt8# (notI# (int8ToInt# u11)), intToInt8# (notI# (int8ToInt# u12)), intToInt8# (notI# (int8ToInt# u13)), intToInt8# (notI# (int8ToInt# u14)), intToInt8# (notI# (int8ToInt# u15)) #)
 {-# INLINE [0] complementInt8X16# #-}
@@ -589,6 +592,125 @@ absInt32X4# u = case unpackInt32X4# u of (# u0, u1, u2, u3 #) -> packInt32X4# (#
 absInt64X2# :: Int64X2# -> Int64X2#
 absInt64X2# u = case unpackInt64X2# u of (# u0, u1 #) -> packInt64X2# (# case ltInt64# u0 (intToInt64# 0#) of { 0# -> u0; _ -> negateInt64# u0 }, case ltInt64# u1 (intToInt64# 0#) of { 0# -> u1; _ -> negateInt64# u1 } #)
 {-# INLINE [0] absInt64X2# #-}
+
+#endif
+
+#else
+
+foreign import ccall unsafe "hs_simdy_complementInt8X16"
+  complementInt8X16# :: Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_complementInt16X8"
+  complementInt16X8# :: Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_complementInt32X4"
+  complementInt32X4# :: Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_complementInt64X2"
+  complementInt64X2# :: Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_complementWord8X16"
+  complementWord8X16# :: Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_complementWord16X8"
+  complementWord16X8# :: Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_complementWord32X4"
+  complementWord32X4# :: Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_complementWord64X2"
+  complementWord64X2# :: Word64X2# -> Word64X2#
+
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)
+
+foreign import ccall unsafe "hs_simdy_andInt8X16"
+  andInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_andInt16X8"
+  andInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_andInt32X4"
+  andInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_andInt64X2"
+  andInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_andWord8X16"
+  andWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_andWord16X8"
+  andWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_andWord32X4"
+  andWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_andWord64X2"
+  andWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+foreign import ccall unsafe "hs_simdy_orInt8X16"
+  orInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_orInt16X8"
+  orInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_orInt32X4"
+  orInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_orInt64X2"
+  orInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_orWord8X16"
+  orWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_orWord16X8"
+  orWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_orWord32X4"
+  orWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_orWord64X2"
+  orWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+foreign import ccall unsafe "hs_simdy_xorInt8X16"
+  xorInt8X16# :: Int8X16# -> Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_xorInt16X8"
+  xorInt16X8# :: Int16X8# -> Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_xorInt32X4"
+  xorInt32X4# :: Int32X4# -> Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_xorInt64X2"
+  xorInt64X2# :: Int64X2# -> Int64X2# -> Int64X2#
+
+foreign import ccall unsafe "hs_simdy_xorWord8X16"
+  xorWord8X16# :: Word8X16# -> Word8X16# -> Word8X16#
+
+foreign import ccall unsafe "hs_simdy_xorWord16X8"
+  xorWord16X8# :: Word16X8# -> Word16X8# -> Word16X8#
+
+foreign import ccall unsafe "hs_simdy_xorWord32X4"
+  xorWord32X4# :: Word32X4# -> Word32X4# -> Word32X4#
+
+foreign import ccall unsafe "hs_simdy_xorWord64X2"
+  xorWord64X2# :: Word64X2# -> Word64X2# -> Word64X2#
+
+foreign import ccall unsafe "hs_simdy_absInt8X16"
+  absInt8X16# :: Int8X16# -> Int8X16#
+
+foreign import ccall unsafe "hs_simdy_absInt16X8"
+  absInt16X8# :: Int16X8# -> Int16X8#
+
+foreign import ccall unsafe "hs_simdy_absInt32X4"
+  absInt32X4# :: Int32X4# -> Int32X4#
+
+foreign import ccall unsafe "hs_simdy_absInt64X2"
+  absInt64X2# :: Int64X2# -> Int64X2#
+
+#endif
+#endif
+
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)
 
 absFloatX4# :: FloatX4# -> FloatX4#
 absFloatX4# u = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> packFloatX4# (# fabsFloat# u0, fabsFloat# u1, fabsFloat# u2, fabsFloat# u3 #)

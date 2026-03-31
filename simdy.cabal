@@ -207,6 +207,8 @@ library vl128
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl128
     default-language: GHC2021
+    c-sources:        cbits/bitwise_vl128.c
+                      cbits/int_abs_vl128.c
 
     if flag(llvm) || !((impl(ghc >= 9.12) && arch(x86_64)) || (impl(ghc >= 9.15) && arch(aarch64)))
         -- We need the LLVM backend unless (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
