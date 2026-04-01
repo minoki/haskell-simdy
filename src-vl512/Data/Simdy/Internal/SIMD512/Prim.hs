@@ -320,51 +320,7 @@ module Data.Simdy.Internal.SIMD512.Prim
   ) where
 import           Data.Simdy.Internal.SIMD256.Prim
 
-#if defined(BROADCAST_IS_BROKEN)
--- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-import           GHC.PrimOps hiding (broadcastInt8X64#, broadcastInt16X32#, broadcastInt32X16#, broadcastInt64X8#, broadcastWord8X64#, broadcastWord16X32#, broadcastWord32X16#, broadcastWord64X8#, broadcastFloatX16#, broadcastDoubleX8#)
-
-broadcastInt8X64# :: Int8# -> Int8X64#
-broadcastInt8X64# x = packInt8X64# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt8X64# #-}
-
-broadcastInt16X32# :: Int16# -> Int16X32#
-broadcastInt16X32# x = packInt16X32# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt16X32# #-}
-
-broadcastInt32X16# :: Int32# -> Int32X16#
-broadcastInt32X16# x = packInt32X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt32X16# #-}
-
-broadcastInt64X8# :: Int64# -> Int64X8#
-broadcastInt64X8# x = packInt64X8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt64X8# #-}
-
-broadcastWord8X64# :: Word8# -> Word8X64#
-broadcastWord8X64# x = packWord8X64# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord8X64# #-}
-
-broadcastWord16X32# :: Word16# -> Word16X32#
-broadcastWord16X32# x = packWord16X32# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord16X32# #-}
-
-broadcastWord32X16# :: Word32# -> Word32X16#
-broadcastWord32X16# x = packWord32X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord32X16# #-}
-
-broadcastWord64X8# :: Word64# -> Word64X8#
-broadcastWord64X8# x = packWord64X8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord64X8# #-}
-
-broadcastFloatX16# :: Float# -> FloatX16#
-broadcastFloatX16# x = packFloatX16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastFloatX16# #-}
-
-broadcastDoubleX8# :: Double# -> DoubleX8#
-broadcastDoubleX8# x = packDoubleX8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastDoubleX8# #-}
-
-#elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 
 -- from ghc-experimental
 import           GHC.PrimOps

@@ -156,19 +156,7 @@ content moduleName width types reexports =
     ++ ["  ) where"]
     ++ ["import           " ++ mod | mod <- reexports]
     ++ [ ""
-       , "#if defined(BROADCAST_IS_BROKEN)"
-       , "-- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561"
-       , "import           GHC.PrimOps hiding (" ++ commaSep ["broadcast" ++ ty ++ "#" | (ty, _, _, _) <- types] ++ ")"
-       , ""
-       ]
-    ++ concat [ [ "broadcast" ++ vecTy ++ "# :: " ++ elemTy ++ "# -> " ++ vecTy ++ "#"
-                , "broadcast" ++ vecTy ++ "# x = pack" ++ vecTy ++ "# (# " ++ commaSep (replicate n "x") ++ " #)"
-                , "{-# INLINE [0] broadcast" ++ vecTy ++ "# #-}"
-                , ""
-                ]
-              | (vecTy, elemTy, _, n) <- types
-              ]
-    ++ [ "#elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)"
+       , "#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)"
        , ""
        , "-- from ghc-experimental"
        , "import           GHC.PrimOps"

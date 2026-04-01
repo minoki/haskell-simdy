@@ -222,7 +222,5 @@ pack/unpack.
 
 ## Platform-Specific Workarounds
 
-- **`BROADCAST_IS_BROKEN`**: Works around a bug in GHC 9.12 + LLVM backend
-  where broadcast primops generate incorrect code.
 - **Integer SIMD availability**: Integer vector primops are conditionally
   available depending on the GHC version and backend combination.

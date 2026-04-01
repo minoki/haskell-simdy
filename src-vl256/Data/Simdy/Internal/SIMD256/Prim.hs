@@ -320,51 +320,7 @@ module Data.Simdy.Internal.SIMD256.Prim
   ) where
 import           Data.Simdy.Internal.SIMD128.Prim
 
-#if defined(BROADCAST_IS_BROKEN)
--- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-import           GHC.PrimOps hiding (broadcastInt8X32#, broadcastInt16X16#, broadcastInt32X8#, broadcastInt64X4#, broadcastWord8X32#, broadcastWord16X16#, broadcastWord32X8#, broadcastWord64X4#, broadcastFloatX8#, broadcastDoubleX4#)
-
-broadcastInt8X32# :: Int8# -> Int8X32#
-broadcastInt8X32# x = packInt8X32# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt8X32# #-}
-
-broadcastInt16X16# :: Int16# -> Int16X16#
-broadcastInt16X16# x = packInt16X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt16X16# #-}
-
-broadcastInt32X8# :: Int32# -> Int32X8#
-broadcastInt32X8# x = packInt32X8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt32X8# #-}
-
-broadcastInt64X4# :: Int64# -> Int64X4#
-broadcastInt64X4# x = packInt64X4# (# x, x, x, x #)
-{-# INLINE [0] broadcastInt64X4# #-}
-
-broadcastWord8X32# :: Word8# -> Word8X32#
-broadcastWord8X32# x = packWord8X32# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord8X32# #-}
-
-broadcastWord16X16# :: Word16# -> Word16X16#
-broadcastWord16X16# x = packWord16X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord16X16# #-}
-
-broadcastWord32X8# :: Word32# -> Word32X8#
-broadcastWord32X8# x = packWord32X8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord32X8# #-}
-
-broadcastWord64X4# :: Word64# -> Word64X4#
-broadcastWord64X4# x = packWord64X4# (# x, x, x, x #)
-{-# INLINE [0] broadcastWord64X4# #-}
-
-broadcastFloatX8# :: Float# -> FloatX8#
-broadcastFloatX8# x = packFloatX8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastFloatX8# #-}
-
-broadcastDoubleX4# :: Double# -> DoubleX4#
-broadcastDoubleX4# x = packDoubleX4# (# x, x, x, x #)
-{-# INLINE [0] broadcastDoubleX4# #-}
-
-#elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 
 -- from ghc-experimental
 import           GHC.PrimOps

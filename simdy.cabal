@@ -40,7 +40,7 @@ extra-source-files: cbits/mask.h
 --     * FFI issue on AArch64: https://gitlab.haskell.org/ghc/ghc/-/issues/26907
 --     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 -- * GHC 9.12.* / base-4.21.* / ghc-prim 0.13.* / ghc-internal 9.12##.* / ghc-experimental 9.12##.*
---     * I'd like to drop support for 9.12.1/9.12.2/9.12.3 once 9.12.4 is out, because of multiple issues.
+--     * GHC 9.12.{1,2,3} are not supported because of multiple issues.
 --     * Broadcast issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25561, fixed in 9.12.3
 --     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606, fixed in 9.12.3
 --     * FFI issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25730, fixed in 9.12.3
@@ -81,11 +81,16 @@ common warnings
         -- For Data.Simdy.Tuple
         ghc-options: -Wno-pattern-namespace-specifier
 
-common arch-options
+common ghc-support
     if impl(ghc == 9.8.1) || impl(ghc == 9.8.2)
         -- GHC 9.8.1 has the FMA primitive broken: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
         -- GHC 9.8.2 has the FMA primitive broken: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
         buildable: False
+    if impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3)
+        -- Broken because of multiple issues
+        buildable: False
+
+common arch-options
     if flag(haswell) || flag(avx512)
         -- Traditionally, -mavx didn't imply -msse4.2: https://gitlab.haskell.org/ghc/ghc/-/issues/24989
         -- GHC 10.0 introduces the new behavior.
@@ -107,6 +112,7 @@ common arch-options
 
 library common
     import:           warnings
+                    , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy.Fusible
                       Data.Simdy.Internal.Bits
@@ -172,6 +178,7 @@ library common
 
 library no-simd
     import:           warnings
+                    , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy.Internal.NoSIMD
     other-modules:    Data.Simdy.Internal.NoSIMD.X2
@@ -189,6 +196,7 @@ library no-simd
 
 library vl128
     import:           warnings
+                    , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy.Internal.SIMD128
                       Data.Simdy.Internal.SIMD128.Prim
@@ -214,19 +222,13 @@ library vl128
         -- We need the LLVM backend unless (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
         ghc-options: -fllvm
 
-        -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-        -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
-        -- So we define a custom macro.
-        -- I'd like to drop support for these versions once 9.12.4 is out.
-        if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
-            cpp-options: -DBROADCAST_IS_BROKEN
-
     if !flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64))
         -- vl128 requires llvm || (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
         buildable: False
 
 library vl256
     import:           warnings
+                    , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy.Internal.SIMD256
                       Data.Simdy.Internal.SIMD256.Prim
@@ -249,19 +251,13 @@ library vl256
     -- We need the LLVM backend, so just enable it
     ghc-options: -fllvm
 
-    -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-    -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
-    -- So we define a custom macro.
-    -- I'd like to drop support for these versions once 9.12.4 is out.
-    if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
-        cpp-options: -DBROADCAST_IS_BROKEN
-
     if !(flag(haswell) || flag(avx512))
         -- vl256 requires (haswell || avx512) && llvm
         buildable: False
 
 library vl512
     import:           warnings
+                    , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy.Internal.SIMD512
     other-modules:    Data.Simdy.Internal.SIMD512.Prim
@@ -284,14 +280,7 @@ library vl512
     -- We need the LLVM backend, so just enable it
     ghc-options: -fllvm
 
-    -- We need to detect the use of LLVM backend on GHC 9.12.{1,2} to workaround https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-    -- However, __GLASGOW_HASKELL_LLVM__ is not defined on GHC 9.12.1: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
-    -- So we define a custom macro.
-    -- I'd like to drop support for these versions once 9.12.4 is out.
-    if impl(ghc == 9.12.1) || impl(ghc == 9.12.2)
-        cpp-options: -DBROADCAST_IS_BROKEN
-
-    if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+    if flag(avx512) && os(darwin) && impl(ghc == 9.14.1)
         -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
         -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
         ghc-options: -optlc -mattr=+evex512
@@ -302,6 +291,7 @@ library vl512
 
 library plugin
     import:           warnings
+                    , ghc-support
                     , arch-options
     visibility:       public
     exposed-modules:  Data.Simdy.Shuffle.Plugin
@@ -316,6 +306,7 @@ library plugin
 
 library
     import:           warnings
+                    , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy
                       Data.Simdy.Backend
@@ -383,7 +374,7 @@ test-suite simdy-test
     if flag(llvm)
         ghc-options: -fllvm
 
-        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        if flag(avx512) && os(darwin) && impl(ghc == 9.14.1)
             -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
             -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
             ghc-options: -optlc -mattr=+evex512
@@ -406,7 +397,7 @@ test-suite shuffle-test
     if flag(llvm)
         ghc-options: -fllvm
 
-        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        if flag(avx512) && os(darwin) && impl(ghc == 9.14.1)
             -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
             -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
             ghc-options: -optlc -mattr=+evex512
@@ -441,7 +432,7 @@ library matmul
     if flag(llvm)
         ghc-options: -fllvm
 
-        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        if flag(avx512) && os(darwin) && impl(ghc == 9.14.1)
             -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
             -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
             ghc-options: -optlc -mattr=+evex512
@@ -465,7 +456,7 @@ test-suite simdy-test-matmul
     if flag(llvm)
         ghc-options: -fllvm
 
-        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        if flag(avx512) && os(darwin) && impl(ghc == 9.14.1)
             -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
             -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
             ghc-options: -optlc -mattr=+evex512
@@ -486,7 +477,7 @@ benchmark simdy-benchmark
     if flag(llvm)
         ghc-options: -fllvm
 
-        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+        if flag(avx512) && os(darwin) && impl(ghc == 9.14.1)
             -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
             -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
             ghc-options: -optlc -mattr=+evex512

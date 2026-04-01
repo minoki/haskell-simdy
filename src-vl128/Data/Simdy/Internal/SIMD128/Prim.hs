@@ -318,51 +318,7 @@ module Data.Simdy.Internal.SIMD128.Prim
   , complementWord64X2#
   ) where
 
-#if defined(BROADCAST_IS_BROKEN)
--- The LLVM backend of GHC 9.12.{1,2} has a bug with broadcast: https://gitlab.haskell.org/ghc/ghc/-/issues/25561
-import           GHC.PrimOps hiding (broadcastInt8X16#, broadcastInt16X8#, broadcastInt32X4#, broadcastInt64X2#, broadcastWord8X16#, broadcastWord16X8#, broadcastWord32X4#, broadcastWord64X2#, broadcastFloatX4#, broadcastDoubleX2#)
-
-broadcastInt8X16# :: Int8# -> Int8X16#
-broadcastInt8X16# x = packInt8X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt8X16# #-}
-
-broadcastInt16X8# :: Int16# -> Int16X8#
-broadcastInt16X8# x = packInt16X8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastInt16X8# #-}
-
-broadcastInt32X4# :: Int32# -> Int32X4#
-broadcastInt32X4# x = packInt32X4# (# x, x, x, x #)
-{-# INLINE [0] broadcastInt32X4# #-}
-
-broadcastInt64X2# :: Int64# -> Int64X2#
-broadcastInt64X2# x = packInt64X2# (# x, x #)
-{-# INLINE [0] broadcastInt64X2# #-}
-
-broadcastWord8X16# :: Word8# -> Word8X16#
-broadcastWord8X16# x = packWord8X16# (# x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord8X16# #-}
-
-broadcastWord16X8# :: Word16# -> Word16X8#
-broadcastWord16X8# x = packWord16X8# (# x, x, x, x, x, x, x, x #)
-{-# INLINE [0] broadcastWord16X8# #-}
-
-broadcastWord32X4# :: Word32# -> Word32X4#
-broadcastWord32X4# x = packWord32X4# (# x, x, x, x #)
-{-# INLINE [0] broadcastWord32X4# #-}
-
-broadcastWord64X2# :: Word64# -> Word64X2#
-broadcastWord64X2# x = packWord64X2# (# x, x #)
-{-# INLINE [0] broadcastWord64X2# #-}
-
-broadcastFloatX4# :: Float# -> FloatX4#
-broadcastFloatX4# x = packFloatX4# (# x, x, x, x #)
-{-# INLINE [0] broadcastFloatX4# #-}
-
-broadcastDoubleX2# :: Double# -> DoubleX2#
-broadcastDoubleX2# x = packDoubleX2# (# x, x #)
-{-# INLINE [0] broadcastDoubleX2# #-}
-
-#elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 
 -- from ghc-experimental
 import           GHC.PrimOps
