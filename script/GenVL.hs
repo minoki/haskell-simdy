@@ -394,12 +394,12 @@ main = do
     \-}"
   writeFile "src-vl512/Data/Simdy/Internal/SIMD512.hs" $ genMod "Data.Simdy.Internal.SIMD512"
     ["import           Data.Simdy.Internal.SIMD128.X2 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.HalfVector ()"
-    ,"import           Data.Simdy.Internal.SIMD256.X16 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X32 as M"
     ,"import           Data.Simdy.Internal.SIMD256.X4 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X64 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X8 as M"
+    ,"import           Data.Simdy.Internal.SIMD512.HalfVector ()"
+    ,"import           Data.Simdy.Internal.SIMD512.X16 as M"
+    ,"import           Data.Simdy.Internal.SIMD512.X32 as M"
+    ,"import           Data.Simdy.Internal.SIMD512.X64 as M"
+    ,"import           Data.Simdy.Internal.SIMD512.X8 as M"
     ]
     "{-|\n\
     \This module contains types and classes that use 512-bit vectors (x86 AVX-512).\n\

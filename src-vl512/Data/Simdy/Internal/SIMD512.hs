@@ -77,12 +77,12 @@ import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD
 import qualified Data.Simdy.Internal.Class as I
 import           Data.Simdy.Internal.Shuffle
 import           Data.Simdy.Internal.SIMD128.X2 as M
-import           Data.Simdy.Internal.SIMD256.HalfVector ()
-import           Data.Simdy.Internal.SIMD256.X16 as M
-import           Data.Simdy.Internal.SIMD256.X32 as M
 import           Data.Simdy.Internal.SIMD256.X4 as M
-import           Data.Simdy.Internal.SIMD256.X64 as M
-import           Data.Simdy.Internal.SIMD256.X8 as M
+import           Data.Simdy.Internal.SIMD512.HalfVector ()
+import           Data.Simdy.Internal.SIMD512.X16 as M
+import           Data.Simdy.Internal.SIMD512.X32 as M
+import           Data.Simdy.Internal.SIMD512.X64 as M
+import           Data.Simdy.Internal.SIMD512.X8 as M
 import           Data.Word
 import           Foreign.Storable
 import           Prelude hiding (not, (==), (/=), (<), (<=), (>), (>=))
