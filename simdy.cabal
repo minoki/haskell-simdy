@@ -44,8 +44,8 @@ extra-source-files: cbits/mask.h
 --     * Broadcast issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25561, fixed in 9.12.3
 --     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606, fixed in 9.12.3
 --     * FFI issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25730, fixed in 9.12.3
---     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410
---     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411
+--     * +evex512 issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26410, fixed in 9.12.4
+--     * NCG spill issue: https://gitlab.haskell.org/ghc/ghc/-/issues/26411, fixed in 9.12.4
 --     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 -- * GHC 9.14.* / base-4.22.* / ghc-prim 0.13.* / ghc-internal 9.14##.* / ghc-experimental 9.14##.*
 --     * I'd like to drop support for 9.14.1 once 9.14.2 is out, because of +evex512 and NCG spill issue.
@@ -383,6 +383,11 @@ test-suite simdy-test
     if flag(llvm)
         ghc-options: -fllvm
 
+        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+            -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
+            -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+            ghc-options: -optlc -mattr=+evex512
+
 test-suite shuffle-test
     import:           warnings
                     , arch-options
@@ -400,6 +405,11 @@ test-suite shuffle-test
 
     if flag(llvm)
         ghc-options: -fllvm
+
+        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+            -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
+            -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+            ghc-options: -optlc -mattr=+evex512
 
 test-suite float-minmax-test
     import:           warnings
@@ -431,6 +441,11 @@ library matmul
     if flag(llvm)
         ghc-options: -fllvm
 
+        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+            -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
+            -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+            ghc-options: -optlc -mattr=+evex512
+
 test-suite simdy-test-matmul
     import:           warnings
                     , arch-options
@@ -450,6 +465,11 @@ test-suite simdy-test-matmul
     if flag(llvm)
         ghc-options: -fllvm
 
+        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+            -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
+            -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+            ghc-options: -optlc -mattr=+evex512
+
 benchmark simdy-benchmark
     import:           warnings
                     , arch-options
@@ -465,3 +485,8 @@ benchmark simdy-benchmark
 
     if flag(llvm)
         ghc-options: -fllvm
+
+        if flag(avx512) && os(darwin) && (impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3) || impl(ghc == 9.14.1))
+            -- You need `-optlc -mattr=+evex512` if using GHC 9.12.{1,2,3} or 9.14.1 with LLVM 18 or newer
+            -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
+            ghc-options: -optlc -mattr=+evex512
