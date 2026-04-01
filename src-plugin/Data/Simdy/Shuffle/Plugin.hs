@@ -9,12 +9,15 @@ import           Control.Monad (forM, guard, replicateM)
 import           Data.Either (partitionEithers)
 import           Data.List (nub)
 import           Data.Maybe (fromMaybe)
-import           Data.Simdy.Internal.Shuffle (ShuffleMany, Pick)
+import           Data.Simdy.Internal.Shuffle (Pick, ShuffleMany)
 import qualified GHC.Builtin.Types as B
 import qualified GHC.Builtin.Types.Prim as B
 import           GHC.Core.Make (mkCoreApps, mkNaturalExpr)
 import           GHC.Core.Type (RuntimeRepType)
-import           GHC.Plugins (DynFlags, getDynFlags, targetPlatform)
+import           GHC.Driver.Backend (DefunctionalizedCodeOutput (LlvmCodeOutput, NcgCodeOutput),
+                                     backendCodeOutput)
+import           GHC.Driver.DynFlags (DynFlags (backend), isAvxEnabled)
+import           GHC.Plugins (getDynFlags, targetPlatform)
 import qualified GHC.Plugins as GHC (Alt (Alt), AltCon (DataAlt),
                                      Boxity (Unboxed),
                                      Expr (App, Case, Lam, Lit, Type, Var),
@@ -73,7 +76,7 @@ data VectorTypeDefs = MkVectorTypeDefs
 
 data PluginDefs = MkPluginDefs
   { shuffleManyClass :: Class
-  , pickClass :: Class
+  , pickClass        :: Class
   {-
   , promotedNothingDataCon :: TyCon
   , promotedJustDataCon :: TyCon
@@ -371,7 +374,7 @@ buildShuffleWithPack dynflags (MkVectorTypeDefs {..}) vExp pairs =
       go [] _ vars =
         let defaultExpr = case vars of
               (_, e:_):_ -> GHC.Var e
-              _ -> zeroExpr
+              _          -> zeroExpr
             args = [ case lookup dst pairs of
                        Nothing -> defaultExpr
                        Just (srcVec, srcLane) -> GHC.Var (fromMaybe (panic "no srcVec") (lookup srcVec vars) !! fromInteger srcLane)
@@ -402,9 +405,17 @@ pluginSolve (MkPluginDefs {..}) _givens wanteds = do
           if effectiveSize <= n
             then do
               vVar <- freshId "v" (mkVisFunTyMany B.naturalTy vecTy)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0)
+              let hasShufflePrim = True
+#else
+              let hasShufflePrim = case backendCodeOutput (backend dynflags) of
+                    NcgCodeOutput  -> isAvxEnabled dynflags
+                    LlvmCodeOutput -> True
+                    _              -> False
+#endif
               body <- case shuffleId of
-                Just shuffleId' -> pure $ buildShuffle dynflags vectorTypeDefs shuffleId' (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
-                Nothing -> buildShuffleWithPack dynflags vectorTypeDefs (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
+                Just shuffleId' | hasShufflePrim -> pure $ buildShuffle dynflags vectorTypeDefs shuffleId' (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
+                _ -> buildShuffleWithPack dynflags vectorTypeDefs (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
               pure [Right (EvExpr (evUnaryDictAppE cls typeArgs $ GHC.Lam vVar body), ct)]
             else pure [Left ct]
       ClassPred cls typeArgs@[ty, typeIndex]
