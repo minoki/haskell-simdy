@@ -1236,8 +1236,7 @@ main = do
     ,"Data.Simdy.Internal.SIMD128.X64"
     ] [2,4,8,16,32,64] [] 128
   writeFile "src-vl256/Data/Simdy/Internal/SIMD256/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD256.HalfVector"
-    ["Data.Simdy.Internal.SIMD128.HalfVector ()"
-    ,"Data.Simdy.Internal.SIMD128.X2"
+    ["Data.Simdy.Internal.SIMD128 (X2 (..))"
     ,"Data.Simdy.Internal.SIMD256.X4"
     ,"Data.Simdy.Internal.SIMD256.X8"
     ,"Data.Simdy.Internal.SIMD256.X16"
@@ -1245,8 +1244,7 @@ main = do
     ,"Data.Simdy.Internal.SIMD256.X64"
     ] [4,8,16,32,64] [] 256
   writeFile "src-vl512/Data/Simdy/Internal/SIMD512/HalfVector.hs" $ unlines $ genHalfFile "Data.Simdy.Internal.SIMD512.HalfVector"
-    ["Data.Simdy.Internal.SIMD256.X4"
-    ,"Data.Simdy.Internal.SIMD256.HalfVector ()"
+    ["Data.Simdy.Internal.SIMD256 (X4 (..))"
     ,"Data.Simdy.Internal.SIMD512.X8"
     ,"Data.Simdy.Internal.SIMD512.X16"
     ,"Data.Simdy.Internal.SIMD512.X32"

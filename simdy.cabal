@@ -201,7 +201,7 @@ library vl128
     exposed-modules:  Data.Simdy.Internal.SIMD128
                       Data.Simdy.Internal.SIMD128.Prim
                       Data.Simdy.Internal.SIMD128.PrimExtra
-                      Data.Simdy.Internal.SIMD128.X2
+    other-modules:    Data.Simdy.Internal.SIMD128.X2
                       Data.Simdy.Internal.SIMD128.X4
                       Data.Simdy.Internal.SIMD128.X8
                       Data.Simdy.Internal.SIMD128.X16
@@ -233,7 +233,7 @@ library vl256
     exposed-modules:  Data.Simdy.Internal.SIMD256
                       Data.Simdy.Internal.SIMD256.Prim
                       Data.Simdy.Internal.SIMD256.PrimExtra
-                      Data.Simdy.Internal.SIMD256.X4
+    other-modules:    Data.Simdy.Internal.SIMD256.X4
                       Data.Simdy.Internal.SIMD256.X8
                       Data.Simdy.Internal.SIMD256.X16
                       Data.Simdy.Internal.SIMD256.X32
@@ -260,9 +260,9 @@ library vl512
                     , ghc-support
                     , arch-options
     exposed-modules:  Data.Simdy.Internal.SIMD512
-    other-modules:    Data.Simdy.Internal.SIMD512.Prim
+                      Data.Simdy.Internal.SIMD512.Prim
                       Data.Simdy.Internal.SIMD512.PrimExtra
-                      Data.Simdy.Internal.SIMD512.X8
+    other-modules:    Data.Simdy.Internal.SIMD512.X8
                       Data.Simdy.Internal.SIMD512.X16
                       Data.Simdy.Internal.SIMD512.X32
                       Data.Simdy.Internal.SIMD512.X64
