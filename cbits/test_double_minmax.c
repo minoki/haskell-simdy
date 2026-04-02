@@ -15,69 +15,69 @@
 
 #pragma STDC FENV_ACCESS ON
 
-extern double hs_simdy_minimum_double(double x, double y);
-extern double hs_simdy_maximum_double(double x, double y);
-extern double hs_simdy_minimumNumber_double(double x, double y);
-extern double hs_simdy_maximumNumber_double(double x, double y);
+extern double hs_simdy_minimumDouble(double x, double y);
+extern double hs_simdy_maximumDouble(double x, double y);
+extern double hs_simdy_minimumNumberDouble(double x, double y);
+extern double hs_simdy_maximumNumberDouble(double x, double y);
 #if defined(__SSE2__)
-extern __m128d hs_simdy_minimum_doublex2(__m128d x, __m128d y);
-extern __m128d hs_simdy_maximum_doublex2(__m128d x, __m128d y);
-extern __m128d hs_simdy_minimumNumber_doublex2(__m128d x, __m128d y);
-extern __m128d hs_simdy_maximumNumber_doublex2(__m128d x, __m128d y);
+extern __m128d hs_simdy_minimumDoubleX2(__m128d x, __m128d y);
+extern __m128d hs_simdy_maximumDoubleX2(__m128d x, __m128d y);
+extern __m128d hs_simdy_minimumNumberDoubleX2(__m128d x, __m128d y);
+extern __m128d hs_simdy_maximumNumberDoubleX2(__m128d x, __m128d y);
 #if defined(__AVX__)
-extern __m256d hs_simdy_minimum_doublex4(__m256d x, __m256d y);
-extern __m256d hs_simdy_maximum_doublex4(__m256d x, __m256d y);
-extern __m256d hs_simdy_minimumNumber_doublex4(__m256d x, __m256d y);
-extern __m256d hs_simdy_maximumNumber_doublex4(__m256d x, __m256d y);
+extern __m256d hs_simdy_minimumDoubleX4(__m256d x, __m256d y);
+extern __m256d hs_simdy_maximumDoubleX4(__m256d x, __m256d y);
+extern __m256d hs_simdy_minimumNumberDoubleX4(__m256d x, __m256d y);
+extern __m256d hs_simdy_maximumNumberDoubleX4(__m256d x, __m256d y);
 #endif
 #if defined(__AVX512DQ__) && defined(__AVX512VL__)
-extern __m128d hs_simdy_minimum_doublex2_avx512(__m128d x, __m128d y);
-extern __m128d hs_simdy_maximum_doublex2_avx512(__m128d x, __m128d y);
-extern __m128d hs_simdy_minimumNumber_doublex2_avx512(__m128d x, __m128d y);
-extern __m128d hs_simdy_maximumNumber_doublex2_avx512(__m128d x, __m128d y);
-extern __m256d hs_simdy_minimum_doublex4_avx512(__m256d x, __m256d y);
-extern __m256d hs_simdy_maximum_doublex4_avx512(__m256d x, __m256d y);
-extern __m256d hs_simdy_minimumNumber_doublex4_avx512(__m256d x, __m256d y);
-extern __m256d hs_simdy_maximumNumber_doublex4_avx512(__m256d x, __m256d y);
+extern __m128d hs_simdy_minimumDoubleX2_avx512(__m128d x, __m128d y);
+extern __m128d hs_simdy_maximumDoubleX2_avx512(__m128d x, __m128d y);
+extern __m128d hs_simdy_minimumNumberDoubleX2_avx512(__m128d x, __m128d y);
+extern __m128d hs_simdy_maximumNumberDoubleX2_avx512(__m128d x, __m128d y);
+extern __m256d hs_simdy_minimumDoubleX4_avx512(__m256d x, __m256d y);
+extern __m256d hs_simdy_maximumDoubleX4_avx512(__m256d x, __m256d y);
+extern __m256d hs_simdy_minimumNumberDoubleX4_avx512(__m256d x, __m256d y);
+extern __m256d hs_simdy_maximumNumberDoubleX4_avx512(__m256d x, __m256d y);
 #endif
 #if defined(__AVX512DQ__)
-extern __m512d hs_simdy_minimum_doublex8(__m512d x, __m512d y);
-extern __m512d hs_simdy_maximum_doublex8(__m512d x, __m512d y);
-extern __m512d hs_simdy_minimumNumber_doublex8(__m512d x, __m512d y);
-extern __m512d hs_simdy_maximumNumber_doublex8(__m512d x, __m512d y);
+extern __m512d hs_simdy_minimumDoubleX8(__m512d x, __m512d y);
+extern __m512d hs_simdy_maximumDoubleX8(__m512d x, __m512d y);
+extern __m512d hs_simdy_minimumNumberDoubleX8(__m512d x, __m512d y);
+extern __m512d hs_simdy_maximumNumberDoubleX8(__m512d x, __m512d y);
 #endif
 #elif defined(__aarch64__)
-float64x2_t hs_simdy_minimum_doublex2(float64x2_t x, float64x2_t y);
-float64x2_t hs_simdy_maximum_doublex2(float64x2_t x, float64x2_t y);
-float64x2_t hs_simdy_minimumNumber_doublex2(float64x2_t x, float64x2_t y);
-float64x2_t hs_simdy_maximumNumber_doublex2(float64x2_t x, float64x2_t y);
+float64x2_t hs_simdy_minimumDoubleX2(float64x2_t x, float64x2_t y);
+float64x2_t hs_simdy_maximumDoubleX2(float64x2_t x, float64x2_t y);
+float64x2_t hs_simdy_minimumNumberDoubleX2(float64x2_t x, float64x2_t y);
+float64x2_t hs_simdy_maximumNumberDoubleX2(float64x2_t x, float64x2_t y);
 #endif
 
 void minimum_double_array_2_portable(const double x[2], const double y[2], double result[restrict 2])
 {
     for (int i = 0; i < 2; ++i) {
-        result[i] = hs_simdy_minimum_double(x[i], y[i]);
+        result[i] = hs_simdy_minimumDouble(x[i], y[i]);
     }
 }
 
 void maximum_double_array_2_portable(const double x[2], const double y[2], double result[restrict 2])
 {
     for (int i = 0; i < 2; ++i) {
-        result[i] = hs_simdy_maximum_double(x[i], y[i]);
+        result[i] = hs_simdy_maximumDouble(x[i], y[i]);
     }
 }
 
 void minimumNumber_double_array_2_portable(const double x[2], const double y[2], double result[restrict 2])
 {
     for (int i = 0; i < 2; ++i) {
-        result[i] = hs_simdy_minimumNumber_double(x[i], y[i]);
+        result[i] = hs_simdy_minimumNumberDouble(x[i], y[i]);
     }
 }
 
 void maximumNumber_double_array_2_portable(const double x[2], const double y[2], double result[restrict 2])
 {
     for (int i = 0; i < 2; ++i) {
-        result[i] = hs_simdy_maximumNumber_double(x[i], y[i]);
+        result[i] = hs_simdy_maximumNumberDouble(x[i], y[i]);
     }
 }
 
@@ -86,28 +86,28 @@ void minimum_double_array_2_sse(const double x[2], const double y[2], double res
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_minimum_doublex2(xx, yy);
+    __m128d zz = hs_simdy_minimumDoubleX2(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void maximum_double_array_2_sse(const double x[2], const double y[2], double result[restrict 2])
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_maximum_doublex2(xx, yy);
+    __m128d zz = hs_simdy_maximumDoubleX2(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void minimumNumber_double_array_2_sse(const double x[2], const double y[2], double result[restrict 2])
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_minimumNumber_doublex2(xx, yy);
+    __m128d zz = hs_simdy_minimumNumberDoubleX2(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void maximumNumber_double_array_2_sse(const double x[2], const double y[2], double result[restrict 2])
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_maximumNumber_doublex2(xx, yy);
+    __m128d zz = hs_simdy_maximumNumberDoubleX2(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 #endif
@@ -117,28 +117,28 @@ void minimum_double_array_4_avx(const double x[4], const double y[4], double res
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_minimum_doublex4(xx, yy);
+    __m256d zz = hs_simdy_minimumDoubleX4(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void maximum_double_array_4_avx(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_maximum_doublex4(xx, yy);
+    __m256d zz = hs_simdy_maximumDoubleX4(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void minimumNumber_double_array_4_avx(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_minimumNumber_doublex4(xx, yy);
+    __m256d zz = hs_simdy_minimumNumberDoubleX4(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void maximumNumber_double_array_4_avx(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_maximumNumber_doublex4(xx, yy);
+    __m256d zz = hs_simdy_maximumNumberDoubleX4(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 #endif
@@ -148,84 +148,84 @@ void minimum_double_array_2_avx512(const double x[2], const double y[2], double 
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_minimum_doublex2_avx512(xx, yy);
+    __m128d zz = hs_simdy_minimumDoubleX2_avx512(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void maximum_double_array_2_avx512(const double x[2], const double y[2], double result[restrict 2])
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_maximum_doublex2_avx512(xx, yy);
+    __m128d zz = hs_simdy_maximumDoubleX2_avx512(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void minimumNumber_double_array_2_avx512(const double x[2], const double y[2], double result[restrict 2])
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_minimumNumber_doublex2_avx512(xx, yy);
+    __m128d zz = hs_simdy_minimumNumberDoubleX2_avx512(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void maximumNumber_double_array_2_avx512(const double x[2], const double y[2], double result[restrict 2])
 {
     __m128d xx = _mm_loadu_pd(x);
     __m128d yy = _mm_loadu_pd(y);
-    __m128d zz = hs_simdy_maximumNumber_doublex2_avx512(xx, yy);
+    __m128d zz = hs_simdy_maximumNumberDoubleX2_avx512(xx, yy);
     _mm_storeu_pd(result, zz);
 }
 void minimum_double_array_4_avx512(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_minimum_doublex4_avx512(xx, yy);
+    __m256d zz = hs_simdy_minimumDoubleX4_avx512(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void maximum_double_array_4_avx512(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_maximum_doublex4_avx512(xx, yy);
+    __m256d zz = hs_simdy_maximumDoubleX4_avx512(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void minimumNumber_double_array_4_avx512(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_minimumNumber_doublex4_avx512(xx, yy);
+    __m256d zz = hs_simdy_minimumNumberDoubleX4_avx512(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void maximumNumber_double_array_4_avx512(const double x[4], const double y[4], double result[restrict 4])
 {
     __m256d xx = _mm256_loadu_pd(x);
     __m256d yy = _mm256_loadu_pd(y);
-    __m256d zz = hs_simdy_maximumNumber_doublex4_avx512(xx, yy);
+    __m256d zz = hs_simdy_maximumNumberDoubleX4_avx512(xx, yy);
     _mm256_storeu_pd(result, zz);
 }
 void minimum_double_array_8_avx512(const double x[8], const double y[8], double result[restrict 8])
 {
     __m512d xx = _mm512_loadu_pd(x);
     __m512d yy = _mm512_loadu_pd(y);
-    __m512d zz = hs_simdy_minimum_doublex8(xx, yy);
+    __m512d zz = hs_simdy_minimumDoubleX8(xx, yy);
     _mm512_storeu_pd(result, zz);
 }
 void maximum_double_array_8_avx512(const double x[8], const double y[8], double result[restrict 8])
 {
     __m512d xx = _mm512_loadu_pd(x);
     __m512d yy = _mm512_loadu_pd(y);
-    __m512d zz = hs_simdy_maximum_doublex8(xx, yy);
+    __m512d zz = hs_simdy_maximumDoubleX8(xx, yy);
     _mm512_storeu_pd(result, zz);
 }
 void minimumNumber_double_array_8_avx512(const double x[8], const double y[8], double result[restrict 8])
 {
     __m512d xx = _mm512_loadu_pd(x);
     __m512d yy = _mm512_loadu_pd(y);
-    __m512d zz = hs_simdy_minimumNumber_doublex8(xx, yy);
+    __m512d zz = hs_simdy_minimumNumberDoubleX8(xx, yy);
     _mm512_storeu_pd(result, zz);
 }
 void maximumNumber_double_array_8_avx512(const double x[8], const double y[8], double result[restrict 8])
 {
     __m512d xx = _mm512_loadu_pd(x);
     __m512d yy = _mm512_loadu_pd(y);
-    __m512d zz = hs_simdy_maximumNumber_doublex8(xx, yy);
+    __m512d zz = hs_simdy_maximumNumberDoubleX8(xx, yy);
     _mm512_storeu_pd(result, zz);
 }
 #endif
@@ -235,28 +235,28 @@ void minimum_double_array_2_neon(const double x[2], const double y[2], double re
 {
     float64x2_t xx = vld1q_f64(x);
     float64x2_t yy = vld1q_f64(y);
-    float64x2_t zz = hs_simdy_minimum_doublex2(xx, yy);
+    float64x2_t zz = hs_simdy_minimumDoubleX2(xx, yy);
     vst1q_f64(result, zz);
 }
 void maximum_double_array_2_neon(const double x[2], const double y[2], double result[restrict 2])
 {
     float64x2_t xx = vld1q_f64(x);
     float64x2_t yy = vld1q_f64(y);
-    float64x2_t zz = hs_simdy_maximum_doublex2(xx, yy);
+    float64x2_t zz = hs_simdy_maximumDoubleX2(xx, yy);
     vst1q_f64(result, zz);
 }
 void minimumNumber_double_array_2_neon(const double x[2], const double y[2], double result[restrict 2])
 {
     float64x2_t xx = vld1q_f64(x);
     float64x2_t yy = vld1q_f64(y);
-    float64x2_t zz = hs_simdy_minimumNumber_doublex2(xx, yy);
+    float64x2_t zz = hs_simdy_minimumNumberDoubleX2(xx, yy);
     vst1q_f64(result, zz);
 }
 void maximumNumber_double_array_2_neon(const double x[2], const double y[2], double result[restrict 2])
 {
     float64x2_t xx = vld1q_f64(x);
     float64x2_t yy = vld1q_f64(y);
-    float64x2_t zz = hs_simdy_maximumNumber_doublex2(xx, yy);
+    float64x2_t zz = hs_simdy_maximumNumberDoubleX2(xx, yy);
     vst1q_f64(result, zz);
 }
 #endif
@@ -504,14 +504,14 @@ int main(int argc, char *argv[])
     set_snan(&test_data[3].y);
     set_snan(&test_data[4].x);
     set_snan(&test_data[4].y);
-    test_scalar("hs_simdy_minimum_double", hs_simdy_minimum_double, offsetof(struct test_data, min));
-    test_scalar("hs_simdy_maximum_double", hs_simdy_maximum_double, offsetof(struct test_data, max));
-    test_scalar("hs_simdy_minimumNumber_double", hs_simdy_minimumNumber_double, offsetof(struct test_data, minnm));
-    test_scalar("hs_simdy_maximumNumber_double", hs_simdy_maximumNumber_double, offsetof(struct test_data, maxnm));
-    test_commutativity("hs_simdy_minimum_double", hs_simdy_minimum_double);
-    test_commutativity("hs_simdy_maximum_double", hs_simdy_maximum_double);
-    test_commutativity("hs_simdy_minimumNumber_double", hs_simdy_minimumNumber_double);
-    test_commutativity("hs_simdy_maximumNumber_double", hs_simdy_maximumNumber_double);
+    test_scalar("hs_simdy_minimumDouble", hs_simdy_minimumDouble, offsetof(struct test_data, min));
+    test_scalar("hs_simdy_maximumDouble", hs_simdy_maximumDouble, offsetof(struct test_data, max));
+    test_scalar("hs_simdy_minimumNumberDouble", hs_simdy_minimumNumberDouble, offsetof(struct test_data, minnm));
+    test_scalar("hs_simdy_maximumNumberDouble", hs_simdy_maximumNumberDouble, offsetof(struct test_data, maxnm));
+    test_commutativity("hs_simdy_minimumDouble", hs_simdy_minimumDouble);
+    test_commutativity("hs_simdy_maximumDouble", hs_simdy_maximumDouble);
+    test_commutativity("hs_simdy_minimumNumberDouble", hs_simdy_minimumNumberDouble);
+    test_commutativity("hs_simdy_maximumNumberDouble", hs_simdy_maximumNumberDouble);
     test_array(2, "minimum_double_array_2_portable", minimum_double_array_2_portable, offsetof(struct test_data, min));
     test_array(2, "maximum_double_array_2_portable", maximum_double_array_2_portable, offsetof(struct test_data, max));
     test_array(2, "minimumNumber_double_array_2_portable", minimumNumber_double_array_2_portable, offsetof(struct test_data, minnm));

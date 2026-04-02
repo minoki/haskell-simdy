@@ -16,7 +16,7 @@
 
 #pragma STDC FENV_ACCESS ON
 
-double hs_simdy_minimum_double(double x, double y)
+double hs_simdy_minimumDouble(double x, double y)
 {
 #if defined(__aarch64__)
     float64x1_t xx = vld1_f64(&x);
@@ -46,7 +46,7 @@ double hs_simdy_minimum_double(double x, double y)
 #endif
 }
 
-double hs_simdy_maximum_double(double x, double y)
+double hs_simdy_maximumDouble(double x, double y)
 {
 #if defined(__aarch64__)
     float64x1_t xx = vld1_f64(&x);
@@ -78,7 +78,7 @@ double hs_simdy_maximum_double(double x, double y)
 
 #if defined(__i386__) || defined(__x86_64__)
 
-__m128d hs_simdy_minimum_doublex2(__m128d x, __m128d y)
+__m128d hs_simdy_minimumDoubleX2(__m128d x, __m128d y)
 {
     __m128d ord = _mm_cmpord_pd(x, y); // non-signaling compare
     __m128d x_ord = _mm_and_pd(x, ord); // convert possible NaN to zero
@@ -93,7 +93,7 @@ __m128d hs_simdy_minimum_doublex2(__m128d x, __m128d y)
     return _mm_or_pd(result_ord, result_unord);
 }
 
-__m128d hs_simdy_maximum_doublex2(__m128d x, __m128d y)
+__m128d hs_simdy_maximumDoubleX2(__m128d x, __m128d y)
 {
     __m128d ord = _mm_cmpord_pd(x, y); // non-signaling compare
     __m128d x_ord = _mm_and_pd(x, ord); // convert possible NaN to zero
@@ -108,7 +108,7 @@ __m128d hs_simdy_maximum_doublex2(__m128d x, __m128d y)
 }
 
 #if defined(__AVX__)
-__m256d hs_simdy_minimum_doublex4(__m256d xx, __m256d yy)
+__m256d hs_simdy_minimumDoubleX4(__m256d xx, __m256d yy)
 {
     __m256d unord = _mm256_cmp_pd(xx, yy, 3); // non-signaling UNORD compare
     if (!_mm256_testz_pd(unord, unord)) {
@@ -133,7 +133,7 @@ __m256d hs_simdy_minimum_doublex4(__m256d xx, __m256d yy)
     }
 }
 
-__m256d hs_simdy_maximum_doublex4(__m256d xx, __m256d yy)
+__m256d hs_simdy_maximumDoubleX4(__m256d xx, __m256d yy)
 {
     __m256d unord = _mm256_cmp_pd(xx, yy, 3); // non-signaling UNORD compare
     if (!_mm256_testz_pd(unord, unord)) {
@@ -159,7 +159,7 @@ __m256d hs_simdy_maximum_doublex4(__m256d xx, __m256d yy)
 #endif
 
 #if defined(__AVX512DQ__) && defined(__AVX512VL__)
-__m128d hs_simdy_minimum_doublex2_avx512(__m128d xx, __m128d yy)
+__m128d hs_simdy_minimumDoubleX2_avx512(__m128d xx, __m128d yy)
 {
     __m128d m = _mm_range_pd(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -173,7 +173,7 @@ __m128d hs_simdy_minimum_doublex2_avx512(__m128d xx, __m128d yy)
 #endif
 }
 
-__m128d hs_simdy_maximum_doublex2_avx512(__m128d xx, __m128d yy)
+__m128d hs_simdy_maximumDoubleX2_avx512(__m128d xx, __m128d yy)
 {
     __m128d m = _mm_range_pd(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -187,7 +187,7 @@ __m128d hs_simdy_maximum_doublex2_avx512(__m128d xx, __m128d yy)
 #endif
 }
 
-__m256d hs_simdy_minimum_doublex4_avx512(__m256d xx, __m256d yy)
+__m256d hs_simdy_minimumDoubleX4_avx512(__m256d xx, __m256d yy)
 {
     __m256d m = _mm256_range_pd(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm256_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -201,7 +201,7 @@ __m256d hs_simdy_minimum_doublex4_avx512(__m256d xx, __m256d yy)
 #endif
 }
 
-__m256d hs_simdy_maximum_doublex4_avx512(__m256d xx, __m256d yy)
+__m256d hs_simdy_maximumDoubleX4_avx512(__m256d xx, __m256d yy)
 {
     __m256d m = _mm256_range_pd(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm256_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -217,7 +217,7 @@ __m256d hs_simdy_maximum_doublex4_avx512(__m256d xx, __m256d yy)
 #endif
 
 #if defined(__AVX512DQ__)
-__m512d hs_simdy_minimum_doublex8(__m512d xx, __m512d yy)
+__m512d hs_simdy_minimumDoubleX8(__m512d xx, __m512d yy)
 {
     __m512d m = _mm512_range_pd(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm512_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -231,7 +231,7 @@ __m512d hs_simdy_minimum_doublex8(__m512d xx, __m512d yy)
 #endif
 }
 
-__m512d hs_simdy_maximum_doublex8(__m512d xx, __m512d yy)
+__m512d hs_simdy_maximumDoubleX8(__m512d xx, __m512d yy)
 {
     __m512d m = _mm512_range_pd(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm512_cmp_pd_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -248,12 +248,12 @@ __m512d hs_simdy_maximum_doublex8(__m512d xx, __m512d yy)
 
 #elif defined(__aarch64__)
 
-float64x2_t hs_simdy_minimum_doublex2(float64x2_t x, float64x2_t y)
+float64x2_t hs_simdy_minimumDoubleX2(float64x2_t x, float64x2_t y)
 {
     return vminq_f64(x, y);
 }
 
-float64x2_t hs_simdy_maximum_doublex2(float64x2_t x, float64x2_t y)
+float64x2_t hs_simdy_maximumDoubleX2(float64x2_t x, float64x2_t y)
 {
     return vmaxq_f64(x, y);
 }

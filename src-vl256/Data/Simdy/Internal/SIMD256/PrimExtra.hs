@@ -32,34 +32,34 @@ foreign import ccall unsafe "hs_simdy_unpack_mask32x8"
 foreign import ccall unsafe "hs_simdy_unpack_mask64x4"
   unpackMask64X4 :: Word8 -> Int64X4#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectInt8X32Mask# :: Int8X32# -> Int8X32# -> Int8X32# -> Int8X32#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectInt16X16Mask# :: Int16X16# -> Int16X16# -> Int16X16# -> Int16X16#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectInt32X8Mask# :: Int32X8# -> Int32X8# -> Int32X8# -> Int32X8#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectInt64X4Mask# :: Int64X4# -> Int64X4# -> Int64X4# -> Int64X4#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectWord8X32Mask# :: Int8X32# -> Word8X32# -> Word8X32# -> Word8X32#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectWord16X16Mask# :: Int16X16# -> Word16X16# -> Word16X16# -> Word16X16#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectWord32X8Mask# :: Int32X8# -> Word32X8# -> Word32X8# -> Word32X8#
 
-foreign import ccall unsafe "hs_simdy_select_int256"
+foreign import ccall unsafe "hs_simdy_selectInt256"
   selectWord64X4Mask# :: Int64X4# -> Word64X4# -> Word64X4# -> Word64X4#
 
-foreign import ccall unsafe "hs_simdy_select_floatx8"
+foreign import ccall unsafe "hs_simdy_selectFloatX8"
   selectFloatX8Mask# :: Int32X8# -> FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_select_doublex4"
+foreign import ccall unsafe "hs_simdy_selectDoubleX4"
   selectDoubleX4Mask# :: Int64X4# -> DoubleX4# -> DoubleX4# -> DoubleX4#
 
 selectInt8X32# :: Word32 -> Int8X32# -> Int8X32# -> Int8X32#
@@ -103,90 +103,90 @@ selectDoubleX4# !x = selectDoubleX4Mask# (unpackMask64X4 x)
 {-# INLINE selectDoubleX4# #-}
 #endif
 
-foreign import ccall unsafe "hs_simdy_select_int8x32_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt8X32_densemask"
   selectInt8X32# :: Word32 -> Int8X32# -> Int8X32# -> Int8X32#
 
-foreign import ccall unsafe "hs_simdy_select_int16x16_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt16X16_densemask"
   selectInt16X16# :: Word16 -> Int16X16# -> Int16X16# -> Int16X16#
 
-foreign import ccall unsafe "hs_simdy_select_int32x8_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt32X8_densemask"
   selectInt32X8# :: Word8 -> Int32X8# -> Int32X8# -> Int32X8#
 
-foreign import ccall unsafe "hs_simdy_select_int64x4_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt64X4_densemask"
   selectInt64X4# :: Word8 -> Int64X4# -> Int64X4# -> Int64X4#
 
-foreign import ccall unsafe "hs_simdy_select_int8x32_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt8X32_densemask"
   selectWord8X32# :: Word32 -> Word8X32# -> Word8X32# -> Word8X32#
 
-foreign import ccall unsafe "hs_simdy_select_int16x16_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt16X16_densemask"
   selectWord16X16# :: Word16 -> Word16X16# -> Word16X16# -> Word16X16#
 
-foreign import ccall unsafe "hs_simdy_select_int32x8_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt32X8_densemask"
   selectWord32X8# :: Word8 -> Word32X8# -> Word32X8# -> Word32X8#
 
-foreign import ccall unsafe "hs_simdy_select_int64x4_densemask"
+foreign import ccall unsafe "hs_simdy_selectInt64X4_densemask"
   selectWord64X4# :: Word8 -> Word64X4# -> Word64X4# -> Word64X4#
 
-foreign import ccall unsafe "hs_simdy_select_floatx8_densemask"
+foreign import ccall unsafe "hs_simdy_selectFloatX8_densemask"
   selectFloatX8# :: Word8 -> FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_select_doublex4_densemask"
+foreign import ccall unsafe "hs_simdy_selectDoubleX4_densemask"
   selectDoubleX4# :: Word8 -> DoubleX4# -> DoubleX4# -> DoubleX4#
 
 --
 -- Left Shift
 --
 
-foreign import ccall unsafe "hs_simdy_shiftL_int8x32"
+foreign import ccall unsafe "hs_simdy_shiftLInt8X32"
   shiftLInt8X32# :: Int8X32# -> Int# -> Int8X32#
 
-foreign import ccall unsafe "hs_simdy_shiftL_int16x16"
+foreign import ccall unsafe "hs_simdy_shiftLInt16X16"
   shiftLInt16X16# :: Int16X16# -> Int# -> Int16X16#
 
-foreign import ccall unsafe "hs_simdy_shiftL_int32x8"
+foreign import ccall unsafe "hs_simdy_shiftLInt32X8"
   shiftLInt32X8# :: Int32X8# -> Int# -> Int32X8#
 
-foreign import ccall unsafe "hs_simdy_shiftL_int64x4"
+foreign import ccall unsafe "hs_simdy_shiftLInt64X4"
   shiftLInt64X4# :: Int64X4# -> Int# -> Int64X4#
 
-foreign import ccall unsafe "hs_simdy_shiftL_word8x32"
+foreign import ccall unsafe "hs_simdy_shiftLWord8X32"
   shiftLWord8X32# :: Word8X32# -> Int# -> Word8X32#
 
-foreign import ccall unsafe "hs_simdy_shiftL_word16x16"
+foreign import ccall unsafe "hs_simdy_shiftLWord16X16"
   shiftLWord16X16# :: Word16X16# -> Int# -> Word16X16#
 
-foreign import ccall unsafe "hs_simdy_shiftL_word32x8"
+foreign import ccall unsafe "hs_simdy_shiftLWord32X8"
   shiftLWord32X8# :: Word32X8# -> Int# -> Word32X8#
 
-foreign import ccall unsafe "hs_simdy_shiftL_word64x4"
+foreign import ccall unsafe "hs_simdy_shiftLWord64X4"
   shiftLWord64X4# :: Word64X4# -> Int# -> Word64X4#
 
 --
 -- Right Shift (Arithmetic / Logical)
 --
 
-foreign import ccall unsafe "hs_simdy_shiftR_int8x32"
+foreign import ccall unsafe "hs_simdy_shiftRInt8X32"
   shiftRInt8X32# :: Int8X32# -> Int# -> Int8X32#
 
-foreign import ccall unsafe "hs_simdy_shiftR_int16x16"
+foreign import ccall unsafe "hs_simdy_shiftRInt16X16"
   shiftRInt16X16# :: Int16X16# -> Int# -> Int16X16#
 
-foreign import ccall unsafe "hs_simdy_shiftR_int32x8"
+foreign import ccall unsafe "hs_simdy_shiftRInt32X8"
   shiftRInt32X8# :: Int32X8# -> Int# -> Int32X8#
 
-foreign import ccall unsafe "hs_simdy_shiftR_int64x4"
+foreign import ccall unsafe "hs_simdy_shiftRInt64X4"
   shiftRInt64X4# :: Int64X4# -> Int# -> Int64X4#
 
-foreign import ccall unsafe "hs_simdy_shiftR_word8x32"
+foreign import ccall unsafe "hs_simdy_shiftRWord8X32"
   shiftRWord8X32# :: Word8X32# -> Int# -> Word8X32#
 
-foreign import ccall unsafe "hs_simdy_shiftR_word16x16"
+foreign import ccall unsafe "hs_simdy_shiftRWord16X16"
   shiftRWord16X16# :: Word16X16# -> Int# -> Word16X16#
 
-foreign import ccall unsafe "hs_simdy_shiftR_word32x8"
+foreign import ccall unsafe "hs_simdy_shiftRWord32X8"
   shiftRWord32X8# :: Word32X8# -> Int# -> Word32X8#
 
-foreign import ccall unsafe "hs_simdy_shiftR_word64x4"
+foreign import ccall unsafe "hs_simdy_shiftRWord64X4"
   shiftRWord64X4# :: Word64X4# -> Int# -> Word64X4#
 
 --
@@ -195,54 +195,54 @@ foreign import ccall unsafe "hs_simdy_shiftR_word64x4"
 
 #if defined(USE_AVX512)
 
-foreign import ccall unsafe "hs_simdy_minimum_floatx8_avx512"
+foreign import ccall unsafe "hs_simdy_minimumFloatX8_avx512"
   minimumFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_maximum_floatx8_avx512"
+foreign import ccall unsafe "hs_simdy_maximumFloatX8_avx512"
   maximumFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_minimumNumber_floatx8_avx512"
+foreign import ccall unsafe "hs_simdy_minimumNumberFloatX8_avx512"
   minimumNumberFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_maximumNumber_floatx8_avx512"
+foreign import ccall unsafe "hs_simdy_maximumNumberFloatX8_avx512"
   maximumNumberFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_minimum_doublex4_avx512"
+foreign import ccall unsafe "hs_simdy_minimumDoubleX4_avx512"
   minimumDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
-foreign import ccall unsafe "hs_simdy_maximum_doublex4_avx512"
+foreign import ccall unsafe "hs_simdy_maximumDoubleX4_avx512"
   maximumDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
-foreign import ccall unsafe "hs_simdy_minimumNumber_doublex4_avx512"
+foreign import ccall unsafe "hs_simdy_minimumNumberDoubleX4_avx512"
   minimumNumberDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
-foreign import ccall unsafe "hs_simdy_maximumNumber_doublex4_avx512"
+foreign import ccall unsafe "hs_simdy_maximumNumberDoubleX4_avx512"
   maximumNumberDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
 #else
 
-foreign import ccall unsafe "hs_simdy_minimum_floatx8"
+foreign import ccall unsafe "hs_simdy_minimumFloatX8"
   minimumFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_maximum_floatx8"
+foreign import ccall unsafe "hs_simdy_maximumFloatX8"
   maximumFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_minimumNumber_floatx8"
+foreign import ccall unsafe "hs_simdy_minimumNumberFloatX8"
   minimumNumberFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_maximumNumber_floatx8"
+foreign import ccall unsafe "hs_simdy_maximumNumberFloatX8"
   maximumNumberFloatX8# :: FloatX8# -> FloatX8# -> FloatX8#
 
-foreign import ccall unsafe "hs_simdy_minimum_doublex4"
+foreign import ccall unsafe "hs_simdy_minimumDoubleX4"
   minimumDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
-foreign import ccall unsafe "hs_simdy_maximum_doublex4"
+foreign import ccall unsafe "hs_simdy_maximumDoubleX4"
   maximumDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
-foreign import ccall unsafe "hs_simdy_minimumNumber_doublex4"
+foreign import ccall unsafe "hs_simdy_minimumNumberDoubleX4"
   minimumNumberDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
-foreign import ccall unsafe "hs_simdy_maximumNumber_doublex4"
+foreign import ccall unsafe "hs_simdy_maximumNumberDoubleX4"
   maximumNumberDoubleX4# :: DoubleX4# -> DoubleX4# -> DoubleX4#
 
 #endif
@@ -251,98 +251,98 @@ foreign import ccall unsafe "hs_simdy_maximumNumber_doublex4"
 -- Equality
 --
 
-foreign import ccall unsafe "hs_simdy_int8x32_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt8X32_densemask"
   eqInt8X32# :: Int8X32# -> Int8X32# -> Word32
 
-foreign import ccall unsafe "hs_simdy_int16x16_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt16X16_densemask"
   eqInt16X16# :: Int16X16# -> Int16X16# -> Word16
 
-foreign import ccall unsafe "hs_simdy_int32x8_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt32X8_densemask"
   eqInt32X8# :: Int32X8# -> Int32X8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_int64x4_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt64X4_densemask"
   eqInt64X4# :: Int64X4# -> Int64X4# -> Word8
 
-foreign import ccall unsafe "hs_simdy_int8x32_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt8X32_densemask"
   eqWord8X32# :: Word8X32# -> Word8X32# -> Word32
 
-foreign import ccall unsafe "hs_simdy_int16x16_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt16X16_densemask"
   eqWord16X16# :: Word16X16# -> Word16X16# -> Word16
 
-foreign import ccall unsafe "hs_simdy_int32x8_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt32X8_densemask"
   eqWord32X8# :: Word32X8# -> Word32X8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_int64x4_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqInt64X4_densemask"
   eqWord64X4# :: Word64X4# -> Word64X4# -> Word8
 
-foreign import ccall unsafe "hs_simdy_floatx8_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqFloatX8_densemask"
   eqFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_doublex4_eq_densemask"
+foreign import ccall unsafe "hs_simdy_eqDoubleX4_densemask"
   eqDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
 
 --
 -- Less than
 --
 
-foreign import ccall unsafe "hs_simdy_int8x32_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltInt8X32_densemask"
   ltInt8X32# :: Int8X32# -> Int8X32# -> Word32
 
-foreign import ccall unsafe "hs_simdy_int16x16_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltInt16X16_densemask"
   ltInt16X16# :: Int16X16# -> Int16X16# -> Word16
 
-foreign import ccall unsafe "hs_simdy_int32x8_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltInt32X8_densemask"
   ltInt32X8# :: Int32X8# -> Int32X8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_int64x4_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltInt64X4_densemask"
   ltInt64X4# :: Int64X4# -> Int64X4# -> Word8
 
-foreign import ccall unsafe "hs_simdy_word8x32_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltWord8X32_densemask"
   ltWord8X32# :: Word8X32# -> Word8X32# -> Word32
 
-foreign import ccall unsafe "hs_simdy_word16x16_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltWord16X16_densemask"
   ltWord16X16# :: Word16X16# -> Word16X16# -> Word16
 
-foreign import ccall unsafe "hs_simdy_word32x8_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltWord32X8_densemask"
   ltWord32X8# :: Word32X8# -> Word32X8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_word64x4_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltWord64X4_densemask"
   ltWord64X4# :: Word64X4# -> Word64X4# -> Word8
 
-foreign import ccall unsafe "hs_simdy_floatx8_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltFloatX8_densemask"
   ltFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_doublex4_lt_densemask"
+foreign import ccall unsafe "hs_simdy_ltDoubleX4_densemask"
   ltDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
 
 --
 -- Less than or equal to
 --
 
-foreign import ccall unsafe "hs_simdy_floatx8_le_densemask"
+foreign import ccall unsafe "hs_simdy_leFloatX8_densemask"
   leFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_doublex4_le_densemask"
+foreign import ccall unsafe "hs_simdy_leDoubleX4_densemask"
   leDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
 
 --
 -- Greater than
 --
 
-foreign import ccall unsafe "hs_simdy_floatx8_gt_densemask"
+foreign import ccall unsafe "hs_simdy_gtFloatX8_densemask"
   gtFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_doublex4_gt_densemask"
+foreign import ccall unsafe "hs_simdy_gtDoubleX4_densemask"
   gtDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
 
 --
 -- Greater than or equal to
 --
 
-foreign import ccall unsafe "hs_simdy_floatx8_ge_densemask"
+foreign import ccall unsafe "hs_simdy_geFloatX8_densemask"
   geFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_doublex4_ge_densemask"
+foreign import ccall unsafe "hs_simdy_geDoubleX4_densemask"
   geDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
 
 {-
@@ -350,10 +350,10 @@ foreign import ccall unsafe "hs_simdy_doublex4_ge_densemask"
 -- Unordered
 --
 
-foreign import ccall unsafe "hs_simdy_floatx8_unord_densemask"
+foreign import ccall unsafe "hs_simdy_unordFloatX8_densemask"
   unordFloatX8# :: FloatX8# -> FloatX8# -> Word8
 
-foreign import ccall unsafe "hs_simdy_doublex4_unord_densemask"
+foreign import ccall unsafe "hs_simdy_unordDoubleX4_densemask"
   unordDoubleX4# :: DoubleX4# -> DoubleX4# -> Word8
 -}
 

@@ -41,7 +41,7 @@ float canonicalize_float(float x)
 }
 #endif
 
-float hs_simdy_minimumNumber_float(float x, float y)
+float hs_simdy_minimumNumberFloat(float x, float y)
 {
 #if defined(__aarch64__)
     float result;
@@ -67,7 +67,7 @@ float hs_simdy_minimumNumber_float(float x, float y)
 #endif
 }
 
-float hs_simdy_maximumNumber_float(float x, float y)
+float hs_simdy_maximumNumberFloat(float x, float y)
 {
 #if defined(__aarch64__)
     float result;
@@ -95,7 +95,7 @@ float hs_simdy_maximumNumber_float(float x, float y)
 
 #if defined(__i386__) || defined(__x86_64__)
 
-__m128 hs_simdy_minimumNumber_floatx4(__m128 x, __m128 y)
+__m128 hs_simdy_minimumNumberFloatX4(__m128 x, __m128 y)
 {
     // Convert (possible) signaling NaN to quiet one
     __m128 one = _mm_set1_ps(1.0f);
@@ -113,7 +113,7 @@ __m128 hs_simdy_minimumNumber_floatx4(__m128 x, __m128 y)
     return _mm_or_ps(result_ord, _mm_andnot_ps(ord, result_unord));
 }
 
-__m128 hs_simdy_maximumNumber_floatx4(__m128 x, __m128 y)
+__m128 hs_simdy_maximumNumberFloatX4(__m128 x, __m128 y)
 {
     // Convert (possible) signaling NaN to quiet one
     __m128 one = _mm_set1_ps(1.0f);
@@ -131,7 +131,7 @@ __m128 hs_simdy_maximumNumber_floatx4(__m128 x, __m128 y)
 }
 
 #if defined(__AVX__)
-__m256 hs_simdy_minimumNumber_floatx8(__m256 xx, __m256 yy)
+__m256 hs_simdy_minimumNumberFloatX8(__m256 xx, __m256 yy)
 {
     __m256 unord = _mm256_cmp_ps(xx, yy, 3); // non-signaling UNORD compare
     if (!_mm256_testz_ps(unord, unord)) {
@@ -158,7 +158,7 @@ __m256 hs_simdy_minimumNumber_floatx8(__m256 xx, __m256 yy)
     }
 }
 
-__m256 hs_simdy_maximumNumber_floatx8(__m256 xx, __m256 yy)
+__m256 hs_simdy_maximumNumberFloatX8(__m256 xx, __m256 yy)
 {
     __m256 unord = _mm256_cmp_ps(xx, yy, 3); // non-signaling UNORD compare
     if (!_mm256_testz_ps(unord, unord)) {
@@ -186,7 +186,7 @@ __m256 hs_simdy_maximumNumber_floatx8(__m256 xx, __m256 yy)
 #endif
 
 #if defined(__AVX512DQ__) && defined(__AVX512VL__)
-__m128 hs_simdy_minimumNumber_floatx4_avx512(__m128 xx, __m128 yy)
+__m128 hs_simdy_minimumNumberFloatX4_avx512(__m128 xx, __m128 yy)
 {
     // Convert (possible) signaling NaN to quiet one
     __m128 one = _mm_set1_ps(1.0f);
@@ -195,7 +195,7 @@ __m128 hs_simdy_minimumNumber_floatx4_avx512(__m128 xx, __m128 yy)
     return _mm_range_ps(xx, yy, 4); // NaN is missing data
 }
 
-__m128 hs_simdy_maximumNumber_floatx4_avx512(__m128 xx, __m128 yy)
+__m128 hs_simdy_maximumNumberFloatX4_avx512(__m128 xx, __m128 yy)
 {
     // Convert (possible) signaling NaN to quiet one
     __m128 one = _mm_set1_ps(1.0f);
@@ -204,7 +204,7 @@ __m128 hs_simdy_maximumNumber_floatx4_avx512(__m128 xx, __m128 yy)
     return _mm_range_ps(xx, yy, 5); // NaN is missing data
 }
 
-__m256 hs_simdy_minimumNumber_floatx8_avx512(__m256 xx, __m256 yy)
+__m256 hs_simdy_minimumNumberFloatX8_avx512(__m256 xx, __m256 yy)
 {
     // Convert (possible) signaling NaN to quiet one
     __m256 one = _mm256_set1_ps(1.0f);
@@ -213,7 +213,7 @@ __m256 hs_simdy_minimumNumber_floatx8_avx512(__m256 xx, __m256 yy)
     return _mm256_range_ps(xx, yy, 4); // NaN is missing data
 }
 
-__m256 hs_simdy_maximumNumber_floatx8_avx512(__m256 xx, __m256 yy)
+__m256 hs_simdy_maximumNumberFloatX8_avx512(__m256 xx, __m256 yy)
 {
     // Convert (possible) signaling NaN to quiet one
     __m256 one = _mm256_set1_ps(1.0f);
@@ -224,7 +224,7 @@ __m256 hs_simdy_maximumNumber_floatx8_avx512(__m256 xx, __m256 yy)
 #endif
 
 #if defined(__AVX512DQ__)
-__m512 hs_simdy_minimumNumber_floatx16(__m512 xx, __m512 yy)
+__m512 hs_simdy_minimumNumberFloatX16(__m512 xx, __m512 yy)
 {
     // Convert (possible) signaling NaN to quiet one
     __m512 one = _mm512_set1_ps(1.0f);
@@ -233,7 +233,7 @@ __m512 hs_simdy_minimumNumber_floatx16(__m512 xx, __m512 yy)
     return _mm512_range_ps(xx, yy, 4); // NaN is missing data
 }
 
-__m512 hs_simdy_maximumNumber_floatx16(__m512 xx, __m512 yy)
+__m512 hs_simdy_maximumNumberFloatX16(__m512 xx, __m512 yy)
 {
     // Convert (possible) signaling NaN to quiet one
     __m512 one = _mm512_set1_ps(1.0f);
@@ -245,7 +245,7 @@ __m512 hs_simdy_maximumNumber_floatx16(__m512 xx, __m512 yy)
 
 #elif defined(__aarch64__)
 
-float32x4_t hs_simdy_minimumNumber_floatx4(float32x4_t x, float32x4_t y)
+float32x4_t hs_simdy_minimumNumberFloatX4(float32x4_t x, float32x4_t y)
 {
     // Convert (possible) signaling NaN to quiet one
     float32x4_t one = vdupq_n_f32(1.0f);
@@ -256,7 +256,7 @@ float32x4_t hs_simdy_minimumNumber_floatx4(float32x4_t x, float32x4_t y)
     return vminnmq_f32(x, y);
 }
 
-float32x4_t hs_simdy_maximumNumber_floatx4(float32x4_t x, float32x4_t y)
+float32x4_t hs_simdy_maximumNumberFloatX4(float32x4_t x, float32x4_t y)
 {
     // Convert (possible) signaling NaN to quiet one
     float32x4_t one = vdupq_n_f32(1.0f);

@@ -15,69 +15,69 @@
 
 #pragma STDC FENV_ACCESS ON
 
-extern float hs_simdy_minimum_float(float x, float y);
-extern float hs_simdy_maximum_float(float x, float y);
-extern float hs_simdy_minimumNumber_float(float x, float y);
-extern float hs_simdy_maximumNumber_float(float x, float y);
+extern float hs_simdy_minimumFloat(float x, float y);
+extern float hs_simdy_maximumFloat(float x, float y);
+extern float hs_simdy_minimumNumberFloat(float x, float y);
+extern float hs_simdy_maximumNumberFloat(float x, float y);
 #if defined(__SSE2__)
-extern __m128 hs_simdy_minimum_floatx4(__m128 x, __m128 y);
-extern __m128 hs_simdy_maximum_floatx4(__m128 x, __m128 y);
-extern __m128 hs_simdy_minimumNumber_floatx4(__m128 x, __m128 y);
-extern __m128 hs_simdy_maximumNumber_floatx4(__m128 x, __m128 y);
+extern __m128 hs_simdy_minimumFloatX4(__m128 x, __m128 y);
+extern __m128 hs_simdy_maximumFloatX4(__m128 x, __m128 y);
+extern __m128 hs_simdy_minimumNumberFloatX4(__m128 x, __m128 y);
+extern __m128 hs_simdy_maximumNumberFloatX4(__m128 x, __m128 y);
 #if defined(__AVX__)
-extern __m256 hs_simdy_minimum_floatx8(__m256 x, __m256 y);
-extern __m256 hs_simdy_maximum_floatx8(__m256 x, __m256 y);
-extern __m256 hs_simdy_minimumNumber_floatx8(__m256 x, __m256 y);
-extern __m256 hs_simdy_maximumNumber_floatx8(__m256 x, __m256 y);
+extern __m256 hs_simdy_minimumFloatX8(__m256 x, __m256 y);
+extern __m256 hs_simdy_maximumFloatX8(__m256 x, __m256 y);
+extern __m256 hs_simdy_minimumNumberFloatX8(__m256 x, __m256 y);
+extern __m256 hs_simdy_maximumNumberFloatX8(__m256 x, __m256 y);
 #endif
 #if defined(__AVX512DQ__) && defined(__AVX512VL__)
-extern __m128 hs_simdy_minimum_floatx4_avx512(__m128 x, __m128 y);
-extern __m128 hs_simdy_maximum_floatx4_avx512(__m128 x, __m128 y);
-extern __m128 hs_simdy_minimumNumber_floatx4_avx512(__m128 x, __m128 y);
-extern __m128 hs_simdy_maximumNumber_floatx4_avx512(__m128 x, __m128 y);
-extern __m256 hs_simdy_minimum_floatx8_avx512(__m256 x, __m256 y);
-extern __m256 hs_simdy_maximum_floatx8_avx512(__m256 x, __m256 y);
-extern __m256 hs_simdy_minimumNumber_floatx8_avx512(__m256 x, __m256 y);
-extern __m256 hs_simdy_maximumNumber_floatx8_avx512(__m256 x, __m256 y);
+extern __m128 hs_simdy_minimumFloatX4_avx512(__m128 x, __m128 y);
+extern __m128 hs_simdy_maximumFloatX4_avx512(__m128 x, __m128 y);
+extern __m128 hs_simdy_minimumNumberFloatX4_avx512(__m128 x, __m128 y);
+extern __m128 hs_simdy_maximumNumberFloatX4_avx512(__m128 x, __m128 y);
+extern __m256 hs_simdy_minimumFloatX8_avx512(__m256 x, __m256 y);
+extern __m256 hs_simdy_maximumFloatX8_avx512(__m256 x, __m256 y);
+extern __m256 hs_simdy_minimumNumberFloatX8_avx512(__m256 x, __m256 y);
+extern __m256 hs_simdy_maximumNumberFloatX8_avx512(__m256 x, __m256 y);
 #endif
 #if defined(__AVX512DQ__)
-extern __m512 hs_simdy_minimum_floatx16(__m512 x, __m512 y);
-extern __m512 hs_simdy_maximum_floatx16(__m512 x, __m512 y);
-extern __m512 hs_simdy_minimumNumber_floatx16(__m512 x, __m512 y);
-extern __m512 hs_simdy_maximumNumber_floatx16(__m512 x, __m512 y);
+extern __m512 hs_simdy_minimumFloatX16(__m512 x, __m512 y);
+extern __m512 hs_simdy_maximumFloatX16(__m512 x, __m512 y);
+extern __m512 hs_simdy_minimumNumberFloatX16(__m512 x, __m512 y);
+extern __m512 hs_simdy_maximumNumberFloatX16(__m512 x, __m512 y);
 #endif
 #elif defined(__aarch64__)
-float32x4_t hs_simdy_minimum_floatx4(float32x4_t x, float32x4_t y);
-float32x4_t hs_simdy_maximum_floatx4(float32x4_t x, float32x4_t y);
-float32x4_t hs_simdy_minimumNumber_floatx4(float32x4_t x, float32x4_t y);
-float32x4_t hs_simdy_maximumNumber_floatx4(float32x4_t x, float32x4_t y);
+float32x4_t hs_simdy_minimumFloatX4(float32x4_t x, float32x4_t y);
+float32x4_t hs_simdy_maximumFloatX4(float32x4_t x, float32x4_t y);
+float32x4_t hs_simdy_minimumNumberFloatX4(float32x4_t x, float32x4_t y);
+float32x4_t hs_simdy_maximumNumberFloatX4(float32x4_t x, float32x4_t y);
 #endif
 
 void minimum_float_array_4_portable(const float x[4], const float y[4], float result[restrict 4])
 {
     for (int i = 0; i < 4; ++i) {
-        result[i] = hs_simdy_minimum_float(x[i], y[i]);
+        result[i] = hs_simdy_minimumFloat(x[i], y[i]);
     }
 }
 
 void maximum_float_array_4_portable(const float x[4], const float y[4], float result[restrict 4])
 {
     for (int i = 0; i < 4; ++i) {
-        result[i] = hs_simdy_maximum_float(x[i], y[i]);
+        result[i] = hs_simdy_maximumFloat(x[i], y[i]);
     }
 }
 
 void minimumNumber_float_array_4_portable(const float x[4], const float y[4], float result[restrict 4])
 {
     for (int i = 0; i < 4; ++i) {
-        result[i] = hs_simdy_minimumNumber_float(x[i], y[i]);
+        result[i] = hs_simdy_minimumNumberFloat(x[i], y[i]);
     }
 }
 
 void maximumNumber_float_array_4_portable(const float x[4], const float y[4], float result[restrict 4])
 {
     for (int i = 0; i < 4; ++i) {
-        result[i] = hs_simdy_maximumNumber_float(x[i], y[i]);
+        result[i] = hs_simdy_maximumNumberFloat(x[i], y[i]);
     }
 }
 
@@ -86,28 +86,28 @@ void minimum_float_array_4_sse(const float x[4], const float y[4], float result[
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_minimum_floatx4(xx, yy);
+    __m128 zz = hs_simdy_minimumFloatX4(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void maximum_float_array_4_sse(const float x[4], const float y[4], float result[restrict 4])
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_maximum_floatx4(xx, yy);
+    __m128 zz = hs_simdy_maximumFloatX4(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void minimumNumber_float_array_4_sse(const float x[4], const float y[4], float result[restrict 4])
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_minimumNumber_floatx4(xx, yy);
+    __m128 zz = hs_simdy_minimumNumberFloatX4(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void maximumNumber_float_array_4_sse(const float x[4], const float y[4], float result[restrict 4])
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_maximumNumber_floatx4(xx, yy);
+    __m128 zz = hs_simdy_maximumNumberFloatX4(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 #endif
@@ -117,28 +117,28 @@ void minimum_float_array_8_avx(const float x[8], const float y[8], float result[
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_minimum_floatx8(xx, yy);
+    __m256 zz = hs_simdy_minimumFloatX8(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void maximum_float_array_8_avx(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_maximum_floatx8(xx, yy);
+    __m256 zz = hs_simdy_maximumFloatX8(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void minimumNumber_float_array_8_avx(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_minimumNumber_floatx8(xx, yy);
+    __m256 zz = hs_simdy_minimumNumberFloatX8(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void maximumNumber_float_array_8_avx(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_maximumNumber_floatx8(xx, yy);
+    __m256 zz = hs_simdy_maximumNumberFloatX8(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 #endif
@@ -148,84 +148,84 @@ void minimum_float_array_4_avx512(const float x[4], const float y[4], float resu
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_minimum_floatx4_avx512(xx, yy);
+    __m128 zz = hs_simdy_minimumFloatX4_avx512(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void maximum_float_array_4_avx512(const float x[4], const float y[4], float result[restrict 4])
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_maximum_floatx4_avx512(xx, yy);
+    __m128 zz = hs_simdy_maximumFloatX4_avx512(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void minimumNumber_float_array_4_avx512(const float x[4], const float y[4], float result[restrict 4])
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_minimumNumber_floatx4_avx512(xx, yy);
+    __m128 zz = hs_simdy_minimumNumberFloatX4_avx512(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void maximumNumber_float_array_4_avx512(const float x[4], const float y[4], float result[restrict 4])
 {
     __m128 xx = _mm_loadu_ps(x);
     __m128 yy = _mm_loadu_ps(y);
-    __m128 zz = hs_simdy_maximumNumber_floatx4_avx512(xx, yy);
+    __m128 zz = hs_simdy_maximumNumberFloatX4_avx512(xx, yy);
     _mm_storeu_ps(result, zz);
 }
 void minimum_float_array_8_avx512(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_minimum_floatx8_avx512(xx, yy);
+    __m256 zz = hs_simdy_minimumFloatX8_avx512(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void maximum_float_array_8_avx512(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_maximum_floatx8_avx512(xx, yy);
+    __m256 zz = hs_simdy_maximumFloatX8_avx512(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void minimumNumber_float_array_8_avx512(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_minimumNumber_floatx8_avx512(xx, yy);
+    __m256 zz = hs_simdy_minimumNumberFloatX8_avx512(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void maximumNumber_float_array_8_avx512(const float x[8], const float y[8], float result[restrict 8])
 {
     __m256 xx = _mm256_loadu_ps(x);
     __m256 yy = _mm256_loadu_ps(y);
-    __m256 zz = hs_simdy_maximumNumber_floatx8_avx512(xx, yy);
+    __m256 zz = hs_simdy_maximumNumberFloatX8_avx512(xx, yy);
     _mm256_storeu_ps(result, zz);
 }
 void minimum_float_array_16_avx512(const float x[16], const float y[16], float result[restrict 16])
 {
     __m512 xx = _mm512_loadu_ps(x);
     __m512 yy = _mm512_loadu_ps(y);
-    __m512 zz = hs_simdy_minimum_floatx16(xx, yy);
+    __m512 zz = hs_simdy_minimumFloatX16(xx, yy);
     _mm512_storeu_ps(result, zz);
 }
 void maximum_float_array_16_avx512(const float x[16], const float y[16], float result[restrict 16])
 {
     __m512 xx = _mm512_loadu_ps(x);
     __m512 yy = _mm512_loadu_ps(y);
-    __m512 zz = hs_simdy_maximum_floatx16(xx, yy);
+    __m512 zz = hs_simdy_maximumFloatX16(xx, yy);
     _mm512_storeu_ps(result, zz);
 }
 void minimumNumber_float_array_16_avx512(const float x[16], const float y[16], float result[restrict 16])
 {
     __m512 xx = _mm512_loadu_ps(x);
     __m512 yy = _mm512_loadu_ps(y);
-    __m512 zz = hs_simdy_minimumNumber_floatx16(xx, yy);
+    __m512 zz = hs_simdy_minimumNumberFloatX16(xx, yy);
     _mm512_storeu_ps(result, zz);
 }
 void maximumNumber_float_array_16_avx512(const float x[16], const float y[16], float result[restrict 16])
 {
     __m512 xx = _mm512_loadu_ps(x);
     __m512 yy = _mm512_loadu_ps(y);
-    __m512 zz = hs_simdy_maximumNumber_floatx16(xx, yy);
+    __m512 zz = hs_simdy_maximumNumberFloatX16(xx, yy);
     _mm512_storeu_ps(result, zz);
 }
 #endif
@@ -235,28 +235,28 @@ void minimum_float_array_4_neon(const float x[4], const float y[4], float result
 {
     float32x4_t xx = vld1q_f32(x);
     float32x4_t yy = vld1q_f32(y);
-    float32x4_t zz = hs_simdy_minimum_floatx4(xx, yy);
+    float32x4_t zz = hs_simdy_minimumFloatX4(xx, yy);
     vst1q_f32(result, zz);
 }
 void maximum_float_array_4_neon(const float x[4], const float y[4], float result[restrict 4])
 {
     float32x4_t xx = vld1q_f32(x);
     float32x4_t yy = vld1q_f32(y);
-    float32x4_t zz = hs_simdy_maximum_floatx4(xx, yy);
+    float32x4_t zz = hs_simdy_maximumFloatX4(xx, yy);
     vst1q_f32(result, zz);
 }
 void minimumNumber_float_array_4_neon(const float x[4], const float y[4], float result[restrict 4])
 {
     float32x4_t xx = vld1q_f32(x);
     float32x4_t yy = vld1q_f32(y);
-    float32x4_t zz = hs_simdy_minimumNumber_floatx4(xx, yy);
+    float32x4_t zz = hs_simdy_minimumNumberFloatX4(xx, yy);
     vst1q_f32(result, zz);
 }
 void maximumNumber_float_array_4_neon(const float x[4], const float y[4], float result[restrict 4])
 {
     float32x4_t xx = vld1q_f32(x);
     float32x4_t yy = vld1q_f32(y);
-    float32x4_t zz = hs_simdy_maximumNumber_floatx4(xx, yy);
+    float32x4_t zz = hs_simdy_maximumNumberFloatX4(xx, yy);
     vst1q_f32(result, zz);
 }
 #endif
@@ -504,14 +504,14 @@ int main(int argc, char *argv[])
     set_snan(&test_data[3].y);
     set_snan(&test_data[4].x);
     set_snan(&test_data[4].y);
-    test_scalar("hs_simdy_minimum_float", hs_simdy_minimum_float, offsetof(struct test_data, min));
-    test_scalar("hs_simdy_maximum_float", hs_simdy_maximum_float, offsetof(struct test_data, max));
-    test_scalar("hs_simdy_minimumNumber_float", hs_simdy_minimumNumber_float, offsetof(struct test_data, minnm));
-    test_scalar("hs_simdy_maximumNumber_float", hs_simdy_maximumNumber_float, offsetof(struct test_data, maxnm));
-    test_commutativity("hs_simdy_minimum_float", hs_simdy_minimum_float);
-    test_commutativity("hs_simdy_maximum_float", hs_simdy_maximum_float);
-    test_commutativity("hs_simdy_minimumNumber_float", hs_simdy_minimumNumber_float);
-    test_commutativity("hs_simdy_maximumNumber_float", hs_simdy_maximumNumber_float);
+    test_scalar("hs_simdy_minimumFloat", hs_simdy_minimumFloat, offsetof(struct test_data, min));
+    test_scalar("hs_simdy_maximumFloat", hs_simdy_maximumFloat, offsetof(struct test_data, max));
+    test_scalar("hs_simdy_minimumNumberFloat", hs_simdy_minimumNumberFloat, offsetof(struct test_data, minnm));
+    test_scalar("hs_simdy_maximumNumberFloat", hs_simdy_maximumNumberFloat, offsetof(struct test_data, maxnm));
+    test_commutativity("hs_simdy_minimumFloat", hs_simdy_minimumFloat);
+    test_commutativity("hs_simdy_maximumFloat", hs_simdy_maximumFloat);
+    test_commutativity("hs_simdy_minimumNumberFloat", hs_simdy_minimumNumberFloat);
+    test_commutativity("hs_simdy_maximumNumberFloat", hs_simdy_maximumNumberFloat);
     test_array(4, "minimum_float_array_4_portable", minimum_float_array_4_portable, offsetof(struct test_data, min));
     test_array(4, "maximum_float_array_4_portable", maximum_float_array_4_portable, offsetof(struct test_data, max));
     test_array(4, "minimumNumber_float_array_4_portable", minimumNumber_float_array_4_portable, offsetof(struct test_data, minnm));

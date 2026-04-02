@@ -16,7 +16,7 @@
 
 #pragma STDC FENV_ACCESS ON
 
-float hs_simdy_minimum_float(float x, float y)
+float hs_simdy_minimumFloat(float x, float y)
 {
 #if defined(__aarch64__)
     float result;
@@ -38,7 +38,7 @@ float hs_simdy_minimum_float(float x, float y)
 #endif
 }
 
-float hs_simdy_maximum_float(float x, float y)
+float hs_simdy_maximumFloat(float x, float y)
 {
 #if defined(__aarch64__)
     float result;
@@ -62,7 +62,7 @@ float hs_simdy_maximum_float(float x, float y)
 
 #if defined(__i386__) || defined(__x86_64__)
 
-__m128 hs_simdy_minimum_floatx4(__m128 x, __m128 y)
+__m128 hs_simdy_minimumFloatX4(__m128 x, __m128 y)
 {
     __m128 ord = _mm_cmpord_ps(x, y); // non-signaling compare
     __m128 x_ord = _mm_and_ps(x, ord); // convert possible NaN to zero
@@ -79,24 +79,24 @@ __m128 hs_simdy_minimum_floatx4(__m128 x, __m128 y)
     float x0, y0;
     _mm_store_ss(&x0, x);
     _mm_store_ss(&y0, y);
-    float z0 = hs_simdy_minimum_float(x0, y0);
+    float z0 = hs_simdy_minimumFloat(x0, y0);
     float x1, y1;
     _mm_store_ss(&x1, _mm_shuffle_ps(x, x, 1));
     _mm_store_ss(&y1, _mm_shuffle_ps(y, y, 1));
-    float z1 = hs_simdy_minimum_float(x1, y1);
+    float z1 = hs_simdy_minimumFloat(x1, y1);
     float x2, y2;
     _mm_store_ss(&x2, _mm_shuffle_ps(x, x, 2));
     _mm_store_ss(&y2, _mm_shuffle_ps(y, y, 2));
-    float z2 = hs_simdy_minimum_float(x2, y2);
+    float z2 = hs_simdy_minimumFloat(x2, y2);
     float x3, y3;
     _mm_store_ss(&x3, _mm_shuffle_ps(x, x, 3));
     _mm_store_ss(&y3, _mm_shuffle_ps(y, y, 3));
-    float z3 = hs_simdy_minimum_float(x3, y3);
+    float z3 = hs_simdy_minimumFloat(x3, y3);
     return _mm_set_ps(z3, z2, z1, z0);
     */
 }
 
-__m128 hs_simdy_maximum_floatx4(__m128 x, __m128 y)
+__m128 hs_simdy_maximumFloatX4(__m128 x, __m128 y)
 {
     __m128 ord = _mm_cmpord_ps(x, y); // non-signaling compare
     __m128 x_ord = _mm_and_ps(x, ord); // convert possible NaN to zero
@@ -112,31 +112,31 @@ __m128 hs_simdy_maximum_floatx4(__m128 x, __m128 y)
     float x0, y0;
     _mm_store_ss(&x0, x);
     _mm_store_ss(&y0, y);
-    float z0 = hs_simdy_maximum_float(x0, y0);
+    float z0 = hs_simdy_maximumFloat(x0, y0);
     float x1, y1;
     _mm_store_ss(&x1, _mm_shuffle_ps(x, x, 1));
     _mm_store_ss(&y1, _mm_shuffle_ps(y, y, 1));
-    float z1 = hs_simdy_maximum_float(x1, y1);
+    float z1 = hs_simdy_maximumFloat(x1, y1);
     float x2, y2;
     _mm_store_ss(&x2, _mm_shuffle_ps(x, x, 2));
     _mm_store_ss(&y2, _mm_shuffle_ps(y, y, 2));
-    float z2 = hs_simdy_maximum_float(x2, y2);
+    float z2 = hs_simdy_maximumFloat(x2, y2);
     float x3, y3;
     _mm_store_ss(&x3, _mm_shuffle_ps(x, x, 3));
     _mm_store_ss(&y3, _mm_shuffle_ps(y, y, 3));
-    float z3 = hs_simdy_maximum_float(x3, y3);
+    float z3 = hs_simdy_maximumFloat(x3, y3);
     return _mm_set_ps(z3, z2, z1, z0);
     */
 }
 
 #if 0
 __attribute__((target("avx")))
-__m128 hs_simdy_minimum_floatx4_avx(__m128 xx, __m128 yy)
+__m128 hs_simdy_minimumFloatX4_avx(__m128 xx, __m128 yy)
 {
     __m128 unord_mask = _mm_cmpunord_ps(xx, yy);
     if (!_mm_testz_ps(unord_mask, unord_mask)) {
         // Some NaN in input
-        return hs_simdy_minimum_floatx4(xx, yy);
+        return hs_simdy_minimumFloatX4(xx, yy);
     } else {
         // No NaN in input
         __m128 neq = _mm_cmp_ps(xx, yy, 0xc); // not-equal, non-signaling (AVX feature)
@@ -149,12 +149,12 @@ __m128 hs_simdy_minimum_floatx4_avx(__m128 xx, __m128 yy)
 }
 
 __attribute__((target("avx")))
-__m128 hs_simdy_maximum_floatx4_avx(__m128 xx, __m128 yy)
+__m128 hs_simdy_maximumFloatX4_avx(__m128 xx, __m128 yy)
 {
     __m128 unord_mask = _mm_cmpunord_ps(xx, yy);
     if (!_mm_testz_ps(unord_mask, unord_mask)) {
         // Some NaN in input
-        return hs_simdy_maximum_floatx4(xx, yy);
+        return hs_simdy_maximumFloatX4(xx, yy);
     } else {
         // No NaN in input
         __m128 neq = _mm_cmp_ps(xx, yy, 0xc); // not-equal, non-signaling (AVX feature)
@@ -168,7 +168,7 @@ __m128 hs_simdy_maximum_floatx4_avx(__m128 xx, __m128 yy)
 #endif
 
 #if defined(__AVX__)
-__m256 hs_simdy_minimum_floatx8(__m256 xx, __m256 yy)
+__m256 hs_simdy_minimumFloatX8(__m256 xx, __m256 yy)
 {
     __m256 unord = _mm256_cmp_ps(xx, yy, 3); // non-signaling UNORD compare
     if (!_mm256_testz_ps(unord, unord)) {
@@ -193,7 +193,7 @@ __m256 hs_simdy_minimum_floatx8(__m256 xx, __m256 yy)
     }
 }
 
-__m256 hs_simdy_maximum_floatx8(__m256 xx, __m256 yy)
+__m256 hs_simdy_maximumFloatX8(__m256 xx, __m256 yy)
 {
     __m256 unord = _mm256_cmp_ps(xx, yy, 3); // non-signaling UNORD compare
     if (!_mm256_testz_ps(unord, unord)) {
@@ -219,7 +219,7 @@ __m256 hs_simdy_maximum_floatx8(__m256 xx, __m256 yy)
 #endif
 
 #if defined(__AVX512DQ__) && defined(__AVX512VL__)
-__m128 hs_simdy_minimum_floatx4_avx512(__m128 xx, __m128 yy)
+__m128 hs_simdy_minimumFloatX4_avx512(__m128 xx, __m128 yy)
 {
     __m128 m = _mm_range_ps(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -239,7 +239,7 @@ __m128 hs_simdy_minimum_floatx4_avx512(__m128 xx, __m128 yy)
     */
 }
 
-__m128 hs_simdy_maximum_floatx4_avx512(__m128 xx, __m128 yy)
+__m128 hs_simdy_maximumFloatX4_avx512(__m128 xx, __m128 yy)
 {
     __m128 m = _mm_range_ps(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -259,7 +259,7 @@ __m128 hs_simdy_maximum_floatx4_avx512(__m128 xx, __m128 yy)
     */
 }
 
-__m256 hs_simdy_minimum_floatx8_avx512(__m256 xx, __m256 yy)
+__m256 hs_simdy_minimumFloatX8_avx512(__m256 xx, __m256 yy)
 {
     __m256 m = _mm256_range_ps(xx, yy, 4); // NaN is missing data
     __mmask8 unord = _mm256_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -279,7 +279,7 @@ __m256 hs_simdy_minimum_floatx8_avx512(__m256 xx, __m256 yy)
     */
 }
 
-__m256 hs_simdy_maximum_floatx8_avx512(__m256 xx, __m256 yy)
+__m256 hs_simdy_maximumFloatX8_avx512(__m256 xx, __m256 yy)
 {
     __m256 m = _mm256_range_ps(xx, yy, 5); // NaN is missing data
     __mmask8 unord = _mm256_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -301,7 +301,7 @@ __m256 hs_simdy_maximum_floatx8_avx512(__m256 xx, __m256 yy)
 #endif
 
 #if defined(__AVX512DQ__)
-__m512 hs_simdy_minimum_floatx16(__m512 xx, __m512 yy)
+__m512 hs_simdy_minimumFloatX16(__m512 xx, __m512 yy)
 {
     __m512 m = _mm512_range_ps(xx, yy, 4); // NaN is missing data
     __mmask16 unord = _mm512_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -315,7 +315,7 @@ __m512 hs_simdy_minimum_floatx16(__m512 xx, __m512 yy)
 #endif
 }
 
-__m512 hs_simdy_maximum_floatx16(__m512 xx, __m512 yy)
+__m512 hs_simdy_maximumFloatX16(__m512 xx, __m512 yy)
 {
     __m512 m = _mm512_range_ps(xx, yy, 5); // NaN is missing data
     __mmask16 unord = _mm512_cmp_ps_mask(xx, yy, 0x3); // UNORD (quiet)
@@ -332,12 +332,12 @@ __m512 hs_simdy_maximum_floatx16(__m512 xx, __m512 yy)
 
 #elif defined(__aarch64__)
 
-float32x4_t hs_simdy_minimum_floatx4(float32x4_t x, float32x4_t y)
+float32x4_t hs_simdy_minimumFloatX4(float32x4_t x, float32x4_t y)
 {
     return vminq_f32(x, y);
 }
 
-float32x4_t hs_simdy_maximum_floatx4(float32x4_t x, float32x4_t y)
+float32x4_t hs_simdy_maximumFloatX4(float32x4_t x, float32x4_t y)
 {
     return vmaxq_f32(x, y);
 }
