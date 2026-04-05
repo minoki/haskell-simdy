@@ -8,7 +8,7 @@ import           Data.Int
 import           Data.Kind
 import           Data.List (foldl1')
 import           Data.Proxy
-import           Data.Simdy (SIMD, SIMDNum, SIMDBoolean, X16, X2, X32, X4, X64, X8)
+import           Data.Simdy (SIMD, SIMDNum, X16, X2, X32, X4, X64, X8)
 import           Data.Simdy.Bits
 import           Data.Simdy.Horizontal
 import           Data.Simdy.MinMax
