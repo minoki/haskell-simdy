@@ -13,18 +13,6 @@ build-type:         Simple
 extra-doc-files:    README.md
                     CHANGELOG.md
 extra-source-files: cbits/mask.h
-                    cbits/mask.c
-                    cbits/select.c
-                    cbits/bitwise.c
-                    cbits/int_compare.c
-                    cbits/float_compare.c
-                    cbits/double_compare.c
-                    cbits/int_minmax.c
-                    cbits/float_minmax.c
-                    cbits/float_minmaxnm.c
-                    cbits/double_minmax.c
-                    cbits/double_minmaxnm.c
-                    cbits/fma.c
 
 -- The versions of GHC and core libraries:
 --
@@ -122,54 +110,10 @@ library common
                       Data.Simdy.Internal.FMA
                       Data.Simdy.Internal.PrimExtra
 
-    -- We use separate C sources for the baseline ISA/Haswell/AVX-512 because
-    --   1) We want to make sure the C sources are recompiled when we re-build this package with different flags
-    --   2) We don't want to rely on __attribute__((target)) because LLVM is buggy: https://github.com/llvm/llvm-project/issues/64706
-    if flag(avx512)
-        c-sources:        cbits/float_minmax_avx512.c
-                          cbits/float_minmaxnm_avx512.c
-                          cbits/double_minmax_avx512.c
-                          cbits/double_minmaxnm_avx512.c
-                          cbits/mask_avx512.c
-                          cbits/select_avx512.c
-                          cbits/bitwise_avx512.c
-                          cbits/int_compare_avx512.c
-                          cbits/float_compare_avx512.c
-                          cbits/double_compare_avx512.c
-        if impl(ghc < 9.12)
-            c-sources:    cbits/int_minmax_avx512.c
-        if impl(ghc < 9.8)
-            c-sources:    cbits/fma_avx512.c
-    elif flag(haswell)
-        c-sources:        cbits/float_minmax_haswell.c
-                          cbits/float_minmaxnm_haswell.c
-                          cbits/double_minmax_haswell.c
-                          cbits/double_minmaxnm_haswell.c
-                          cbits/mask_haswell.c
-                          cbits/select_haswell.c
-                          cbits/bitwise_haswell.c
-                          cbits/int_compare_haswell.c
-                          cbits/float_compare_haswell.c
-                          cbits/double_compare_haswell.c
-        if impl(ghc < 9.12)
-            c-sources:    cbits/int_minmax_haswell.c
-        if impl(ghc < 9.8)
-            c-sources:    cbits/fma_haswell.c
-    else
-        c-sources:        cbits/float_minmax_baseline.c
-                          cbits/float_minmaxnm_baseline.c
-                          cbits/double_minmax_baseline.c
-                          cbits/double_minmaxnm_baseline.c
-                          cbits/mask_baseline.c
-                          cbits/select_baseline.c
-                          cbits/bitwise_baseline.c
-                          cbits/int_compare_baseline.c
-                          cbits/float_compare_baseline.c
-                          cbits/double_compare_baseline.c
-        if impl(ghc < 9.12)
-            c-sources:    cbits/int_minmax_baseline.c
-        if impl(ghc < 9.8)
-            c-sources:    cbits/fma_baseline.c
+    c-sources:        cbits/float_minmax.c
+                      cbits/float_minmaxnm.c
+                      cbits/double_minmax.c
+                      cbits/double_minmaxnm.c
 
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0
@@ -194,6 +138,25 @@ library no-simd
     hs-source-dirs:   src-no-simd
     default-language: GHC2021
 
+library vl128-c
+    if flag(haswell) || flag(avx512)
+        cc-options:   -mavx2 -mfma -mf16c
+    if flag(avx512)
+        cc-options:   -mavx512f -mavx512vl -mavx512bw -mavx512dq
+    c-sources:        cbits/bitwise_vl128.c
+                      cbits/double_compare_vl128.c
+                      cbits/double_minmax_vl128.c
+                      cbits/double_minmaxnm_vl128.c
+                      cbits/float_compare_vl128.c
+                      cbits/float_minmax_vl128.c
+                      cbits/float_minmaxnm_vl128.c
+                      cbits/fma_vl128.c
+                      cbits/int_abs_vl128.c
+                      cbits/int_compare_vl128.c
+                      cbits/int_minmax_vl128.c
+                      cbits/mask_vl128.c
+                      cbits/select_vl128.c
+
 library vl128
     import:           warnings
                     , ghc-support
@@ -210,13 +173,12 @@ library vl128
                       Data.Simdy.Internal.SIMD128.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0,
-                      simdy:common
+                      simdy:common,
+                      simdy:vl128-c
     if impl(ghc >= 9.12)
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl128
     default-language: GHC2021
-    c-sources:        cbits/bitwise_vl128.c
-                      cbits/int_abs_vl128.c
 
     if flag(llvm) || !((impl(ghc >= 9.12) && arch(x86_64)) || (impl(ghc >= 9.15) && arch(aarch64)))
         -- We need the LLVM backend unless (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
@@ -225,6 +187,23 @@ library vl128
     if !flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64))
         -- vl128 requires llvm || (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
         buildable: False
+
+library vl256-c
+    cc-options:       -mavx2 -mfma -mf16c
+    if flag(avx512)
+        cc-options:   -mavx512f -mavx512vl -mavx512bw -mavx512dq
+    c-sources:        cbits/bitwise_vl256.c
+                      cbits/double_compare_vl256.c
+                      cbits/double_minmax_vl256.c
+                      cbits/double_minmaxnm_vl256.c
+                      cbits/float_compare_vl256.c
+                      cbits/float_minmax_vl256.c
+                      cbits/float_minmaxnm_vl256.c
+                      cbits/fma_vl256.c
+                      cbits/int_compare_vl256.c
+                      cbits/int_minmax_vl256.c
+                      cbits/mask_vl256.c
+                      cbits/select_vl256.c
 
 library vl256
     import:           warnings
@@ -242,7 +221,8 @@ library vl256
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0,
                       simdy:common,
-                      simdy:vl128
+                      simdy:vl128,
+                      simdy:vl256-c
     if impl(ghc >= 9.12)
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl256
@@ -254,6 +234,20 @@ library vl256
     if !(flag(haswell) || flag(avx512))
         -- vl256 requires (haswell || avx512) && llvm
         buildable: False
+
+library vl512-c
+    cc-options:       -mavx2 -mfma -mf16c -mavx512f -mavx512vl -mavx512bw -mavx512dq
+    c-sources:        cbits/bitwise_vl512.c
+                      cbits/double_compare_vl512.c
+                      cbits/double_minmax_vl512.c
+                      cbits/double_minmaxnm_vl512.c
+                      cbits/float_compare_vl512.c
+                      cbits/float_minmax_vl512.c
+                      cbits/float_minmaxnm_vl512.c
+                      cbits/fma_vl512.c
+                      cbits/int_compare_vl512.c
+                      cbits/int_minmax_vl512.c
+                      cbits/select_vl512.c
 
 library vl512
     import:           warnings
@@ -271,7 +265,8 @@ library vl512
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128,
-                      simdy:vl256
+                      simdy:vl256,
+                      simdy:vl512-c
     if impl(ghc >= 9.12)
         build-depends: ghc-experimental
     hs-source-dirs:   src-vl512
@@ -408,7 +403,10 @@ test-suite float-minmax-test
     default-language: GHC2021
     type:             exitcode-stdio-1.0
     main-is:          cbits/test_float_minmax.c
-    build-depends:    simdy
+    build-depends:    simdy,
+                      simdy:vl128-c,
+                      simdy:vl256-c,
+                      simdy:vl512-c
 
 test-suite double-minmax-test
     import:           warnings
@@ -416,7 +414,10 @@ test-suite double-minmax-test
     default-language: GHC2021
     type:             exitcode-stdio-1.0
     main-is:          cbits/test_double_minmax.c
-    build-depends:    simdy
+    build-depends:    simdy,
+                      simdy:vl128-c,
+                      simdy:vl256-c,
+                      simdy:vl512-c
 
 library matmul
     import:           warnings
