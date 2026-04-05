@@ -256,9 +256,6 @@ __m128i hs_simdy_shiftRInt32X4(__m128i x, HsInt y)
 
 __m128i hs_simdy_shiftRInt64X2(__m128i x, HsInt y)
 {
-#if defined(__AVX512F__) && defined(__AVX512VL__)
-    return _mm_sra_epi64(x, _mm_set_epi64x(0, y));
-#else
     _Alignas(16) int64_t buf[2];
     memcpy(buf, &x, 16);
     if (y >= 64) {
@@ -268,7 +265,12 @@ __m128i hs_simdy_shiftRInt64X2(__m128i x, HsInt y)
     buf[1] >>= y;
     memcpy(&x, buf, 16);
     return x;
-#endif
+}
+
+__attribute__((target("avx512f,avx512vl")))
+__m128i hs_simdy_shiftRInt64X2_avx512(__m128i x, HsInt y)
+{
+    return _mm_sra_epi64(x, _mm_set_epi64x(0, y));
 }
 
 __m128i hs_simdy_shiftRWord8X16(__m128i x, HsInt y)
