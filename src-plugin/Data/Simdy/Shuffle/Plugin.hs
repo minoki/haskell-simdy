@@ -3,6 +3,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 module Data.Simdy.Shuffle.Plugin (plugin) where
 import           Control.Applicative ((<|>))
 import           Control.Monad (forM, guard, replicateM)
