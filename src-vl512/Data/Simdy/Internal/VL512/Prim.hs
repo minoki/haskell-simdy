@@ -3,7 +3,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedFFITypes #-}
-module Data.Simdy.Internal.SIMD512.Prim
+module Data.Simdy.Internal.VL512.Prim
   ( Int8X64#
   , Int16X32#
   , Int32X16#
@@ -316,9 +316,9 @@ module Data.Simdy.Internal.SIMD512.Prim
   , complementWord16X32#
   , complementWord32X16#
   , complementWord64X8#
-  , module Data.Simdy.Internal.SIMD256.Prim
+  , module Data.Simdy.Internal.VL256.Prim
   ) where
-import           Data.Simdy.Internal.SIMD256.Prim
+import           Data.Simdy.Internal.VL256.Prim
 
 #if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 

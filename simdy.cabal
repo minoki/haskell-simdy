@@ -161,16 +161,16 @@ library vl128
     import:           warnings
                     , ghc-support
                     , arch-options
-    exposed-modules:  Data.Simdy.Internal.SIMD128
-                      Data.Simdy.Internal.SIMD128.Prim
-                      Data.Simdy.Internal.SIMD128.PrimExtra
-    other-modules:    Data.Simdy.Internal.SIMD128.X2
-                      Data.Simdy.Internal.SIMD128.X4
-                      Data.Simdy.Internal.SIMD128.X8
-                      Data.Simdy.Internal.SIMD128.X16
-                      Data.Simdy.Internal.SIMD128.X32
-                      Data.Simdy.Internal.SIMD128.X64
-                      Data.Simdy.Internal.SIMD128.HalfVector
+    exposed-modules:  Data.Simdy.Internal.VL128
+                      Data.Simdy.Internal.VL128.Prim
+                      Data.Simdy.Internal.VL128.PrimExtra
+    other-modules:    Data.Simdy.Internal.VL128.X2
+                      Data.Simdy.Internal.VL128.X4
+                      Data.Simdy.Internal.VL128.X8
+                      Data.Simdy.Internal.VL128.X16
+                      Data.Simdy.Internal.VL128.X32
+                      Data.Simdy.Internal.VL128.X64
+                      Data.Simdy.Internal.VL128.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0,
                       simdy:common,
@@ -209,15 +209,15 @@ library vl256
     import:           warnings
                     , ghc-support
                     , arch-options
-    exposed-modules:  Data.Simdy.Internal.SIMD256
-                      Data.Simdy.Internal.SIMD256.Prim
-                      Data.Simdy.Internal.SIMD256.PrimExtra
-    other-modules:    Data.Simdy.Internal.SIMD256.X4
-                      Data.Simdy.Internal.SIMD256.X8
-                      Data.Simdy.Internal.SIMD256.X16
-                      Data.Simdy.Internal.SIMD256.X32
-                      Data.Simdy.Internal.SIMD256.X64
-                      Data.Simdy.Internal.SIMD256.HalfVector
+    exposed-modules:  Data.Simdy.Internal.VL256
+                      Data.Simdy.Internal.VL256.Prim
+                      Data.Simdy.Internal.VL256.PrimExtra
+    other-modules:    Data.Simdy.Internal.VL256.X4
+                      Data.Simdy.Internal.VL256.X8
+                      Data.Simdy.Internal.VL256.X16
+                      Data.Simdy.Internal.VL256.X32
+                      Data.Simdy.Internal.VL256.X64
+                      Data.Simdy.Internal.VL256.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0,
                       simdy:common,
@@ -253,14 +253,14 @@ library vl512
     import:           warnings
                     , ghc-support
                     , arch-options
-    exposed-modules:  Data.Simdy.Internal.SIMD512
-                      Data.Simdy.Internal.SIMD512.Prim
-                      Data.Simdy.Internal.SIMD512.PrimExtra
-    other-modules:    Data.Simdy.Internal.SIMD512.X8
-                      Data.Simdy.Internal.SIMD512.X16
-                      Data.Simdy.Internal.SIMD512.X32
-                      Data.Simdy.Internal.SIMD512.X64
-                      Data.Simdy.Internal.SIMD512.HalfVector
+    exposed-modules:  Data.Simdy.Internal.VL512
+                      Data.Simdy.Internal.VL512.Prim
+                      Data.Simdy.Internal.VL512.PrimExtra
+    other-modules:    Data.Simdy.Internal.VL512.X8
+                      Data.Simdy.Internal.VL512.X16
+                      Data.Simdy.Internal.VL512.X32
+                      Data.Simdy.Internal.VL512.X64
+                      Data.Simdy.Internal.VL512.HalfVector
     build-depends:    base >=4.18.0.0 && <4.23,
                       primitive ^>=0.9.0.0,
                       simdy:common,
@@ -323,24 +323,24 @@ library
                       , Data.Simdy.Internal.NoSIMD
 
     if !flag(no-simd) && (flag(llvm) || (impl(ghc >= 9.12) && arch(x86_64)) || (impl(ghc >= 9.15) && arch(aarch64)))
-        reexported-modules: Data.Simdy.Internal.SIMD128
+        reexported-modules: Data.Simdy.Internal.VL128
         build-depends: simdy:vl128
     if !flag(no-simd) && (flag(haswell) || flag(avx512)) && flag(llvm)
-        reexported-modules: Data.Simdy.Internal.SIMD256
+        reexported-modules: Data.Simdy.Internal.VL256
         build-depends: simdy:vl256
     if !flag(no-simd) && flag(avx512) && flag(llvm)
-        reexported-modules: Data.Simdy.Internal.SIMD512
+        reexported-modules: Data.Simdy.Internal.VL512
         build-depends: simdy:vl512
 
     -- Choose the default vector length (Data.Simdy.Internal.Default) based on the flags.
     if flag(no-simd) || (!flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64)))
         mixins: simdy:no-simd (Data.Simdy.Internal.NoSIMD, Data.Simdy.Internal.NoSIMD as Data.Simdy.Internal.Default)
     elif flag(avx512) && flag(llvm)
-        mixins: simdy:vl512 (Data.Simdy.Internal.SIMD512, Data.Simdy.Internal.SIMD512 as Data.Simdy.Internal.Default)
+        mixins: simdy:vl512 (Data.Simdy.Internal.VL512, Data.Simdy.Internal.VL512 as Data.Simdy.Internal.Default)
     elif flag(haswell) && flag(llvm)
-        mixins: simdy:vl256 (Data.Simdy.Internal.SIMD256, Data.Simdy.Internal.SIMD256 as Data.Simdy.Internal.Default)
+        mixins: simdy:vl256 (Data.Simdy.Internal.VL256, Data.Simdy.Internal.VL256 as Data.Simdy.Internal.Default)
     else
-        mixins: simdy:vl128 (Data.Simdy.Internal.SIMD128, Data.Simdy.Internal.SIMD128 as Data.Simdy.Internal.Default)
+        mixins: simdy:vl128 (Data.Simdy.Internal.VL128, Data.Simdy.Internal.VL128 as Data.Simdy.Internal.Default)
 
     -- other-extensions:
     build-depends:    base >=4.18.0.0 && <4.23,

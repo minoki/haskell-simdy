@@ -1,8 +1,8 @@
 -- This file was created by script/GenVL.hs. Do not edit by hand!
 {-|
-This module contains types and classes that use 128-bit vectors (x86 SSE, Arm NEON).
+This module contains types and classes that use 256-bit vectors (x86 AVX/AVX2).
 
-In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. "Data.Simdy.Internal.NoSIMD", "Data.Simdy.Internal.SIMD256", "Data.Simdy.Internal.SIMD512").
+In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. "Data.Simdy.Internal.NoSIMD", "Data.Simdy.Internal.VL128", "Data.Simdy.Internal.VL512").
 -}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
@@ -11,7 +11,7 @@ In general, the types and classes exported from this module are not compatible w
 #if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)
 {-# LANGUAGE RequiredTypeArguments #-}
 #endif
-module Data.Simdy.Internal.SIMD128
+module Data.Simdy.Internal.VL256
   ( module M
   , SIMD (horizontalFold)
   , SIMDElement
@@ -76,13 +76,13 @@ import           Data.Simdy.Internal.Bits (Boolean, BitShift)
 import           Data.Simdy.Internal.Class hiding (broadcast, liftSIMD, liftSIMD2)
 import qualified Data.Simdy.Internal.Class as I
 import           Data.Simdy.Internal.Shuffle
-import           Data.Simdy.Internal.SIMD128.HalfVector ()
-import           Data.Simdy.Internal.SIMD128.X16 as M
-import           Data.Simdy.Internal.SIMD128.X2 as M
-import           Data.Simdy.Internal.SIMD128.X32 as M
-import           Data.Simdy.Internal.SIMD128.X4 as M
-import           Data.Simdy.Internal.SIMD128.X64 as M
-import           Data.Simdy.Internal.SIMD128.X8 as M
+import           Data.Simdy.Internal.VL128 as M (X2 (..))
+import           Data.Simdy.Internal.VL256.HalfVector ()
+import           Data.Simdy.Internal.VL256.X16 as M
+import           Data.Simdy.Internal.VL256.X32 as M
+import           Data.Simdy.Internal.VL256.X4 as M
+import           Data.Simdy.Internal.VL256.X64 as M
+import           Data.Simdy.Internal.VL256.X8 as M
 import           Data.Word
 import           Foreign.Storable
 import           Prelude hiding (not, (==), (/=), (<), (<=), (>), (>=))

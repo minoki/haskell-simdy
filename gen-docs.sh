@@ -25,8 +25,8 @@ cabal haddock \
   --haddock-option=--use-index=../doc-index.html \
   --haddock-option=--use-contents=../index.html \
   --haddock-option=--base-url=.. \
-  --haddock-option=--hide=Data.Simdy.Internal.SIMD128.Prim \
-  --haddock-option=--hide=Data.Simdy.Internal.SIMD128.PrimExtra \
+  --haddock-option=--hide=Data.Simdy.Internal.VL128.Prim \
+  --haddock-option=--hide=Data.Simdy.Internal.VL128.PrimExtra \
   --haddock-option=--read-interface=../common,../common/src,docs/common/simdy.haddock \
   --haddock-output-dir=docs/vl128 \
   lib:vl128

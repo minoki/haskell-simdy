@@ -285,9 +285,9 @@ content moduleName width types reexports =
 
 main :: IO ()
 main = do
-  writeFile "src-vl128/Data/Simdy/Internal/SIMD128/Prim.hs" $ unlines $
-    content "Data.Simdy.Internal.SIMD128.Prim" 128 types128 []
-  writeFile "src-vl256/Data/Simdy/Internal/SIMD256/Prim.hs" $ unlines $
-    content "Data.Simdy.Internal.SIMD256.Prim" 256 types256 ["Data.Simdy.Internal.SIMD128.Prim"]
-  writeFile "src-vl512/Data/Simdy/Internal/SIMD512/Prim.hs" $ unlines $
-    content "Data.Simdy.Internal.SIMD512.Prim" 512 types512 ["Data.Simdy.Internal.SIMD256.Prim"]
+  writeFile "src-vl128/Data/Simdy/Internal/VL128/Prim.hs" $ unlines $
+    content "Data.Simdy.Internal.VL128.Prim" 128 types128 []
+  writeFile "src-vl256/Data/Simdy/Internal/VL256/Prim.hs" $ unlines $
+    content "Data.Simdy.Internal.VL256.Prim" 256 types256 ["Data.Simdy.Internal.VL128.Prim"]
+  writeFile "src-vl512/Data/Simdy/Internal/VL512/Prim.hs" $ unlines $
+    content "Data.Simdy.Internal.VL512.Prim" 512 types512 ["Data.Simdy.Internal.VL256.Prim"]

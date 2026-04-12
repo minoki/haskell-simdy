@@ -362,47 +362,47 @@ main = do
     "{-|\n\
     \This module contains types and classes that do not use SIMD primitives.\n\
     \\n\
-    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.SIMD128\", \"Data.Simdy.Internal.SIMD256\", \"Data.Simdy.Internal.SIMD512\").\n\
+    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.VL128\", \"Data.Simdy.Internal.VL256\", \"Data.Simdy.Internal.VL512\").\n\
     \-}"
-  writeFile "src-vl128/Data/Simdy/Internal/SIMD128.hs" $ genMod "Data.Simdy.Internal.SIMD128"
-    ["import           Data.Simdy.Internal.SIMD128.HalfVector ()"
-    ,"import           Data.Simdy.Internal.SIMD128.X16 as M"
-    ,"import           Data.Simdy.Internal.SIMD128.X2 as M"
-    ,"import           Data.Simdy.Internal.SIMD128.X32 as M"
-    ,"import           Data.Simdy.Internal.SIMD128.X4 as M"
-    ,"import           Data.Simdy.Internal.SIMD128.X64 as M"
-    ,"import           Data.Simdy.Internal.SIMD128.X8 as M"
+  writeFile "src-vl128/Data/Simdy/Internal/VL128.hs" $ genMod "Data.Simdy.Internal.VL128"
+    ["import           Data.Simdy.Internal.VL128.HalfVector ()"
+    ,"import           Data.Simdy.Internal.VL128.X16 as M"
+    ,"import           Data.Simdy.Internal.VL128.X2 as M"
+    ,"import           Data.Simdy.Internal.VL128.X32 as M"
+    ,"import           Data.Simdy.Internal.VL128.X4 as M"
+    ,"import           Data.Simdy.Internal.VL128.X64 as M"
+    ,"import           Data.Simdy.Internal.VL128.X8 as M"
     ]
     "{-|\n\
     \This module contains types and classes that use 128-bit vectors (x86 SSE, Arm NEON).\n\
     \\n\
-    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.NoSIMD\", \"Data.Simdy.Internal.SIMD256\", \"Data.Simdy.Internal.SIMD512\").\n\
+    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.NoSIMD\", \"Data.Simdy.Internal.VL256\", \"Data.Simdy.Internal.VL512\").\n\
     \-}"
-  writeFile "src-vl256/Data/Simdy/Internal/SIMD256.hs" $ genMod "Data.Simdy.Internal.SIMD256"
-    ["import           Data.Simdy.Internal.SIMD128 as M (X2 (..))"
-    ,"import           Data.Simdy.Internal.SIMD256.HalfVector ()"
-    ,"import           Data.Simdy.Internal.SIMD256.X16 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X32 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X4 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X64 as M"
-    ,"import           Data.Simdy.Internal.SIMD256.X8 as M"
+  writeFile "src-vl256/Data/Simdy/Internal/VL256.hs" $ genMod "Data.Simdy.Internal.VL256"
+    ["import           Data.Simdy.Internal.VL128 as M (X2 (..))"
+    ,"import           Data.Simdy.Internal.VL256.HalfVector ()"
+    ,"import           Data.Simdy.Internal.VL256.X16 as M"
+    ,"import           Data.Simdy.Internal.VL256.X32 as M"
+    ,"import           Data.Simdy.Internal.VL256.X4 as M"
+    ,"import           Data.Simdy.Internal.VL256.X64 as M"
+    ,"import           Data.Simdy.Internal.VL256.X8 as M"
     ]
     "{-|\n\
     \This module contains types and classes that use 256-bit vectors (x86 AVX/AVX2).\n\
     \\n\
-    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.NoSIMD\", \"Data.Simdy.Internal.SIMD128\", \"Data.Simdy.Internal.SIMD512\").\n\
+    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.NoSIMD\", \"Data.Simdy.Internal.VL128\", \"Data.Simdy.Internal.VL512\").\n\
     \-}"
-  writeFile "src-vl512/Data/Simdy/Internal/SIMD512.hs" $ genMod "Data.Simdy.Internal.SIMD512"
-    ["import           Data.Simdy.Internal.SIMD128 as M (X2 (..))"
-    ,"import           Data.Simdy.Internal.SIMD256 as M (X4 (..))"
-    ,"import           Data.Simdy.Internal.SIMD512.HalfVector ()"
-    ,"import           Data.Simdy.Internal.SIMD512.X16 as M"
-    ,"import           Data.Simdy.Internal.SIMD512.X32 as M"
-    ,"import           Data.Simdy.Internal.SIMD512.X64 as M"
-    ,"import           Data.Simdy.Internal.SIMD512.X8 as M"
+  writeFile "src-vl512/Data/Simdy/Internal/VL512.hs" $ genMod "Data.Simdy.Internal.VL512"
+    ["import           Data.Simdy.Internal.VL128 as M (X2 (..))"
+    ,"import           Data.Simdy.Internal.VL256 as M (X4 (..))"
+    ,"import           Data.Simdy.Internal.VL512.HalfVector ()"
+    ,"import           Data.Simdy.Internal.VL512.X16 as M"
+    ,"import           Data.Simdy.Internal.VL512.X32 as M"
+    ,"import           Data.Simdy.Internal.VL512.X64 as M"
+    ,"import           Data.Simdy.Internal.VL512.X8 as M"
     ]
     "{-|\n\
     \This module contains types and classes that use 512-bit vectors (x86 AVX-512).\n\
     \\n\
-    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.NoSIMD\", \"Data.Simdy.Internal.SIMD128\", \"Data.Simdy.Internal.SIMD256\").\n\
+    \In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. \"Data.Simdy.Internal.NoSIMD\", \"Data.Simdy.Internal.VL128\", \"Data.Simdy.Internal.VL256\").\n\
     \-}"

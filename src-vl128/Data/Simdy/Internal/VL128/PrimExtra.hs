@@ -2,7 +2,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedFFITypes #-}
-module Data.Simdy.Internal.SIMD128.PrimExtra where
+module Data.Simdy.Internal.VL128.PrimExtra where
 import Data.Word
 import GHC.Exts
 

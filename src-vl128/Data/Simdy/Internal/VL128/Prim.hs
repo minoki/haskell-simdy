@@ -3,7 +3,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedFFITypes #-}
-module Data.Simdy.Internal.SIMD128.Prim
+module Data.Simdy.Internal.VL128.Prim
   ( Int8X16#
   , Int16X8#
   , Int32X4#

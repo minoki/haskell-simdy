@@ -2,7 +2,7 @@
 {-|
 This module contains types and classes that do not use SIMD primitives.
 
-In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. "Data.Simdy.Internal.SIMD128", "Data.Simdy.Internal.SIMD256", "Data.Simdy.Internal.SIMD512").
+In general, the types and classes exported from this module are not compatible with other modules with different vector lengths (i.e. "Data.Simdy.Internal.VL128", "Data.Simdy.Internal.VL256", "Data.Simdy.Internal.VL512").
 -}
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
