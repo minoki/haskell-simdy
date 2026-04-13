@@ -91,6 +91,10 @@ main = defaultMain
     ]
   , bgroup "matMul 1000 Float" $
     [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat1000A, mat1000B)
+    , bench "matMulTranspose" $ nf (uncurry matMulTranspose) (mat1000A, mat1000B)
+    , bench "matMulBlock 8 8 8" $ nf (uncurry $ matMulBlock 8 8 8) (mat1000A, mat1000B)
+    , bench "matMulBlock 16 16 16" $ nf (uncurry $ matMulBlock 16 16 16) (mat1000A, mat1000B)
+    , bench "matMulBlock 32 32 32" $ nf (uncurry $ matMulBlock 32 32 32) (mat1000A, mat1000B)
     , bench "matMulSIMD X4" $ nf (uncurry (matMulSIMD (Proxy @X4))) (mat1000A, mat1000B)
     , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat1000A, mat1000B)
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat1000A, mat1000B)
@@ -107,6 +111,10 @@ main = defaultMain
       Nothing -> []
   , bgroup "matMul 2000 Float" $
     [ bench "matMulNaive" $ nf (uncurry matMulNaive) (mat2000A, mat2000B)
+    , bench "matMulTranspose" $ nf (uncurry matMulTranspose) (mat2000A, mat2000B)
+    , bench "matMulBlock 8 8 8" $ nf (uncurry $ matMulBlock 8 8 8) (mat2000A, mat2000B)
+    , bench "matMulBlock 16 16 16" $ nf (uncurry $ matMulBlock 16 16 16) (mat2000A, mat2000B)
+    , bench "matMulBlock 32 32 32" $ nf (uncurry $ matMulBlock 32 32 32) (mat2000A, mat2000B)
     , bench "matMulSIMD X4" $ nf (uncurry (matMulSIMD (Proxy @X4))) (mat2000A, mat2000B)
     , bench "matMulSIMD X8" $ nf (uncurry (matMulSIMD (Proxy @X8))) (mat2000A, mat2000B)
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat2000A, mat2000B)

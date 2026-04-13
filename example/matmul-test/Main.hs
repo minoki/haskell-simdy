@@ -26,7 +26,27 @@ shrinkNat n | n <= 1 = []
 
 properties :: TestTree
 properties = testGroup "(checked by QuickCheck)" $
-  [ QC.testProperty "matMulNaive == matMulSIMD X4 Float" $
+  [ QC.testProperty "matMulNaive == matMulTranspose X4 Float" $
+      QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
+        SomeNat pl ->
+          QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \m -> case someNatVal m of
+            SomeNat pm ->
+              QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \n -> case someNatVal n of
+                SomeNat pn ->
+                  QC.forAll (genMatrix pl pm) $ \a ->
+                    QC.forAll (genMatrix pm pn) $ \b ->
+                      matMulNaive a b QC.=== (matMulTranspose a b `elemTypeProxy` Proxy @Float)
+  , QC.testProperty "matMulNaive == matMulBlock X4 Float" $
+      QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
+        SomeNat pl ->
+          QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \m -> case someNatVal m of
+            SomeNat pm ->
+              QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \n -> case someNatVal n of
+                SomeNat pn ->
+                  QC.forAll (genMatrix pl pm) $ \a ->
+                    QC.forAll (genMatrix pm pn) $ \b ->
+                      matMulNaive a b QC.=== (matMulBlock 8 8 8 a b `elemTypeProxy` Proxy @Float)
+  , QC.testProperty "matMulNaive == matMulSIMD X4 Float" $
       QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
         SomeNat pl ->
           QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \m -> case someNatVal m of
