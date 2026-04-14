@@ -100,6 +100,12 @@ main = defaultMain
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat1000A, mat1000B)
     , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat1000A, mat1000B)
     , bench "matMulSIMD X64" $ nf (uncurry (matMulSIMD (Proxy @X64))) (mat1000A, mat1000B)
+    , bench "matMulBlockSIMD X8 8 8 8" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 8 8 8) (mat1000A, mat1000B)
+    , bench "matMulBlockSIMD X8 16 16 16" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 16 16 16) (mat1000A, mat1000B)
+    , bench "matMulBlockSIMD X8 32 32 32" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 32 32 32) (mat1000A, mat1000B)
+    , bench "matMulBlockSIMD X8 32 64 32" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 32 64 32) (mat1000A, mat1000B)
+    , bench "matMulBlockSIMD X8 32 128 32" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 32 128 32) (mat1000A, mat1000B)
+    , bench "matMulBlockSIMDX8 32 128 32" $ nf (uncurry $ matMulBlockSIMDX8 32 128 32) (mat1000A, mat1000B)
     ] ++ case isFMAAvailable of
       Just MkFMAWitness ->
         [ bench "matMulFMA X4" $ nf (uncurry (matMulFMA (Proxy @X4))) (mat1000A, mat1000B)
@@ -120,6 +126,12 @@ main = defaultMain
     , bench "matMulSIMD X16" $ nf (uncurry (matMulSIMD (Proxy @X16))) (mat2000A, mat2000B)
     , bench "matMulSIMD X32" $ nf (uncurry (matMulSIMD (Proxy @X32))) (mat2000A, mat2000B)
     , bench "matMulSIMD X64" $ nf (uncurry (matMulSIMD (Proxy @X64))) (mat2000A, mat2000B)
+    , bench "matMulBlockSIMD X8 8 8 8" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 8 8 8) (mat2000A, mat2000B)
+    , bench "matMulBlockSIMD X8 16 16 16" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 16 16 16) (mat2000A, mat2000B)
+    , bench "matMulBlockSIMD X8 32 32 32" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 32 32 32) (mat2000A, mat2000B)
+    , bench "matMulBlockSIMD X8 32 64 32" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 32 64 32) (mat2000A, mat2000B)
+    , bench "matMulBlockSIMD X8 32 128 32" $ nf (uncurry $ matMulBlockSIMD (Proxy @X8) 32 128 32) (mat2000A, mat2000B)
+    , bench "matMulBlockSIMDX8 32 128 32" $ nf (uncurry $ matMulBlockSIMDX8 32 128 32) (mat2000A, mat2000B)
     ] ++ case isFMAAvailable of
       Just MkFMAWitness ->
         [ bench "matMulFMA X4" $ nf (uncurry (matMulFMA (Proxy @X4))) (mat2000A, mat2000B)
