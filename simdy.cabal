@@ -426,6 +426,7 @@ library matmul
     hs-source-dirs:   example/matmul
     build-depends:    base >=4.18.0.0 && <4.23,
                       simdy,
+                      simdy:plugin,
                       vector ^>=0.13.1.0,
                       deepseq
     default-language: GHC2021

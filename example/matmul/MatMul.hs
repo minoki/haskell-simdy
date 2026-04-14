@@ -160,6 +160,114 @@ matMulSIMD _ (MkMat !a) (MkMat !b) = MkMat $ VU.create $ do
 {-# SPECIALIZE matMulSIMD :: forall l m n. (KnownNat l, KnownNat m, KnownNat n) => Proxy X16 -> Mat l m Double -> Mat m n Double -> Mat l n Double #-}
 {-# SPECIALIZE matMulSIMD :: forall l m n. (KnownNat l, KnownNat m, KnownNat n) => Proxy X32 -> Mat l m Double -> Mat m n Double -> Mat l n Double #-}
 
+matMulSIMD_4_3 :: forall x l m n a. (SIMD x, KnownNat l, KnownNat m, KnownNat n, SV.MultiUnbox x a, SIMDNum a) => Proxy x -> Mat l m a -> Mat m n a -> Mat l n a
+matMulSIMD_4_3 _ (MkMat !a) (MkMat !b) = MkMat $ VU.create $ do
+  let l, m, n, simdLen :: Int
+      !l = fromIntegral (natVal (Proxy @l))
+      !m = fromIntegral (natVal (Proxy @m))
+      !n = fromIntegral (natVal (Proxy @n))
+      !simdLen = simdLength @x
+  !result <- VUM.replicate (l * n) 0
+  forBlockM_ l 4 $ \case
+    Block i ->
+      forBlockM_ m 3 $ \case
+        Block j -> do
+          let !a_i0j0 = a `VU.unsafeIndex` (i * m + j)
+              !a_i1j0 = a `VU.unsafeIndex` ((i + 1) * m + j)
+              !a_i2j0 = a `VU.unsafeIndex` ((i + 2) * m + j)
+              !a_i3j0 = a `VU.unsafeIndex` ((i + 3) * m + j)
+              !a_i0j1 = a `VU.unsafeIndex` (i * m + j + 1)
+              !a_i1j1 = a `VU.unsafeIndex` ((i + 1) * m + j + 1)
+              !a_i2j1 = a `VU.unsafeIndex` ((i + 2) * m + j + 1)
+              !a_i3j1 = a `VU.unsafeIndex` ((i + 3) * m + j + 1)
+              !a_i0j2 = a `VU.unsafeIndex` (i * m + j + 2)
+              !a_i1j2 = a `VU.unsafeIndex` ((i + 1) * m + j + 2)
+              !a_i2j2 = a `VU.unsafeIndex` ((i + 2) * m + j + 2)
+              !a_i3j2 = a `VU.unsafeIndex` ((i + 3) * m + j + 2)
+          let loopVector !k
+                | k + simdLen > n = loopScalar k
+                | otherwise = do
+                  !acc0 <- SV.unsafeReadMulti result (i * n + k)
+                  !acc1 <- SV.unsafeReadMulti result ((i + 1) * n + k)
+                  !acc2 <- SV.unsafeReadMulti result ((i + 2) * n + k)
+                  !acc3 <- SV.unsafeReadMulti result ((i + 3) * n + k)
+                  let !b_j0k = SV.unsafeIndexMulti b (j * n + k) :: x a
+                      !b_j1k = SV.unsafeIndexMulti b ((j + 1) * n + k) :: x a
+                      !b_j2k = SV.unsafeIndexMulti b ((j + 2) * n + k) :: x a
+                  SV.unsafeWriteMulti result (i * n + k) $! acc0 + broadcast a_i0j0 * b_j0k + broadcast a_i0j1 * b_j1k + broadcast a_i0j2 * b_j2k
+                  SV.unsafeWriteMulti result ((i + 1) * n + k) $! acc1 + broadcast a_i1j0 * b_j0k + broadcast a_i1j1 * b_j1k + broadcast a_i1j2 * b_j2k
+                  SV.unsafeWriteMulti result ((i + 2) * n + k) $! acc2 + broadcast a_i2j0 * b_j0k + broadcast a_i2j1 * b_j1k + broadcast a_i2j2 * b_j2k
+                  SV.unsafeWriteMulti result ((i + 3) * n + k) $! acc3 + broadcast a_i3j0 * b_j0k + broadcast a_i3j1 * b_j1k + broadcast a_i3j2 * b_j2k
+                  loopVector (k + simdLen)
+              loopScalar !k
+                | k >= n = pure ()
+                | otherwise = do
+                  !acc0 <- VUM.unsafeRead result (i * n + k)
+                  !acc1 <- VUM.unsafeRead result ((i + 1) * n + k)
+                  !acc2 <- VUM.unsafeRead result ((i + 2) * n + k)
+                  !acc3 <- VUM.unsafeRead result ((i + 3) * n + k)
+                  let !b_j0k = VU.unsafeIndex b (j * n + k)
+                      !b_j1k = VU.unsafeIndex b ((j + 1) * n + k)
+                      !b_j2k = VU.unsafeIndex b ((j + 2) * n + k)
+                  VUM.unsafeWrite result (i * n + k) $! acc0 + a_i0j0 * b_j0k + a_i0j1 * b_j1k + a_i0j2 * b_j2k
+                  VUM.unsafeWrite result ((i + 1) * n + k) $! acc1 + a_i1j0 * b_j0k + a_i1j1 * b_j1k + a_i1j2 * b_j2k
+                  VUM.unsafeWrite result ((i + 2) * n + k) $! acc2 + a_i2j0 * b_j0k + a_i2j1 * b_j1k + a_i2j2 * b_j2k
+                  VUM.unsafeWrite result ((i + 3) * n + k) $! acc3 + a_i3j0 * b_j0k + a_i3j1 * b_j1k + a_i3j2 * b_j2k
+                  loopScalar (k + 1)
+          loopVector 0
+        Elem j -> do
+          let !a_i0j = a `VU.unsafeIndex` (i * m + j)
+              !a_i1j = a `VU.unsafeIndex` ((i + 1) * m + j)
+              !a_i2j = a `VU.unsafeIndex` ((i + 2) * m + j)
+              !a_i3j = a `VU.unsafeIndex` ((i + 3) * m + j)
+          let loopVector !k
+                | k + simdLen > n = loopScalar k
+                | otherwise = do
+                  !acc0 <- SV.unsafeReadMulti result (i * n + k)
+                  !acc1 <- SV.unsafeReadMulti result ((i + 1) * n + k)
+                  !acc2 <- SV.unsafeReadMulti result ((i + 2) * n + k)
+                  !acc3 <- SV.unsafeReadMulti result ((i + 3) * n + k)
+                  let !b_jk = SV.unsafeIndexMulti b (j * n + k) :: x a
+                  SV.unsafeWriteMulti result (i * n + k) $! acc0 + broadcast a_i0j * b_jk
+                  SV.unsafeWriteMulti result ((i + 1) * n + k) $! acc1 + broadcast a_i1j * b_jk
+                  SV.unsafeWriteMulti result ((i + 2) * n + k) $! acc2 + broadcast a_i2j * b_jk
+                  SV.unsafeWriteMulti result ((i + 3) * n + k) $! acc3 + broadcast a_i3j * b_jk
+                  loopVector (k + simdLen)
+              loopScalar !k
+                | k >= n = pure ()
+                | otherwise = do
+                  !acc0 <- VUM.unsafeRead result (i * n + k)
+                  !acc1 <- VUM.unsafeRead result ((i + 1) * n + k)
+                  !acc2 <- VUM.unsafeRead result ((i + 2) * n + k)
+                  !acc3 <- VUM.unsafeRead result ((i + 3) * n + k)
+                  let !b_jk = VU.unsafeIndex b (j * n + k)
+                  VUM.unsafeWrite result (i * n + k) $! acc0 + a_i0j * b_jk
+                  VUM.unsafeWrite result ((i + 1) * n + k) $! acc1 + a_i1j * b_jk
+                  VUM.unsafeWrite result ((i + 2) * n + k) $! acc2 + a_i2j * b_jk
+                  VUM.unsafeWrite result ((i + 3) * n + k) $! acc3 + a_i3j * b_jk
+                  loopScalar (k + 1)
+          loopVector 0
+    Elem i ->
+      forM_ [0..m-1] $ \ !j -> do
+        let !a_ij = a `VU.unsafeIndex` (i * m + j)
+            a_ij_v :: x a
+            !a_ij_v = broadcast a_ij
+        let loopVector !k
+              | k + simdLen > n = loopScalar k
+              | otherwise = do
+                !acc <- SV.unsafeReadMulti result (i * n + k)
+                SV.unsafeWriteMulti result (i * n + k) $! acc + a_ij_v * SV.unsafeIndexMulti b (j * n + k)
+                loopVector (k + simdLen)
+            loopScalar !k
+              | k >= n = pure ()
+              | otherwise = do
+                !acc <- VUM.unsafeRead result (i * n + k)
+                VUM.unsafeWrite result (i * n + k) $! acc + a_ij * VU.unsafeIndex b (j * n + k)
+                loopScalar (k + 1)
+        loopVector 0
+  pure result
+{-# INLINABLE matMulSIMD_4_3 #-}
+
 matMulBlockSIMD :: forall x l m n a. (SIMD x, KnownNat l, KnownNat m, KnownNat n, SV.MultiUnbox x a, SIMDNum a) => Proxy x -> Int -> Int -> Int -> Mat l m a -> Mat m n a -> Mat l n a
 matMulBlockSIMD _ !lB !mB !nB (MkMat !a) (MkMat !b) = MkMat $ VU.create $ do
   let l, m, n, simdLen :: Int

@@ -56,6 +56,16 @@ properties = testGroup "(checked by QuickCheck)" $
                   QC.forAll (genMatrix pl pm) $ \a ->
                     QC.forAll (genMatrix pm pn) $ \b ->
                       matMulNaive a b QC.=== (matMulSIMD (Proxy @X4) a b `elemTypeProxy` Proxy @Float)
+  , QC.testProperty "matMulNaive == matMulSIMD_4_3 X4 Float" $
+      QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
+        SomeNat pl ->
+          QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \m -> case someNatVal m of
+            SomeNat pm ->
+              QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \n -> case someNatVal n of
+                SomeNat pn ->
+                  QC.forAll (genMatrix pl pm) $ \a ->
+                    QC.forAll (genMatrix pm pn) $ \b ->
+                      matMulNaive a b QC.=== (matMulSIMD_4_3 (Proxy @X4) a b `elemTypeProxy` Proxy @Float)
   , QC.testProperty "matMulNaive == matMulBlockSIMD X4 Float" $
       QC.forAllShrink (chooseEnum (1, 50)) shrinkNat $ \l -> case someNatVal l of
         SomeNat pl ->
