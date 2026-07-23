@@ -7,7 +7,7 @@ license:            BSD-3-Clause
 license-file:       LICENSE
 author:             ARATA Mizuki
 maintainer:         minorinoki@gmail.com
-copyright:          2025 ARATA Mizuki
+copyright:          2026 ARATA Mizuki
 category:           Data
 build-type:         Simple
 extra-doc-files:    README.md
@@ -115,7 +115,7 @@ library common
                       cbits/double_minmax.c
                       cbits/double_minmaxnm.c
 
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       primitive ^>=0.9.0.0
     hs-source-dirs:   src-common
     default-language: GHC2021
@@ -132,7 +132,7 @@ library no-simd
                       Data.Simdy.Internal.NoSIMD.X32
                       Data.Simdy.Internal.NoSIMD.X64
                       Data.Simdy.Internal.NoSIMD.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common
     hs-source-dirs:   src-no-simd
@@ -171,7 +171,7 @@ library vl128
                       Data.Simdy.Internal.VL128.X32
                       Data.Simdy.Internal.VL128.X64
                       Data.Simdy.Internal.VL128.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128-c
@@ -218,7 +218,7 @@ library vl256
                       Data.Simdy.Internal.VL256.X32
                       Data.Simdy.Internal.VL256.X64
                       Data.Simdy.Internal.VL256.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128,
@@ -261,7 +261,7 @@ library vl512
                       Data.Simdy.Internal.VL512.X32
                       Data.Simdy.Internal.VL512.X64
                       Data.Simdy.Internal.VL512.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128,
@@ -290,7 +290,7 @@ library plugin
                     , arch-options
     visibility:       public
     exposed-modules:  Data.Simdy.Shuffle.Plugin
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       simdy:common,
                       ghc >=9.6 && <9.15,
                       ghc-tcplugin-api ^>=0.18.2
@@ -343,7 +343,7 @@ library
         mixins: simdy:vl128 (Data.Simdy.Internal.VL128, Data.Simdy.Internal.VL128 as Data.Simdy.Internal.Default)
 
     -- other-extensions:
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       vector ^>=0.13.1.0,
                       simdy:common,
@@ -360,7 +360,7 @@ test-suite simdy-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Main.hs
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       simdy,
                       tasty ^>=1.5.3,
                       tasty-quickcheck ^>=0.11.1,
@@ -381,7 +381,7 @@ test-suite shuffle-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test-shuffle
     main-is:          ShuffleTest.hs
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       simdy,
                       simdy:plugin,
                       tasty ^>=1.5.3,
@@ -424,7 +424,7 @@ library matmul
                     , arch-options
     exposed-modules:  MatMul
     hs-source-dirs:   example/matmul
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       simdy,
                       simdy:plugin,
                       vector ^>=0.13.1.0,
@@ -448,7 +448,7 @@ test-suite simdy-test-matmul
     type:             exitcode-stdio-1.0
     hs-source-dirs:   example/matmul-test
     main-is:          Main.hs
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       simdy,
                       simdy:matmul,
                       vector ^>=0.13.1.0,
@@ -470,7 +470,7 @@ benchmark simdy-benchmark
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     hs-source-dirs:   benchmark
-    build-depends:    base >=4.18.0.0 && <4.23,
+    build-depends:    base >=4.18.0.0 && <4.24,
                       simdy,
                       simdy:matmul,
                       vector ^>=0.13.1.0,
