@@ -1173,9 +1173,9 @@ main = do
     ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module Data.Simdy.Internal.Class.Generated where"]
     ++ concatMap (\n -> ["-- | Pack\\/unpack " ++ show n ++ "-lane SIMD vectors from\\/to individual scalar elements."
-                        ,"class PackX" ++ show n ++ " f a where"
-                        ,"  mkX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "f a"
-                        ,"  unpackX" ++ show n ++ " :: f a -> (" ++ commaSep (replicate n "a") ++ ")"
+                        ,"class PackX" ++ show n ++ " x a where"
+                        ,"  mkX" ++ show n ++ " :: " ++ concat (replicate n "a -> ") ++ "x a"
+                        ,"  unpackX" ++ show n ++ " :: x a -> (" ++ commaSep (replicate n "a") ++ ")"
                         ,"pattern MkX" ++ show n ++ " :: PackX" ++ show n ++ " x a => " ++ concat (replicate n "a -> ") ++ "x a"
                         ,"pattern MkX" ++ show n ++ concat [" x" ++ show i | i <- [0..n-1]] ++ " <- (unpackX" ++ show n ++ " -> " ++ parens (commaSep ["x" ++ show i | i <- [0..n-1]]) ++ ") where"
                         ,"  MkX" ++ show n ++ " = mkX" ++ show n
