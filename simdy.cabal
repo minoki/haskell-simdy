@@ -274,6 +274,10 @@ library vl512
         -- See https://gitlab.haskell.org/ghc/ghc/-/issues/26410
         ghc-options: -optlc -mattr=+evex512
 
+    if flag(avx512) && os(windows) && (impl(ghc == 9.8.3) || impl(ghc == 9.8.4) || impl(ghc == 9.10.2) || impl(ghc == 9.10.3) || impl(ghc == 9.12.4) || impl(ghc == 9.14.1))
+        -- The stack alignment issue is critical on Windows
+        buildable: False
+
     if !flag(avx512)
         -- vl512 requires avx512 && llvm
         buildable: False
