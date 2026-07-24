@@ -267,7 +267,7 @@ instance MultiStorable X16 Double where
   pokeElemOffSIMD (Ptr addr) (I# i) (MkDoubleX16WithVec128 v0 v1 v2 v3 v4 v5 v6 v7) = IO (\s0 -> case writeDoubleOffAddrAsDoubleX2# addr i v0 s0 of s1 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 2#) v1 s1 of s2 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 4#) v2 s2 of s3 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 6#) v3 s3 of s4 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 8#) v4 s4 of s5 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 10#) v5 s5 of s6 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 12#) v6 s6 of s7 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 14#) v7 s7 of s8 -> (# s8, () #))
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance ImplementationDescription X16 where
   implementationDescription _ = "X16;maxBits=128"
 data instance X16 Int8 = MkInt8X16 Int8X16#

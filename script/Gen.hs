@@ -72,7 +72,7 @@ gen !vecCount !maxBits
     ]
     ++ genType "Float" "F#" 32 "0.0#" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
     ++ genType "Double" "D#" 64 "0.0##" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
-    ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
+    ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)" | maxBits == 128]
     ++ ["instance ImplementationDescription " ++ tyCon ++ " where"
        ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits=" ++ show maxBits ++ "\""
        ]
@@ -751,7 +751,7 @@ genHalf !vecCount !maxBits
     ]
     ++ genType "Float" "F#" 32 maxBits
     ++ genType "Double" "D#" 64 maxBits
-    ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)" | maxBits == 128]
+    ++ ["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)" | maxBits == 128]
     ++ genType "Int8" "I8#" 8 maxBits
     ++ genType "Int16" "I16#" 16 maxBits
     ++ genType "Int32" "I32#" 32 maxBits

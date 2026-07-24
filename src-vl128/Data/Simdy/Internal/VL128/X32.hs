@@ -267,7 +267,7 @@ instance MultiStorable X32 Double where
   pokeElemOffSIMD (Ptr addr) (I# i) (MkDoubleX32WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = IO (\s0 -> case writeDoubleOffAddrAsDoubleX2# addr i v0 s0 of s1 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 2#) v1 s1 of s2 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 4#) v2 s2 of s3 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 6#) v3 s3 of s4 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 8#) v4 s4 of s5 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 10#) v5 s5 of s6 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 12#) v6 s6 of s7 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 14#) v7 s7 of s8 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 16#) v8 s8 of s9 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 18#) v9 s9 of s10 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 20#) v10 s10 of s11 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 22#) v11 s11 of s12 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 24#) v12 s12 of s13 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 26#) v13 s13 of s14 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 28#) v14 s14 of s15 -> case writeDoubleOffAddrAsDoubleX2# addr (i +# 30#) v15 s15 of s16 -> (# s16, () #))
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance ImplementationDescription X32 where
   implementationDescription _ = "X32;maxBits=128"
 data instance X32 Int8 = MkInt8X32WithVec128 Int8X16# Int8X16#

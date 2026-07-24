@@ -330,7 +330,7 @@ import           GHC.Exts
 
 #endif
 
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 
 complementInt8X16# :: Int8X16# -> Int8X16#
 complementInt8X16# u = case unpackInt8X16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15 #) -> packInt8X16# (# intToInt8# (notI# (int8ToInt# u0)), intToInt8# (notI# (int8ToInt# u1)), intToInt8# (notI# (int8ToInt# u2)), intToInt8# (notI# (int8ToInt# u3)), intToInt8# (notI# (int8ToInt# u4)), intToInt8# (notI# (int8ToInt# u5)), intToInt8# (notI# (int8ToInt# u6)), intToInt8# (notI# (int8ToInt# u7)), intToInt8# (notI# (int8ToInt# u8)), intToInt8# (notI# (int8ToInt# u9)), intToInt8# (notI# (int8ToInt# u10)), intToInt8# (notI# (int8ToInt# u11)), intToInt8# (notI# (int8ToInt# u12)), intToInt8# (notI# (int8ToInt# u13)), intToInt8# (notI# (int8ToInt# u14)), intToInt8# (notI# (int8ToInt# u15)) #)

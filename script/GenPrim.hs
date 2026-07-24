@@ -170,7 +170,7 @@ content moduleName width types reexports =
        , ""
        ]
     ++ concat (intersperse [""] $
-      [["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)"] | width == 128] ++
+      [["#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)"] | width == 128] ++
       [ mkUnary int8 "complement" (\u -> "intToInt8# (notI# (int8ToInt# " ++ u ++ "))")
       , mkUnary int16 "complement" (\u -> "intToInt16# (notI# (int16ToInt# " ++ u ++ "))")
       , mkUnary int32 "complement" (\u -> "intToInt32# (notI# (int32ToInt# " ++ u ++ "))")

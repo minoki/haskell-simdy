@@ -20,6 +20,7 @@ extra-source-files: cbits/mask.h
 --     * GHC 9.8.1 and 9.8.2 are not supported because the FMA primitive is broken and I don't think it is worth working around it.
 --     * GHC 9.8.1 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
 --     * GHC 9.8.2 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
+--     * __GLASGOW_HASKELL_LLVM__ issue: https://gitlab.haskell.org/ghc/ghc/-/issues/25606
 --     * FFI issue on AArch64: https://gitlab.haskell.org/ghc/ghc/-/issues/26907
 --     * Stack alignment issue on x86: https://gitlab.haskell.org/ghc/ghc/-/issues/26595, https://gitlab.haskell.org/ghc/ghc/-/issues/26822
 -- * GHC 9.10.* / base-4.20.* / ghc-prim 0.12.*
@@ -72,6 +73,9 @@ common ghc-support
     if impl(ghc == 9.8.1) || impl(ghc == 9.8.2)
         -- GHC 9.8.1 has the FMA primitive broken: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
         -- GHC 9.8.2 has the FMA primitive broken: https://gitlab.haskell.org/ghc/ghc/-/issues/24496
+        buildable: False
+    if impl(ghc == 9.10.1)
+        -- Broken because of __GLASGOW_HASKELL_LLVM__ issue
         buildable: False
     if impl(ghc == 9.12.1) || impl(ghc == 9.12.2) || impl(ghc == 9.12.3)
         -- Broken because of multiple issues
@@ -180,8 +184,10 @@ library vl128
         -- We need the LLVM backend unless (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
         ghc-options: -fllvm
 
-    if !flag(llvm) && (impl(ghc < 9.12) || !arch(x86_64)) && (impl(ghc < 9.15) || !arch(aarch64))
-        -- vl128 requires llvm || (ghc >= 9.12 && x86_64) || (ghc >= 10.0 && aarch64)
+        if impl(ghc < 9.10) || impl(ghc == 9.10.1)
+            -- Detection of LLVM is broken on GHC 9.8, so __GLASGOW_HASKELL_LLVM__ is not defined
+            cpp-options: -DUSE_LLVM
+
         buildable: False
 
 library vl256-c

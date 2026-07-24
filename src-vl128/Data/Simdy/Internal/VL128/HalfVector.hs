@@ -33,7 +33,7 @@ instance SplitShortVector X2 Double where
   joinShortVector (Identity x0) (Identity x1) = mkX2 x0 x1
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance SplitShortVector X2 Int8 where
   splitShortVector v = coerce (unpackX2 v)
   joinShortVector (Identity x0) (Identity x1) = mkX2 x0 x1
@@ -186,7 +186,7 @@ instance SplitShortVector X4 Double where
   joinShortVector (MkDoubleX2 v0) (MkDoubleX2 v1) = MkDoubleX4WithVec128 v0 v1
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance SplitShortVector X4 Int8 where
   splitShortVector v = case unpackX4 v of (x0, x1, x2, x3) -> (mkX2 x0 x1, mkX2 x2 x3)
   joinShortVector u v = case unpackX2 u of (x0, x1) -> case unpackX2 v of (x2, x3) -> mkX4 x0 x1 x2 x3
@@ -339,7 +339,7 @@ instance SplitShortVector X8 Double where
   joinShortVector (MkDoubleX4WithVec128 v0 v1) (MkDoubleX4WithVec128 v2 v3) = MkDoubleX8WithVec128 v0 v1 v2 v3
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance SplitShortVector X8 Int8 where
   splitShortVector v = case unpackX8 v of (x0, x1, x2, x3, x4, x5, x6, x7) -> (mkX4 x0 x1 x2 x3, mkX4 x4 x5 x6 x7)
   joinShortVector u v = case unpackX4 u of (x0, x1, x2, x3) -> case unpackX4 v of (x4, x5, x6, x7) -> mkX8 x0 x1 x2 x3 x4 x5 x6 x7
@@ -492,7 +492,7 @@ instance SplitShortVector X16 Double where
   joinShortVector (MkDoubleX8WithVec128 v0 v1 v2 v3) (MkDoubleX8WithVec128 v4 v5 v6 v7) = MkDoubleX16WithVec128 v0 v1 v2 v3 v4 v5 v6 v7
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance SplitShortVector X16 Int8 where
   splitShortVector v = case unpackX16 v of (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15) -> (mkX8 x0 x1 x2 x3 x4 x5 x6 x7, mkX8 x8 x9 x10 x11 x12 x13 x14 x15)
   joinShortVector u v = case unpackX8 u of (x0, x1, x2, x3, x4, x5, x6, x7) -> case unpackX8 v of (x8, x9, x10, x11, x12, x13, x14, x15) -> mkX16 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15
@@ -645,7 +645,7 @@ instance SplitShortVector X32 Double where
   joinShortVector (MkDoubleX16WithVec128 v0 v1 v2 v3 v4 v5 v6 v7) (MkDoubleX16WithVec128 v8 v9 v10 v11 v12 v13 v14 v15) = MkDoubleX32WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance SplitShortVector X32 Int8 where
   splitShortVector (MkInt8X32WithVec128 v0 v1) = (MkInt8X16 v0, MkInt8X16 v1)
   joinShortVector (MkInt8X16 v0) (MkInt8X16 v1) = MkInt8X32WithVec128 v0 v1
@@ -798,7 +798,7 @@ instance SplitShortVector X64 Double where
   joinShortVector (MkDoubleX32WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) (MkDoubleX32WithVec128 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkDoubleX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0) || defined(__GLASGOW_HASKELL_LLVM__) || defined(USE_LLVM)
 instance SplitShortVector X64 Int8 where
   splitShortVector (MkInt8X64WithVec128 v0 v1 v2 v3) = (MkInt8X32WithVec128 v0 v1, MkInt8X32WithVec128 v2 v3)
   joinShortVector (MkInt8X32WithVec128 v0 v1) (MkInt8X32WithVec128 v2 v3) = MkInt8X64WithVec128 v0 v1 v2 v3
