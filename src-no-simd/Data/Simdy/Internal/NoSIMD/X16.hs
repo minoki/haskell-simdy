@@ -2,13 +2,11 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE ExtendedLiterals #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
-{-# LANGUAGE ExtendedLiterals #-}
-#endif
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.NoSIMD.X16 where

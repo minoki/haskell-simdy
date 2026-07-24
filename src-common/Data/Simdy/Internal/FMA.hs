@@ -1,8 +1,6 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE MonoLocalBinds #-}
-#if MIN_VERSION_base(4, 19, 0)
 {-# LANGUAGE MagicHash #-}
-#endif
 -- |
 -- Fused multiply-add (FMA) support.
 --
@@ -11,9 +9,7 @@
 module Data.Simdy.Internal.FMA where
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Coerce
-#if MIN_VERSION_base(4, 19, 0)
 import           GHC.Exts
-#endif
 
 -- | Types that support fused multiply-add: @fusedMultiplyAdd x y z = x * y + z@
 -- with a single rounding step.
@@ -42,9 +38,6 @@ isFMAAvailable = Nothing
 fmaIsDisabled :: HasFMA => a
 fmaIsDisabled = error "simdy: FMA is disabled"
 #endif
-
-#if MIN_VERSION_base(4, 19, 0)
--- GHC 9.8 or later
 
 {-
 -- | @x * y + z@
@@ -149,22 +142,6 @@ instance FusedMultiplyAdd Float where
 instance FusedMultiplyAdd Double where
   fusedMultiplyAdd (D# x) (D# y) (D# z) = D# (fmaddDouble# x y z)
   {-# INLINE fusedMultiplyAdd #-}
-#else
--- Should we depend on fp-ieee?
-foreign import ccall unsafe "fmaf"
-  fmaFloat :: Float -> Float -> Float -> Float
-
-foreign import ccall unsafe "fma"
-  fmaDouble :: Double -> Double -> Double -> Double
-
-instance FusedMultiplyAdd Float where
-  fusedMultiplyAdd = fmaFloat
-  {-# INLINE fusedMultiplyAdd #-}
-
-instance FusedMultiplyAdd Double where
-  fusedMultiplyAdd = fmaDouble
-  {-# INLINE fusedMultiplyAdd #-}
-#endif
 
 instance FusedMultiplyAdd a => FusedMultiplyAdd (Identity a) where
   fusedMultiplyAdd = coerce (fusedMultiplyAdd @a)

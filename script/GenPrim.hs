@@ -147,6 +147,7 @@ content moduleName width types reexports =
   in
     [ "-- This file was created by script/GenPrim.hs. Do not edit by hand!"
     , "{-# LANGUAGE CPP #-}"
+    , "{-# LANGUAGE ExtendedLiterals #-}"
     , "{-# LANGUAGE MagicHash #-}"
     , "{-# LANGUAGE UnboxedTuples #-}"
     , "{-# LANGUAGE UnliftedFFITypes #-}"
@@ -222,12 +223,11 @@ content moduleName width types reexports =
       , mkBinary word32 "max" (\u v -> "case ltWord32# " ++ u <+> v ++ " of { 0# -> " ++ u ++ "; _ -> " ++ v ++ " }")
       , mkBinary word64 "max" (\u v -> "case ltWord64# " ++ u <+> v ++ " of { 0# -> " ++ u ++ "; _ -> " ++ v ++ " }")
       , ["#endif"]
-      -- ExtendLiterals is not available on GHC 9.6
       , ["#if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)"]
-      , mkUnary int8 "abs" (\u -> "case ltInt8# " ++ u ++ " (intToInt8# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt8# " ++ u ++ " }")
-      , mkUnary int16 "abs" (\u -> "case ltInt16# " ++ u ++ " (intToInt16# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt16# " ++ u ++ " }")
-      , mkUnary int32 "abs" (\u -> "case ltInt32# " ++ u ++ " (intToInt32# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt32# " ++ u ++ " }")
-      , mkUnary int64 "abs" (\u -> "case ltInt64# " ++ u ++ " (intToInt64# 0#) of { 0# -> " ++ u ++ "; _ -> negateInt64# " ++ u ++ " }")
+      , mkUnary int8 "abs" (\u -> "case ltInt8# " ++ u ++ " 0#Int8 of { 0# -> " ++ u ++ "; _ -> negateInt8# " ++ u ++ " }")
+      , mkUnary int16 "abs" (\u -> "case ltInt16# " ++ u ++ " 0#Int16 of { 0# -> " ++ u ++ "; _ -> negateInt16# " ++ u ++ " }")
+      , mkUnary int32 "abs" (\u -> "case ltInt32# " ++ u ++ " 0#Int32 of { 0# -> " ++ u ++ "; _ -> negateInt32# " ++ u ++ " }")
+      , mkUnary int64 "abs" (\u -> "case ltInt64# " ++ u ++ " 0#Int64 of { 0# -> " ++ u ++ "; _ -> negateInt64# " ++ u ++ " }")
       , ["#endif"]
       ] ++
       (if width == 128

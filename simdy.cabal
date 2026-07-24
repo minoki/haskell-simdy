@@ -16,7 +16,6 @@ extra-source-files: cbits/mask.h
 
 -- The versions of GHC and core libraries:
 --
--- * GHC 9.6.* / base-4.18.* / ghc-prim 0.10.*
 -- * GHC 9.8.* / base-4.19.* / ghc-prim 0.11.*
 --     * GHC 9.8.1 and 9.8.2 are not supported because the FMA primitive is broken and I don't think it is worth working around it.
 --     * GHC 9.8.1 is affected by: https://gitlab.haskell.org/ghc/ghc/-/issues/24160
@@ -82,10 +81,8 @@ common arch-options
     if flag(haswell) || flag(avx512)
         -- Traditionally, -mavx didn't imply -msse4.2: https://gitlab.haskell.org/ghc/ghc/-/issues/24989
         -- GHC 10.0 introduces the new behavior.
-        ghc-options: -msse4.2 -mavx -mavx2
+        ghc-options: -msse4.2 -mavx -mavx2 -mfma
         cc-options: -mavx2 -mfma -mf16c
-    if (flag(haswell) || flag(avx512)) && impl(ghc >= 9.8)
-        ghc-options: -mfma
     if flag(haswell) || flag(avx512) || arch(aarch64)
         cpp-options: -DUSE_FMA
     if flag(avx512)
@@ -115,7 +112,7 @@ library common
                       cbits/double_minmax.c
                       cbits/double_minmaxnm.c
 
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       primitive ^>=0.9.0.0
     hs-source-dirs:   src-common
     default-language: GHC2021
@@ -132,7 +129,7 @@ library no-simd
                       Data.Simdy.Internal.NoSIMD.X32
                       Data.Simdy.Internal.NoSIMD.X64
                       Data.Simdy.Internal.NoSIMD.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common
     hs-source-dirs:   src-no-simd
@@ -150,7 +147,6 @@ library vl128-c
                       cbits/float_compare_vl128.c
                       cbits/float_minmax_vl128.c
                       cbits/float_minmaxnm_vl128.c
-                      cbits/fma_vl128.c
                       cbits/int_abs_vl128.c
                       cbits/int_compare_vl128.c
                       cbits/int_minmax_vl128.c
@@ -171,7 +167,7 @@ library vl128
                       Data.Simdy.Internal.VL128.X32
                       Data.Simdy.Internal.VL128.X64
                       Data.Simdy.Internal.VL128.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128-c
@@ -199,7 +195,6 @@ library vl256-c
                       cbits/float_compare_vl256.c
                       cbits/float_minmax_vl256.c
                       cbits/float_minmaxnm_vl256.c
-                      cbits/fma_vl256.c
                       cbits/int_compare_vl256.c
                       cbits/int_minmax_vl256.c
                       cbits/mask_vl256.c
@@ -218,7 +213,7 @@ library vl256
                       Data.Simdy.Internal.VL256.X32
                       Data.Simdy.Internal.VL256.X64
                       Data.Simdy.Internal.VL256.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128,
@@ -244,7 +239,6 @@ library vl512-c
                       cbits/float_compare_vl512.c
                       cbits/float_minmax_vl512.c
                       cbits/float_minmaxnm_vl512.c
-                      cbits/fma_vl512.c
                       cbits/int_compare_vl512.c
                       cbits/int_minmax_vl512.c
                       cbits/select_vl512.c
@@ -261,7 +255,7 @@ library vl512
                       Data.Simdy.Internal.VL512.X32
                       Data.Simdy.Internal.VL512.X64
                       Data.Simdy.Internal.VL512.HalfVector
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       simdy:common,
                       simdy:vl128,
@@ -290,9 +284,9 @@ library plugin
                     , arch-options
     visibility:       public
     exposed-modules:  Data.Simdy.Shuffle.Plugin
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       simdy:common,
-                      ghc >=9.6 && <9.15,
+                      ghc >=9.8 && <9.15,
                       ghc-tcplugin-api ^>=0.18.2
     if impl(ghc >= 9.12)
         build-depends: ghc-experimental
@@ -343,7 +337,7 @@ library
         mixins: simdy:vl128 (Data.Simdy.Internal.VL128, Data.Simdy.Internal.VL128 as Data.Simdy.Internal.Default)
 
     -- other-extensions:
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       primitive ^>=0.9.0.0,
                       vector ^>=0.13.1.0,
                       simdy:common,
@@ -360,7 +354,7 @@ test-suite simdy-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test
     main-is:          Main.hs
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       simdy,
                       tasty ^>=1.5.3,
                       tasty-quickcheck ^>=0.11.1,
@@ -381,7 +375,7 @@ test-suite shuffle-test
     type:             exitcode-stdio-1.0
     hs-source-dirs:   test-shuffle
     main-is:          ShuffleTest.hs
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       simdy,
                       simdy:plugin,
                       tasty ^>=1.5.3,
@@ -424,7 +418,7 @@ library matmul
                     , arch-options
     exposed-modules:  MatMul
     hs-source-dirs:   example/matmul
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       simdy,
                       simdy:plugin,
                       vector ^>=0.13.1.0,
@@ -448,7 +442,7 @@ test-suite simdy-test-matmul
     type:             exitcode-stdio-1.0
     hs-source-dirs:   example/matmul-test
     main-is:          Main.hs
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       simdy,
                       simdy:matmul,
                       vector ^>=0.13.1.0,
@@ -470,7 +464,7 @@ benchmark simdy-benchmark
     type:             exitcode-stdio-1.0
     main-is:          Main.hs
     hs-source-dirs:   benchmark
-    build-depends:    base >=4.18.0.0 && <4.24,
+    build-depends:    base >=4.19.0.0 && <4.24,
                       simdy,
                       simdy:matmul,
                       vector ^>=0.13.1.0,

@@ -76,28 +76,28 @@ gen !vecCount !maxBits
     ++ ["instance ImplementationDescription " ++ tyCon ++ " where"
        ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits=" ++ show maxBits ++ "\""
        ]
-    ++ genType "Int8" "I8#" 8 "intToInt8# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-    ++ genType "Int16" "I16#" 16 "intToInt16# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-    ++ genType "Int32" "I32#" 32 "intToInt32# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-    ++ genType "Int64" "I64#" 64 "intToInt64# 0#" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-    ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-    ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-    ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-    ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+    ++ genType "Int8" "I8#" 8 "0#Int8" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+    ++ genType "Int16" "I16#" 16 "0#Int16" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+    ++ genType "Int32" "I32#" 32 "0#Int32" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+    ++ genType "Int64" "I64#" 64 "0#Int64" maxBits [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+    ++ genType "Word8" "W8#" 8 "0#Word8" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+    ++ genType "Word16" "W16#" 16 "0#Word16" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+    ++ genType "Word32" "W32#" 32 "0#Word32" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+    ++ genType "Word64" "W64#" 64 "0#Word64" maxBits [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
     ++ (if maxBits == 128
         then ["#else"
              ,"-- The NCG of GHC 9.12 does not support integer vectors"
              ,"instance ImplementationDescription " ++ tyCon ++ " where"
              ,"  implementationDescription _ = \"" ++ tyCon ++ ";maxBits(Float,Double)=" ++ show maxBits ++ ",maxBits(other)=0\""
              ]
-             ++ genType "Int8" "I8#" 8 "intToInt8# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
-             ++ genType "Int16" "I16#" 16 "intToInt16# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
-             ++ genType "Int32" "I32#" 32 "intToInt32# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
-             ++ genType "Int64" "I64#" 64 "intToInt64# 0#" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
-             ++ genType "Word8" "W8#" 8 "wordToWord8# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
-             ++ genType "Word16" "W16#" 16 "wordToWord16# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
-             ++ genType "Word32" "W32#" 32 "wordToWord32# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
-             ++ genType "Word64" "W64#" 64 "wordToWord64# 0##" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
+             ++ genType "Int8" "I8#" 8 "0#Int8" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int8", genPrim, genStorable]
+             ++ genType "Int16" "I16#" 16 "0#Int16" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int16", genPrim, genStorable]
+             ++ genType "Int32" "I32#" 32 "0#Int32" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int32", genPrim, genStorable]
+             ++ genType "Int64" "I64#" 64 "0#Int64" 0 [genEquatable, genOrderedInt, genNum True False, genBits, genEnumFromZero "#Int64", genPrim, genStorable]
+             ++ genType "Word8" "W8#" 8 "0#Word8" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word8", genPrim, genStorable]
+             ++ genType "Word16" "W16#" 16 "0#Word16" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word16", genPrim, genStorable]
+             ++ genType "Word32" "W32#" 32 "0#Word32" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word32", genPrim, genStorable]
+             ++ genType "Word64" "W64#" 64 "0#Word64" 0 [genEquatable, genOrderedInt, genNum False False, genBits, genEnumFromZero "#Word64", genPrim, genStorable]
              ++ ["#endif"]
         else []
        )
@@ -558,11 +558,7 @@ gen !vecCount !maxBits
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance EnumFromZero_ " ++ tyCon ++ " " ++ name ++ " where"
-                ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
                 ,"  enumFromZero = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(pack" ++ shortVecName ++ "# (# " ++ commaSep [(if k < vecCount then show k else "0") ++ litSuffix | j <- [0..shortVecSize - 1], let k = i * shortVecSize + j] ++ " #))" | i <- [0..shortVecCount - 1]]
-                ,"#else"
-                ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
-                ,"#endif"
                 ,"  -- {-# INLINE enumFromZero #-}"
                 ]
     genPrim name primCon !bitsPerElem zero maxBits
@@ -935,14 +931,12 @@ genFile moduleName primModules !n !maxBits
     ,"{-# LANGUAGE CPP #-}"
     ,"{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
+    ,"{-# LANGUAGE ExtendedLiterals #-}"
     ,"{-# LANGUAGE LambdaCase #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
     ,"{-# LANGUAGE UnboxedTuples #-}"
     ,"{-# LANGUAGE UndecidableInstances #-}"
-    ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
-    ,"{-# LANGUAGE ExtendedLiterals #-}"
-    ,"#endif"
     ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
     ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module " ++ moduleName ++ " where"
@@ -958,7 +952,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Type.Ord (type (<))"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
-    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), intToInt8#, intToInt16#, intToInt32#, intToInt64#, wordToWord8#, wordToWord16#, wordToWord32#, wordToWord64#)"
+    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))"
     ,"import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
@@ -972,13 +966,11 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"{-# LANGUAGE CPP #-}"
     ,"{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
+    ,"{-# LANGUAGE ExtendedLiterals #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
     ,"{-# LANGUAGE UnboxedTuples #-}"
     ,"{-# LANGUAGE UndecidableInstances #-}"
-    ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)"
-    ,"{-# LANGUAGE ExtendedLiterals #-}"
-    ,"#endif"
     ,"{-# OPTIONS_GHC -Wno-unused-imports #-}"
     ,"{-# OPTIONS_HADDOCK hide #-}"
     ,"module " ++ moduleName ++ " where"

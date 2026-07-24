@@ -2,14 +2,12 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE ExtendedLiterals #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
-{-# LANGUAGE ExtendedLiterals #-}
-#endif
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.VL128.X4 where
@@ -26,7 +24,7 @@ import           Data.Type.Ord (type (<))
 import           Data.Simdy.Internal.VL128.Prim
 import           Data.Simdy.Internal.VL128.PrimExtra
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), intToInt8#, intToInt16#, intToInt32#, intToInt64#, wordToWord8#, wordToWord16#, wordToWord32#, wordToWord64#)
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word
@@ -154,11 +152,7 @@ instance HasFMA => FusedMultiplyAddF X4 Float where
   #-}
 #endif
 instance EnumFromZero_ X4 Float where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkFloatX4 (packFloatX4# (# 0.0#, 1.0#, 2.0#, 3.0# #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Float where
   indexByteArraySIMD# ba i = MkFloatX4 (indexFloatArrayAsFloatX4# ba i)
@@ -259,11 +253,7 @@ instance HasFMA => FusedMultiplyAddF X4 Double where
   #-}
 #endif
 instance EnumFromZero_ X4 Double where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkDoubleX4WithVec128 (packDoubleX2# (# 0.0##, 1.0## #)) (packDoubleX2# (# 2.0##, 3.0## #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Double where
   indexByteArraySIMD# ba i = MkDoubleX4WithVec128 (indexDoubleArrayAsDoubleX2# ba i) (indexDoubleArrayAsDoubleX2# ba (i +# 2#))
@@ -282,7 +272,7 @@ instance ImplementationDescription X4 where
   implementationDescription _ = "X4;maxBits=128"
 data instance X4 Int8 = MkInt8X4 Int8X16#
 instance PackX4 X4 Int8 where
-  mkX4 (I8# x0) (I8# x1) (I8# x2) (I8# x3) = MkInt8X4 (packInt8X16# (# x0, x1, x2, x3, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0# #))
+  mkX4 (I8# x0) (I8# x1) (I8# x2) (I8# x3) = MkInt8X4 (packInt8X16# (# x0, x1, x2, x3, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8 #))
   unpackX4 (MkInt8X4 v0) = case unpackInt8X16# v0 of (# x0, x1, x2, x3, _, _, _, _, _, _, _, _, _, _, _, _ #) -> (I8# x0, I8# x1, I8# x2, I8# x3)
   {-# INLINE mkX4 #-}
   {-# INLINE unpackX4 #-}
@@ -345,27 +335,23 @@ instance BitShiftF X4 Int8 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Int8 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt8X4 (packInt8X16# (# 0#Int8, 1#Int8, 2#Int8, 3#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Int8 where
-  indexByteArraySIMD# ba i = MkInt8X4 (packInt8X16# (# GHC.Exts.indexInt8Array# ba i, GHC.Exts.indexInt8Array# ba (i +# 1#), GHC.Exts.indexInt8Array# ba (i +# 2#), GHC.Exts.indexInt8Array# ba (i +# 3#), intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0# #))
-  readByteArraySIMD# mba i s0 = case GHC.Exts.readInt8Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readInt8Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt8Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt8Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt8X4 (packInt8X16# (# x0, x1, x2, x3, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0# #)) #)
+  indexByteArraySIMD# ba i = MkInt8X4 (packInt8X16# (# GHC.Exts.indexInt8Array# ba i, GHC.Exts.indexInt8Array# ba (i +# 1#), GHC.Exts.indexInt8Array# ba (i +# 2#), GHC.Exts.indexInt8Array# ba (i +# 3#), 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8 #))
+  readByteArraySIMD# mba i s0 = case GHC.Exts.readInt8Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readInt8Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt8Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt8Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt8X4 (packInt8X16# (# x0, x1, x2, x3, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8 #)) #)
   writeByteArraySIMD# mba i (MkInt8X4 v0) s0 = case unpackInt8X16# v0 of (# x0, x1, x2, x3, _, _, _, _, _, _, _, _, _, _, _, _ #) -> case GHC.Exts.writeInt8Array# mba i x0 s0 of s1 -> case GHC.Exts.writeInt8Array# mba (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeInt8Array# mba (i +# 2#) x2 s2 of s3 -> GHC.Exts.writeInt8Array# mba (i +# 3#) x3 s3
   {-# INLINE indexByteArraySIMD# #-}
   {-# INLINE readByteArraySIMD# #-}
   {-# INLINE writeByteArraySIMD# #-}
 instance MultiStorable X4 Int8 where
-  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readInt8OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readInt8OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt8OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt8OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt8X4 (packInt8X16# (# x0, x1, x2, x3, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0#, intToInt8# 0# #)) #))
+  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readInt8OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readInt8OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt8OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt8OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt8X4 (packInt8X16# (# x0, x1, x2, x3, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8 #)) #))
   pokeElemOffSIMD (Ptr addr) (I# i) (MkInt8X4 v0) = IO (\s0 -> case unpackInt8X16# v0 of (# x0, x1, x2, x3, _, _, _, _, _, _, _, _, _, _, _, _ #) -> case GHC.Exts.writeInt8OffAddr# addr i x0 s0 of s1 -> case GHC.Exts.writeInt8OffAddr# addr (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeInt8OffAddr# addr (i +# 2#) x2 s2 of s3 -> case GHC.Exts.writeInt8OffAddr# addr (i +# 3#) x3 s3 of s4 -> (# s4, () #))
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
 data instance X4 Int16 = MkInt16X4 Int16X8#
 instance PackX4 X4 Int16 where
-  mkX4 (I16# x0) (I16# x1) (I16# x2) (I16# x3) = MkInt16X4 (packInt16X8# (# x0, x1, x2, x3, intToInt16# 0#, intToInt16# 0#, intToInt16# 0#, intToInt16# 0# #))
+  mkX4 (I16# x0) (I16# x1) (I16# x2) (I16# x3) = MkInt16X4 (packInt16X8# (# x0, x1, x2, x3, 0#Int16, 0#Int16, 0#Int16, 0#Int16 #))
   unpackX4 (MkInt16X4 v0) = case unpackInt16X8# v0 of (# x0, x1, x2, x3, _, _, _, _ #) -> (I16# x0, I16# x1, I16# x2, I16# x3)
   {-# INLINE mkX4 #-}
   {-# INLINE unpackX4 #-}
@@ -428,21 +414,17 @@ instance BitShiftF X4 Int16 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Int16 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt16X4 (packInt16X8# (# 0#Int16, 1#Int16, 2#Int16, 3#Int16, 0#Int16, 0#Int16, 0#Int16, 0#Int16 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Int16 where
-  indexByteArraySIMD# ba i = MkInt16X4 (packInt16X8# (# GHC.Exts.indexInt16Array# ba i, GHC.Exts.indexInt16Array# ba (i +# 1#), GHC.Exts.indexInt16Array# ba (i +# 2#), GHC.Exts.indexInt16Array# ba (i +# 3#), intToInt16# 0#, intToInt16# 0#, intToInt16# 0#, intToInt16# 0# #))
-  readByteArraySIMD# mba i s0 = case GHC.Exts.readInt16Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readInt16Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt16Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt16Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt16X4 (packInt16X8# (# x0, x1, x2, x3, intToInt16# 0#, intToInt16# 0#, intToInt16# 0#, intToInt16# 0# #)) #)
+  indexByteArraySIMD# ba i = MkInt16X4 (packInt16X8# (# GHC.Exts.indexInt16Array# ba i, GHC.Exts.indexInt16Array# ba (i +# 1#), GHC.Exts.indexInt16Array# ba (i +# 2#), GHC.Exts.indexInt16Array# ba (i +# 3#), 0#Int16, 0#Int16, 0#Int16, 0#Int16 #))
+  readByteArraySIMD# mba i s0 = case GHC.Exts.readInt16Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readInt16Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt16Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt16Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt16X4 (packInt16X8# (# x0, x1, x2, x3, 0#Int16, 0#Int16, 0#Int16, 0#Int16 #)) #)
   writeByteArraySIMD# mba i (MkInt16X4 v0) s0 = case unpackInt16X8# v0 of (# x0, x1, x2, x3, _, _, _, _ #) -> case GHC.Exts.writeInt16Array# mba i x0 s0 of s1 -> case GHC.Exts.writeInt16Array# mba (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeInt16Array# mba (i +# 2#) x2 s2 of s3 -> GHC.Exts.writeInt16Array# mba (i +# 3#) x3 s3
   {-# INLINE indexByteArraySIMD# #-}
   {-# INLINE readByteArraySIMD# #-}
   {-# INLINE writeByteArraySIMD# #-}
 instance MultiStorable X4 Int16 where
-  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readInt16OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readInt16OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt16OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt16OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt16X4 (packInt16X8# (# x0, x1, x2, x3, intToInt16# 0#, intToInt16# 0#, intToInt16# 0#, intToInt16# 0# #)) #))
+  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readInt16OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readInt16OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readInt16OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readInt16OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkInt16X4 (packInt16X8# (# x0, x1, x2, x3, 0#Int16, 0#Int16, 0#Int16, 0#Int16 #)) #))
   pokeElemOffSIMD (Ptr addr) (I# i) (MkInt16X4 v0) = IO (\s0 -> case unpackInt16X8# v0 of (# x0, x1, x2, x3, _, _, _, _ #) -> case GHC.Exts.writeInt16OffAddr# addr i x0 s0 of s1 -> case GHC.Exts.writeInt16OffAddr# addr (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeInt16OffAddr# addr (i +# 2#) x2 s2 of s3 -> case GHC.Exts.writeInt16OffAddr# addr (i +# 3#) x3 s3 of s4 -> (# s4, () #))
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
@@ -511,11 +493,7 @@ instance BitShiftF X4 Int32 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Int32 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt32X4 (packInt32X4# (# 0#Int32, 1#Int32, 2#Int32, 3#Int32 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Int32 where
   indexByteArraySIMD# ba i = MkInt32X4 (indexInt32ArrayAsInt32X4# ba i)
@@ -594,11 +572,7 @@ instance BitShiftF X4 Int64 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Int64 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt64X4WithVec128 (packInt64X2# (# 0#Int64, 1#Int64 #)) (packInt64X2# (# 2#Int64, 3#Int64 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Int64 where
   indexByteArraySIMD# ba i = MkInt64X4WithVec128 (indexInt64ArrayAsInt64X2# ba i) (indexInt64ArrayAsInt64X2# ba (i +# 2#))
@@ -614,7 +588,7 @@ instance MultiStorable X4 Int64 where
   {-# INLINE pokeElemOffSIMD #-}
 data instance X4 Word8 = MkWord8X4 Word8X16#
 instance PackX4 X4 Word8 where
-  mkX4 (W8# x0) (W8# x1) (W8# x2) (W8# x3) = MkWord8X4 (packWord8X16# (# x0, x1, x2, x3, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0## #))
+  mkX4 (W8# x0) (W8# x1) (W8# x2) (W8# x3) = MkWord8X4 (packWord8X16# (# x0, x1, x2, x3, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8 #))
   unpackX4 (MkWord8X4 v0) = case unpackWord8X16# v0 of (# x0, x1, x2, x3, _, _, _, _, _, _, _, _, _, _, _, _ #) -> (W8# x0, W8# x1, W8# x2, W8# x3)
   {-# INLINE mkX4 #-}
   {-# INLINE unpackX4 #-}
@@ -676,27 +650,23 @@ instance BitShiftF X4 Word8 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Word8 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord8X4 (packWord8X16# (# 0#Word8, 1#Word8, 2#Word8, 3#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Word8 where
-  indexByteArraySIMD# ba i = MkWord8X4 (packWord8X16# (# GHC.Exts.indexWord8Array# ba i, GHC.Exts.indexWord8Array# ba (i +# 1#), GHC.Exts.indexWord8Array# ba (i +# 2#), GHC.Exts.indexWord8Array# ba (i +# 3#), wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0## #))
-  readByteArraySIMD# mba i s0 = case GHC.Exts.readWord8Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readWord8Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord8Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord8Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord8X4 (packWord8X16# (# x0, x1, x2, x3, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0## #)) #)
+  indexByteArraySIMD# ba i = MkWord8X4 (packWord8X16# (# GHC.Exts.indexWord8Array# ba i, GHC.Exts.indexWord8Array# ba (i +# 1#), GHC.Exts.indexWord8Array# ba (i +# 2#), GHC.Exts.indexWord8Array# ba (i +# 3#), 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8 #))
+  readByteArraySIMD# mba i s0 = case GHC.Exts.readWord8Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readWord8Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord8Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord8Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord8X4 (packWord8X16# (# x0, x1, x2, x3, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8 #)) #)
   writeByteArraySIMD# mba i (MkWord8X4 v0) s0 = case unpackWord8X16# v0 of (# x0, x1, x2, x3, _, _, _, _, _, _, _, _, _, _, _, _ #) -> case GHC.Exts.writeWord8Array# mba i x0 s0 of s1 -> case GHC.Exts.writeWord8Array# mba (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeWord8Array# mba (i +# 2#) x2 s2 of s3 -> GHC.Exts.writeWord8Array# mba (i +# 3#) x3 s3
   {-# INLINE indexByteArraySIMD# #-}
   {-# INLINE readByteArraySIMD# #-}
   {-# INLINE writeByteArraySIMD# #-}
 instance MultiStorable X4 Word8 where
-  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readWord8OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readWord8OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord8OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord8OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord8X4 (packWord8X16# (# x0, x1, x2, x3, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0##, wordToWord8# 0## #)) #))
+  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readWord8OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readWord8OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord8OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord8OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord8X4 (packWord8X16# (# x0, x1, x2, x3, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8 #)) #))
   pokeElemOffSIMD (Ptr addr) (I# i) (MkWord8X4 v0) = IO (\s0 -> case unpackWord8X16# v0 of (# x0, x1, x2, x3, _, _, _, _, _, _, _, _, _, _, _, _ #) -> case GHC.Exts.writeWord8OffAddr# addr i x0 s0 of s1 -> case GHC.Exts.writeWord8OffAddr# addr (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeWord8OffAddr# addr (i +# 2#) x2 s2 of s3 -> case GHC.Exts.writeWord8OffAddr# addr (i +# 3#) x3 s3 of s4 -> (# s4, () #))
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
 data instance X4 Word16 = MkWord16X4 Word16X8#
 instance PackX4 X4 Word16 where
-  mkX4 (W16# x0) (W16# x1) (W16# x2) (W16# x3) = MkWord16X4 (packWord16X8# (# x0, x1, x2, x3, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0## #))
+  mkX4 (W16# x0) (W16# x1) (W16# x2) (W16# x3) = MkWord16X4 (packWord16X8# (# x0, x1, x2, x3, 0#Word16, 0#Word16, 0#Word16, 0#Word16 #))
   unpackX4 (MkWord16X4 v0) = case unpackWord16X8# v0 of (# x0, x1, x2, x3, _, _, _, _ #) -> (W16# x0, W16# x1, W16# x2, W16# x3)
   {-# INLINE mkX4 #-}
   {-# INLINE unpackX4 #-}
@@ -758,21 +728,17 @@ instance BitShiftF X4 Word16 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Word16 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord16X4 (packWord16X8# (# 0#Word16, 1#Word16, 2#Word16, 3#Word16, 0#Word16, 0#Word16, 0#Word16, 0#Word16 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Word16 where
-  indexByteArraySIMD# ba i = MkWord16X4 (packWord16X8# (# GHC.Exts.indexWord16Array# ba i, GHC.Exts.indexWord16Array# ba (i +# 1#), GHC.Exts.indexWord16Array# ba (i +# 2#), GHC.Exts.indexWord16Array# ba (i +# 3#), wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0## #))
-  readByteArraySIMD# mba i s0 = case GHC.Exts.readWord16Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readWord16Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord16Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord16Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord16X4 (packWord16X8# (# x0, x1, x2, x3, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0## #)) #)
+  indexByteArraySIMD# ba i = MkWord16X4 (packWord16X8# (# GHC.Exts.indexWord16Array# ba i, GHC.Exts.indexWord16Array# ba (i +# 1#), GHC.Exts.indexWord16Array# ba (i +# 2#), GHC.Exts.indexWord16Array# ba (i +# 3#), 0#Word16, 0#Word16, 0#Word16, 0#Word16 #))
+  readByteArraySIMD# mba i s0 = case GHC.Exts.readWord16Array# mba i s0 of (# s1, x0 #) -> case GHC.Exts.readWord16Array# mba (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord16Array# mba (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord16Array# mba (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord16X4 (packWord16X8# (# x0, x1, x2, x3, 0#Word16, 0#Word16, 0#Word16, 0#Word16 #)) #)
   writeByteArraySIMD# mba i (MkWord16X4 v0) s0 = case unpackWord16X8# v0 of (# x0, x1, x2, x3, _, _, _, _ #) -> case GHC.Exts.writeWord16Array# mba i x0 s0 of s1 -> case GHC.Exts.writeWord16Array# mba (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeWord16Array# mba (i +# 2#) x2 s2 of s3 -> GHC.Exts.writeWord16Array# mba (i +# 3#) x3 s3
   {-# INLINE indexByteArraySIMD# #-}
   {-# INLINE readByteArraySIMD# #-}
   {-# INLINE writeByteArraySIMD# #-}
 instance MultiStorable X4 Word16 where
-  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readWord16OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readWord16OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord16OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord16OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord16X4 (packWord16X8# (# x0, x1, x2, x3, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0##, wordToWord16# 0## #)) #))
+  peekElemOffSIMD (Ptr addr) (I# i) = IO (\s0 -> case GHC.Exts.readWord16OffAddr# addr i s0 of (# s1, x0 #) -> case GHC.Exts.readWord16OffAddr# addr (i +# 1#) s1 of (# s2, x1 #) -> case GHC.Exts.readWord16OffAddr# addr (i +# 2#) s2 of (# s3, x2 #) -> case GHC.Exts.readWord16OffAddr# addr (i +# 3#) s3 of (# s4, x3 #) -> (# s4, MkWord16X4 (packWord16X8# (# x0, x1, x2, x3, 0#Word16, 0#Word16, 0#Word16, 0#Word16 #)) #))
   pokeElemOffSIMD (Ptr addr) (I# i) (MkWord16X4 v0) = IO (\s0 -> case unpackWord16X8# v0 of (# x0, x1, x2, x3, _, _, _, _ #) -> case GHC.Exts.writeWord16OffAddr# addr i x0 s0 of s1 -> case GHC.Exts.writeWord16OffAddr# addr (i +# 1#) x1 s1 of s2 -> case GHC.Exts.writeWord16OffAddr# addr (i +# 2#) x2 s2 of s3 -> case GHC.Exts.writeWord16OffAddr# addr (i +# 3#) x3 s3 of s4 -> (# s4, () #))
   {-# INLINE peekElemOffSIMD #-}
   {-# INLINE pokeElemOffSIMD #-}
@@ -840,11 +806,7 @@ instance BitShiftF X4 Word32 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Word32 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord32X4 (packWord32X4# (# 0#Word32, 1#Word32, 2#Word32, 3#Word32 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Word32 where
   indexByteArraySIMD# ba i = MkWord32X4 (indexWord32ArrayAsWord32X4# ba i)
@@ -922,11 +884,7 @@ instance BitShiftF X4 Word64 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X4 Word64 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord64X4WithVec128 (packWord64X2# (# 0#Word64, 1#Word64 #)) (packWord64X2# (# 2#Word64, 3#Word64 #))
-#else
-  enumFromZero = mkX4 0 1 2 3
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X4 Word64 where
   indexByteArraySIMD# ba i = MkWord64X4WithVec128 (indexWord64ArrayAsWord64X2# ba i) (indexWord64ArrayAsWord64X2# ba (i +# 2#))

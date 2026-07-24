@@ -2,14 +2,12 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE ExtendedLiterals #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
-{-# LANGUAGE ExtendedLiterals #-}
-#endif
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.NoSIMD.X4 where
@@ -24,7 +22,7 @@ import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), intToInt8#, intToInt16#, intToInt32#, intToInt64#, wordToWord8#, wordToWord16#, wordToWord32#, wordToWord64#)
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word

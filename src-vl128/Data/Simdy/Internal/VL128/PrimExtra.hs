@@ -584,8 +584,6 @@ foreign import ccall unsafe "hs_simdy_unordDoubleX2_densemask"
 -- FMA
 --
 #if !MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
-#if MIN_VERSION_base(4, 19, 0)
--- GHC 9.8 or later
 -- Let's hope LLVM's optimizer does a good job!
 
 fmaddFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
@@ -616,13 +614,4 @@ fmaddDoubleX2# x y z = case unpackDoubleX2# x of
                #)
 {-# INLINE fmaddDoubleX2# #-}
 
-#else
-
-foreign import ccall unsafe "hs_simdy_fmaddFloatX4"
-  fmaddFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
-
-foreign import ccall unsafe "hs_simdy_fmaddDoubleX2"
-  fmaddDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
-
-#endif
 #endif

@@ -1,5 +1,6 @@
 -- This file was created by script/GenPrim.hs. Do not edit by hand!
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE ExtendedLiterals #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UnliftedFFITypes #-}
@@ -534,19 +535,19 @@ maxWord64X2# u v = case unpackWord64X2# u of (# u0, u1 #) -> case unpackWord64X2
 #if !MIN_VERSION_GLASGOW_HASKELL(9, 15, 0, 0)
 
 absInt8X16# :: Int8X16# -> Int8X16#
-absInt8X16# u = case unpackInt8X16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15 #) -> packInt8X16# (# case ltInt8# u0 (intToInt8# 0#) of { 0# -> u0; _ -> negateInt8# u0 }, case ltInt8# u1 (intToInt8# 0#) of { 0# -> u1; _ -> negateInt8# u1 }, case ltInt8# u2 (intToInt8# 0#) of { 0# -> u2; _ -> negateInt8# u2 }, case ltInt8# u3 (intToInt8# 0#) of { 0# -> u3; _ -> negateInt8# u3 }, case ltInt8# u4 (intToInt8# 0#) of { 0# -> u4; _ -> negateInt8# u4 }, case ltInt8# u5 (intToInt8# 0#) of { 0# -> u5; _ -> negateInt8# u5 }, case ltInt8# u6 (intToInt8# 0#) of { 0# -> u6; _ -> negateInt8# u6 }, case ltInt8# u7 (intToInt8# 0#) of { 0# -> u7; _ -> negateInt8# u7 }, case ltInt8# u8 (intToInt8# 0#) of { 0# -> u8; _ -> negateInt8# u8 }, case ltInt8# u9 (intToInt8# 0#) of { 0# -> u9; _ -> negateInt8# u9 }, case ltInt8# u10 (intToInt8# 0#) of { 0# -> u10; _ -> negateInt8# u10 }, case ltInt8# u11 (intToInt8# 0#) of { 0# -> u11; _ -> negateInt8# u11 }, case ltInt8# u12 (intToInt8# 0#) of { 0# -> u12; _ -> negateInt8# u12 }, case ltInt8# u13 (intToInt8# 0#) of { 0# -> u13; _ -> negateInt8# u13 }, case ltInt8# u14 (intToInt8# 0#) of { 0# -> u14; _ -> negateInt8# u14 }, case ltInt8# u15 (intToInt8# 0#) of { 0# -> u15; _ -> negateInt8# u15 } #)
+absInt8X16# u = case unpackInt8X16# u of (# u0, u1, u2, u3, u4, u5, u6, u7, u8, u9, u10, u11, u12, u13, u14, u15 #) -> packInt8X16# (# case ltInt8# u0 0#Int8 of { 0# -> u0; _ -> negateInt8# u0 }, case ltInt8# u1 0#Int8 of { 0# -> u1; _ -> negateInt8# u1 }, case ltInt8# u2 0#Int8 of { 0# -> u2; _ -> negateInt8# u2 }, case ltInt8# u3 0#Int8 of { 0# -> u3; _ -> negateInt8# u3 }, case ltInt8# u4 0#Int8 of { 0# -> u4; _ -> negateInt8# u4 }, case ltInt8# u5 0#Int8 of { 0# -> u5; _ -> negateInt8# u5 }, case ltInt8# u6 0#Int8 of { 0# -> u6; _ -> negateInt8# u6 }, case ltInt8# u7 0#Int8 of { 0# -> u7; _ -> negateInt8# u7 }, case ltInt8# u8 0#Int8 of { 0# -> u8; _ -> negateInt8# u8 }, case ltInt8# u9 0#Int8 of { 0# -> u9; _ -> negateInt8# u9 }, case ltInt8# u10 0#Int8 of { 0# -> u10; _ -> negateInt8# u10 }, case ltInt8# u11 0#Int8 of { 0# -> u11; _ -> negateInt8# u11 }, case ltInt8# u12 0#Int8 of { 0# -> u12; _ -> negateInt8# u12 }, case ltInt8# u13 0#Int8 of { 0# -> u13; _ -> negateInt8# u13 }, case ltInt8# u14 0#Int8 of { 0# -> u14; _ -> negateInt8# u14 }, case ltInt8# u15 0#Int8 of { 0# -> u15; _ -> negateInt8# u15 } #)
 {-# INLINE [0] absInt8X16# #-}
 
 absInt16X8# :: Int16X8# -> Int16X8#
-absInt16X8# u = case unpackInt16X8# u of (# u0, u1, u2, u3, u4, u5, u6, u7 #) -> packInt16X8# (# case ltInt16# u0 (intToInt16# 0#) of { 0# -> u0; _ -> negateInt16# u0 }, case ltInt16# u1 (intToInt16# 0#) of { 0# -> u1; _ -> negateInt16# u1 }, case ltInt16# u2 (intToInt16# 0#) of { 0# -> u2; _ -> negateInt16# u2 }, case ltInt16# u3 (intToInt16# 0#) of { 0# -> u3; _ -> negateInt16# u3 }, case ltInt16# u4 (intToInt16# 0#) of { 0# -> u4; _ -> negateInt16# u4 }, case ltInt16# u5 (intToInt16# 0#) of { 0# -> u5; _ -> negateInt16# u5 }, case ltInt16# u6 (intToInt16# 0#) of { 0# -> u6; _ -> negateInt16# u6 }, case ltInt16# u7 (intToInt16# 0#) of { 0# -> u7; _ -> negateInt16# u7 } #)
+absInt16X8# u = case unpackInt16X8# u of (# u0, u1, u2, u3, u4, u5, u6, u7 #) -> packInt16X8# (# case ltInt16# u0 0#Int16 of { 0# -> u0; _ -> negateInt16# u0 }, case ltInt16# u1 0#Int16 of { 0# -> u1; _ -> negateInt16# u1 }, case ltInt16# u2 0#Int16 of { 0# -> u2; _ -> negateInt16# u2 }, case ltInt16# u3 0#Int16 of { 0# -> u3; _ -> negateInt16# u3 }, case ltInt16# u4 0#Int16 of { 0# -> u4; _ -> negateInt16# u4 }, case ltInt16# u5 0#Int16 of { 0# -> u5; _ -> negateInt16# u5 }, case ltInt16# u6 0#Int16 of { 0# -> u6; _ -> negateInt16# u6 }, case ltInt16# u7 0#Int16 of { 0# -> u7; _ -> negateInt16# u7 } #)
 {-# INLINE [0] absInt16X8# #-}
 
 absInt32X4# :: Int32X4# -> Int32X4#
-absInt32X4# u = case unpackInt32X4# u of (# u0, u1, u2, u3 #) -> packInt32X4# (# case ltInt32# u0 (intToInt32# 0#) of { 0# -> u0; _ -> negateInt32# u0 }, case ltInt32# u1 (intToInt32# 0#) of { 0# -> u1; _ -> negateInt32# u1 }, case ltInt32# u2 (intToInt32# 0#) of { 0# -> u2; _ -> negateInt32# u2 }, case ltInt32# u3 (intToInt32# 0#) of { 0# -> u3; _ -> negateInt32# u3 } #)
+absInt32X4# u = case unpackInt32X4# u of (# u0, u1, u2, u3 #) -> packInt32X4# (# case ltInt32# u0 0#Int32 of { 0# -> u0; _ -> negateInt32# u0 }, case ltInt32# u1 0#Int32 of { 0# -> u1; _ -> negateInt32# u1 }, case ltInt32# u2 0#Int32 of { 0# -> u2; _ -> negateInt32# u2 }, case ltInt32# u3 0#Int32 of { 0# -> u3; _ -> negateInt32# u3 } #)
 {-# INLINE [0] absInt32X4# #-}
 
 absInt64X2# :: Int64X2# -> Int64X2#
-absInt64X2# u = case unpackInt64X2# u of (# u0, u1 #) -> packInt64X2# (# case ltInt64# u0 (intToInt64# 0#) of { 0# -> u0; _ -> negateInt64# u0 }, case ltInt64# u1 (intToInt64# 0#) of { 0# -> u1; _ -> negateInt64# u1 } #)
+absInt64X2# u = case unpackInt64X2# u of (# u0, u1 #) -> packInt64X2# (# case ltInt64# u0 0#Int64 of { 0# -> u0; _ -> negateInt64# u0 }, case ltInt64# u1 0#Int64 of { 0# -> u1; _ -> negateInt64# u1 } #)
 {-# INLINE [0] absInt64X2# #-}
 
 #endif

@@ -148,12 +148,12 @@ instance (SIMD x, SIMDBits a) => BitShift (x a) -- pseudocode
 
 ## Supported compilers and architectures
 
-This library requires a modern GHC (9.6 at minimum). SIMD functionality is only available on certain architectures. However, you can always use a non-SIMD implementation of the data types by enabling the `no-simd` package flag.
+This library requires a modern GHC (9.8 at minimum). SIMD functionality is only available on certain architectures. However, you can always use a non-SIMD implementation of the data types by enabling the `no-simd` package flag.
 
 Supported architectures are:
 
 * x86_64 with
-    * LLVM backend with GHC 9.6 or newer
+    * LLVM backend with GHC 9.8 or newer
     * NCG backend with GHC 9.12 or newer (128-bit vectors only)
 * AArch64 with
     * LLVM backend with GHC 9.12 or newer (128-bit vectors only)

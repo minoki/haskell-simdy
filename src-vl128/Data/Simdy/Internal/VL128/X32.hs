@@ -2,14 +2,12 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DerivingVia #-}
+{-# LANGUAGE ExtendedLiterals #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# LANGUAGE UndecidableInstances #-}
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
-{-# LANGUAGE ExtendedLiterals #-}
-#endif
 {-# OPTIONS_GHC -Wno-unused-imports #-}
 {-# OPTIONS_HADDOCK hide #-}
 module Data.Simdy.Internal.VL128.X32 where
@@ -26,7 +24,7 @@ import           Data.Type.Ord (type (<))
 import           Data.Simdy.Internal.VL128.Prim
 import           Data.Simdy.Internal.VL128.PrimExtra
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), intToInt8#, intToInt16#, intToInt32#, intToInt64#, wordToWord8#, wordToWord16#, wordToWord32#, wordToWord64#)
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word
@@ -154,11 +152,7 @@ instance HasFMA => FusedMultiplyAddF X32 Float where
   #-}
 #endif
 instance EnumFromZero_ X32 Float where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkFloatX32WithVec128 (packFloatX4# (# 0.0#, 1.0#, 2.0#, 3.0# #)) (packFloatX4# (# 4.0#, 5.0#, 6.0#, 7.0# #)) (packFloatX4# (# 8.0#, 9.0#, 10.0#, 11.0# #)) (packFloatX4# (# 12.0#, 13.0#, 14.0#, 15.0# #)) (packFloatX4# (# 16.0#, 17.0#, 18.0#, 19.0# #)) (packFloatX4# (# 20.0#, 21.0#, 22.0#, 23.0# #)) (packFloatX4# (# 24.0#, 25.0#, 26.0#, 27.0# #)) (packFloatX4# (# 28.0#, 29.0#, 30.0#, 31.0# #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Float where
   indexByteArraySIMD# ba i = MkFloatX32WithVec128 (indexFloatArrayAsFloatX4# ba i) (indexFloatArrayAsFloatX4# ba (i +# 4#)) (indexFloatArrayAsFloatX4# ba (i +# 8#)) (indexFloatArrayAsFloatX4# ba (i +# 12#)) (indexFloatArrayAsFloatX4# ba (i +# 16#)) (indexFloatArrayAsFloatX4# ba (i +# 20#)) (indexFloatArrayAsFloatX4# ba (i +# 24#)) (indexFloatArrayAsFloatX4# ba (i +# 28#))
@@ -259,11 +253,7 @@ instance HasFMA => FusedMultiplyAddF X32 Double where
   #-}
 #endif
 instance EnumFromZero_ X32 Double where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkDoubleX32WithVec128 (packDoubleX2# (# 0.0##, 1.0## #)) (packDoubleX2# (# 2.0##, 3.0## #)) (packDoubleX2# (# 4.0##, 5.0## #)) (packDoubleX2# (# 6.0##, 7.0## #)) (packDoubleX2# (# 8.0##, 9.0## #)) (packDoubleX2# (# 10.0##, 11.0## #)) (packDoubleX2# (# 12.0##, 13.0## #)) (packDoubleX2# (# 14.0##, 15.0## #)) (packDoubleX2# (# 16.0##, 17.0## #)) (packDoubleX2# (# 18.0##, 19.0## #)) (packDoubleX2# (# 20.0##, 21.0## #)) (packDoubleX2# (# 22.0##, 23.0## #)) (packDoubleX2# (# 24.0##, 25.0## #)) (packDoubleX2# (# 26.0##, 27.0## #)) (packDoubleX2# (# 28.0##, 29.0## #)) (packDoubleX2# (# 30.0##, 31.0## #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Double where
   indexByteArraySIMD# ba i = MkDoubleX32WithVec128 (indexDoubleArrayAsDoubleX2# ba i) (indexDoubleArrayAsDoubleX2# ba (i +# 2#)) (indexDoubleArrayAsDoubleX2# ba (i +# 4#)) (indexDoubleArrayAsDoubleX2# ba (i +# 6#)) (indexDoubleArrayAsDoubleX2# ba (i +# 8#)) (indexDoubleArrayAsDoubleX2# ba (i +# 10#)) (indexDoubleArrayAsDoubleX2# ba (i +# 12#)) (indexDoubleArrayAsDoubleX2# ba (i +# 14#)) (indexDoubleArrayAsDoubleX2# ba (i +# 16#)) (indexDoubleArrayAsDoubleX2# ba (i +# 18#)) (indexDoubleArrayAsDoubleX2# ba (i +# 20#)) (indexDoubleArrayAsDoubleX2# ba (i +# 22#)) (indexDoubleArrayAsDoubleX2# ba (i +# 24#)) (indexDoubleArrayAsDoubleX2# ba (i +# 26#)) (indexDoubleArrayAsDoubleX2# ba (i +# 28#)) (indexDoubleArrayAsDoubleX2# ba (i +# 30#))
@@ -345,11 +335,7 @@ instance BitShiftF X32 Int8 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Int8 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt8X32WithVec128 (packInt8X16# (# 0#Int8, 1#Int8, 2#Int8, 3#Int8, 4#Int8, 5#Int8, 6#Int8, 7#Int8, 8#Int8, 9#Int8, 10#Int8, 11#Int8, 12#Int8, 13#Int8, 14#Int8, 15#Int8 #)) (packInt8X16# (# 16#Int8, 17#Int8, 18#Int8, 19#Int8, 20#Int8, 21#Int8, 22#Int8, 23#Int8, 24#Int8, 25#Int8, 26#Int8, 27#Int8, 28#Int8, 29#Int8, 30#Int8, 31#Int8 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Int8 where
   indexByteArraySIMD# ba i = MkInt8X32WithVec128 (indexInt8ArrayAsInt8X16# ba i) (indexInt8ArrayAsInt8X16# ba (i +# 16#))
@@ -428,11 +414,7 @@ instance BitShiftF X32 Int16 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Int16 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt16X32WithVec128 (packInt16X8# (# 0#Int16, 1#Int16, 2#Int16, 3#Int16, 4#Int16, 5#Int16, 6#Int16, 7#Int16 #)) (packInt16X8# (# 8#Int16, 9#Int16, 10#Int16, 11#Int16, 12#Int16, 13#Int16, 14#Int16, 15#Int16 #)) (packInt16X8# (# 16#Int16, 17#Int16, 18#Int16, 19#Int16, 20#Int16, 21#Int16, 22#Int16, 23#Int16 #)) (packInt16X8# (# 24#Int16, 25#Int16, 26#Int16, 27#Int16, 28#Int16, 29#Int16, 30#Int16, 31#Int16 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Int16 where
   indexByteArraySIMD# ba i = MkInt16X32WithVec128 (indexInt16ArrayAsInt16X8# ba i) (indexInt16ArrayAsInt16X8# ba (i +# 8#)) (indexInt16ArrayAsInt16X8# ba (i +# 16#)) (indexInt16ArrayAsInt16X8# ba (i +# 24#))
@@ -511,11 +493,7 @@ instance BitShiftF X32 Int32 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Int32 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt32X32WithVec128 (packInt32X4# (# 0#Int32, 1#Int32, 2#Int32, 3#Int32 #)) (packInt32X4# (# 4#Int32, 5#Int32, 6#Int32, 7#Int32 #)) (packInt32X4# (# 8#Int32, 9#Int32, 10#Int32, 11#Int32 #)) (packInt32X4# (# 12#Int32, 13#Int32, 14#Int32, 15#Int32 #)) (packInt32X4# (# 16#Int32, 17#Int32, 18#Int32, 19#Int32 #)) (packInt32X4# (# 20#Int32, 21#Int32, 22#Int32, 23#Int32 #)) (packInt32X4# (# 24#Int32, 25#Int32, 26#Int32, 27#Int32 #)) (packInt32X4# (# 28#Int32, 29#Int32, 30#Int32, 31#Int32 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Int32 where
   indexByteArraySIMD# ba i = MkInt32X32WithVec128 (indexInt32ArrayAsInt32X4# ba i) (indexInt32ArrayAsInt32X4# ba (i +# 4#)) (indexInt32ArrayAsInt32X4# ba (i +# 8#)) (indexInt32ArrayAsInt32X4# ba (i +# 12#)) (indexInt32ArrayAsInt32X4# ba (i +# 16#)) (indexInt32ArrayAsInt32X4# ba (i +# 20#)) (indexInt32ArrayAsInt32X4# ba (i +# 24#)) (indexInt32ArrayAsInt32X4# ba (i +# 28#))
@@ -594,11 +572,7 @@ instance BitShiftF X32 Int64 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Int64 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkInt64X32WithVec128 (packInt64X2# (# 0#Int64, 1#Int64 #)) (packInt64X2# (# 2#Int64, 3#Int64 #)) (packInt64X2# (# 4#Int64, 5#Int64 #)) (packInt64X2# (# 6#Int64, 7#Int64 #)) (packInt64X2# (# 8#Int64, 9#Int64 #)) (packInt64X2# (# 10#Int64, 11#Int64 #)) (packInt64X2# (# 12#Int64, 13#Int64 #)) (packInt64X2# (# 14#Int64, 15#Int64 #)) (packInt64X2# (# 16#Int64, 17#Int64 #)) (packInt64X2# (# 18#Int64, 19#Int64 #)) (packInt64X2# (# 20#Int64, 21#Int64 #)) (packInt64X2# (# 22#Int64, 23#Int64 #)) (packInt64X2# (# 24#Int64, 25#Int64 #)) (packInt64X2# (# 26#Int64, 27#Int64 #)) (packInt64X2# (# 28#Int64, 29#Int64 #)) (packInt64X2# (# 30#Int64, 31#Int64 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Int64 where
   indexByteArraySIMD# ba i = MkInt64X32WithVec128 (indexInt64ArrayAsInt64X2# ba i) (indexInt64ArrayAsInt64X2# ba (i +# 2#)) (indexInt64ArrayAsInt64X2# ba (i +# 4#)) (indexInt64ArrayAsInt64X2# ba (i +# 6#)) (indexInt64ArrayAsInt64X2# ba (i +# 8#)) (indexInt64ArrayAsInt64X2# ba (i +# 10#)) (indexInt64ArrayAsInt64X2# ba (i +# 12#)) (indexInt64ArrayAsInt64X2# ba (i +# 14#)) (indexInt64ArrayAsInt64X2# ba (i +# 16#)) (indexInt64ArrayAsInt64X2# ba (i +# 18#)) (indexInt64ArrayAsInt64X2# ba (i +# 20#)) (indexInt64ArrayAsInt64X2# ba (i +# 22#)) (indexInt64ArrayAsInt64X2# ba (i +# 24#)) (indexInt64ArrayAsInt64X2# ba (i +# 26#)) (indexInt64ArrayAsInt64X2# ba (i +# 28#)) (indexInt64ArrayAsInt64X2# ba (i +# 30#))
@@ -676,11 +650,7 @@ instance BitShiftF X32 Word8 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Word8 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord8X32WithVec128 (packWord8X16# (# 0#Word8, 1#Word8, 2#Word8, 3#Word8, 4#Word8, 5#Word8, 6#Word8, 7#Word8, 8#Word8, 9#Word8, 10#Word8, 11#Word8, 12#Word8, 13#Word8, 14#Word8, 15#Word8 #)) (packWord8X16# (# 16#Word8, 17#Word8, 18#Word8, 19#Word8, 20#Word8, 21#Word8, 22#Word8, 23#Word8, 24#Word8, 25#Word8, 26#Word8, 27#Word8, 28#Word8, 29#Word8, 30#Word8, 31#Word8 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Word8 where
   indexByteArraySIMD# ba i = MkWord8X32WithVec128 (indexWord8ArrayAsWord8X16# ba i) (indexWord8ArrayAsWord8X16# ba (i +# 16#))
@@ -758,11 +728,7 @@ instance BitShiftF X32 Word16 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Word16 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord16X32WithVec128 (packWord16X8# (# 0#Word16, 1#Word16, 2#Word16, 3#Word16, 4#Word16, 5#Word16, 6#Word16, 7#Word16 #)) (packWord16X8# (# 8#Word16, 9#Word16, 10#Word16, 11#Word16, 12#Word16, 13#Word16, 14#Word16, 15#Word16 #)) (packWord16X8# (# 16#Word16, 17#Word16, 18#Word16, 19#Word16, 20#Word16, 21#Word16, 22#Word16, 23#Word16 #)) (packWord16X8# (# 24#Word16, 25#Word16, 26#Word16, 27#Word16, 28#Word16, 29#Word16, 30#Word16, 31#Word16 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Word16 where
   indexByteArraySIMD# ba i = MkWord16X32WithVec128 (indexWord16ArrayAsWord16X8# ba i) (indexWord16ArrayAsWord16X8# ba (i +# 8#)) (indexWord16ArrayAsWord16X8# ba (i +# 16#)) (indexWord16ArrayAsWord16X8# ba (i +# 24#))
@@ -840,11 +806,7 @@ instance BitShiftF X32 Word32 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Word32 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord32X32WithVec128 (packWord32X4# (# 0#Word32, 1#Word32, 2#Word32, 3#Word32 #)) (packWord32X4# (# 4#Word32, 5#Word32, 6#Word32, 7#Word32 #)) (packWord32X4# (# 8#Word32, 9#Word32, 10#Word32, 11#Word32 #)) (packWord32X4# (# 12#Word32, 13#Word32, 14#Word32, 15#Word32 #)) (packWord32X4# (# 16#Word32, 17#Word32, 18#Word32, 19#Word32 #)) (packWord32X4# (# 20#Word32, 21#Word32, 22#Word32, 23#Word32 #)) (packWord32X4# (# 24#Word32, 25#Word32, 26#Word32, 27#Word32 #)) (packWord32X4# (# 28#Word32, 29#Word32, 30#Word32, 31#Word32 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Word32 where
   indexByteArraySIMD# ba i = MkWord32X32WithVec128 (indexWord32ArrayAsWord32X4# ba i) (indexWord32ArrayAsWord32X4# ba (i +# 4#)) (indexWord32ArrayAsWord32X4# ba (i +# 8#)) (indexWord32ArrayAsWord32X4# ba (i +# 12#)) (indexWord32ArrayAsWord32X4# ba (i +# 16#)) (indexWord32ArrayAsWord32X4# ba (i +# 20#)) (indexWord32ArrayAsWord32X4# ba (i +# 24#)) (indexWord32ArrayAsWord32X4# ba (i +# 28#))
@@ -922,11 +884,7 @@ instance BitShiftF X32 Word64 where
   {-# INLINE shiftLF #-}
   {-# INLINE shiftRF #-}
 instance EnumFromZero_ X32 Word64 where
-#if MIN_VERSION_GLASGOW_HASKELL(9, 8, 1, 0)
   enumFromZero = MkWord64X32WithVec128 (packWord64X2# (# 0#Word64, 1#Word64 #)) (packWord64X2# (# 2#Word64, 3#Word64 #)) (packWord64X2# (# 4#Word64, 5#Word64 #)) (packWord64X2# (# 6#Word64, 7#Word64 #)) (packWord64X2# (# 8#Word64, 9#Word64 #)) (packWord64X2# (# 10#Word64, 11#Word64 #)) (packWord64X2# (# 12#Word64, 13#Word64 #)) (packWord64X2# (# 14#Word64, 15#Word64 #)) (packWord64X2# (# 16#Word64, 17#Word64 #)) (packWord64X2# (# 18#Word64, 19#Word64 #)) (packWord64X2# (# 20#Word64, 21#Word64 #)) (packWord64X2# (# 22#Word64, 23#Word64 #)) (packWord64X2# (# 24#Word64, 25#Word64 #)) (packWord64X2# (# 26#Word64, 27#Word64 #)) (packWord64X2# (# 28#Word64, 29#Word64 #)) (packWord64X2# (# 30#Word64, 31#Word64 #))
-#else
-  enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
-#endif
   -- {-# INLINE enumFromZero #-}
 instance MultiPrim X32 Word64 where
   indexByteArraySIMD# ba i = MkWord64X32WithVec128 (indexWord64ArrayAsWord64X2# ba i) (indexWord64ArrayAsWord64X2# ba (i +# 2#)) (indexWord64ArrayAsWord64X2# ba (i +# 4#)) (indexWord64ArrayAsWord64X2# ba (i +# 6#)) (indexWord64ArrayAsWord64X2# ba (i +# 8#)) (indexWord64ArrayAsWord64X2# ba (i +# 10#)) (indexWord64ArrayAsWord64X2# ba (i +# 12#)) (indexWord64ArrayAsWord64X2# ba (i +# 14#)) (indexWord64ArrayAsWord64X2# ba (i +# 16#)) (indexWord64ArrayAsWord64X2# ba (i +# 18#)) (indexWord64ArrayAsWord64X2# ba (i +# 20#)) (indexWord64ArrayAsWord64X2# ba (i +# 22#)) (indexWord64ArrayAsWord64X2# ba (i +# 24#)) (indexWord64ArrayAsWord64X2# ba (i +# 26#)) (indexWord64ArrayAsWord64X2# ba (i +# 28#)) (indexWord64ArrayAsWord64X2# ba (i +# 30#))
