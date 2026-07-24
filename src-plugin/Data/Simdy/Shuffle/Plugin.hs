@@ -17,7 +17,11 @@ import           GHC.Core.Make (mkCoreApps, mkNaturalExpr)
 import           GHC.Core.Type (RuntimeRepType)
 import           GHC.Driver.Backend (DefunctionalizedCodeOutput (LlvmCodeOutput, NcgCodeOutput),
                                      backendCodeOutput)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
 import           GHC.Driver.DynFlags (DynFlags (backend), isAvxEnabled)
+#else
+import           GHC.Driver.DynFlags (DynFlags)
+#endif
 import           GHC.Plugins (getDynFlags, targetPlatform)
 import qualified GHC.Plugins as GHC (Alt (Alt), AltCon (DataAlt),
                                      Boxity (Unboxed),
@@ -408,11 +412,13 @@ pluginSolve (MkPluginDefs {..}) _givens wanteds = do
               vVar <- freshId "v" (mkVisFunTyMany B.naturalTy vecTy)
 #if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0)
               let hasShufflePrim = True
-#else
+#elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
               let hasShufflePrim = case backendCodeOutput (backend dynflags) of
                     NcgCodeOutput  -> isAvxEnabled dynflags
                     LlvmCodeOutput -> True
                     _              -> False
+#else
+              let hasShufflePrim = False
 #endif
               body <- case shuffleId of
                 Just shuffleId' | hasShufflePrim -> pure $ buildShuffle dynflags vectorTypeDefs shuffleId' (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
