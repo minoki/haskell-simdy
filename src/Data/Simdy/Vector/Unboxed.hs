@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE QuantifiedConstraints #-}
 -- |
 -- SIMD-accelerated operations on 'Data.Vector.Unboxed.Vector'.
