@@ -373,14 +373,14 @@ matMulBlockSIMDX8 !lB !mB !nB (MkMat !a) (MkMat !b) = MkMat $ VU.create $ do
                           !b_j1k = b `SV.unsafeIndexMulti` ((j + j' + 1) * n + k + k')
                           !b_j2k = b `SV.unsafeIndexMulti` ((j + j' + 2) * n + k + k')
                           !b_j3k = b `SV.unsafeIndexMulti` ((j + j' + 3) * n + k + k')
-                          d0 = binaryShuffleWithX4 (\(u00, u01, u02, u03) (u10, u11, u12, u13) -> (u00, u10, u01, u11)) b_j0k b_j1k
-                          d1 = binaryShuffleWithX4 (\(u00, u01, u02, u03) (u10, u11, u12, u13) -> (u02, u12, u03, u13)) b_j0k b_j1k
-                          d2 = binaryShuffleWithX4 (\(u20, u21, u22, u23) (u30, u31, u32, u33) -> (u20, u30, u21, u31)) b_j2k b_j3k
-                          d3 = binaryShuffleWithX4 (\(u20, u21, u22, u23) (u30, u31, u32, u33) -> (u22, u32, u23, u33)) b_j2k b_j3k
-                      SV.unsafeWriteMulti bBlockT (k' * mB + j')       (binaryShuffleWithX4 (\(u00, u10, u01, u11) (u20, u30, u21, u31) -> (u00, u10, u20, u30)) d0 d2)
-                      SV.unsafeWriteMulti bBlockT ((k' + 1) * mB + j') (binaryShuffleWithX4 (\(u00, u10, u01, u11) (u20, u30, u21, u31) -> (u01, u11, u21, u31)) d0 d2)
-                      SV.unsafeWriteMulti bBlockT ((k' + 2) * mB + j') (binaryShuffleWithX4 (\(u02, u12, u03, u13) (u22, u32, u23, u33) -> (u02, u12, u22, u32)) d1 d3)
-                      SV.unsafeWriteMulti bBlockT ((k' + 3) * mB + j') (binaryShuffleWithX4 (\(u02, u12, u03, u13) (u22, u32, u23, u33) -> (u03, u13, u23, u33)) d1 d3)
+                          d0 = binaryShuffleWithX4 (\(u00, u01, _u02, _u03) (u10, u11, _u12, _u13) -> (u00, u10, u01, u11)) b_j0k b_j1k
+                          d1 = binaryShuffleWithX4 (\(_u00, _u01, u02, u03) (_u10, _u11, u12, u13) -> (u02, u12, u03, u13)) b_j0k b_j1k
+                          d2 = binaryShuffleWithX4 (\(u20, u21, _u22, _u23) (u30, u31, _u32, _u33) -> (u20, u30, u21, u31)) b_j2k b_j3k
+                          d3 = binaryShuffleWithX4 (\(_u20, _u21, u22, u23) (_u30, _u31, u32, u33) -> (u22, u32, u23, u33)) b_j2k b_j3k
+                      SV.unsafeWriteMulti bBlockT (k' * mB + j')       (binaryShuffleWithX4 (\(u00, u10, _u01, _u11) (u20, u30, _u21, _u31) -> (u00, u10, u20, u30)) d0 d2)
+                      SV.unsafeWriteMulti bBlockT ((k' + 1) * mB + j') (binaryShuffleWithX4 (\(_u00, _u10, u01, u11) (_u20, _u30, u21, u31) -> (u01, u11, u21, u31)) d0 d2)
+                      SV.unsafeWriteMulti bBlockT ((k' + 2) * mB + j') (binaryShuffleWithX4 (\(u02, u12, _u03, _u13) (u22, u32, _u23, _u33) -> (u02, u12, u22, u32)) d1 d3)
+                      SV.unsafeWriteMulti bBlockT ((k' + 3) * mB + j') (binaryShuffleWithX4 (\(_u02, _u12, u03, u13) (_u22, _u32, u23, u33) -> (u03, u13, u23, u33)) d1 d3)
                     Elem k' -> do
                       forM_ [j'..j'+4-1] $ \ !j'' -> do
                         let !b_jk = b `VU.unsafeIndex` ((j + j'') * n + k + k')
