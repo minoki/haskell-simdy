@@ -188,6 +188,16 @@ library vl128
             -- Detection of LLVM is broken on GHC 9.8, so __GLASGOW_HASKELL_LLVM__ is not defined
             cpp-options: -DUSE_LLVM
 
+    if arch(x86_64) && !flag(llvm) && impl(ghc < 9.12)
+        -- x86_64:
+        -- * GHC >= 9.8 with LLVM
+        -- * GHC >= 9.12 with NCG
+        buildable: False
+
+    if arch(aarch64) && (flag(llvm) && impl(ghc < 9.12) || !flag(llvm) && impl(ghc < 9.15))
+        -- AArch64:
+        --   * GHC >= 9.12 with LLVM
+        --   * GHC >= 10.0 with NCG
         buildable: False
 
 library vl256-c
