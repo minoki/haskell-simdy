@@ -37,7 +37,6 @@ module Data.Simdy.Internal.VL128
   , SIMDEnumFromZero
   , SIMDPrim
   , SIMDStorable
-#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)
   , unaryShuffleX2
   , unaryShuffleX4
   , unaryShuffleX8
@@ -50,7 +49,6 @@ module Data.Simdy.Internal.VL128
   , binaryShuffleX16
   , binaryShuffleX32
   , binaryShuffleX64
-#endif
   , unaryShuffleWithX2
   , unaryShuffleWithX4
   , unaryShuffleWithX8
@@ -86,6 +84,10 @@ import           Data.Simdy.Internal.VL128.X8 as M
 import           Data.Word
 import           Foreign.Storable
 import           Prelude hiding (not, (==), (/=), (<), (<=), (>), (>=))
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)
+import qualified GHC.TypeError as TE
+import           Numeric.Natural (Natural)
+#endif
 
 -- | Constraint on element types that can be stored in SIMD vectors
 -- (e.g. 'Int32', 'Float', 'Double').
@@ -494,6 +496,7 @@ infix 4 <^, <=^, >^, >=^
 {-# INLINE (>=^) #-}
 
 #if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)
+
 unaryShuffleX2 :: X2 a -> forall t -> UnaryShuffle (Tuple2ToList t) X2 a => X2 a
 unaryShuffleX2 v t = unaryShuffle @(Tuple2ToList t) v
 {-# INLINE unaryShuffleX2 #-}
@@ -541,6 +544,57 @@ binaryShuffleX32 u v t = binaryShuffle @(Tuple32ToList t) u v
 binaryShuffleX64 :: X64 a -> X64 a -> forall t -> BinaryShuffle (Tuple64ToList t) X64 a => X64 a
 binaryShuffleX64 u v t = binaryShuffle @(Tuple64ToList t) u v
 {-# INLINE binaryShuffleX64 #-}
+
+#else
+
+unaryShuffleX2 :: TE.Unsatisfiable (TE.Text "unaryShuffleX2 is only available on GHC 9.10 or later") => X2 a -> (Natural, Natural) -> X2 a
+unaryShuffleX2 _ _ = TE.unsatisfiable
+{-# NOINLINE unaryShuffleX2 #-}
+
+unaryShuffleX4 :: TE.Unsatisfiable (TE.Text "unaryShuffleX4 is only available on GHC 9.10 or later") => X4 a -> (Natural, Natural, Natural, Natural) -> X4 a
+unaryShuffleX4 _ _ = TE.unsatisfiable
+{-# NOINLINE unaryShuffleX4 #-}
+
+unaryShuffleX8 :: TE.Unsatisfiable (TE.Text "unaryShuffleX8 is only available on GHC 9.10 or later") => X8 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X8 a
+unaryShuffleX8 _ _ = TE.unsatisfiable
+{-# NOINLINE unaryShuffleX8 #-}
+
+unaryShuffleX16 :: TE.Unsatisfiable (TE.Text "unaryShuffleX16 is only available on GHC 9.10 or later") => X16 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X16 a
+unaryShuffleX16 _ _ = TE.unsatisfiable
+{-# NOINLINE unaryShuffleX16 #-}
+
+unaryShuffleX32 :: TE.Unsatisfiable (TE.Text "unaryShuffleX32 is only available on GHC 9.10 or later") => X32 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X32 a
+unaryShuffleX32 _ _ = TE.unsatisfiable
+{-# NOINLINE unaryShuffleX32 #-}
+
+unaryShuffleX64 :: TE.Unsatisfiable (TE.Text "unaryShuffleX64 is only available on GHC 9.10 or later") => X64 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X64 a
+unaryShuffleX64 _ _ = TE.unsatisfiable
+{-# NOINLINE unaryShuffleX64 #-}
+
+binaryShuffleX2 :: TE.Unsatisfiable (TE.Text "binaryShuffleX2 is only available on GHC 9.10 or later") => X2 a -> X2 a -> (Natural, Natural) -> X2 a
+binaryShuffleX2 _ _ _ = TE.unsatisfiable
+{-# NOINLINE binaryShuffleX2 #-}
+
+binaryShuffleX4 :: TE.Unsatisfiable (TE.Text "binaryShuffleX4 is only available on GHC 9.10 or later") => X4 a -> X4 a -> (Natural, Natural, Natural, Natural) -> X4 a
+binaryShuffleX4 _ _ _ = TE.unsatisfiable
+{-# NOINLINE binaryShuffleX4 #-}
+
+binaryShuffleX8 :: TE.Unsatisfiable (TE.Text "binaryShuffleX8 is only available on GHC 9.10 or later") => X8 a -> X8 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X8 a
+binaryShuffleX8 _ _ _ = TE.unsatisfiable
+{-# NOINLINE binaryShuffleX8 #-}
+
+binaryShuffleX16 :: TE.Unsatisfiable (TE.Text "binaryShuffleX16 is only available on GHC 9.10 or later") => X16 a -> X16 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X16 a
+binaryShuffleX16 _ _ _ = TE.unsatisfiable
+{-# NOINLINE binaryShuffleX16 #-}
+
+binaryShuffleX32 :: TE.Unsatisfiable (TE.Text "binaryShuffleX32 is only available on GHC 9.10 or later") => X32 a -> X32 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X32 a
+binaryShuffleX32 _ _ _ = TE.unsatisfiable
+{-# NOINLINE binaryShuffleX32 #-}
+
+binaryShuffleX64 :: TE.Unsatisfiable (TE.Text "binaryShuffleX64 is only available on GHC 9.10 or later") => X64 a -> X64 a -> (Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural, Natural) -> X64 a
+binaryShuffleX64 _ _ _ = TE.unsatisfiable
+{-# NOINLINE binaryShuffleX64 #-}
+
 #endif
 
 unaryShuffleWithX2 :: forall i0 i1 a. UnaryShuffle '[i0, i1] X2 a => ((Proxy 0, Proxy 1) -> (Proxy i0, Proxy i1)) -> X2 a -> X2 a

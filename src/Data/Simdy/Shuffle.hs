@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 -- |
 -- Lane-reordering (shuffle) operations on SIMD vectors.
 --
@@ -14,7 +13,6 @@
 -- the underlying 'ShuffleMany' constraints.
 module Data.Simdy.Shuffle
   (
-#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)
     -- * Unary shuffle (RequiredTypeArguments)
     -- | Rearrange lanes of a single vector. Pass indices as a type-level tuple:
     --
@@ -36,7 +34,6 @@ module Data.Simdy.Shuffle
   , binaryShuffleX32
   , binaryShuffleX64
   ,
-#endif
     -- * Unary shuffle (proxy-based)
     -- | Rearrange lanes of a single vector using a proxy to specify indices.
     -- Works on all supported GHC versions.

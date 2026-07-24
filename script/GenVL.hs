@@ -53,11 +53,9 @@ genMod name imports comment = unlines $
   ,"  , SIMDEnumFromZero"
   ,"  , SIMDPrim"
   ,"  , SIMDStorable"
-  ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)"
   ] ++
   ["  , unaryShuffle" ++ x | x <- properVecTypes] ++
   ["  , binaryShuffle" ++ x | x <- properVecTypes] ++
-  ["#endif"] ++
   ["  , unaryShuffleWith" ++ x | x <- properVecTypes] ++
   ["  , binaryShuffleWith" ++ x | x <- properVecTypes] ++
   ["  ) where"
@@ -78,6 +76,10 @@ genMod name imports comment = unlines $
   ["import           Data.Word"
   ,"import           Foreign.Storable"
   ,"import           Prelude hiding (not, (==), (/=), (<), (<=), (>), (>=))"
+  ,"#if !MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)"
+  ,"import qualified GHC.TypeError as TE"
+  ,"import           Numeric.Natural (Natural)"
+  ,"#endif"
   ,""
   ,"-- | Constraint on element types that can be stored in SIMD vectors"
   ,"-- (e.g. 'Int32', 'Float', 'Double')."
@@ -307,6 +309,7 @@ genMod name imports comment = unlines $
   ,"{-# INLINE (>=^) #-}"
   ,""
   ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)"
+  ,""
   ] ++ concat (List.intersperse [""] $
     [["unaryShuffle" ++ x ++ " :: " ++ x ++ " a -> forall t -> UnaryShuffle (Tuple" ++ show n ++ "ToList t) " ++ x ++ " a => " ++ x ++ " a"
     ,"unaryShuffle" ++ x ++ " v t = unaryShuffle @(Tuple" ++ show n ++ "ToList t) v"
@@ -316,7 +319,17 @@ genMod name imports comment = unlines $
     ,"binaryShuffle" ++ x ++ " u v t = binaryShuffle @(Tuple" ++ show n ++ "ToList t) u v"
     ,"{-# INLINE binaryShuffle" ++ x ++ " #-}"
     ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]]) ++
-  ["#endif",""] ++
+  ["","#else",""] ++
+  concat (List.intersperse [""] $
+    [["unaryShuffle" ++ x ++ " :: TE.Unsatisfiable (TE.Text \"unaryShuffle" ++ x ++ " is only available on GHC 9.10 or later\") => " ++ x ++ " a -> (" ++ commaSep (replicate n "Natural") ++ ") -> " ++ x ++ " a"
+    ,"unaryShuffle" ++ x ++ " _ _ = TE.unsatisfiable"
+    ,"{-# NOINLINE unaryShuffle" ++ x ++ " #-}"
+    ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]] ++
+    [["binaryShuffle" ++ x ++ " :: TE.Unsatisfiable (TE.Text \"binaryShuffle" ++ x ++ " is only available on GHC 9.10 or later\") => " ++ x ++ " a -> " ++ x ++ " a -> (" ++ commaSep (replicate n "Natural") ++ ") -> " ++ x ++ " a"
+    ,"binaryShuffle" ++ x ++ " _ _ _ = TE.unsatisfiable"
+    ,"{-# NOINLINE binaryShuffle" ++ x ++ " #-}"
+    ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]]) ++
+  ["","#endif",""] ++
   concat (List.intersperse [""] $
     [["unaryShuffleWith" ++ x ++ " :: forall " ++ spaceSep ["i" ++ show i | i <- [0..n-1]] ++ " a. UnaryShuffle '[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "] " ++ x ++ " a => ((" ++ commaSep ["Proxy " ++ show i | i <- [0..n-1]] ++ ") -> (" ++ commaSep ["Proxy i" ++ show i | i <- [0..n-1]] ++ ")) -> " ++ x ++ " a -> " ++ x ++ " a"
     ,"unaryShuffleWith" ++ x ++ " _ = unaryShuffle @'[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "]"
