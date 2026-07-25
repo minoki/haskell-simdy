@@ -109,7 +109,6 @@ library common
                       Data.Simdy.Internal.Shuffle
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.FMA
-                      Data.Simdy.Internal.PrimExtra
 
     c-sources:        cbits/float_minmax.c
                       cbits/float_minmaxnm.c
