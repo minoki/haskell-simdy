@@ -3,7 +3,7 @@
 --
 -- 'MinMax' provides IEEE 754-2019 compliant min\/max for floating-point types:
 --
--- * 'min' \/ 'max' propagate NaN.
+-- * 'Data.Simdy.Internal.Class.min' \/ 'Data.Simdy.Internal.Class.max' propagate NaN.
 -- * 'minimumNumber' \/ 'maximumNumber' prefer numeric values over NaN.
 module Data.Simdy.MinMax
   ( MinMax (..)

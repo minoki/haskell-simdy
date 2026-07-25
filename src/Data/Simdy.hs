@@ -21,7 +21,7 @@
 -- * 'X16' &#x2014; 16 lanes
 -- * 'X32' &#x2014; 32 lanes
 -- * 'X64' &#x2014; 64 lanes
--- * 'Identity' &#x2014; 1 lane (scalar, always available)
+-- * t'Identity' &#x2014; 1 lane (scalar, always available)
 module Data.Simdy
   ( -- * Classes
     SIMD

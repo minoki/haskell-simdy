@@ -42,7 +42,7 @@ instance ImplementationDescription Identity where
 -- | Maps a SIMD vector type to its half-width counterpart.
 --
 -- For example, @HalfVector X8 = X4@ and @HalfVector X4 = X2@.
--- Used by 'SplitShortVector' and 'horizontalFold'.
+-- Used by 'SplitShortVector' and @horizontalFold@.
 type HalfVector :: (Type -> Type) -> Type -> Type
 type family HalfVector f
 
@@ -759,7 +759,7 @@ instance Num a => EnumFromZero_ Identity a where
   {-# INLINE enumFromZero #-}
 
 -- | Constraint alias for types that support generating @[0, 1, 2, ...]@ SIMD vectors.
--- Used by 'indexed' and related functions.
+-- Used by @Data.Simdy.Vector.Generic.indexed@ and related functions.
 type EnumFromZero f a = (EnumFromZero_ f a, Num a, NumF f a, Broadcast f a)
 
 -- TODO: Add Data.Semigroup and Data.Monoid counterparts

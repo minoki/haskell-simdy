@@ -9,7 +9,7 @@
 -- (@aarch64@).  They do __not__ perform runtime CPUID detection.
 --
 -- To enable automatic fusion of @a * b + c@ expressions, import "Data.Simdy.Fusible"
--- instead of 'Prelude' arithmetic.
+-- instead of "Prelude" arithmetic.
 module Data.Simdy.FMA
   ( -- * FMA class
     FusedMultiplyAdd (..)

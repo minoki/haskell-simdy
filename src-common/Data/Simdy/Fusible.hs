@@ -3,10 +3,19 @@
 -- |
 -- Arithmetic operators that enable automatic FMA fusion via rewrite rules.
 --
--- Import this module instead of using 'Prelude' arithmetic operators to allow
--- GHC rewrite rules to fuse @a * b + c@ into 'Data.Simdy.Internal.FMA.fusedMultiplyAdd'.
--- The operators are only fused when FMA hardware support is enabled at compile time;
--- otherwise they behave identically to their 'Prelude' counterparts.
+-- These operators clash with "Prelude", so import them qualified and use them
+-- where you want @a * b + c@ fused into
+-- 'Data.Simdy.Internal.FMA.fusedMultiplyAdd':
+--
+-- @
+-- import qualified Data.Simdy.Fusible as F
+--
+-- muladd a b c = a F.* b F.+ c
+-- @
+--
+-- Fusion only happens when FMA support is enabled at compile time (the
+-- @haswell@ or @avx512@ package flag, or an AArch64 target); otherwise these
+-- operators behave exactly like their "Prelude" counterparts.
 module Data.Simdy.Fusible where
 import           Prelude hiding ((+), (-), (*))
 import qualified Prelude

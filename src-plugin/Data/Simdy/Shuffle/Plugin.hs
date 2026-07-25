@@ -4,6 +4,26 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
+-- |
+-- A type-checker plugin that solves the shuffle constraints of
+-- "Data.Simdy.Internal.Shuffle", which have no hand-written instances.
+--
+-- Enable it with @-fplugin=Data.Simdy.Shuffle.Plugin@ (or
+-- @{-\# OPTIONS_GHC -fplugin=Data.Simdy.Shuffle.Plugin \#-}@) in modules that
+-- use @unaryShuffleX4@ and friends from @Data.Simdy.Shuffle@.
+--
+-- For a wanted @ShuffleMany v indices@ the plugin reads the type-level indices
+-- and builds the evidence as a Core expression:
+--
+-- * as a call to the corresponding shuffle primop (e.g. @shuffleFloatX4#@),
+--   which requires GHC 9.12+ and a code generator that supports it, or
+-- * as an @unpack@ \/ @pack@ sequence otherwise.
+--
+-- Lanes that no index selects are \"don't care\": @fillIndices@ fills them so
+-- that the resulting index vector matches a pattern the hardware implements as
+-- a single instruction (no-op, UNPCKL, UNPCKH or BLEND) whenever possible.
+--
+-- @Pick t index@, the single-element counterpart, is solved the same way.
 module Data.Simdy.Shuffle.Plugin (plugin) where
 import           Control.Applicative ((<|>))
 import           Control.Monad (forM, guard, replicateM)
@@ -53,6 +73,7 @@ evUnaryDictAppE cls tys meth = case tyConSingleDataCon_maybe (classTyCon cls) of
   Nothing -> pprPanic "evUnaryDictAppE" (ppr cls)
 #endif
 
+-- | The plugin itself. Pass @-fplugin=Data.Simdy.Shuffle.Plugin@ to GHC.
 plugin :: GHC.Plugin
 plugin = GHC.defaultPlugin
   { GHC.tcPlugin = \_args -> Just $ mkTcPlugin tcPlugin

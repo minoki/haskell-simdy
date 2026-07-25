@@ -36,6 +36,7 @@ class Boolean a => BitShift a where
   shiftR :: a -> Int -> a
   -- | Shift right without bounds checking.
   unsafeShiftR :: a -> Int -> a
+  -- The remaining "Data.Bits" methods are not implemented yet:
   -- shift :: a -> Int -> a
   -- zeroBits :: a
   -- bit :: Int -> a

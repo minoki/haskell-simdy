@@ -5,7 +5,7 @@
 -- Use 'selectSIMD' to choose lanes based on a mask, or 'Boolean' operators to combine masks.
 --
 -- The @(==^)@, @(/=^)@, @(\<^)@, @(\<=^)@, @(>^)@, @(>=^)@ operators are
--- convenience wrappers that avoid name clashes with 'Prelude'.
+-- convenience wrappers that avoid name clashes with "Prelude".
 module Data.Simdy.Mask
   ( -- * Boolean algebra on masks
     Boolean (..)

@@ -26,8 +26,8 @@ type ShuffleMany :: forall rep. TYPE rep -> [Natural] -> Constraint
 class ShuffleMany v indices where
   shuffleMany# :: (Natural -> v) -> v
 
--- Technically this does not require a compiler magic, but it is implemented so
--- because of consistency.
+-- Technically this needs no compiler magic, but it is solved by the plugin
+-- anyway, for consistency with 'ShuffleMany'.
 type Pick :: Type -> Natural -> Constraint
 class Pick t index where
   pick :: (Natural -> t) -> t
