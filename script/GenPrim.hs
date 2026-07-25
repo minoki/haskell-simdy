@@ -1,3 +1,8 @@
+-- Run as 'cabal run script/GenPrim.hs'
+{- cabal:
+build-depends: base
+default-language: GHC2021
+-}
 import Data.List as List
 
 infixr 5 <+>
@@ -130,7 +135,7 @@ content moduleName width types reexports =
         ,["#endif"]
         ,["min" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]
         ,["max" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]
-        -- GHC 9.16 or later
+        -- Integer and/or/xor are ours; the floating-point ones are primops in GHC 10.0 (9.15) or later
         ,["and" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]
         ,["or" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]
         ,["xor" ++ t ++ "#" | (t, _, k, _) <- types, k /= FLOAT]

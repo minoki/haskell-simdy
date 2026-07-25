@@ -1,3 +1,8 @@
+-- Run as 'cabal run script/GenVL.hs'
+{- cabal:
+build-depends: base
+default-language: GHC2021
+-}
 import qualified Data.List as List
 
 infixr 5 <+>
