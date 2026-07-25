@@ -95,12 +95,12 @@ indexed = unstream . Bundle.indexed @f . stream
 
 -- | Map a function over every element. Takes a SIMD-width function and a scalar fallback.
 {-# INLINE map #-}
-map :: (SIMDVector v f a, SIMDVector v f b) => (f a -> f b) -> (a -> b) -> v a -> v b
+map :: forall f v a b. (SIMDVector v f a, SIMDVector v f b) => (f a -> f b) -> (a -> b) -> v a -> v b
 map vf f = unstream . Bundle.map vf f . stream
 
 -- | Map with index. The SIMD-width function receives a vector of indices.
 {-# INLINE imap #-}
-imap :: (SIMDVector v f a, SIMDVector v f b, EnumFromZero f i, LiftConstructor f) => (f i -> f a -> f b) -> (i -> a -> b) -> v a -> v b
+imap :: forall f v i a b. (SIMDVector v f a, SIMDVector v f b, EnumFromZero f i, LiftConstructor f) => (f i -> f a -> f b) -> (i -> a -> b) -> v a -> v b
 imap vf f = unstream . Bundle.map (\t -> case deconstructTuple2 t of (i, x) -> vf i x) (\(i, x) -> f i x) . Bundle.indexed . stream
 
 -- {-# INLINE mapM #-}
@@ -111,26 +111,26 @@ imap vf f = unstream . Bundle.map (\t -> case deconstructTuple2 t of (i, x) -> v
 
 -- | Monadic map, discarding results.
 {-# INLINE mapM_ #-}
-mapM_ :: (Monad m, SIMDVector v f a) => (f a -> m (f b)) -> (a -> m b) -> v a -> m ()
+mapM_ :: forall f v m a b. (Monad m, SIMDVector v f a) => (f a -> m (f b)) -> (a -> m b) -> v a -> m ()
 mapM_ vf f = Bundle.mapM_ vf f . stream
 
 -- | Indexed monadic map, discarding results.
 {-# INLINE imapM_ #-}
-imapM_ :: (Monad m, SIMDVector v f a, EnumFromZero f i, LiftConstructor f) => (f i -> f a -> m (f b)) -> (i -> a -> m b) -> v a -> m ()
+imapM_ :: forall f v m i a b. (Monad m, SIMDVector v f a, EnumFromZero f i, LiftConstructor f) => (f i -> f a -> m (f b)) -> (i -> a -> m b) -> v a -> m ()
 imapM_ vf f = Bundle.mapM_ (\t -> case deconstructTuple2 t of (i, x) -> vf i x) (\(i, x) -> f i x) . Bundle.indexed . stream
 
 -- forM
 
 -- | Like 'mapM_' with the vector argument first.
 {-# INLINE forM_ #-}
-forM_ :: (Monad m, SIMDVector v f a) => v a -> (f a -> m (f b)) -> (a -> m b) -> m ()
+forM_ :: forall f v m a b. (Monad m, SIMDVector v f a) => v a -> (f a -> m (f b)) -> (a -> m b) -> m ()
 forM_ xs vf f = mapM_ vf f xs
 
 -- iforM
 
 -- | Like 'imapM_' with the vector argument first.
 {-# INLINE iforM_ #-}
-iforM_ :: (Monad m, SIMDVector v f a, EnumFromZero f i, LiftConstructor f) => v a -> (f i -> f a -> m (f b)) -> (i -> a -> m b) -> m ()
+iforM_ :: forall f v m i a b. (Monad m, SIMDVector v f a, EnumFromZero f i, LiftConstructor f) => v a -> (f i -> f a -> m (f b)) -> (i -> a -> m b) -> m ()
 iforM_ xs vf f = imapM_ vf f xs
 
 -- | Element-wise combination of two vectors.
@@ -233,14 +233,14 @@ zip6 = zipWith6 (mkTuple6 @x) (,,,,,)
 
 -- | Monadic element-wise combination, discarding results.
 {-# INLINE zipWithM_ #-}
-zipWithM_ :: (Monad m, SIMDVector v f a, SIMDVector v f b)
+zipWithM_ :: forall f v m a b c. (Monad m, SIMDVector v f a, SIMDVector v f b)
           => (f a -> f b -> m (f c)) -> (a -> b -> m c)
           -> v a -> v b -> m ()
 zipWithM_ vf f = \as bs -> Bundle.zipWithM_ vf f (stream as) (stream bs)
 
 -- | Indexed monadic element-wise combination, discarding results.
 {-# INLINE izipWithM_ #-}
-izipWithM_ :: (Monad m, SIMDVector v f a, SIMDVector v f b, EnumFromZero f i, LiftConstructor f)
+izipWithM_ :: forall f v m i a b c. (Monad m, SIMDVector v f a, SIMDVector v f b, EnumFromZero f i, LiftConstructor f)
            => (f i -> f a -> f b -> m (f c)) -> (i -> a -> b -> m c)
            -> v a -> v b -> m ()
 izipWithM_ vf f = \as bs -> Bundle.zipWithM_ (\t -> case deconstructTuple2 t of (i, a) -> vf i a) (\(i, a) -> f i a) (Bundle.indexed $ stream as) (stream bs)
