@@ -1,6 +1,31 @@
 on: [push, pull_request]
 name: Build and test
 jobs:
+  check-generated-sources:
+    name: Check generated sources
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: haskell-actions/setup@v2
+        name: Setup Haskell
+        with:
+          ghc-version: '9.12'
+
+      - name: Generate sources
+        run: |
+          cabal run script/Gen.hs
+          cabal run script/GenVL.hs
+          cabal run script/GenPrim.hs
+
+      - name: Check the generated sources are up-to-date
+        run: |
+          git add --intent-to-add .
+          if ! git diff --exit-code; then
+            echo "::error::The generated sources are out of date. Run 'cabal run script/Gen.hs', 'cabal run script/GenVL.hs' and 'cabal run script/GenPrim.hs', and commit the result."
+            exit 1
+          fi
+
   build-and-test:
     name: Build and test
     runs-on: ${{ matrix.os }}
@@ -95,10 +120,6 @@ jobs:
       - name: Configure with Cmm lint (Windows)
         run: cabal configure --ghc-options="-dlint -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks
         if: ${{ (matrix.ghc == '9.12' || matrix.ghc == '9.14') && matrix.os == 'windows-latest' }}
-
-      # TODO: Check the generated sources are up-to-date
-      # - name: Generate sources
-      #   run: cabal run script/Gen.hs
 
       - name: Build
         run: cabal build ${{ matrix.flags }}
