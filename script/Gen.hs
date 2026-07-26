@@ -69,6 +69,12 @@ gen !vecCount !maxBits
     ,"instance SelectableF " ++ tyCon ++ " Bool where"
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
+    ,"instance UnaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"  unaryShuffle = error \"not implemented yet\""
+    ,"  {-# NOINLINE unaryShuffle #-}"
+    ,"instance BinaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"  binaryShuffle = error \"not implemented yet\""
+    ,"  {-# NOINLINE binaryShuffle #-}"
     ]
     ++ genType "Float" "F#" 32 "0.0#" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
     ++ genType "Double" "D#" 64 "0.0##" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
@@ -117,6 +123,12 @@ gen !vecCount !maxBits
        ,"instance SelectableF " ++ tyCon ++ " a => SelectableF " ++ tyCon ++ " (Complex a) where"
        ,"  selectF !cond (MkComplex" ++ tyCon ++ " x y) (MkComplex" ++ tyCon ++ " x' y') = MkComplex" ++ tyCon ++ " (selectF cond x x') (selectF cond y y')"
        ,"  {-# INLINE selectF #-}"
+       ,"instance UnaryShuffleT indices " ++ tyCon ++ " a => UnaryShuffleT indices " ++ tyCon ++ " (Complex a) where"
+       ,"  unaryShuffle (MkComplex" ++ tyCon ++ " x y) = MkComplex" ++ tyCon ++ " (unaryShuffle @indices x) (unaryShuffle @indices y)"
+       ,"  {-# INLINE unaryShuffle #-}"
+       ,"instance BinaryShuffleT indices " ++ tyCon ++ " a => BinaryShuffleT indices " ++ tyCon ++ " (Complex a) where"
+       ,"  binaryShuffle (MkComplex" ++ tyCon ++ " x y) (MkComplex" ++ tyCon ++ " u v) = MkComplex" ++ tyCon ++ " (binaryShuffle @indices x u) (binaryShuffle @indices y v)"
+       ,"  {-# INLINE binaryShuffle #-}"
        ]
     {-
     ++ ["instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (Complex a) where"
@@ -140,6 +152,12 @@ gen !vecCount !maxBits
        ,"instance SelectableF " ++ tyCon ++ " () where"
        ,"  selectF _ _ _ = MkUnit" ++ tyCon
        ,"  {-# INLINE selectF #-}"
+       ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
+       ,"  unaryShuffle _ = MkUnit" ++ tyCon
+       ,"  {-# INLINE unaryShuffle #-}"
+       ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++ ") => BinaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
+       ,"  binaryShuffle _ _ = MkUnit" ++ tyCon
+       ,"  {-# INLINE binaryShuffle #-}"
        ]
     ++ concatMap genTuple [2..maxTupleLen]
     ++ ["instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b) => LiftSIMD " ++ tyCon ++ " a b where"
@@ -186,10 +204,10 @@ gen !vecCount !maxBits
                            ,"  {-# INLINE broadcast #-}"
                            ,"instance SelectableF " ++ tyCon ++ " " ++ name ++ " where"
                            ,"  selectF (MkBool" ++ tyCon ++ " !cond) (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(if testBit cond " ++ show i ++ " then x" ++ show i ++ " else y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                           ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => UnaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                           ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
                            ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == vecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..vecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(pick @_ @i" ++ show i ++ " sources)" | i <- [0..vecCount-1]]
                            ,"  {-# INLINE unaryShuffle #-}"
-                           ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => BinaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                           ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => BinaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
                            ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [vecCount..2*vecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == 2 * vecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..2*vecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(pick @_ @i" ++ show i ++ " sources)" | i <- [0..vecCount-1]]
                            ,"  {-# INLINE binaryShuffle #-}"
                            ]
@@ -216,18 +234,18 @@ gen !vecCount !maxBits
                            ] ++
                            (if shortVecCount == 1
                            then
-                             ["instance (AllLessThan indices " ++ show vecCount ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => UnaryShuffle indices " ++ tyCon <+> name ++ " where"
+                             ["instance (AllLessThan indices " ++ show vecCount ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => UnaryShuffleT indices " ++ tyCon <+> name ++ " where"
                              ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> "x) = Mk" ++ name ++ tyCon ++ suffix ++ " (shuffleMany# @_ @_ @indices (\\_ -> x))"
                              ,"  {-# INLINE unaryShuffle #-}"
-                             ,"instance (AllLessThan indices " ++ show (2 * vecCount) ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => BinaryShuffle indices " ++ tyCon <+> name ++ " where"
+                             ,"instance (AllLessThan indices " ++ show (2 * vecCount) ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => BinaryShuffleT indices " ++ tyCon <+> name ++ " where"
                              ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> "x0) (Mk" ++ name ++ tyCon ++ suffix <+> "x1) = Mk" ++ name ++ tyCon ++ suffix ++ " (shuffleMany# @_ @_ @indices (\\case { 0 -> x0; _ -> x1 }))"
                              ,"  {-# INLINE binaryShuffle #-}"
                            ]
                            else
-                             ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => UnaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                             ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => UnaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
                              ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == shortVecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..shortVecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" ++ " sources)" | g <- [0..shortVecCount-1]]
                              ,"  {-# INLINE unaryShuffle #-}"
-                             ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => BinaryShuffle [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+                             ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => BinaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
                              ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [shortVecCount..2*shortVecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == 2 * shortVecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..2*shortVecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "] sources)" | g <- [0..shortVecCount-1]]
                              ,"  {-# INLINE binaryShuffle #-}"
                              ]
@@ -702,6 +720,12 @@ gen !vecCount !maxBits
         ,"instance (" ++ commaSep ["SelectableF " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => SelectableF " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
         ,"  selectF !cond (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(selectF cond x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
         ,"  {-# INLINE selectF #-}"
+        ,"instance (" ++ commaSep ["UnaryShuffleT indices " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnaryShuffleT indices " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
+        ,"  unaryShuffle (MkTuple" ++ show n ++ tyCon <+> spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unaryShuffle @indices x" ++ show i ++ ")" | i <- [0..n-1]]
+        ,"  {-# INLINE unaryShuffle #-}"
+        ,"instance (" ++ commaSep ["BinaryShuffleT indices " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => BinaryShuffleT indices " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
+        ,"  binaryShuffle (MkTuple" ++ show n ++ tyCon <+> spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (MkTuple" ++ show n ++ tyCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(binaryShuffle @indices x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
+        ,"  {-# INLINE binaryShuffle #-}"
         ] {- ++ if n <= maxTupleLenForUnboxedVector
              then ["instance (" ++ commaSep ["UnboxSIMD " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSIMD " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
                   ,"  unsafeIndexUnboxedSIMD (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSIMD v" ++ show i ++ " i)" | i <- [0..n-1]]
@@ -725,6 +749,12 @@ gen !vecCount !maxBits
         ,"instance SelectableF " ++ tyCon ++ " a => SelectableF " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  selectF = coerce (selectF @" ++ tyCon ++ " @a)"
         ,"  {-# INLINE selectF #-}"
+        ,"instance UnaryShuffleT indices " ++ tyCon ++ " a => UnaryShuffleT indices " ++ tyCon ++ " (" ++ name ++ " a) where"
+        ,"  unaryShuffle = coerce (unaryShuffle @indices @" ++ tyCon ++ " @a)"
+        ,"  {-# INLINE unaryShuffle #-}"
+        ,"instance BinaryShuffleT indices " ++ tyCon ++ " a => BinaryShuffleT indices " ++ tyCon ++ " (" ++ name ++ " a) where"
+        ,"  binaryShuffle = coerce (binaryShuffle @indices @" ++ tyCon ++ " @a)"
+        ,"  {-# INLINE binaryShuffle #-}"
         {-
         ,"instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (" ++ name ++ " a) where"
         ,"  unsafeIndexUnboxedSIMD = coerce (unsafeIndexUnboxedSIMD @" ++ tyCon ++ " @a)"
@@ -967,6 +997,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"{-# LANGUAGE DataKinds #-}"
     ,"{-# LANGUAGE DerivingVia #-}"
     ,"{-# LANGUAGE ExtendedLiterals #-}"
+    ,"{-# LANGUAGE LambdaCase #-}"
     ,"{-# LANGUAGE MagicHash #-}"
     ,"{-# LANGUAGE TypeFamilies #-}"
     ,"{-# LANGUAGE UnboxedTuples #-}"
@@ -982,6 +1013,8 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Internal.Bits (Boolean, BitShift)"
     ,"import           Data.Simdy.Internal.Class"
+    ,"import           Data.Simdy.Internal.Shuffle"
+    ,"import           Data.Type.Ord (type (<))"
     ] ++ ["import           " ++ m | m <- imports] ++
     ["import           Foreign.Storable (Storable)"
     ,"import qualified GHC.Exts"
@@ -1048,7 +1081,52 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"instance SelectableF " ++ baseTyCon ++ " a => SelectableF " ++ tyCon ++ " a where"
     ,"  selectF (" ++ dataCon ++ " " ++ spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(selectF cond" ++ show i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
     ,"  {-# INLINE selectF #-}"
-    ,"instance EquatableF " ++ baseTyCon ++ " a => EquatableF " ++ tyCon ++ " a where"
+    ,"instance UnaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"  unaryShuffle = error \"not implemented yet\""
+    ,"  {-# NOINLINE unaryShuffle #-}"
+    ,"instance BinaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"  binaryShuffle = error \"not implemented yet\""
+    ,"  {-# NOINLINE binaryShuffle #-}"
+    ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
+    ,"  unaryShuffle _ = " ++ dataCon <+> spaceSep (replicate n ("MkUnit" ++ baseTyCon))
+    ,"  {-# INLINE unaryShuffle #-}"
+    ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++ ") => BinaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
+    ,"  binaryShuffle _ _ = " ++ dataCon <+> spaceSep (replicate n ("MkUnit" ++ baseTyCon))
+    ,"  {-# INLINE binaryShuffle #-}"
+    ]
+    ++ do
+      { name <- ["Float","Double","Int8","Int16","Int32","Int64","Word8","Word16","Word32","Word64"]
+      ; let unpacked f = dataCon ++ concat [" (Mk" ++ name ++ baseTyCon ++ "WithElems " ++ spaceSep [f j | j <- [baseCount * i..baseCount * (i + 1) - 1]] ++ ")" | i <- [0..n-1]]
+      ; ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+        ,"  unaryShuffle (" ++ unpacked (\i -> "x" ++ show i) ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == vecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..vecCount-1]] ++ " } } in " ++ unpacked (\i -> "(pick @_ @i" ++ show i ++ " sources)")
+        ,"  {-# INLINE unaryShuffle #-}"
+        ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["Pick " ++ name ++ " i" ++ show i | i <- [0..vecCount-1]] ++ ") => BinaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
+        ,"  binaryShuffle (" ++ unpacked (\i -> "x" ++ show i) ++ ") (" ++ unpacked (\i -> "x" ++ show (i + vecCount)) ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == 2 * vecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..2*vecCount-1]] ++ " } } in " ++ unpacked (\i -> "(pick @_ @i" ++ show i ++ " sources)")
+        ,"  {-# INLINE binaryShuffle #-}"
+        ]
+      }
+    ++ concat [["instance UnaryShuffleT indices " ++ tyCon ++ " a => UnaryShuffleT indices " ++ tyCon ++ " (" ++ name ++ " a) where"
+               ,"  unaryShuffle v = mk" ++ name ++ " (unaryShuffle @indices (get" ++ name ++ "' v))"
+               ,"  {-# INLINE unaryShuffle #-}"
+               ,"instance BinaryShuffleT indices " ++ tyCon ++ " a => BinaryShuffleT indices " ++ tyCon ++ " (" ++ name ++ " a) where"
+               ,"  binaryShuffle u v = mk" ++ name ++ " (binaryShuffle @indices (get" ++ name ++ "' u) (get" ++ name ++ "' v))"
+               ,"  {-# INLINE binaryShuffle #-}"
+               ] | name <- ["Sum", "Product", "Min", "Max"]]
+    ++ ["instance UnaryShuffleT indices " ++ tyCon ++ " a => UnaryShuffleT indices " ++ tyCon ++ " (Complex a) where"
+       ,"  unaryShuffle v = case deconstructComplex v of (x0, x1) -> mkComplex (unaryShuffle @indices x0) (unaryShuffle @indices x1)"
+       ,"  {-# INLINE unaryShuffle #-}"
+       ,"instance BinaryShuffleT indices " ++ tyCon ++ " a => BinaryShuffleT indices " ++ tyCon ++ " (Complex a) where"
+       ,"  binaryShuffle u v = case deconstructComplex u of (x0, x1) -> case deconstructComplex v of (y0, y1) -> mkComplex (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)"
+       ,"  {-# INLINE binaryShuffle #-}"
+       ]
+    ++ concat [["instance (" ++ commaSep ["UnaryShuffleT indices " ++ tyCon ++ " a" ++ show i | i <- [0..k-1]] ++ ") => UnaryShuffleT indices " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..k-1]] ++ ") where"
+               ,"  unaryShuffle v = case deconstructTuple" ++ show k ++ " v of (" ++ commaSep ["x" ++ show i | i <- [0..k-1]] ++ ") -> mkTuple" ++ show k ++ " " ++ spaceSep ["(unaryShuffle @indices x" ++ show i ++ ")" | i <- [0..k-1]]
+               ,"  {-# INLINE unaryShuffle #-}"
+               ,"instance (" ++ commaSep ["BinaryShuffleT indices " ++ tyCon ++ " a" ++ show i | i <- [0..k-1]] ++ ") => BinaryShuffleT indices " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..k-1]] ++ ") where"
+               ,"  binaryShuffle u v = case deconstructTuple" ++ show k ++ " u of (" ++ commaSep ["x" ++ show i | i <- [0..k-1]] ++ ") -> case deconstructTuple" ++ show k ++ " v of (" ++ commaSep ["y" ++ show i | i <- [0..k-1]] ++ ") -> mkTuple" ++ show k ++ " " ++ spaceSep ["(binaryShuffle @indices x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..k-1]]
+               ,"  {-# INLINE binaryShuffle #-}"
+               ] | k <- [2..maxTupleLen]]
+    ++ ["instance EquatableF " ++ baseTyCon ++ " a => EquatableF " ++ tyCon ++ " a where"
     ,liftBinary "eqF"
     ,"  {-# INLINE eqF #-}"
     ,"instance OrderedF " ++ baseTyCon ++ " a => OrderedF " ++ tyCon ++ " a where"

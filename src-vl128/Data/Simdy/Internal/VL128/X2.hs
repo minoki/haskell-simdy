@@ -65,6 +65,12 @@ instance Broadcast X2 Bool where
 instance SelectableF X2 Bool where
   selectF (MkBoolX2 !cond) (MkBoolX2 !x) (MkBoolX2 !y) = MkBoolX2 ((cond .&. x) .|. (complement cond .&. y))
   {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 Bool where
+  unaryShuffle = error "not implemented yet"
+  {-# NOINLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 Bool where
+  binaryShuffle = error "not implemented yet"
+  {-# NOINLINE binaryShuffle #-}
 data instance X2 Float = MkFloatX2 FloatX4#
 instance PackX2 X2 Float where
   mkX2 (F# x0) (F# x1) = MkFloatX2 (packFloatX4# (# x0, x1, 0.0#, 0.0# #))
@@ -77,10 +83,10 @@ instance Broadcast X2 Float where
 instance SelectableF X2 Float where
   selectF (MkBoolX2 !cond) (MkFloatX2 x0) (MkFloatX2 y0) = MkFloatX2 (selectFloatX4# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany FloatX4# indices) => UnaryShuffle indices X2 Float where
+instance (AllLessThan indices 2, ShuffleMany FloatX4# indices) => UnaryShuffleT indices X2 Float where
   unaryShuffle (MkFloatX2 x) = MkFloatX2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany FloatX4# indices) => BinaryShuffle indices X2 Float where
+instance (AllLessThan indices 4, ShuffleMany FloatX4# indices) => BinaryShuffleT indices X2 Float where
   binaryShuffle (MkFloatX2 x0) (MkFloatX2 x1) = MkFloatX2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Float where
@@ -178,10 +184,10 @@ instance Broadcast X2 Double where
 instance SelectableF X2 Double where
   selectF (MkBoolX2 !cond) (MkDoubleX2 x0) (MkDoubleX2 y0) = MkDoubleX2 (selectDoubleX2# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany DoubleX2# indices) => UnaryShuffle indices X2 Double where
+instance (AllLessThan indices 2, ShuffleMany DoubleX2# indices) => UnaryShuffleT indices X2 Double where
   unaryShuffle (MkDoubleX2 x) = MkDoubleX2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany DoubleX2# indices) => BinaryShuffle indices X2 Double where
+instance (AllLessThan indices 4, ShuffleMany DoubleX2# indices) => BinaryShuffleT indices X2 Double where
   binaryShuffle (MkDoubleX2 x0) (MkDoubleX2 x1) = MkDoubleX2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Double where
@@ -282,10 +288,10 @@ instance Broadcast X2 Int8 where
 instance SelectableF X2 Int8 where
   selectF (MkBoolX2 !cond) (MkInt8X2 x0) (MkInt8X2 y0) = MkInt8X2 (selectInt8X16# (fromIntegral cond) x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Int8X16# indices) => UnaryShuffle indices X2 Int8 where
+instance (AllLessThan indices 2, ShuffleMany Int8X16# indices) => UnaryShuffleT indices X2 Int8 where
   unaryShuffle (MkInt8X2 x) = MkInt8X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Int8X16# indices) => BinaryShuffle indices X2 Int8 where
+instance (AllLessThan indices 4, ShuffleMany Int8X16# indices) => BinaryShuffleT indices X2 Int8 where
   binaryShuffle (MkInt8X2 x0) (MkInt8X2 x1) = MkInt8X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int8 where
@@ -361,10 +367,10 @@ instance Broadcast X2 Int16 where
 instance SelectableF X2 Int16 where
   selectF (MkBoolX2 !cond) (MkInt16X2 x0) (MkInt16X2 y0) = MkInt16X2 (selectInt16X8# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Int16X8# indices) => UnaryShuffle indices X2 Int16 where
+instance (AllLessThan indices 2, ShuffleMany Int16X8# indices) => UnaryShuffleT indices X2 Int16 where
   unaryShuffle (MkInt16X2 x) = MkInt16X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Int16X8# indices) => BinaryShuffle indices X2 Int16 where
+instance (AllLessThan indices 4, ShuffleMany Int16X8# indices) => BinaryShuffleT indices X2 Int16 where
   binaryShuffle (MkInt16X2 x0) (MkInt16X2 x1) = MkInt16X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int16 where
@@ -440,10 +446,10 @@ instance Broadcast X2 Int32 where
 instance SelectableF X2 Int32 where
   selectF (MkBoolX2 !cond) (MkInt32X2 x0) (MkInt32X2 y0) = MkInt32X2 (selectInt32X4# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Int32X4# indices) => UnaryShuffle indices X2 Int32 where
+instance (AllLessThan indices 2, ShuffleMany Int32X4# indices) => UnaryShuffleT indices X2 Int32 where
   unaryShuffle (MkInt32X2 x) = MkInt32X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Int32X4# indices) => BinaryShuffle indices X2 Int32 where
+instance (AllLessThan indices 4, ShuffleMany Int32X4# indices) => BinaryShuffleT indices X2 Int32 where
   binaryShuffle (MkInt32X2 x0) (MkInt32X2 x1) = MkInt32X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int32 where
@@ -519,10 +525,10 @@ instance Broadcast X2 Int64 where
 instance SelectableF X2 Int64 where
   selectF (MkBoolX2 !cond) (MkInt64X2 x0) (MkInt64X2 y0) = MkInt64X2 (selectInt64X2# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Int64X2# indices) => UnaryShuffle indices X2 Int64 where
+instance (AllLessThan indices 2, ShuffleMany Int64X2# indices) => UnaryShuffleT indices X2 Int64 where
   unaryShuffle (MkInt64X2 x) = MkInt64X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Int64X2# indices) => BinaryShuffle indices X2 Int64 where
+instance (AllLessThan indices 4, ShuffleMany Int64X2# indices) => BinaryShuffleT indices X2 Int64 where
   binaryShuffle (MkInt64X2 x0) (MkInt64X2 x1) = MkInt64X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int64 where
@@ -598,10 +604,10 @@ instance Broadcast X2 Word8 where
 instance SelectableF X2 Word8 where
   selectF (MkBoolX2 !cond) (MkWord8X2 x0) (MkWord8X2 y0) = MkWord8X2 (selectWord8X16# (fromIntegral cond) x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Word8X16# indices) => UnaryShuffle indices X2 Word8 where
+instance (AllLessThan indices 2, ShuffleMany Word8X16# indices) => UnaryShuffleT indices X2 Word8 where
   unaryShuffle (MkWord8X2 x) = MkWord8X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Word8X16# indices) => BinaryShuffle indices X2 Word8 where
+instance (AllLessThan indices 4, ShuffleMany Word8X16# indices) => BinaryShuffleT indices X2 Word8 where
   binaryShuffle (MkWord8X2 x0) (MkWord8X2 x1) = MkWord8X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word8 where
@@ -676,10 +682,10 @@ instance Broadcast X2 Word16 where
 instance SelectableF X2 Word16 where
   selectF (MkBoolX2 !cond) (MkWord16X2 x0) (MkWord16X2 y0) = MkWord16X2 (selectWord16X8# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Word16X8# indices) => UnaryShuffle indices X2 Word16 where
+instance (AllLessThan indices 2, ShuffleMany Word16X8# indices) => UnaryShuffleT indices X2 Word16 where
   unaryShuffle (MkWord16X2 x) = MkWord16X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Word16X8# indices) => BinaryShuffle indices X2 Word16 where
+instance (AllLessThan indices 4, ShuffleMany Word16X8# indices) => BinaryShuffleT indices X2 Word16 where
   binaryShuffle (MkWord16X2 x0) (MkWord16X2 x1) = MkWord16X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word16 where
@@ -754,10 +760,10 @@ instance Broadcast X2 Word32 where
 instance SelectableF X2 Word32 where
   selectF (MkBoolX2 !cond) (MkWord32X2 x0) (MkWord32X2 y0) = MkWord32X2 (selectWord32X4# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Word32X4# indices) => UnaryShuffle indices X2 Word32 where
+instance (AllLessThan indices 2, ShuffleMany Word32X4# indices) => UnaryShuffleT indices X2 Word32 where
   unaryShuffle (MkWord32X2 x) = MkWord32X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Word32X4# indices) => BinaryShuffle indices X2 Word32 where
+instance (AllLessThan indices 4, ShuffleMany Word32X4# indices) => BinaryShuffleT indices X2 Word32 where
   binaryShuffle (MkWord32X2 x0) (MkWord32X2 x1) = MkWord32X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word32 where
@@ -832,10 +838,10 @@ instance Broadcast X2 Word64 where
 instance SelectableF X2 Word64 where
   selectF (MkBoolX2 !cond) (MkWord64X2 x0) (MkWord64X2 y0) = MkWord64X2 (selectWord64X2# cond x0 y0)
   {-# INLINE selectF #-}
-instance (AllLessThan indices 2, ShuffleMany Word64X2# indices) => UnaryShuffle indices X2 Word64 where
+instance (AllLessThan indices 2, ShuffleMany Word64X2# indices) => UnaryShuffleT indices X2 Word64 where
   unaryShuffle (MkWord64X2 x) = MkWord64X2 (shuffleMany# @_ @_ @indices (\_ -> x))
   {-# INLINE unaryShuffle #-}
-instance (AllLessThan indices 4, ShuffleMany Word64X2# indices) => BinaryShuffle indices X2 Word64 where
+instance (AllLessThan indices 4, ShuffleMany Word64X2# indices) => BinaryShuffleT indices X2 Word64 where
   binaryShuffle (MkWord64X2 x0) (MkWord64X2 x1) = MkWord64X2 (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 }))
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word64 where
@@ -913,10 +919,10 @@ instance Broadcast X2 Int8 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Int8 where
   selectF (MkBoolX2 !cond) (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Int8 i0, Pick Int8 i1) => UnaryShuffle [i0, i1] X2 Int8 where
+instance (i0 < 2, i1 < 2, Pick Int8 i0, Pick Int8 i1) => UnaryShuffleT [i0, i1] X2 Int8 where
   unaryShuffle (MkInt8X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkInt8X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Int8 i0, Pick Int8 i1) => BinaryShuffle [i0, i1] X2 Int8 where
+instance (i0 < 4, i1 < 4, Pick Int8 i0, Pick Int8 i1) => BinaryShuffleT [i0, i1] X2 Int8 where
   binaryShuffle (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkInt8X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int8 where
@@ -993,10 +999,10 @@ instance Broadcast X2 Int16 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Int16 where
   selectF (MkBoolX2 !cond) (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Int16 i0, Pick Int16 i1) => UnaryShuffle [i0, i1] X2 Int16 where
+instance (i0 < 2, i1 < 2, Pick Int16 i0, Pick Int16 i1) => UnaryShuffleT [i0, i1] X2 Int16 where
   unaryShuffle (MkInt16X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkInt16X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Int16 i0, Pick Int16 i1) => BinaryShuffle [i0, i1] X2 Int16 where
+instance (i0 < 4, i1 < 4, Pick Int16 i0, Pick Int16 i1) => BinaryShuffleT [i0, i1] X2 Int16 where
   binaryShuffle (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkInt16X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int16 where
@@ -1073,10 +1079,10 @@ instance Broadcast X2 Int32 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Int32 where
   selectF (MkBoolX2 !cond) (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Int32 i0, Pick Int32 i1) => UnaryShuffle [i0, i1] X2 Int32 where
+instance (i0 < 2, i1 < 2, Pick Int32 i0, Pick Int32 i1) => UnaryShuffleT [i0, i1] X2 Int32 where
   unaryShuffle (MkInt32X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkInt32X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Int32 i0, Pick Int32 i1) => BinaryShuffle [i0, i1] X2 Int32 where
+instance (i0 < 4, i1 < 4, Pick Int32 i0, Pick Int32 i1) => BinaryShuffleT [i0, i1] X2 Int32 where
   binaryShuffle (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkInt32X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int32 where
@@ -1153,10 +1159,10 @@ instance Broadcast X2 Int64 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Int64 where
   selectF (MkBoolX2 !cond) (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Int64 i0, Pick Int64 i1) => UnaryShuffle [i0, i1] X2 Int64 where
+instance (i0 < 2, i1 < 2, Pick Int64 i0, Pick Int64 i1) => UnaryShuffleT [i0, i1] X2 Int64 where
   unaryShuffle (MkInt64X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkInt64X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Int64 i0, Pick Int64 i1) => BinaryShuffle [i0, i1] X2 Int64 where
+instance (i0 < 4, i1 < 4, Pick Int64 i0, Pick Int64 i1) => BinaryShuffleT [i0, i1] X2 Int64 where
   binaryShuffle (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkInt64X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Int64 where
@@ -1233,10 +1239,10 @@ instance Broadcast X2 Word8 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Word8 where
   selectF (MkBoolX2 !cond) (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Word8 i0, Pick Word8 i1) => UnaryShuffle [i0, i1] X2 Word8 where
+instance (i0 < 2, i1 < 2, Pick Word8 i0, Pick Word8 i1) => UnaryShuffleT [i0, i1] X2 Word8 where
   unaryShuffle (MkWord8X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkWord8X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Word8 i0, Pick Word8 i1) => BinaryShuffle [i0, i1] X2 Word8 where
+instance (i0 < 4, i1 < 4, Pick Word8 i0, Pick Word8 i1) => BinaryShuffleT [i0, i1] X2 Word8 where
   binaryShuffle (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkWord8X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word8 where
@@ -1313,10 +1319,10 @@ instance Broadcast X2 Word16 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Word16 where
   selectF (MkBoolX2 !cond) (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Word16 i0, Pick Word16 i1) => UnaryShuffle [i0, i1] X2 Word16 where
+instance (i0 < 2, i1 < 2, Pick Word16 i0, Pick Word16 i1) => UnaryShuffleT [i0, i1] X2 Word16 where
   unaryShuffle (MkWord16X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkWord16X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Word16 i0, Pick Word16 i1) => BinaryShuffle [i0, i1] X2 Word16 where
+instance (i0 < 4, i1 < 4, Pick Word16 i0, Pick Word16 i1) => BinaryShuffleT [i0, i1] X2 Word16 where
   binaryShuffle (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkWord16X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word16 where
@@ -1393,10 +1399,10 @@ instance Broadcast X2 Word32 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Word32 where
   selectF (MkBoolX2 !cond) (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Word32 i0, Pick Word32 i1) => UnaryShuffle [i0, i1] X2 Word32 where
+instance (i0 < 2, i1 < 2, Pick Word32 i0, Pick Word32 i1) => UnaryShuffleT [i0, i1] X2 Word32 where
   unaryShuffle (MkWord32X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkWord32X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Word32 i0, Pick Word32 i1) => BinaryShuffle [i0, i1] X2 Word32 where
+instance (i0 < 4, i1 < 4, Pick Word32 i0, Pick Word32 i1) => BinaryShuffleT [i0, i1] X2 Word32 where
   binaryShuffle (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkWord32X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word32 where
@@ -1473,10 +1479,10 @@ instance Broadcast X2 Word64 where
   {-# INLINE broadcast #-}
 instance SelectableF X2 Word64 where
   selectF (MkBoolX2 !cond) (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (if testBit cond 0 then x0 else y0) (if testBit cond 1 then x1 else y1)
-instance (i0 < 2, i1 < 2, Pick Word64 i0, Pick Word64 i1) => UnaryShuffle [i0, i1] X2 Word64 where
+instance (i0 < 2, i1 < 2, Pick Word64 i0, Pick Word64 i1) => UnaryShuffleT [i0, i1] X2 Word64 where
   unaryShuffle (MkWord64X2WithElems x0 x1) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkWord64X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE unaryShuffle #-}
-instance (i0 < 4, i1 < 4, Pick Word64 i0, Pick Word64 i1) => BinaryShuffle [i0, i1] X2 Word64 where
+instance (i0 < 4, i1 < 4, Pick Word64 i0, Pick Word64 i1) => BinaryShuffleT [i0, i1] X2 Word64 where
   binaryShuffle (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems x2 x3) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkWord64X2WithElems (pick @_ @i0 sources) (pick @_ @i1 sources)
   {-# INLINE binaryShuffle #-}
 instance EquatableF X2 Word64 where
@@ -1555,6 +1561,12 @@ instance Broadcast X2 a => Broadcast X2 (Sum a) where
 instance SelectableF X2 a => SelectableF X2 (Sum a) where
   selectF = coerce (selectF @X2 @a)
   {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Sum a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Sum a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
 newtype instance X2 (Product a) = MkProductX2 (X2 a)
 instance PackX2 X2 a => PackX2 X2 (Product a) where
   mkX2 = coerce (mkX2 @X2 @a)
@@ -1567,6 +1579,12 @@ instance Broadcast X2 a => Broadcast X2 (Product a) where
 instance SelectableF X2 a => SelectableF X2 (Product a) where
   selectF = coerce (selectF @X2 @a)
   {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Product a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Product a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
 newtype instance X2 (Min a) = MkMinX2 (X2 a)
 instance PackX2 X2 a => PackX2 X2 (Min a) where
   mkX2 = coerce (mkX2 @X2 @a)
@@ -1579,6 +1597,12 @@ instance Broadcast X2 a => Broadcast X2 (Min a) where
 instance SelectableF X2 a => SelectableF X2 (Min a) where
   selectF = coerce (selectF @X2 @a)
   {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Min a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Min a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
 newtype instance X2 (Max a) = MkMaxX2 (X2 a)
 instance PackX2 X2 a => PackX2 X2 (Max a) where
   mkX2 = coerce (mkX2 @X2 @a)
@@ -1591,6 +1615,12 @@ instance Broadcast X2 a => Broadcast X2 (Max a) where
 instance SelectableF X2 a => SelectableF X2 (Max a) where
   selectF = coerce (selectF @X2 @a)
   {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Max a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Max a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
 data instance X2 (Complex a) = MkComplexX2 !(X2 a) !(X2 a)
 instance PackX2 X2 a => PackX2 X2 (Complex a) where
   mkX2 (x0 :+ y0) (x1 :+ y1) = MkComplexX2 (mkX2 x0 x1) (mkX2 y0 y1)
@@ -1603,6 +1633,12 @@ instance Broadcast X2 a => Broadcast X2 (Complex a) where
 instance SelectableF X2 a => SelectableF X2 (Complex a) where
   selectF !cond (MkComplexX2 x y) (MkComplexX2 x' y') = MkComplexX2 (selectF cond x x') (selectF cond y y')
   {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Complex a) where
+  unaryShuffle (MkComplexX2 x y) = MkComplexX2 (unaryShuffle @indices x) (unaryShuffle @indices y)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Complex a) where
+  binaryShuffle (MkComplexX2 x y) (MkComplexX2 u v) = MkComplexX2 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
+  {-# INLINE binaryShuffle #-}
 data instance X2 () = MkUnitX2
 instance PackX2 X2 () where
   mkX2 _ _ = MkUnitX2
@@ -1615,6 +1651,12 @@ instance Broadcast X2 () where
 instance SelectableF X2 () where
   selectF _ _ _ = MkUnitX2
   {-# INLINE selectF #-}
+instance (i0 < 2, i1 < 2) => UnaryShuffleT '[i0, i1] X2 () where
+  unaryShuffle _ = MkUnitX2
+  {-# INLINE unaryShuffle #-}
+instance (i0 < 4, i1 < 4) => BinaryShuffleT '[i0, i1] X2 () where
+  binaryShuffle _ _ = MkUnitX2
+  {-# INLINE binaryShuffle #-}
 data instance X2 (a0, a1) = MkTuple2X2 !(X2 a0) !(X2 a1)
 instance (PackX2 X2 a0, PackX2 X2 a1) => PackX2 X2 (a0, a1) where
   mkX2 (x0_0, x0_1) (x1_0, x1_1) = MkTuple2X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1)
@@ -1627,6 +1669,12 @@ instance (Broadcast X2 a0, Broadcast X2 a1) => Broadcast X2 (a0, a1) where
 instance (SelectableF X2 a0, SelectableF X2 a1) => SelectableF X2 (a0, a1) where
   selectF !cond (MkTuple2X2 x0 x1) (MkTuple2X2 y0 y1) = MkTuple2X2 (selectF cond x0 y0) (selectF cond x1 y1)
   {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1) => UnaryShuffleT indices X2 (a0, a1) where
+  unaryShuffle (MkTuple2X2 x0 x1) = MkTuple2X2 (unaryShuffle @indices x0) (unaryShuffle @indices x1)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1) => BinaryShuffleT indices X2 (a0, a1) where
+  binaryShuffle (MkTuple2X2 x0 x1) (MkTuple2X2 y0 y1) = MkTuple2X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
+  {-# INLINE binaryShuffle #-}
 data instance X2 (a0, a1, a2) = MkTuple3X2 !(X2 a0) !(X2 a1) !(X2 a2)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2) => PackX2 X2 (a0, a1, a2) where
   mkX2 (x0_0, x0_1, x0_2) (x1_0, x1_1, x1_2) = MkTuple3X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2)
@@ -1639,6 +1687,12 @@ instance (Broadcast X2 a0, Broadcast X2 a1, Broadcast X2 a2) => Broadcast X2 (a0
 instance (SelectableF X2 a0, SelectableF X2 a1, SelectableF X2 a2) => SelectableF X2 (a0, a1, a2) where
   selectF !cond (MkTuple3X2 x0 x1 x2) (MkTuple3X2 y0 y1 y2) = MkTuple3X2 (selectF cond x0 y0) (selectF cond x1 y1) (selectF cond x2 y2)
   {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffleT indices X2 a2) => UnaryShuffleT indices X2 (a0, a1, a2) where
+  unaryShuffle (MkTuple3X2 x0 x1 x2) = MkTuple3X2 (unaryShuffle @indices x0) (unaryShuffle @indices x1) (unaryShuffle @indices x2)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2) => BinaryShuffleT indices X2 (a0, a1, a2) where
+  binaryShuffle (MkTuple3X2 x0 x1 x2) (MkTuple3X2 y0 y1 y2) = MkTuple3X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2)
+  {-# INLINE binaryShuffle #-}
 data instance X2 (a0, a1, a2, a3) = MkTuple4X2 !(X2 a0) !(X2 a1) !(X2 a2) !(X2 a3)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2, PackX2 X2 a3) => PackX2 X2 (a0, a1, a2, a3) where
   mkX2 (x0_0, x0_1, x0_2, x0_3) (x1_0, x1_1, x1_2, x1_3) = MkTuple4X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2) (mkX2 x0_3 x1_3)
@@ -1651,6 +1705,12 @@ instance (Broadcast X2 a0, Broadcast X2 a1, Broadcast X2 a2, Broadcast X2 a3) =>
 instance (SelectableF X2 a0, SelectableF X2 a1, SelectableF X2 a2, SelectableF X2 a3) => SelectableF X2 (a0, a1, a2, a3) where
   selectF !cond (MkTuple4X2 x0 x1 x2 x3) (MkTuple4X2 y0 y1 y2 y3) = MkTuple4X2 (selectF cond x0 y0) (selectF cond x1 y1) (selectF cond x2 y2) (selectF cond x3 y3)
   {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffleT indices X2 a2, UnaryShuffleT indices X2 a3) => UnaryShuffleT indices X2 (a0, a1, a2, a3) where
+  unaryShuffle (MkTuple4X2 x0 x1 x2 x3) = MkTuple4X2 (unaryShuffle @indices x0) (unaryShuffle @indices x1) (unaryShuffle @indices x2) (unaryShuffle @indices x3)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2, BinaryShuffleT indices X2 a3) => BinaryShuffleT indices X2 (a0, a1, a2, a3) where
+  binaryShuffle (MkTuple4X2 x0 x1 x2 x3) (MkTuple4X2 y0 y1 y2 y3) = MkTuple4X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3)
+  {-# INLINE binaryShuffle #-}
 data instance X2 (a0, a1, a2, a3, a4) = MkTuple5X2 !(X2 a0) !(X2 a1) !(X2 a2) !(X2 a3) !(X2 a4)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2, PackX2 X2 a3, PackX2 X2 a4) => PackX2 X2 (a0, a1, a2, a3, a4) where
   mkX2 (x0_0, x0_1, x0_2, x0_3, x0_4) (x1_0, x1_1, x1_2, x1_3, x1_4) = MkTuple5X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2) (mkX2 x0_3 x1_3) (mkX2 x0_4 x1_4)
@@ -1663,6 +1723,12 @@ instance (Broadcast X2 a0, Broadcast X2 a1, Broadcast X2 a2, Broadcast X2 a3, Br
 instance (SelectableF X2 a0, SelectableF X2 a1, SelectableF X2 a2, SelectableF X2 a3, SelectableF X2 a4) => SelectableF X2 (a0, a1, a2, a3, a4) where
   selectF !cond (MkTuple5X2 x0 x1 x2 x3 x4) (MkTuple5X2 y0 y1 y2 y3 y4) = MkTuple5X2 (selectF cond x0 y0) (selectF cond x1 y1) (selectF cond x2 y2) (selectF cond x3 y3) (selectF cond x4 y4)
   {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffleT indices X2 a2, UnaryShuffleT indices X2 a3, UnaryShuffleT indices X2 a4) => UnaryShuffleT indices X2 (a0, a1, a2, a3, a4) where
+  unaryShuffle (MkTuple5X2 x0 x1 x2 x3 x4) = MkTuple5X2 (unaryShuffle @indices x0) (unaryShuffle @indices x1) (unaryShuffle @indices x2) (unaryShuffle @indices x3) (unaryShuffle @indices x4)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2, BinaryShuffleT indices X2 a3, BinaryShuffleT indices X2 a4) => BinaryShuffleT indices X2 (a0, a1, a2, a3, a4) where
+  binaryShuffle (MkTuple5X2 x0 x1 x2 x3 x4) (MkTuple5X2 y0 y1 y2 y3 y4) = MkTuple5X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4)
+  {-# INLINE binaryShuffle #-}
 data instance X2 (a0, a1, a2, a3, a4, a5) = MkTuple6X2 !(X2 a0) !(X2 a1) !(X2 a2) !(X2 a3) !(X2 a4) !(X2 a5)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2, PackX2 X2 a3, PackX2 X2 a4, PackX2 X2 a5) => PackX2 X2 (a0, a1, a2, a3, a4, a5) where
   mkX2 (x0_0, x0_1, x0_2, x0_3, x0_4, x0_5) (x1_0, x1_1, x1_2, x1_3, x1_4, x1_5) = MkTuple6X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2) (mkX2 x0_3 x1_3) (mkX2 x0_4 x1_4) (mkX2 x0_5 x1_5)
@@ -1675,6 +1741,12 @@ instance (Broadcast X2 a0, Broadcast X2 a1, Broadcast X2 a2, Broadcast X2 a3, Br
 instance (SelectableF X2 a0, SelectableF X2 a1, SelectableF X2 a2, SelectableF X2 a3, SelectableF X2 a4, SelectableF X2 a5) => SelectableF X2 (a0, a1, a2, a3, a4, a5) where
   selectF !cond (MkTuple6X2 x0 x1 x2 x3 x4 x5) (MkTuple6X2 y0 y1 y2 y3 y4 y5) = MkTuple6X2 (selectF cond x0 y0) (selectF cond x1 y1) (selectF cond x2 y2) (selectF cond x3 y3) (selectF cond x4 y4) (selectF cond x5 y5)
   {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffleT indices X2 a2, UnaryShuffleT indices X2 a3, UnaryShuffleT indices X2 a4, UnaryShuffleT indices X2 a5) => UnaryShuffleT indices X2 (a0, a1, a2, a3, a4, a5) where
+  unaryShuffle (MkTuple6X2 x0 x1 x2 x3 x4 x5) = MkTuple6X2 (unaryShuffle @indices x0) (unaryShuffle @indices x1) (unaryShuffle @indices x2) (unaryShuffle @indices x3) (unaryShuffle @indices x4) (unaryShuffle @indices x5)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2, BinaryShuffleT indices X2 a3, BinaryShuffleT indices X2 a4, BinaryShuffleT indices X2 a5) => BinaryShuffleT indices X2 (a0, a1, a2, a3, a4, a5) where
+  binaryShuffle (MkTuple6X2 x0 x1 x2 x3 x4 x5) (MkTuple6X2 y0 y1 y2 y3 y4 y5) = MkTuple6X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4) (binaryShuffle @indices x5 y5)
+  {-# INLINE binaryShuffle #-}
 instance (PackX2 X2 a, PackX2 X2 b) => LiftSIMD X2 a b where
   liftSIMD f !v = case unpackX2 v of (x0, x1) -> mkX2 (f x0) (f x1)
   {-# INLINE liftSIMD #-}

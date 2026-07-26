@@ -29,6 +29,7 @@ genMod name imports comment = unlines $
   ,"{-# LANGUAGE DataKinds #-}"
   ,"{-# LANGUAGE MonoLocalBinds #-}"
   ,"{-# LANGUAGE QuantifiedConstraints #-}"
+  ,"{-# LANGUAGE UndecidableInstances #-}"
   ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)"
   ,"{-# LANGUAGE RequiredTypeArguments #-}"
   ,"#endif"
@@ -58,6 +59,8 @@ genMod name imports comment = unlines $
   ,"  , SIMDEnumFromZero"
   ,"  , SIMDPrim"
   ,"  , SIMDStorable"
+  ,"  , UnaryShuffle"
+  ,"  , BinaryShuffle"
   ] ++
   ["  , unaryShuffle" ++ x | x <- properVecTypes] ++
   ["  , binaryShuffle" ++ x | x <- properVecTypes] ++
@@ -94,7 +97,9 @@ genMod name imports comment = unlines $
    (["Pack" ++ x <+> x ++ " a" | x <- properVecTypes] ++
     ["Broadcast " ++ x  ++ " a" | x <- properVecTypes] ++
     ["SplitShortVector " ++ x  ++ " a" | x <- properVecTypes] ++
-    ["SelectableF " ++ x  ++ " a" | x <- properVecTypes]
+    ["SelectableF " ++ x  ++ " a" | x <- properVecTypes] ++
+    ["forall indices. UnaryShuffle indices " ++ x  ++ " => UnaryShuffleT indices " ++ x ++ " a" | x <- {- "Identity" : -} properVecTypes] ++
+    ["forall indices. BinaryShuffle indices " ++ x  ++ " => BinaryShuffleT indices " ++ x ++ " a" | x <- {- "Identity" : -} properVecTypes]
    ) ++ "\n      ) => SIMDElement a"
   ] ++ ["instance SIMDElement " ++ a | a <- ["Bool"] ++ intishTypes ++ ["Float","Double"]] ++
   ["instance SIMDElement a => SIMDElement (Sum a)"
@@ -235,6 +240,8 @@ genMod name imports comment = unlines $
   ,"      , forall a. SIMDEnumFromZero a => EnumFromZero_ f a"
   ,"      , forall a. SIMDPrim a => MultiPrim f a"
   ,"      , forall a. SIMDStorable a => MultiStorable f a"
+  ,"      , forall indices a. (SIMDElement a, UnaryShuffle indices f) => UnaryShuffleT indices f a"
+  ,"      , forall indices a. (SIMDElement a, BinaryShuffle indices f) => BinaryShuffleT indices f a"
   ,"      ) => SIMD f where"
   ,"  -- | Reduce all lanes of a SIMD vector using a binary combining function."
   ,"  -- The function is applied via recursive halving (splitting the vector in half"
@@ -313,14 +320,33 @@ genMod name imports comment = unlines $
   ,"(>=^) = (>=)"
   ,"{-# INLINE (>=^) #-}"
   ,""
+  ,"-- | @UnaryShuffle indices x@ says that @indices@ is a valid unary shuffle for"
+  ,"-- the vector type @x@, for every element type supported by the backend."
+  ,"--"
+  ,"-- Together with 'SIMDElement' it implies @'UnaryShuffleT' indices x a@ for any"
+  ,"-- element type @a@; see the superclasses of 'SIMDElement' and 'SIMD'."
+  ,"type UnaryShuffle indices x"
+  ,"  = ( " ++ List.intercalate "\n    , "
+   ("UnaryShuffleFor x indices" : ["UnaryShuffleT indices x " ++ a | a <- intishTypes ++ ["Float","Double","()"]])
+    ++ "\n    )"
+  ,""
+  ,"-- | @BinaryShuffle indices x@ says that @indices@ is a valid binary shuffle for"
+  ,"-- the vector type @x@, for every element type supported by the backend."
+  ,"--"
+  ,"-- See 'UnaryShuffle'."
+  ,"type BinaryShuffle indices x"
+  ,"  = ( " ++ List.intercalate "\n    , "
+   ("BinaryShuffleFor x indices" : ["BinaryShuffleT indices x " ++ a | a <- intishTypes ++ ["Float","Double","()"]])
+    ++ "\n    )"
+  ,""
   ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)"
   ,""
   ] ++ concat (List.intersperse [""] $
-    [["unaryShuffle" ++ x ++ " :: " ++ x ++ " a -> forall t -> UnaryShuffle (Tuple" ++ show n ++ "ToList t) " ++ x ++ " a => " ++ x ++ " a"
+    [["unaryShuffle" ++ x ++ " :: " ++ x ++ " a -> forall t -> UnaryShuffleT (Tuple" ++ show n ++ "ToList t) " ++ x ++ " a => " ++ x ++ " a"
     ,"unaryShuffle" ++ x ++ " v t = unaryShuffle @(Tuple" ++ show n ++ "ToList t) v"
     ,"{-# INLINE unaryShuffle" ++ x ++ " #-}"
     ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]] ++
-    [["binaryShuffle" ++ x ++ " :: " ++ x ++ " a -> " ++ x ++ " a -> forall t -> BinaryShuffle (Tuple" ++ show n ++ "ToList t) " ++ x ++ " a => " ++ x ++ " a"
+    [["binaryShuffle" ++ x ++ " :: " ++ x ++ " a -> " ++ x ++ " a -> forall t -> BinaryShuffleT (Tuple" ++ show n ++ "ToList t) " ++ x ++ " a => " ++ x ++ " a"
     ,"binaryShuffle" ++ x ++ " u v t = binaryShuffle @(Tuple" ++ show n ++ "ToList t) u v"
     ,"{-# INLINE binaryShuffle" ++ x ++ " #-}"
     ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]]) ++
@@ -336,11 +362,11 @@ genMod name imports comment = unlines $
     ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]]) ++
   ["","#endif",""] ++
   concat (List.intersperse [""] $
-    [["unaryShuffleWith" ++ x ++ " :: forall " ++ spaceSep ["i" ++ show i | i <- [0..n-1]] ++ " a. UnaryShuffle '[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "] " ++ x ++ " a => ((" ++ commaSep ["Proxy " ++ show i | i <- [0..n-1]] ++ ") -> (" ++ commaSep ["Proxy i" ++ show i | i <- [0..n-1]] ++ ")) -> " ++ x ++ " a -> " ++ x ++ " a"
+    [["unaryShuffleWith" ++ x ++ " :: forall " ++ spaceSep ["i" ++ show i | i <- [0..n-1]] ++ " a. UnaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "] " ++ x ++ " a => ((" ++ commaSep ["Proxy " ++ show i | i <- [0..n-1]] ++ ") -> (" ++ commaSep ["Proxy i" ++ show i | i <- [0..n-1]] ++ ")) -> " ++ x ++ " a -> " ++ x ++ " a"
     ,"unaryShuffleWith" ++ x ++ " _ = unaryShuffle @'[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "]"
     ,"{-# INLINE unaryShuffleWith" ++ x ++ " #-}"
     ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]] ++
-    [["binaryShuffleWith" ++ x ++ " :: forall " ++ spaceSep ["i" ++ show i | i <- [0..n-1]] ++ " a. BinaryShuffle '[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "] " ++ x ++ " a => ((" ++ commaSep ["Proxy " ++ show i | i <- [0..n-1]] ++ ") -> (" ++ commaSep ["Proxy " ++ show i | i <- [n..2*n-1]] ++ ") -> (" ++ commaSep ["Proxy i" ++ show i | i <- [0..n-1]] ++ ")) -> " ++ x ++ " a -> " ++ x ++ " a -> " ++ x ++ " a"
+    [["binaryShuffleWith" ++ x ++ " :: forall " ++ spaceSep ["i" ++ show i | i <- [0..n-1]] ++ " a. BinaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "] " ++ x ++ " a => ((" ++ commaSep ["Proxy " ++ show i | i <- [0..n-1]] ++ ") -> (" ++ commaSep ["Proxy " ++ show i | i <- [n..2*n-1]] ++ ") -> (" ++ commaSep ["Proxy i" ++ show i | i <- [0..n-1]] ++ ")) -> " ++ x ++ " a -> " ++ x ++ " a -> " ++ x ++ " a"
     ,"binaryShuffleWith" ++ x ++ " _ = binaryShuffle @'[" ++ commaSep ["i" ++ show i | i <- [0..n-1]] ++ "]"
     ,"{-# INLINE binaryShuffleWith" ++ x ++ " #-}"
     ] | (x,n) <- zip properVecTypes [2,4,8,16,32,64]]) ++

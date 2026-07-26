@@ -96,8 +96,10 @@ module Data.Simdy.Shuffle
   , binaryShuffleWithX32
   , binaryShuffleWithX64
     -- * Shuffle classes
-  , UnaryShuffle (..)
-  , BinaryShuffle (..)
+  , UnaryShuffle
+  , BinaryShuffle
+  , UnaryShuffleT (..)
+  , BinaryShuffleT (..)
   ) where
 import           Data.Simdy.Internal.Default
 import           Data.Simdy.Internal.Shuffle
