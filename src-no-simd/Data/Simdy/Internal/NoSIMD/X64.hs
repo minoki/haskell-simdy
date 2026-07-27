@@ -29,6 +29,7 @@ import           GHC.Int
 import           GHC.IO
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
+import qualified Prelude
 -- | @'X64' a@ is a fixed-length vector of length 64.
 --
 -- Conceptually, @data 'X64' a = MkX64 !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a@.
@@ -117,6 +118,11 @@ instance Broadcast X8 a => Broadcast X64 a where
 instance SelectableF X8 a => SelectableF X64 a where
   selectF (MkX64WithX8 cond0 cond1 cond2 cond3 cond4 cond5 cond6 cond7) (MkX64WithX8 x0 x1 x2 x3 x4 x5 x6 x7) (MkX64WithX8 y0 y1 y2 y3 y4 y5 y6 y7) = MkX64WithX8 (selectF cond0 x0 y0) (selectF cond1 x1 y1) (selectF cond2 x2 y2) (selectF cond3 x3 y3) (selectF cond4 x4 y4) (selectF cond5 x5 y5) (selectF cond6 x6 y6) (selectF cond7 x7 y7)
   {-# INLINE selectF #-}
+instance BooleanReduction X64 where
+  horizontalAndBool (MkX64WithX8 cond0 cond1 cond2 cond3 cond4 cond5 cond6 cond7) = horizontalAndBool cond0 Prelude.&& horizontalAndBool cond1 Prelude.&& horizontalAndBool cond2 Prelude.&& horizontalAndBool cond3 Prelude.&& horizontalAndBool cond4 Prelude.&& horizontalAndBool cond5 Prelude.&& horizontalAndBool cond6 Prelude.&& horizontalAndBool cond7
+  horizontalOrBool (MkX64WithX8 cond0 cond1 cond2 cond3 cond4 cond5 cond6 cond7) = horizontalOrBool cond0 Prelude.|| horizontalOrBool cond1 Prelude.|| horizontalOrBool cond2 Prelude.|| horizontalOrBool cond3 Prelude.|| horizontalOrBool cond4 Prelude.|| horizontalOrBool cond5 Prelude.|| horizontalOrBool cond6 Prelude.|| horizontalOrBool cond7
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 instance UnaryShuffleT indices X64 Bool where
   unaryShuffle = error "not implemented yet"
   {-# NOINLINE unaryShuffle #-}

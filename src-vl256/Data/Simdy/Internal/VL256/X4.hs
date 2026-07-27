@@ -30,6 +30,7 @@ import           GHC.Int
 import           GHC.IO
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
+import qualified Prelude
 -- | @'X4' a@ is a fixed-length vector of length 4.
 --
 -- Conceptually, @data 'X4' a = MkX4 !a !a !a !a@.
@@ -66,6 +67,11 @@ instance Broadcast X4 Bool where
 instance SelectableF X4 Bool where
   selectF (MkBoolX4 !cond) (MkBoolX4 !x) (MkBoolX4 !y) = MkBoolX4 ((cond .&. x) .|. (complement cond .&. y))
   {-# INLINE selectF #-}
+instance BooleanReduction X4 where
+  horizontalAndBool (MkBoolX4 !cond) = cond Prelude.== 0xf
+  horizontalOrBool (MkBoolX4 !cond) = cond Prelude./= 0
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 instance UnaryShuffleT indices X4 Bool where
   unaryShuffle = error "not implemented yet"
   {-# NOINLINE unaryShuffle #-}

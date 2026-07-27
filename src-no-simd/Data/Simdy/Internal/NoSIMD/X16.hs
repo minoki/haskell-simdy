@@ -29,6 +29,7 @@ import           GHC.Int
 import           GHC.IO
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
+import qualified Prelude
 -- | @'X16' a@ is a fixed-length vector of length 16.
 --
 -- Conceptually, @data 'X16' a = MkX16 !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a@.
@@ -117,6 +118,11 @@ instance Broadcast X8 a => Broadcast X16 a where
 instance SelectableF X8 a => SelectableF X16 a where
   selectF (MkX16WithX8 cond0 cond1) (MkX16WithX8 x0 x1) (MkX16WithX8 y0 y1) = MkX16WithX8 (selectF cond0 x0 y0) (selectF cond1 x1 y1)
   {-# INLINE selectF #-}
+instance BooleanReduction X16 where
+  horizontalAndBool (MkX16WithX8 cond0 cond1) = horizontalAndBool cond0 Prelude.&& horizontalAndBool cond1
+  horizontalOrBool (MkX16WithX8 cond0 cond1) = horizontalOrBool cond0 Prelude.|| horizontalOrBool cond1
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 instance UnaryShuffleT indices X16 Bool where
   unaryShuffle = error "not implemented yet"
   {-# NOINLINE unaryShuffle #-}

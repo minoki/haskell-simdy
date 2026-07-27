@@ -57,14 +57,21 @@ horizontalMaximumNumber = horizontalFold maximumNumber
 -- | Bitwise AND of all lanes.
 horizontalAnd :: (SIMD f, SIMDBoolean a) => f a -> a
 horizontalAnd = horizontalFold (.&.)
-{-# INLINE horizontalAnd #-}
+{-# INLINE [1] horizontalAnd #-}
 
 -- | Bitwise OR of all lanes.
 horizontalOr :: (SIMD f, SIMDBoolean a) => f a -> a
 horizontalOr = horizontalFold (.|.)
-{-# INLINE horizontalOr #-}
+{-# INLINE [1] horizontalOr #-}
 
 -- | Bitwise XOR of all lanes.
 horizontalXor :: (SIMD f, SIMDBoolean a) => f a -> a
 horizontalXor = horizontalFold xor
 {-# INLINE horizontalXor #-}
+
+{-# RULES
+"horizontalAnd/Bool"
+  horizontalAnd = horizontalAndBool
+"horizontalOr/Bool"
+  horizontalOr = horizontalOrBool
+  #-}

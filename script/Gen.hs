@@ -69,6 +69,11 @@ gen !vecCount !maxBits
     ,"instance SelectableF " ++ tyCon ++ " Bool where"
     ,"  selectF (MkBool" ++ tyCon ++ " !cond) (MkBool" ++ tyCon ++ " !x) (MkBool" ++ tyCon ++ " !y) = MkBool" ++ tyCon ++ " ((cond .&. x) .|. (complement cond .&. y))"
     ,"  {-# INLINE selectF #-}"
+    ,"instance BooleanReduction " ++ tyCon ++ " where"
+    ,"  horizontalAndBool (MkBool" ++ tyCon ++ " !cond) = cond Prelude.== 0x" ++ showHex (2^vecCount-1) ""
+    ,"  horizontalOrBool (MkBool" ++ tyCon ++ " !cond) = cond Prelude./= 0"
+    ,"  {-# INLINE horizontalAndBool #-}"
+    ,"  {-# INLINE horizontalOrBool #-}"
     ,"instance UnaryShuffleT indices " ++ tyCon ++ " Bool where"
     ,"  unaryShuffle = error \"not implemented yet\""
     ,"  {-# NOINLINE unaryShuffle #-}"
@@ -988,6 +993,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           GHC.Word"
     -- ,"import qualified Data.Vector.Unboxed.Base as VUB"
     ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)"
+    ,"import qualified Prelude"
     ] ++ gen n maxBits
 
 genReplicatedDef :: String -> [String] -> Int -> Int -> [String]
@@ -1023,6 +1029,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"import           GHC.IO"
     ,"import           GHC.Word"
     ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)"
+    ,"import qualified Prelude"
     ,"-- | @'" ++ tyCon ++ "' a@ is a fixed-length vector of length " ++ show vecCount ++ "."
     ,"--"
     ,"-- Conceptually, @data '" ++ tyCon ++ "' a = Mk" ++ tyCon ++ concat (replicate vecCount " !a") ++ "@."
@@ -1081,6 +1088,11 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"instance SelectableF " ++ baseTyCon ++ " a => SelectableF " ++ tyCon ++ " a where"
     ,"  selectF (" ++ dataCon ++ " " ++ spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(selectF cond" ++ show i ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
     ,"  {-# INLINE selectF #-}"
+    ,"instance BooleanReduction " ++ tyCon ++ " where"
+    ,"  horizontalAndBool (" ++ dataCon <+> spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") = " ++ List.intercalate " Prelude.&& " ["horizontalAndBool cond" ++ show i | i <- [0..n-1]]
+    ,"  horizontalOrBool (" ++ dataCon <+> spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") = " ++ List.intercalate " Prelude.|| " ["horizontalOrBool cond" ++ show i | i <- [0..n-1]]
+    ,"  {-# INLINE horizontalAndBool #-}"
+    ,"  {-# INLINE horizontalOrBool #-}"
     ,"instance UnaryShuffleT indices " ++ tyCon ++ " Bool where"
     ,"  unaryShuffle = error \"not implemented yet\""
     ,"  {-# NOINLINE unaryShuffle #-}"

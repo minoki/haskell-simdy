@@ -12,7 +12,7 @@
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Data.Coerce (coerce)
 import           Data.Complex (Complex (..))
-import           Data.Functor.Identity (Identity (Identity))
+import           Data.Functor.Identity (Identity (Identity, runIdentity))
 import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Kind (Constraint, Type)
 import           Data.Monoid (Product (..), Sum (..))
@@ -282,6 +282,16 @@ instance SelectableF Identity a where
 instance SelectableF f a => Selectable (WrappedMulti f a) where
   select = coerce (selectF @f @a)
   {-# INLINE select #-}
+
+class BooleanReduction f where
+  horizontalAndBool :: f Bool -> Bool
+  horizontalOrBool :: f Bool -> Bool
+
+instance BooleanReduction Identity where
+  horizontalAndBool = runIdentity
+  horizontalOrBool = runIdentity
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 
 infix 4 ==, /=, <, <=, >, >=
 

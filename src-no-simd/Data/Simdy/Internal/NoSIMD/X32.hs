@@ -29,6 +29,7 @@ import           GHC.Int
 import           GHC.IO
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
+import qualified Prelude
 -- | @'X32' a@ is a fixed-length vector of length 32.
 --
 -- Conceptually, @data 'X32' a = MkX32 !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a@.
@@ -117,6 +118,11 @@ instance Broadcast X8 a => Broadcast X32 a where
 instance SelectableF X8 a => SelectableF X32 a where
   selectF (MkX32WithX8 cond0 cond1 cond2 cond3) (MkX32WithX8 x0 x1 x2 x3) (MkX32WithX8 y0 y1 y2 y3) = MkX32WithX8 (selectF cond0 x0 y0) (selectF cond1 x1 y1) (selectF cond2 x2 y2) (selectF cond3 x3 y3)
   {-# INLINE selectF #-}
+instance BooleanReduction X32 where
+  horizontalAndBool (MkX32WithX8 cond0 cond1 cond2 cond3) = horizontalAndBool cond0 Prelude.&& horizontalAndBool cond1 Prelude.&& horizontalAndBool cond2 Prelude.&& horizontalAndBool cond3
+  horizontalOrBool (MkX32WithX8 cond0 cond1 cond2 cond3) = horizontalOrBool cond0 Prelude.|| horizontalOrBool cond1 Prelude.|| horizontalOrBool cond2 Prelude.|| horizontalOrBool cond3
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 instance UnaryShuffleT indices X32 Bool where
   unaryShuffle = error "not implemented yet"
   {-# NOINLINE unaryShuffle #-}

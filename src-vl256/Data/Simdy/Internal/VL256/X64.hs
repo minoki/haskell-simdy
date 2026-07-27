@@ -30,6 +30,7 @@ import           GHC.Int
 import           GHC.IO
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
+import qualified Prelude
 -- | @'X64' a@ is a fixed-length vector of length 64.
 --
 -- Conceptually, @data 'X64' a = MkX64 !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a !a@.
@@ -66,6 +67,11 @@ instance Broadcast X64 Bool where
 instance SelectableF X64 Bool where
   selectF (MkBoolX64 !cond) (MkBoolX64 !x) (MkBoolX64 !y) = MkBoolX64 ((cond .&. x) .|. (complement cond .&. y))
   {-# INLINE selectF #-}
+instance BooleanReduction X64 where
+  horizontalAndBool (MkBoolX64 !cond) = cond Prelude.== 0xffffffffffffffff
+  horizontalOrBool (MkBoolX64 !cond) = cond Prelude./= 0
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 instance UnaryShuffleT indices X64 Bool where
   unaryShuffle = error "not implemented yet"
   {-# NOINLINE unaryShuffle #-}

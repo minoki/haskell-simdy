@@ -30,6 +30,7 @@ import           GHC.Int
 import           GHC.IO
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
+import qualified Prelude
 -- | @'X8' a@ is a fixed-length vector of length 8.
 --
 -- Conceptually, @data 'X8' a = MkX8 !a !a !a !a !a !a !a !a@.
@@ -66,6 +67,11 @@ instance Broadcast X8 Bool where
 instance SelectableF X8 Bool where
   selectF (MkBoolX8 !cond) (MkBoolX8 !x) (MkBoolX8 !y) = MkBoolX8 ((cond .&. x) .|. (complement cond .&. y))
   {-# INLINE selectF #-}
+instance BooleanReduction X8 where
+  horizontalAndBool (MkBoolX8 !cond) = cond Prelude.== 0xff
+  horizontalOrBool (MkBoolX8 !cond) = cond Prelude./= 0
+  {-# INLINE horizontalAndBool #-}
+  {-# INLINE horizontalOrBool #-}
 instance UnaryShuffleT indices X8 Bool where
   unaryShuffle = error "not implemented yet"
   {-# NOINLINE unaryShuffle #-}
