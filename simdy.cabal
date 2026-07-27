@@ -241,7 +241,7 @@ library vl256
     -- We need the LLVM backend, so just enable it
     ghc-options: -fllvm
 
-    if !(flag(haswell) || flag(avx512))
+    if !flag(llvm) || !(flag(haswell) || flag(avx512))
         -- vl256 requires (haswell || avx512) && llvm
         buildable: False
 
@@ -293,7 +293,7 @@ library vl512
         -- The stack alignment issue is critical on Windows
         buildable: False
 
-    if !flag(avx512)
+    if !flag(llvm) || !flag(avx512)
         -- vl512 requires avx512 && llvm
         buildable: False
 
