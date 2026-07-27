@@ -229,7 +229,6 @@ module Data.Simdy.Internal.VL128.Prim
   , writeWord64OffAddrAsWord64X2#
   , writeFloatOffAddrAsFloatX4#
   , writeDoubleOffAddrAsDoubleX2#
-#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
   , fmaddFloatX4#
   , fmaddDoubleX2#
   , fmsubFloatX4#
@@ -238,6 +237,7 @@ module Data.Simdy.Internal.VL128.Prim
   , fnmaddDoubleX2#
   , fnmsubFloatX4#
   , fnmsubDoubleX2#
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
   , shuffleInt8X16#
   , shuffleInt16X8#
   , shuffleInt32X4#
@@ -684,5 +684,41 @@ sqrtFloatX4# u = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> packFloatX4# (
 sqrtDoubleX2# :: DoubleX2# -> DoubleX2#
 sqrtDoubleX2# u = case unpackDoubleX2# u of (# u0, u1 #) -> packDoubleX2# (# sqrtDouble# u0, sqrtDouble# u1 #)
 {-# INLINE [0] sqrtDoubleX2# #-}
+
+#endif
+
+#if !MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+
+fmaddFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
+fmaddFloatX4# u v w = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> case unpackFloatX4# v of (# v0, v1, v2, v3 #) -> case unpackFloatX4# w of (# w0, w1, w2, w3 #) -> packFloatX4# (# fmaddFloat# u0 v0 w0, fmaddFloat# u1 v1 w1, fmaddFloat# u2 v2 w2, fmaddFloat# u3 v3 w3 #)
+{-# INLINE [0] fmaddFloatX4# #-}
+
+fmaddDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
+fmaddDoubleX2# u v w = case unpackDoubleX2# u of (# u0, u1 #) -> case unpackDoubleX2# v of (# v0, v1 #) -> case unpackDoubleX2# w of (# w0, w1 #) -> packDoubleX2# (# fmaddDouble# u0 v0 w0, fmaddDouble# u1 v1 w1 #)
+{-# INLINE [0] fmaddDoubleX2# #-}
+
+fnmaddFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
+fnmaddFloatX4# u v w = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> case unpackFloatX4# v of (# v0, v1, v2, v3 #) -> case unpackFloatX4# w of (# w0, w1, w2, w3 #) -> packFloatX4# (# fnmaddFloat# u0 v0 w0, fnmaddFloat# u1 v1 w1, fnmaddFloat# u2 v2 w2, fnmaddFloat# u3 v3 w3 #)
+{-# INLINE [0] fnmaddFloatX4# #-}
+
+fnmaddDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
+fnmaddDoubleX2# u v w = case unpackDoubleX2# u of (# u0, u1 #) -> case unpackDoubleX2# v of (# v0, v1 #) -> case unpackDoubleX2# w of (# w0, w1 #) -> packDoubleX2# (# fnmaddDouble# u0 v0 w0, fnmaddDouble# u1 v1 w1 #)
+{-# INLINE [0] fnmaddDoubleX2# #-}
+
+fmsubFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
+fmsubFloatX4# u v w = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> case unpackFloatX4# v of (# v0, v1, v2, v3 #) -> case unpackFloatX4# w of (# w0, w1, w2, w3 #) -> packFloatX4# (# fmsubFloat# u0 v0 w0, fmsubFloat# u1 v1 w1, fmsubFloat# u2 v2 w2, fmsubFloat# u3 v3 w3 #)
+{-# INLINE [0] fmsubFloatX4# #-}
+
+fmsubDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
+fmsubDoubleX2# u v w = case unpackDoubleX2# u of (# u0, u1 #) -> case unpackDoubleX2# v of (# v0, v1 #) -> case unpackDoubleX2# w of (# w0, w1 #) -> packDoubleX2# (# fmsubDouble# u0 v0 w0, fmsubDouble# u1 v1 w1 #)
+{-# INLINE [0] fmsubDoubleX2# #-}
+
+fnmsubFloatX4# :: FloatX4# -> FloatX4# -> FloatX4# -> FloatX4#
+fnmsubFloatX4# u v w = case unpackFloatX4# u of (# u0, u1, u2, u3 #) -> case unpackFloatX4# v of (# v0, v1, v2, v3 #) -> case unpackFloatX4# w of (# w0, w1, w2, w3 #) -> packFloatX4# (# fnmsubFloat# u0 v0 w0, fnmsubFloat# u1 v1 w1, fnmsubFloat# u2 v2 w2, fnmsubFloat# u3 v3 w3 #)
+{-# INLINE [0] fnmsubFloatX4# #-}
+
+fnmsubDoubleX2# :: DoubleX2# -> DoubleX2# -> DoubleX2# -> DoubleX2#
+fnmsubDoubleX2# u v w = case unpackDoubleX2# u of (# u0, u1 #) -> case unpackDoubleX2# v of (# v0, v1 #) -> case unpackDoubleX2# w of (# w0, w1 #) -> packDoubleX2# (# fnmsubDouble# u0 v0 w0, fnmsubDouble# u1 v1 w1 #)
+{-# INLINE [0] fnmsubDoubleX2# #-}
 
 #endif

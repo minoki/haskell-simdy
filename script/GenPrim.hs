@@ -70,6 +70,18 @@ mkBinary (typename, n) name scalarOp =
      , "{-# INLINE [0] " ++ name ++ vecTy ++ " #-}"
      ]
 
+mkTernary :: (String, Int) -> String -> (String -> String -> String -> String) -> [String]
+mkTernary (typename, n) name scalarOp =
+  let vecTy = typename ++ "X" ++ shows n "#"
+  in [ name ++ vecTy ++ " :: " ++ vecTy ++ " -> " ++ vecTy ++ " -> " ++ vecTy ++ " -> " ++ vecTy
+     , name ++ vecTy ++ " u v w = \
+      \case unpack" ++ vecTy ++ " u of (# " ++ commaSep ["u" ++ show i | i <- [0..n-1]] ++ " #) -> \
+      \case unpack" ++ vecTy ++ " v of (# " ++ commaSep ["v" ++ show i | i <- [0..n-1]] ++ " #) -> \
+      \case unpack" ++ vecTy ++ " w of (# " ++ commaSep ["w" ++ show i | i <- [0..n-1]] ++ " #) -> \
+      \pack" ++ vecTy ++ " (# " ++ commaSep [scalarOp ("u" ++ show i) ("v" ++ show i) ("w" ++ show i) | i <- [0..n-1]] ++ " #)"
+     , "{-# INLINE [0] " ++ name ++ vecTy ++ " #-}"
+     ]
+
 mkForeignUnary :: (String, Int) -> String -> [String]
 mkForeignUnary (typename, n) name =
   let vecTySymbol = typename ++ "X" ++ show n
@@ -124,11 +136,11 @@ content moduleName width types reexports =
         ,["read" ++ s ++ "OffAddrAs" ++ t ++ "#" | (t, s, _, _) <- types]
         ,["write" ++ s ++ "OffAddrAs" ++ t ++ "#" | (t, s, _, _) <- types]
         -- GHC 9.12 or later
-        ,["#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)"]
         ,["fmadd" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ,["fmsub" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ,["fnmadd" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ,["fnmsub" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
+        ,["#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)"]
         ,["shuffle" ++ t ++ "#" | (t, _, _, _) <- types]
         ,["min" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
         ,["max" ++ t ++ "#" | (t, _, k, _) <- types, k == FLOAT]
@@ -287,6 +299,20 @@ content moduleName width types reexports =
       , mkUnary double "sqrt" (\u -> "sqrtDouble# " ++ u)
       , ["#endif"]
       ])
+    ++ [""]
+    ++ List.intercalate [""] (
+      [ ["#if !MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)"]
+      , mkTernary float "fmadd" (\u v w -> "fmaddFloat# " ++ u <+> v <+> w)
+      , mkTernary double "fmadd" (\u v w -> "fmaddDouble# " ++ u <+> v <+> w)
+      , mkTernary float "fnmadd" (\u v w -> "fnmaddFloat# " ++ u <+> v <+> w)
+      , mkTernary double "fnmadd" (\u v w -> "fnmaddDouble# " ++ u <+> v <+> w)
+      , mkTernary float "fmsub" (\u v w -> "fmsubFloat# " ++ u <+> v <+> w)
+      , mkTernary double "fmsub" (\u v w -> "fmsubDouble# " ++ u <+> v <+> w)
+      , mkTernary float "fnmsub" (\u v w -> "fnmsubFloat# " ++ u <+> v <+> w)
+      , mkTernary double "fnmsub" (\u v w -> "fnmsubDouble# " ++ u <+> v <+> w)
+      , ["#endif"]
+      ]
+    )
 
 main :: IO ()
 main = do
