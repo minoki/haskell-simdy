@@ -85,7 +85,8 @@ tcPlugin = TcPlugin
   { tcPluginInit = pluginInit
   , tcPluginSolve = pluginSolve
   , tcPluginRewrite = const emptyUFM
-  , tcPluginStop = \_ -> pure ()
+  , tcPluginPostTc = \_ -> pure ()
+  , tcPluginShutdown = \_ -> pure ()
   }
 
 data VectorTypeDefs = MkVectorTypeDefs

@@ -305,8 +305,8 @@ library plugin
     exposed-modules:  Data.Simdy.Shuffle.Plugin
     build-depends:    base >=4.19.0.0 && <4.24,
                       simdy:common,
-                      ghc >=9.8 && <9.15,
-                      ghc-tcplugin-api ^>=0.18.2
+                      ghc >=9.8 && <10.1,
+                      ghc-tcplugin-api ^>=0.19
     if impl(ghc >= 9.12)
         build-depends: ghc-experimental
     hs-source-dirs:   src-plugin
