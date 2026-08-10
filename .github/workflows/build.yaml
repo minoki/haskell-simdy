@@ -128,3 +128,71 @@ jobs:
         run: cabal test ${{ matrix.flags }}
         if: ${{ matrix.flags != '--flags avx512' }}
         # AVX-512 may not be available on the runner
+
+  build-and-test-with-nightly:
+    name: Build and test (nightly GHC)
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ghc: ['9.12.4.20260713', '9.14.1.20260728', 'latest-nightly']
+        os: [ubuntu-24.04, macos-15-intel, macos-14, windows-latest]
+        flags: ['', '--flags no-simd', '--flags haswell', '--flags avx512', '--flags -llvm']
+        # Other possible combinations: "haswell -llvm", "avx512 -llvm"
+        exclude:
+          # x86-only features
+          - os: macos-14
+            flags: '--flags haswell'
+          - os: macos-14
+            flags: '--flags avx512'
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install LLVM 19 with Homebrew
+        run: |
+          brew install llvm@19
+          echo "OPT=$(brew --prefix llvm@19)/bin/opt" >> "${GITHUB_ENV}"
+          echo "LLC=$(brew --prefix llvm@19)/bin/llc" >> "${GITHUB_ENV}"
+        if: ${{ matrix.os == 'macos-15-intel' || matrix.os == 'macos-14' }}
+
+      - name: Install LLVM 19 with APT
+        run: |
+          sudo apt-get install llvm-19 clang-19
+          echo "OPT=opt-19" >> "${GITHUB_ENV}"
+          echo "LLC=llc-19" >> "${GITHUB_ENV}"
+          echo "LLVMAS=clang-19" >> "${GITHUB_ENV}"
+        if: ${{ matrix.os == 'ubuntu-24.04' }}
+
+      - uses: haskell/ghcup-setup@v1
+        with:
+          ghc: ${{ matrix.ghc }}
+          config: |
+            # don't cache metadata files based on last access time
+            meta-cache: 0
+            url-source:
+              - GHCupURL
+              - prereleases
+              - https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml
+
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+          key: ${{ runner.os }}-${{ matrix.ghc }}
+
+      - name: Configure with Cmm lint (non-Windows)
+        run: cabal configure --ghc-options="-pgmlo $OPT -pgmlc $LLC -dlint -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks --allow-newer
+        if: ${{ matrix.os != 'windows-latest' }}
+
+      - name: Configure with Cmm lint (Windows)
+        run: cabal configure --ghc-options="-dlint -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks --allow-newer
+        if: ${{ matrix.os == 'windows-latest' }}
+
+      - name: Build
+        run: cabal build ${{ matrix.flags }}
+
+      - name: Test
+        run: cabal test ${{ matrix.flags }}
+        if: ${{ matrix.flags != '--flags avx512' }}
+        # AVX-512 may not be available on the runner
