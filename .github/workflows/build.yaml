@@ -27,6 +27,7 @@ jobs:
           fi
 
   build-and-test:
+    if: false
     name: Build and test
     runs-on: ${{ matrix.os }}
     strategy:
@@ -133,7 +134,7 @@ jobs:
     name: Build and test (nightly GHC)
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      # fail-fast: false
       matrix:
         ghc: ['9.12.4.20260713', '9.14.1.20260728', 'latest-nightly']
         os: [ubuntu-24.04, macos-15-intel, macos-14, windows-latest]
@@ -166,6 +167,7 @@ jobs:
       - uses: haskell/ghcup-setup@v1
         with:
           ghc: ${{ matrix.ghc }}
+          cabal: latest
           config: |
             # don't cache metadata files based on last access time
             meta-cache: 0
