@@ -181,6 +181,9 @@ jobs:
             ~/.cabal/store
           key: ${{ runner.os }}-${{ matrix.ghc }}
 
+      - name: cabal update
+        run: cabal update
+
       - name: Configure with Cmm lint (non-Windows)
         run: cabal configure --ghc-options="-pgmlo $OPT -pgmlc $LLC -dlint -fcheck-prim-bounds -fno-ignore-asserts" --enable-test --enable-benchmarks --allow-newer
         if: ${{ matrix.os != 'windows-latest' }}
