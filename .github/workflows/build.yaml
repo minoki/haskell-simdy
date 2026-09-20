@@ -136,7 +136,7 @@ jobs:
     strategy:
       # fail-fast: false
       matrix:
-        ghc: ['9.12.4.20260713', '9.14.1.20260728']
+        ghc: ['9.12.4.20260713', '9.14.1.20260916', '10.0.0.20260917']
         os: [ubuntu-24.04, macos-15-intel, macos-14, windows-latest]
         flags: ['', '--flags no-simd', '--flags haswell', '--flags avx512', '--flags -llvm']
         # Other possible combinations: "haswell -llvm", "avx512 -llvm"
