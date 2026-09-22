@@ -136,7 +136,7 @@ jobs:
     strategy:
       # fail-fast: false
       matrix:
-        ghc: ['9.12.4.20260713', '9.14.1.20260916', '10.0.0.20260917']
+        ghc: ['9.12.4.20260713', '9.14.1.20260916', '10.0.0.20260917', 'latest-nightly']
         os: [ubuntu-24.04, macos-15-intel, macos-14, windows-latest]
         flags: ['', '--flags no-simd', '--flags haswell', '--flags avx512', '--flags -llvm']
         # Other possible combinations: "haswell -llvm", "avx512 -llvm"
@@ -146,6 +146,11 @@ jobs:
             flags: '--flags haswell'
           - os: macos-14
             flags: '--flags avx512'
+          # https://gitlab.haskell.org/ghc/ghc/-/work_items/27672
+          - ghc: '10.0.0.20260917'
+            os: windows-latest
+          - ghc: 'latest-nightly'
+            os: windows-latest
     steps:
       - uses: actions/checkout@v6
 
