@@ -149,8 +149,6 @@ jobs:
           # https://gitlab.haskell.org/ghc/ghc/-/work_items/27672
           - ghc: '10.0.0.20260917'
             os: windows-latest
-          - ghc: 'latest-nightly'
-            os: windows-latest
     steps:
       - uses: actions/checkout@v6
 
