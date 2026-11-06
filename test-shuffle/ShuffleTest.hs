@@ -263,7 +263,17 @@ testX64 proxy = testGroup "X64"
 
 tests :: TestTree
 tests = testGroup "Tests"
-  [ let proxy :: Proxy Int8
+  [ let proxy :: Proxy Bool
+        proxy = Proxy
+    in testGroup "Bool"
+      [ testX2 proxy
+      , testX4 proxy
+      , testX8 proxy
+      , testX16 proxy
+      , testX32 proxy
+      , testX64 proxy
+      ]
+  , let proxy :: Proxy Int8
         proxy = Proxy
     in testGroup "Int8"
       [ testX2 proxy

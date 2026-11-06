@@ -74,12 +74,12 @@ gen !vecCount !maxBits
     ,"  horizontalOrBool (MkBool" ++ tyCon ++ " !cond) = cond Prelude./= 0"
     ,"  {-# INLINE horizontalAndBool #-}"
     ,"  {-# INLINE horizontalOrBool #-}"
-    ,"instance UnaryShuffleT indices " ++ tyCon ++ " Bool where"
-    ,"  unaryShuffle = error \"not implemented yet\""
-    ,"  {-# NOINLINE unaryShuffle #-}"
-    ,"instance BinaryShuffleT indices " ++ tyCon ++ " Bool where"
-    ,"  binaryShuffle = error \"not implemented yet\""
-    ,"  {-# NOINLINE binaryShuffle #-}"
+    ,"instance (AllLessThan indices " ++ show vecCount ++ ", ShuffleMany Word" ++ show (max vecCount 8) ++ "# indices) => UnaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"  unaryShuffle (MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# x)) = MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# (shuffleMany# @_ @_ @indices (\\_ -> x)))"
+    ,"  {-# INLINE unaryShuffle #-}"
+    ,"instance (AllLessThan indices " ++ show (2 * vecCount) ++ ", ShuffleMany Word" ++ show (max vecCount 8) ++ "# indices) => BinaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"  binaryShuffle (MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# x0)) (MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# x1)) = MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# (shuffleMany# @_ @_ @indices (\\case { 0 -> x0; _ -> x1 })))"
+    ,"  {-# INLINE binaryShuffle #-}"
     ]
     ++ genType "Float" "F#" 32 "0.0#" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0#", genPrim, genStorable]
     ++ genType "Double" "D#" 64 "0.0##" maxBits [genEquatable, genOrderedFloat, genNum True True, genFractional, genFloating, genFMA, genEnumFromZero ".0##", genPrim, genStorable]
@@ -245,7 +245,7 @@ gen !vecCount !maxBits
                              ,"instance (AllLessThan indices " ++ show (2 * vecCount) ++ ", ShuffleMany " ++ shortVecName ++ "# indices) => BinaryShuffleT indices " ++ tyCon <+> name ++ " where"
                              ,"  binaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> "x0) (Mk" ++ name ++ tyCon ++ suffix <+> "x1) = Mk" ++ name ++ tyCon ++ suffix ++ " (shuffleMany# @_ @_ @indices (\\case { 0 -> x0; _ -> x1 }))"
                              ,"  {-# INLINE binaryShuffle #-}"
-                           ]
+                             ]
                            else
                              ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany " ++ shortVecName ++ "# [" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" | g <- [0..shortVecCount-1]] ++ ") => UnaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon <+> name ++ " where"
                              ,"  unaryShuffle (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["x" ++ show i | i <- [0..shortVecCount-1]] ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == shortVecCount - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..shortVecCount-1]] ++ " } } in Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show i | i <- [g*shortVecSize..(g+1)*shortVecSize-1]] ++ "]" ++ " sources)" | g <- [0..shortVecCount-1]]
@@ -987,7 +987,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Type.Ord (type (<))"
     ] ++ ["import           " ++ primModule | primModule <- primModules] ++
     ["import qualified GHC.Exts"
-    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))"
+    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)"
     ,"import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
@@ -1024,7 +1024,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ] ++ ["import           " ++ m | m <- imports] ++
     ["import           Foreign.Storable (Storable)"
     ,"import qualified GHC.Exts"
-    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))"
+    ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)"
     ,"import           GHC.Int"
     ,"import           GHC.IO"
     ,"import           GHC.Word"
@@ -1093,12 +1093,6 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  horizontalOrBool (" ++ dataCon <+> spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") = " ++ List.intercalate " Prelude.|| " ["horizontalOrBool cond" ++ show i | i <- [0..n-1]]
     ,"  {-# INLINE horizontalAndBool #-}"
     ,"  {-# INLINE horizontalOrBool #-}"
-    ,"instance UnaryShuffleT indices " ++ tyCon ++ " Bool where"
-    ,"  unaryShuffle = error \"not implemented yet\""
-    ,"  {-# NOINLINE unaryShuffle #-}"
-    ,"instance BinaryShuffleT indices " ++ tyCon ++ " Bool where"
-    ,"  binaryShuffle = error \"not implemented yet\""
-    ,"  {-# NOINLINE binaryShuffle #-}"
     ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
     ,"  unaryShuffle _ = " ++ dataCon <+> spaceSep (replicate n ("MkUnit" ++ baseTyCon))
     ,"  {-# INLINE unaryShuffle #-}"
@@ -1106,6 +1100,17 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  binaryShuffle _ _ = " ++ dataCon <+> spaceSep (replicate n ("MkUnit" ++ baseTyCon))
     ,"  {-# INLINE binaryShuffle #-}"
     ]
+    ++ do
+      { let w = max baseCount 8
+      ; let unpacked f = dataCon ++ concat [" (MkBool" ++ baseTyCon ++ " (W" ++ show w ++ "# " ++ f i ++ "))" | i <- [0..n-1]]
+      ; ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany Word" ++ show w ++ "# [" ++ commaSep ["i" ++ show (i * baseCount + j) | j <- [0..baseCount-1]] ++ "]" | i <- [0..n-1]] ++ ") => UnaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " Bool where"
+        ,"  unaryShuffle (" ++ unpacked (\i -> "x" ++ show i) ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == n - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..n-1]] ++ " } } in " ++ unpacked (\i -> "(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show (i * baseCount + j) | j <- [0..baseCount-1]] ++ "] sources)")
+        ,"  {-# INLINE unaryShuffle #-}"
+        ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++  ", " ++ commaSep ["ShuffleMany Word" ++ show w ++ "# [" ++ commaSep ["i" ++ show (i * baseCount + j) | j <- [0..baseCount-1]] ++ "]" | i <- [0..n-1]] ++ ") => BinaryShuffleT [" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " Bool where"
+        ,"  binaryShuffle (" ++ unpacked (\i -> "x" ++ show i) ++ ") (" ++ unpacked (\i -> "x" ++ show (i + n)) ++ ") = let { sources = \\case { " ++ semicolonSep [(if i == 2 * n - 1 then "_" else show i) ++ " -> x" ++ show i | i <- [0..2*n-1]] ++ " } } in " ++ unpacked (\i -> "(shuffleMany# @_ @_ @[" ++ commaSep ["i" ++ show (i * baseCount + j) | j <- [0..baseCount-1]] ++ "] sources)")
+        ,"  {-# INLINE binaryShuffle #-}"
+        ]
+      }
     ++ do
       { name <- ["Float","Double","Int8","Int16","Int32","Int64","Word8","Word16","Word32","Word64"]
       ; let unpacked f = dataCon ++ concat [" (Mk" ++ name ++ baseTyCon ++ "WithElems " ++ spaceSep [f j | j <- [baseCount * i..baseCount * (i + 1) - 1]] ++ ")" | i <- [0..n-1]]

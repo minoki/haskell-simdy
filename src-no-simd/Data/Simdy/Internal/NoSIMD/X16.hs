@@ -24,7 +24,7 @@ import           Data.Type.Ord (type (<))
 import           Data.Simdy.Internal.NoSIMD.X8
 import           Foreign.Storable (Storable)
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word
@@ -123,17 +123,17 @@ instance BooleanReduction X16 where
   horizontalOrBool (MkX16WithX8 cond0 cond1) = horizontalOrBool cond0 Prelude.|| horizontalOrBool cond1
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
-instance UnaryShuffleT indices X16 Bool where
-  unaryShuffle = error "not implemented yet"
-  {-# NOINLINE unaryShuffle #-}
-instance BinaryShuffleT indices X16 Bool where
-  binaryShuffle = error "not implemented yet"
-  {-# NOINLINE binaryShuffle #-}
 instance (i0 < 16, i1 < 16, i2 < 16, i3 < 16, i4 < 16, i5 < 16, i6 < 16, i7 < 16, i8 < 16, i9 < 16, i10 < 16, i11 < 16, i12 < 16, i13 < 16, i14 < 16, i15 < 16) => UnaryShuffleT '[i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15] X16 () where
   unaryShuffle _ = MkX16WithX8 MkUnitX8 MkUnitX8
   {-# INLINE unaryShuffle #-}
 instance (i0 < 32, i1 < 32, i2 < 32, i3 < 32, i4 < 32, i5 < 32, i6 < 32, i7 < 32, i8 < 32, i9 < 32, i10 < 32, i11 < 32, i12 < 32, i13 < 32, i14 < 32, i15 < 32) => BinaryShuffleT '[i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15] X16 () where
   binaryShuffle _ _ = MkX16WithX8 MkUnitX8 MkUnitX8
+  {-# INLINE binaryShuffle #-}
+instance (i0 < 16, i1 < 16, i2 < 16, i3 < 16, i4 < 16, i5 < 16, i6 < 16, i7 < 16, i8 < 16, i9 < 16, i10 < 16, i11 < 16, i12 < 16, i13 < 16, i14 < 16, i15 < 16, ShuffleMany Word8# [i0, i1, i2, i3, i4, i5, i6, i7], ShuffleMany Word8# [i8, i9, i10, i11, i12, i13, i14, i15]) => UnaryShuffleT [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15] X16 Bool where
+  unaryShuffle (MkX16WithX8 (MkBoolX8 (W8# x0)) (MkBoolX8 (W8# x1))) = let { sources = \case { 0 -> x0; _ -> x1 } } in MkX16WithX8 (MkBoolX8 (W8# (shuffleMany# @_ @_ @[i0, i1, i2, i3, i4, i5, i6, i7] sources))) (MkBoolX8 (W8# (shuffleMany# @_ @_ @[i8, i9, i10, i11, i12, i13, i14, i15] sources)))
+  {-# INLINE unaryShuffle #-}
+instance (i0 < 32, i1 < 32, i2 < 32, i3 < 32, i4 < 32, i5 < 32, i6 < 32, i7 < 32, i8 < 32, i9 < 32, i10 < 32, i11 < 32, i12 < 32, i13 < 32, i14 < 32, i15 < 32, ShuffleMany Word8# [i0, i1, i2, i3, i4, i5, i6, i7], ShuffleMany Word8# [i8, i9, i10, i11, i12, i13, i14, i15]) => BinaryShuffleT [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15] X16 Bool where
+  binaryShuffle (MkX16WithX8 (MkBoolX8 (W8# x0)) (MkBoolX8 (W8# x1))) (MkX16WithX8 (MkBoolX8 (W8# x2)) (MkBoolX8 (W8# x3))) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; _ -> x3 } } in MkX16WithX8 (MkBoolX8 (W8# (shuffleMany# @_ @_ @[i0, i1, i2, i3, i4, i5, i6, i7] sources))) (MkBoolX8 (W8# (shuffleMany# @_ @_ @[i8, i9, i10, i11, i12, i13, i14, i15] sources)))
   {-# INLINE binaryShuffle #-}
 instance (i0 < 16, i1 < 16, i2 < 16, i3 < 16, i4 < 16, i5 < 16, i6 < 16, i7 < 16, i8 < 16, i9 < 16, i10 < 16, i11 < 16, i12 < 16, i13 < 16, i14 < 16, i15 < 16, Pick Float i0, Pick Float i1, Pick Float i2, Pick Float i3, Pick Float i4, Pick Float i5, Pick Float i6, Pick Float i7, Pick Float i8, Pick Float i9, Pick Float i10, Pick Float i11, Pick Float i12, Pick Float i13, Pick Float i14, Pick Float i15) => UnaryShuffleT [i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15] X16 Float where
   unaryShuffle (MkX16WithX8 (MkFloatX8WithElems x0 x1 x2 x3 x4 x5 x6 x7) (MkFloatX8WithElems x8 x9 x10 x11 x12 x13 x14 x15)) = let { sources = \case { 0 -> x0; 1 -> x1; 2 -> x2; 3 -> x3; 4 -> x4; 5 -> x5; 6 -> x6; 7 -> x7; 8 -> x8; 9 -> x9; 10 -> x10; 11 -> x11; 12 -> x12; 13 -> x13; 14 -> x14; _ -> x15 } } in MkX16WithX8 (MkFloatX8WithElems (pick @_ @i0 sources) (pick @_ @i1 sources) (pick @_ @i2 sources) (pick @_ @i3 sources) (pick @_ @i4 sources) (pick @_ @i5 sources) (pick @_ @i6 sources) (pick @_ @i7 sources)) (MkFloatX8WithElems (pick @_ @i8 sources) (pick @_ @i9 sources) (pick @_ @i10 sources) (pick @_ @i11 sources) (pick @_ @i12 sources) (pick @_ @i13 sources) (pick @_ @i14 sources) (pick @_ @i15 sources))

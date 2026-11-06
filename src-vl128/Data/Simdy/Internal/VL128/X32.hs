@@ -24,7 +24,7 @@ import           Data.Type.Ord (type (<))
 import           Data.Simdy.Internal.VL128.Prim
 import           Data.Simdy.Internal.VL128.PrimExtra
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word
@@ -71,12 +71,12 @@ instance BooleanReduction X32 where
   horizontalOrBool (MkBoolX32 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
-instance UnaryShuffleT indices X32 Bool where
-  unaryShuffle = error "not implemented yet"
-  {-# NOINLINE unaryShuffle #-}
-instance BinaryShuffleT indices X32 Bool where
-  binaryShuffle = error "not implemented yet"
-  {-# NOINLINE binaryShuffle #-}
+instance (AllLessThan indices 32, ShuffleMany Word32# indices) => UnaryShuffleT indices X32 Bool where
+  unaryShuffle (MkBoolX32 (W32# x)) = MkBoolX32 (W32# (shuffleMany# @_ @_ @indices (\_ -> x)))
+  {-# INLINE unaryShuffle #-}
+instance (AllLessThan indices 64, ShuffleMany Word32# indices) => BinaryShuffleT indices X32 Bool where
+  binaryShuffle (MkBoolX32 (W32# x0)) (MkBoolX32 (W32# x1)) = MkBoolX32 (W32# (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 })))
+  {-# INLINE binaryShuffle #-}
 data instance X32 Float = MkFloatX32WithVec128 FloatX4# FloatX4# FloatX4# FloatX4# FloatX4# FloatX4# FloatX4# FloatX4#
 instance PackX32 X32 Float where
   mkX32 (F# x0) (F# x1) (F# x2) (F# x3) (F# x4) (F# x5) (F# x6) (F# x7) (F# x8) (F# x9) (F# x10) (F# x11) (F# x12) (F# x13) (F# x14) (F# x15) (F# x16) (F# x17) (F# x18) (F# x19) (F# x20) (F# x21) (F# x22) (F# x23) (F# x24) (F# x25) (F# x26) (F# x27) (F# x28) (F# x29) (F# x30) (F# x31) = MkFloatX32WithVec128 (packFloatX4# (# x0, x1, x2, x3 #)) (packFloatX4# (# x4, x5, x6, x7 #)) (packFloatX4# (# x8, x9, x10, x11 #)) (packFloatX4# (# x12, x13, x14, x15 #)) (packFloatX4# (# x16, x17, x18, x19 #)) (packFloatX4# (# x20, x21, x22, x23 #)) (packFloatX4# (# x24, x25, x26, x27 #)) (packFloatX4# (# x28, x29, x30, x31 #))

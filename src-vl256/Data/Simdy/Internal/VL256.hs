@@ -530,6 +530,7 @@ type UnaryShuffle indices x
     , UnaryShuffleT indices x Word64
     , UnaryShuffleT indices x Float
     , UnaryShuffleT indices x Double
+    , UnaryShuffleT indices x Bool
     , UnaryShuffleT indices x ()
     )
 
@@ -549,6 +550,7 @@ type BinaryShuffle indices x
     , BinaryShuffleT indices x Word64
     , BinaryShuffleT indices x Float
     , BinaryShuffleT indices x Double
+    , BinaryShuffleT indices x Bool
     , BinaryShuffleT indices x ()
     )
 
