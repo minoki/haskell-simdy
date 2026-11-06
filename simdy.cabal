@@ -82,6 +82,7 @@ common ghc-support
         buildable: False
 
 common arch-options
+    cc-options: -msse2
     if flag(haswell) || flag(avx512)
         -- Traditionally, -mavx didn't imply -msse4.2: https://gitlab.haskell.org/ghc/ghc/-/issues/24989
         -- GHC 10.0 introduces the new behavior.
@@ -139,6 +140,7 @@ library no-simd
     default-language: GHC2021
 
 library vl128-c
+    cc-options:       -msse2
     if flag(haswell) || flag(avx512)
         cc-options:   -mavx2 -mfma -mf16c
     if flag(avx512)
