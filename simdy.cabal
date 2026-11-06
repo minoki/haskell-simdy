@@ -82,6 +82,8 @@ common ghc-support
         buildable: False
 
 common arch-options
+    if arch(i386)
+        cc-options: -msse2
     if flag(haswell) || flag(avx512)
         -- Traditionally, -mavx didn't imply -msse4.2: https://gitlab.haskell.org/ghc/ghc/-/issues/24989
         -- GHC 10.0 introduces the new behavior.
@@ -139,6 +141,8 @@ library no-simd
     default-language: GHC2021
 
 library vl128-c
+    if arch(i386)
+        cc-options:   -msse2
     if flag(haswell) || flag(avx512)
         cc-options:   -mavx2 -mfma -mf16c
     if flag(avx512)
@@ -214,6 +218,8 @@ library vl256-c
                       cbits/int_minmax_vl256.c
                       cbits/mask_vl256.c
                       cbits/select_vl256.c
+    if !(arch(i386) || arch(x86_64))
+        buildable: False
 
 library vl256
     import:           warnings
@@ -257,6 +263,8 @@ library vl512-c
                       cbits/int_compare_vl512.c
                       cbits/int_minmax_vl512.c
                       cbits/select_vl512.c
+    if !(arch(i386) || arch(x86_64))
+        buildable: False
 
 library vl512
     import:           warnings
