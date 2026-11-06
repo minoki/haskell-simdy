@@ -24,7 +24,7 @@ import           Data.Type.Ord (type (<))
 import           Data.Simdy.Internal.VL128.Prim
 import           Data.Simdy.Internal.VL128.PrimExtra
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word
@@ -71,12 +71,12 @@ instance BooleanReduction X4 where
   horizontalOrBool (MkBoolX4 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
-instance UnaryShuffleT indices X4 Bool where
-  unaryShuffle = error "not implemented yet"
-  {-# NOINLINE unaryShuffle #-}
-instance BinaryShuffleT indices X4 Bool where
-  binaryShuffle = error "not implemented yet"
-  {-# NOINLINE binaryShuffle #-}
+instance (AllLessThan indices 4, ShuffleMany Word8# indices) => UnaryShuffleT indices X4 Bool where
+  unaryShuffle (MkBoolX4 (W8# x)) = MkBoolX4 (W8# (shuffleMany# @_ @_ @indices (\_ -> x)))
+  {-# INLINE unaryShuffle #-}
+instance (AllLessThan indices 8, ShuffleMany Word8# indices) => BinaryShuffleT indices X4 Bool where
+  binaryShuffle (MkBoolX4 (W8# x0)) (MkBoolX4 (W8# x1)) = MkBoolX4 (W8# (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 })))
+  {-# INLINE binaryShuffle #-}
 data instance X4 Float = MkFloatX4 FloatX4#
 instance PackX4 X4 Float where
   mkX4 (F# x0) (F# x1) (F# x2) (F# x3) = MkFloatX4 (packFloatX4# (# x0, x1, x2, x3 #))

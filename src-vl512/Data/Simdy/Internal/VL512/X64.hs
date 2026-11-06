@@ -26,7 +26,7 @@ import           Data.Simdy.Internal.VL128.PrimExtra
 import           Data.Simdy.Internal.VL256.PrimExtra
 import           Data.Simdy.Internal.VL512.PrimExtra
 import qualified GHC.Exts
-import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..))
+import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
 import           GHC.Word
@@ -73,12 +73,12 @@ instance BooleanReduction X64 where
   horizontalOrBool (MkBoolX64 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
-instance UnaryShuffleT indices X64 Bool where
-  unaryShuffle = error "not implemented yet"
-  {-# NOINLINE unaryShuffle #-}
-instance BinaryShuffleT indices X64 Bool where
-  binaryShuffle = error "not implemented yet"
-  {-# NOINLINE binaryShuffle #-}
+instance (AllLessThan indices 64, ShuffleMany Word64# indices) => UnaryShuffleT indices X64 Bool where
+  unaryShuffle (MkBoolX64 (W64# x)) = MkBoolX64 (W64# (shuffleMany# @_ @_ @indices (\_ -> x)))
+  {-# INLINE unaryShuffle #-}
+instance (AllLessThan indices 128, ShuffleMany Word64# indices) => BinaryShuffleT indices X64 Bool where
+  binaryShuffle (MkBoolX64 (W64# x0)) (MkBoolX64 (W64# x1)) = MkBoolX64 (W64# (shuffleMany# @_ @_ @indices (\case { 0 -> x0; _ -> x1 })))
+  {-# INLINE binaryShuffle #-}
 data instance X64 Float = MkFloatX64WithVec512 FloatX16# FloatX16# FloatX16# FloatX16#
 instance PackX64 X64 Float where
   mkX64 (F# x0) (F# x1) (F# x2) (F# x3) (F# x4) (F# x5) (F# x6) (F# x7) (F# x8) (F# x9) (F# x10) (F# x11) (F# x12) (F# x13) (F# x14) (F# x15) (F# x16) (F# x17) (F# x18) (F# x19) (F# x20) (F# x21) (F# x22) (F# x23) (F# x24) (F# x25) (F# x26) (F# x27) (F# x28) (F# x29) (F# x30) (F# x31) (F# x32) (F# x33) (F# x34) (F# x35) (F# x36) (F# x37) (F# x38) (F# x39) (F# x40) (F# x41) (F# x42) (F# x43) (F# x44) (F# x45) (F# x46) (F# x47) (F# x48) (F# x49) (F# x50) (F# x51) (F# x52) (F# x53) (F# x54) (F# x55) (F# x56) (F# x57) (F# x58) (F# x59) (F# x60) (F# x61) (F# x62) (F# x63) = MkFloatX64WithVec512 (packFloatX16# (# x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15 #)) (packFloatX16# (# x16, x17, x18, x19, x20, x21, x22, x23, x24, x25, x26, x27, x28, x29, x30, x31 #)) (packFloatX16# (# x32, x33, x34, x35, x36, x37, x38, x39, x40, x41, x42, x43, x44, x45, x46, x47 #)) (packFloatX16# (# x48, x49, x50, x51, x52, x53, x54, x55, x56, x57, x58, x59, x60, x61, x62, x63 #))

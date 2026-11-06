@@ -328,7 +328,7 @@ genMod name imports comment = unlines $
   ,"-- element type @a@; see the superclasses of 'SIMDElement' and 'SIMD'."
   ,"type UnaryShuffle indices x"
   ,"  = ( " ++ List.intercalate "\n    , "
-   ("UnaryShuffleFor x indices" : ["UnaryShuffleT indices x " ++ a | a <- intishTypes ++ ["Float","Double","()"]])
+   ("UnaryShuffleFor x indices" : ["UnaryShuffleT indices x " ++ a | a <- intishTypes ++ ["Float","Double","Bool","()"]])
     ++ "\n    )"
   ,""
   ,"-- | @BinaryShuffle indices x@ says that @indices@ is a valid binary shuffle for"
@@ -337,7 +337,7 @@ genMod name imports comment = unlines $
   ,"-- See 'UnaryShuffle'."
   ,"type BinaryShuffle indices x"
   ,"  = ( " ++ List.intercalate "\n    , "
-   ("BinaryShuffleFor x indices" : ["BinaryShuffleT indices x " ++ a | a <- intishTypes ++ ["Float","Double","()"]])
+   ("BinaryShuffleFor x indices" : ["BinaryShuffleT indices x " ++ a | a <- intishTypes ++ ["Float","Double","Bool","()"]])
     ++ "\n    )"
   ,""
   ,"#if MIN_VERSION_GLASGOW_HASKELL(9, 10, 0, 0)"

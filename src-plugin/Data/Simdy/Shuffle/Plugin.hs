@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskellQuotes #-}
 {-# OPTIONS_GHC -Wno-unused-imports #-}
@@ -27,6 +28,7 @@
 module Data.Simdy.Shuffle.Plugin (plugin) where
 import           Control.Applicative ((<|>))
 import           Control.Monad (forM, guard, replicateM)
+import           Data.Bits (Bits (shiftL, (.|.)))
 import           Data.Either (partitionEithers)
 import           Data.List (nub)
 import           Data.Maybe (fromMaybe)
@@ -43,14 +45,15 @@ import           GHC.Driver.DynFlags (DynFlags (backend), isAvxEnabled)
 import           GHC.Driver.DynFlags (DynFlags)
 #endif
 import           GHC.Plugins (getDynFlags, targetPlatform)
-import qualified GHC.Plugins as GHC (Alt (Alt), AltCon (DataAlt),
-                                     Boxity (Unboxed),
+import qualified GHC.Plugins as GHC (Alt (Alt), AltCon (DEFAULT, DataAlt),
+                                     Bind (NonRec), Boxity (Unboxed),
                                      Expr (App, Case, Lam, Lit, Type, Var),
-                                     Plugin (..), defaultPlugin, getUniqueM,
-                                     intRepDataConTy, manyDataConTy,
-                                     mkCoreConApps, mkLitInt, mkLocalId,
-                                     mkSystemName, mkTyConApp, purePlugin,
-                                     tupleDataCon)
+                                     Literal, Plugin (..), defaultPlugin,
+                                     getUniqueM, intRepDataConTy, manyDataConTy,
+                                     mkCoreConApps, mkLitInt, mkLitWord16,
+                                     mkLitWord32, mkLitWord64, mkLitWord8,
+                                     mkLocalId, mkSystemName, mkTyConApp,
+                                     purePlugin, tupleDataCon)
 import           GHC.TcPlugin.API
 import           GHC.TcPlugin.API.Internal (unsafeLiftTcM)
 import           GHC.Types.Literal (mkLitDouble, mkLitFloat, mkLitInt16,
@@ -101,6 +104,16 @@ data VectorTypeDefs = MkVectorTypeDefs
   , zeroExpr           :: CoreExpr
   }
 
+data BitVectorTypeDefs = MkBitVectorTypeDefs
+  { numberOfBits :: !Int
+  , tyCon'       :: TyCon
+  , orId         :: Id
+  , andId        :: Id
+  , shiftLId     :: Id
+  , shiftRId     :: Id
+  , mkLit        :: Integer -> GHC.Literal
+  }
+
 data PluginDefs = MkPluginDefs
   { shuffleManyClass :: Class
   , pickClass        :: Class
@@ -111,6 +124,7 @@ data PluginDefs = MkPluginDefs
   , promotedRightDataCon :: TyCon
   -}
   , table            :: [(TyCon, VectorTypeDefs)]
+  , wordTable        :: [(TyCon, BitVectorTypeDefs)]
   }
 
 pluginInit :: TcPluginM Init PluginDefs
@@ -239,6 +253,22 @@ pluginInit = do
   unpackWord16X32Prim <- lookupTHName 'unpackWord16X32# >>= tcLookupId
   unpackWord32X16Prim <- lookupTHName 'unpackWord32X16# >>= tcLookupId
   unpackWord64X8Prim <- lookupTHName 'unpackWord64X8# >>= tcLookupId
+  orWord8Prim <- lookupTHName 'orWord8# >>= tcLookupId
+  orWord16Prim <- lookupTHName 'orWord16# >>= tcLookupId
+  orWord32Prim <- lookupTHName 'orWord32# >>= tcLookupId
+  orWord64Prim <- lookupTHName 'or64# >>= tcLookupId
+  andWord8Prim <- lookupTHName 'andWord8# >>= tcLookupId
+  andWord16Prim <- lookupTHName 'andWord16# >>= tcLookupId
+  andWord32Prim <- lookupTHName 'andWord32# >>= tcLookupId
+  andWord64Prim <- lookupTHName 'and64# >>= tcLookupId
+  uncheckedShiftLWord8Prim <- lookupTHName 'uncheckedShiftLWord8# >>= tcLookupId
+  uncheckedShiftLWord16Prim <- lookupTHName 'uncheckedShiftLWord16# >>= tcLookupId
+  uncheckedShiftLWord32Prim <- lookupTHName 'uncheckedShiftLWord32# >>= tcLookupId
+  uncheckedShiftLWord64Prim <- lookupTHName 'uncheckedShiftL64# >>= tcLookupId
+  uncheckedShiftRLWord8Prim <- lookupTHName 'uncheckedShiftRLWord8# >>= tcLookupId
+  uncheckedShiftRLWord16Prim <- lookupTHName 'uncheckedShiftRLWord16# >>= tcLookupId
+  uncheckedShiftRLWord32Prim <- lookupTHName 'uncheckedShiftRLWord32# >>= tcLookupId
+  uncheckedShiftRLWord64Prim <- lookupTHName 'uncheckedShiftRL64# >>= tcLookupId
   {-
   nothingDataCon <- lookupTHName 'Nothing >>= tcLookupDataCon
   let promotedNothingDataCon = promoteDataCon nothingDataCon
@@ -249,6 +279,11 @@ pluginInit = do
   rightDataCon <- lookupTHName 'Right >>= tcLookupDataCon
   let promotedRightDataCon = promoteDataCon rightDataCon
   -}
+  let wordTable = [(B.word8PrimTyCon, MkBitVectorTypeDefs 8 B.word8PrimTyCon orWord8Prim andWord8Prim uncheckedShiftLWord8Prim uncheckedShiftRLWord8Prim GHC.mkLitWord8)
+                  ,(B.word16PrimTyCon, MkBitVectorTypeDefs 16 B.word16PrimTyCon orWord16Prim andWord16Prim uncheckedShiftLWord16Prim uncheckedShiftRLWord16Prim GHC.mkLitWord16)
+                  ,(B.word32PrimTyCon, MkBitVectorTypeDefs 32 B.word32PrimTyCon orWord32Prim andWord32Prim uncheckedShiftLWord32Prim uncheckedShiftRLWord32Prim GHC.mkLitWord32)
+                  ,(B.word64PrimTyCon, MkBitVectorTypeDefs 64 B.word64PrimTyCon orWord64Prim andWord64Prim uncheckedShiftLWord64Prim uncheckedShiftRLWord64Prim GHC.mkLitWord64)
+                  ]
 #if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
   let table = [(B.floatX4PrimTyCon, MkVectorTypeDefs 4 B.floatX4PrimTyCon B.floatPrimTyCon B.floatRepDataConTy (Just shuffleFloatX4Prim) broadcastFloatX4Prim packFloatX4Prim unpackFloatX4Prim (GHC.Lit (mkLitFloat 0)))
               ,(B.doubleX2PrimTyCon, MkVectorTypeDefs 2 B.doubleX2PrimTyCon B.doublePrimTyCon B.doubleRepDataConTy (Just shuffleDoubleX2Prim) broadcastDoubleX2Prim packDoubleX2Prim unpackDoubleX2Prim (GHC.Lit (mkLitDouble 0)))
@@ -416,6 +451,41 @@ buildShuffleWithPack dynflags (MkVectorTypeDefs {..}) vExp pairs =
         pure $ GHC.Case (GHC.App (GHC.Var unpackId) (GHC.App vExp $ mkNaturalExpr platform srcVec)) v vecTy [GHC.Alt (GHC.DataAlt (GHC.tupleDataCon GHC.Unboxed n)) elems rest]
   in go (nub [srcVec | (_, (srcVec, _)) <- pairs]) 0 []
 
+-- Solve `ShuffleMany Word{8,16,32,64}# [i0,i1,...]`
+solveBitVector :: DynFlags -> Ct -> Class -> [Type] -> Type -> BitVectorTypeDefs -> [Integer] -> TcPluginM Solve [Either Ct (EvTerm, Ct)]
+solveBitVector dynflags ct cls typeArgs wordTy (MkBitVectorTypeDefs {..}) indices =
+  let effectiveSize = length indices
+  in
+    if effectiveSize <= numberOfBits
+    then do
+      vVar <- freshId "v" (mkVisFunTyMany B.naturalTy wordTy)
+      let vExp = GHC.Var vVar
+      let platform = targetPlatform dynflags
+      let pairs :: [(Integer, (Integer, Integer))] -- (dstPos, (srcIndex, srcPos))
+          pairs = zip [0..] $ map (`quotRem` toInteger effectiveSize) indices
+      sources <- forM (nub [srcVec | (_, (srcVec, _)) <- pairs]) $ \s -> do
+        vnVar <- freshId "vn" wordTy
+        pure (s, (GHC.Var vnVar, \rhs -> GHC.Case (GHC.App vExp (mkNaturalExpr platform s)) vnVar wordTy [GHC.Alt GHC.DEFAULT [] rhs]))
+      let shift x 0 = x
+          shift x i | i > 0 = GHC.App (GHC.App (GHC.Var shiftLId) x) (GHC.Lit $ GHC.mkLitInt platform i)
+                    | otherwise = GHC.App (GHC.App (GHC.Var shiftRId) x) (GHC.Lit $ GHC.mkLitInt platform (-i))
+          zeroExp = GHC.Lit $ mkLit 0
+          andExp = GHC.Var andId
+      let body = foldl (GHC.App . GHC.App (GHC.Var orId)) zeroExp [ -- (source .&. mask) `shift` shiftAmount
+                GHC.App (GHC.App andExp srcExp) (GHC.Lit $ mkLit mask) `shift` toInteger shiftAmount
+              | (srcIdx, (srcExp, _)) <- sources
+              , shiftAmount <- [1-effectiveSize..effectiveSize-1]
+              , let mask = foldl' (.|.) 0
+                           [ 1 `shiftL` fromInteger srcPos
+                           | dstPos <- [0..effectiveSize-1]
+                           , let (srcIdx', srcPos) = snd (pairs !! dstPos)
+                           , srcIdx == srcIdx'
+                           , toInteger (dstPos - shiftAmount) == srcPos
+                           ]
+              ]
+      pure [Right (EvExpr (evUnaryDictAppE cls typeArgs $ GHC.Lam vVar $ foldr (\(_, (_, b)) -> b) body sources), ct)]
+    else pure [Left ct]
+
 pluginSolve :: PluginDefs -> [Ct] -> [Ct] -> TcPluginM Solve TcPluginSolveResult
 pluginSolve (MkPluginDefs {..}) _givens wanteds = do
   -- tcPluginTrace "---Plugin start---" (ppr givens $$ ppr wanteds)
@@ -425,28 +495,32 @@ pluginSolve (MkPluginDefs {..}) _givens wanteds = do
       ClassPred cls typeArgs@[_rep, vecTy, typeIndices]
         | cls == shuffleManyClass
         , Just (vcon, []) <- splitTyConApp_maybe vecTy
-        , Just indices <- extractIndices typeIndices
-        , Just vectorTypeDefs@(MkVectorTypeDefs { shuffleId }) <- lookup vcon table -> do
-          let n = numberOfElements vectorTypeDefs
-              effectiveSize = length indices
-          if effectiveSize <= n
-            then do
-              vVar <- freshId "v" (mkVisFunTyMany B.naturalTy vecTy)
+        , Just indices <- extractIndices typeIndices ->
+          if
+            | Just vectorTypeDefs@(MkVectorTypeDefs { shuffleId }) <- lookup vcon table -> do
+              let n = numberOfElements vectorTypeDefs
+                  effectiveSize = length indices
+              if effectiveSize <= n
+                then do
+                  vVar <- freshId "v" (mkVisFunTyMany B.naturalTy vecTy)
 #if MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0)
-              let hasShufflePrim = True
+                  let hasShufflePrim = True
 #elif MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
-              let hasShufflePrim = case backendCodeOutput (backend dynflags) of
-                    NcgCodeOutput  -> isAvxEnabled dynflags
-                    LlvmCodeOutput -> True
-                    _              -> False
+                  let hasShufflePrim = case backendCodeOutput (backend dynflags) of
+                        NcgCodeOutput  -> isAvxEnabled dynflags
+                        LlvmCodeOutput -> True
+                        _              -> False
 #else
-              let hasShufflePrim = False
+                  let hasShufflePrim = False
 #endif
-              body <- case shuffleId of
-                Just shuffleId' | hasShufflePrim -> pure $ buildShuffle dynflags vectorTypeDefs shuffleId' (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
-                _ -> buildShuffleWithPack dynflags vectorTypeDefs (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
-              pure [Right (EvExpr (evUnaryDictAppE cls typeArgs $ GHC.Lam vVar body), ct)]
-            else pure [Left ct]
+                  body <- case shuffleId of
+                    Just shuffleId' | hasShufflePrim -> pure $ buildShuffle dynflags vectorTypeDefs shuffleId' (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
+                    _ -> buildShuffleWithPack dynflags vectorTypeDefs (GHC.Var vVar) (zip [0..] $ map (`quotRem` toInteger effectiveSize) indices)
+                  pure [Right (EvExpr (evUnaryDictAppE cls typeArgs $ GHC.Lam vVar body), ct)]
+                else pure [Left ct]
+            | Just bitVectorTypeDefs@(MkBitVectorTypeDefs {}) <- lookup vcon wordTable ->
+              solveBitVector dynflags ct cls typeArgs vecTy bitVectorTypeDefs indices
+            | otherwise -> pure []
       ClassPred cls typeArgs@[ty, typeIndex]
         | cls == pickClass
         , Just i <- isNumLitTy typeIndex
