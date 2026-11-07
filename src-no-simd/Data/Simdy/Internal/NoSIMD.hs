@@ -425,6 +425,7 @@ class ( KnownSIMDLength f
       , forall a. SIMDMinMax a => MinMax (f a)
       , forall a. SIMDFMA a => FusedMultiplyAdd (f a)
       , forall a. SIMDEnumFromZero a => EnumFromZero_ f a
+      , forall a. SIMDEnumFromZero a => NumF f a
       , forall a. SIMDPrim a => MultiPrim f a
       , forall a. SIMDStorable a => MultiStorable f a
       , forall indices a. (SIMDElement a, UnaryShuffle indices f) => UnaryShuffleT indices f a

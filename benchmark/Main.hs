@@ -13,55 +13,55 @@ dotProdVU :: VU.Vector Float -> VU.Vector Float -> Float
 dotProdVU a b = VU.foldl' (+) 0 (VU.zipWith (*) a b)
 
 dotProdX4 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdX4 a b = V.SIMD.fold' @X4 (+) 0 (V.SIMD.zipWith @X4 (*) (*) a b)
+dotProdX4 a b = V.SIMD.fold' @X4 (+) 0 (V.SIMD.zipWith @X4 (*) a b)
 
 dotProdX8 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdX8 a b = V.SIMD.fold' @X8 (+) 0 (V.SIMD.zipWith @X8 (*) (*) a b)
+dotProdX8 a b = V.SIMD.fold' @X8 (+) 0 (V.SIMD.zipWith @X8 (*) a b)
 
 dotProdX16 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdX16 a b = V.SIMD.fold' @X16 (+) 0 (V.SIMD.zipWith @X16 (*) (*) a b)
+dotProdX16 a b = V.SIMD.fold' @X16 (+) 0 (V.SIMD.zipWith @X16 (*) a b)
 
 dotProdX32 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdX32 a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) (*) a b)
+dotProdX32 a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) a b)
 
 dotProdX64 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdX64 a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) (*) a b)
+dotProdX64 a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) a b)
 
 dotProdFVU :: VU.Vector Float -> VU.Vector Float -> Float
 dotProdFVU a b = VU.foldl' (F.+) 0 (VU.zipWith (F.*) a b)
 
 dotProdFX4 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdFX4 a b = V.SIMD.fold' @X4 (F.+) 0 (V.SIMD.zipWith @X4 (F.*) (F.*) a b)
+dotProdFX4 a b = V.SIMD.fold' @X4 (F.+) 0 (V.SIMD.zipWith @X4 (F.*) a b)
 
 dotProdFX8 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdFX8 a b = V.SIMD.fold' @X8 (F.+) 0 (V.SIMD.zipWith @X8 (F.*) (F.*) a b)
+dotProdFX8 a b = V.SIMD.fold' @X8 (F.+) 0 (V.SIMD.zipWith @X8 (F.*) a b)
 
 dotProdFX16 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdFX16 a b = V.SIMD.fold' @X16 (F.+) 0 (V.SIMD.zipWith @X16 (F.*) (F.*) a b)
+dotProdFX16 a b = V.SIMD.fold' @X16 (F.+) 0 (V.SIMD.zipWith @X16 (F.*) a b)
 
 dotProdFX32 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdFX32 a b = V.SIMD.fold' @X32 (F.+) 0 (V.SIMD.zipWith @X32 (F.*) (F.*) a b)
+dotProdFX32 a b = V.SIMD.fold' @X32 (F.+) 0 (V.SIMD.zipWith @X32 (F.*) a b)
 
 dotProdFX64 :: VU.Vector Float -> VU.Vector Float -> Float
-dotProdFX64 a b = V.SIMD.fold' @X64 (F.+) 0 (V.SIMD.zipWith @X64 (F.*) (F.*) a b)
+dotProdFX64 a b = V.SIMD.fold' @X64 (F.+) 0 (V.SIMD.zipWith @X64 (F.*) a b)
 
 dotProdVU_D :: VU.Vector Double -> VU.Vector Double -> Double
 dotProdVU_D a b = VU.foldl' (+) 0 (VU.zipWith (*) a b)
 
 dotProdX4_D :: VU.Vector Double -> VU.Vector Double -> Double
-dotProdX4_D a b = V.SIMD.fold' @X4 (+) 0 (V.SIMD.zipWith @X4 (*) (*) a b)
+dotProdX4_D a b = V.SIMD.fold' @X4 (+) 0 (V.SIMD.zipWith @X4 (*) a b)
 
 dotProdX8_D :: VU.Vector Double -> VU.Vector Double -> Double
-dotProdX8_D a b = V.SIMD.fold' @X8 (+) 0 (V.SIMD.zipWith @X8 (*) (*) a b)
+dotProdX8_D a b = V.SIMD.fold' @X8 (+) 0 (V.SIMD.zipWith @X8 (*) a b)
 
 dotProdX16_D :: VU.Vector Double -> VU.Vector Double -> Double
-dotProdX16_D a b = V.SIMD.fold' @X16 (+) 0 (V.SIMD.zipWith @X16 (*) (*) a b)
+dotProdX16_D a b = V.SIMD.fold' @X16 (+) 0 (V.SIMD.zipWith @X16 (*) a b)
 
 dotProdX32_D :: VU.Vector Double -> VU.Vector Double -> Double
-dotProdX32_D a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) (*) a b)
+dotProdX32_D a b = V.SIMD.fold' @X32 (+) 0 (V.SIMD.zipWith @X32 (*) a b)
 
 dotProdX64_D :: VU.Vector Double -> VU.Vector Double -> Double
-dotProdX64_D a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) (*) a b)
+dotProdX64_D a b = V.SIMD.fold' @X64 (+) 0 (V.SIMD.zipWith @X64 (*) a b)
 
 main :: IO ()
 main = defaultMain

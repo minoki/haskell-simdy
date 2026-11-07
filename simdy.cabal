@@ -109,6 +109,7 @@ library common
                       Data.Simdy.Internal.Bits
                       Data.Simdy.Internal.Class
                       Data.Simdy.Internal.Shuffle
+                      Data.Simdy.Internal.Stream
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.FMA
 
@@ -340,8 +341,9 @@ library
                       Data.Simdy.Pack
                       Data.Simdy.Shuffle
                       Data.Simdy.Split
+                      Data.Simdy.Stream
                       Data.Simdy.Tuple
-                      Data.Simdy.Vector.Bundle
+                      Data.Simdy.Vector.Stream
                       Data.Simdy.Vector.Class
                       Data.Simdy.Vector.Generic
                       Data.Simdy.Vector.Unboxed
