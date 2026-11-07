@@ -361,6 +361,40 @@ instance BooleanReduction Identity where
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
 
+class PackMask x where
+  maskToNatural :: x Bool -> Natural
+  maskFromNatural :: Natural -> x Bool
+  maskToInteger :: x Bool -> Integer
+  maskFromInteger :: Integer -> x Bool
+
+class PackMask x => PackMask8 x where
+  maskToWord8 :: x Bool -> Word8
+  maskFromWord8 :: Word8 -> x Bool
+
+class PackMask x => PackMask16 x where
+  maskToWord16 :: x Bool -> Word16
+  maskFromWord16 :: Word16 -> x Bool
+
+class PackMask x => PackMask32 x where
+  maskToWord32 :: x Bool -> Word32
+  maskFromWord32 :: Word32 -> x Bool
+
+class PackMask x => PackMask64 x where
+  maskToWord64 :: x Bool -> Word64
+  maskFromWord64 :: Word64 -> x Bool
+
+instance PackMask Identity where
+  maskToNatural (Identity True) = 1
+  maskToNatural (Identity False) = 0
+  maskFromNatural x = Identity (odd x)
+  maskToInteger (Identity True) = 1
+  maskToInteger (Identity False) = 0
+  maskFromInteger x = Identity (odd x)
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+
 infix 4 ==, /=, <, <=, >, >=
 
 -- | Lane-wise equality comparison, returning a 'Mask'.

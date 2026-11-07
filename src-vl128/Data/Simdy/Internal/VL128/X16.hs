@@ -74,6 +74,20 @@ instance BooleanReduction X16 where
   horizontalOrBool (MkBoolX16 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
+instance PackMask X16 where
+  maskToNatural (MkBoolX16 x) = fromIntegral x
+  maskFromNatural x = MkBoolX16 (fromIntegral x)
+  maskToInteger (MkBoolX16 x) = toInteger x
+  maskFromInteger x = MkBoolX16 (fromInteger x)
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+instance PackMask16 X16 where
+  maskToWord16 = coerce
+  maskFromWord16 = coerce
+  {-# INLINE maskToWord16 #-}
+  {-# INLINE maskFromWord16 #-}
 instance (AllLessThan indices 16, ShuffleMany Word16# indices) => UnaryShuffleT indices X16 Bool where
   unaryShuffle (MkBoolX16 (W16# x)) = MkBoolX16 (W16# (shuffleMany# @_ @_ @indices (\_ -> x)))
   {-# INLINE unaryShuffle #-}

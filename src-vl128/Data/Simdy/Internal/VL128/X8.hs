@@ -74,6 +74,20 @@ instance BooleanReduction X8 where
   horizontalOrBool (MkBoolX8 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
+instance PackMask X8 where
+  maskToNatural (MkBoolX8 x) = fromIntegral x
+  maskFromNatural x = MkBoolX8 (fromIntegral x)
+  maskToInteger (MkBoolX8 x) = toInteger x
+  maskFromInteger x = MkBoolX8 (fromInteger x)
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+instance PackMask8 X8 where
+  maskToWord8 = coerce
+  maskFromWord8 = coerce
+  {-# INLINE maskToWord8 #-}
+  {-# INLINE maskFromWord8 #-}
 instance (AllLessThan indices 8, ShuffleMany Word8# indices) => UnaryShuffleT indices X8 Bool where
   unaryShuffle (MkBoolX8 (W8# x)) = MkBoolX8 (W8# (shuffleMany# @_ @_ @indices (\_ -> x)))
   {-# INLINE unaryShuffle #-}

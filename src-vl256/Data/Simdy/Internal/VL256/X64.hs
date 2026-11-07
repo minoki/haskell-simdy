@@ -75,6 +75,20 @@ instance BooleanReduction X64 where
   horizontalOrBool (MkBoolX64 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
+instance PackMask X64 where
+  maskToNatural (MkBoolX64 x) = fromIntegral x
+  maskFromNatural x = MkBoolX64 (fromIntegral x)
+  maskToInteger (MkBoolX64 x) = toInteger x
+  maskFromInteger x = MkBoolX64 (fromInteger x)
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+instance PackMask64 X64 where
+  maskToWord64 = coerce
+  maskFromWord64 = coerce
+  {-# INLINE maskToWord64 #-}
+  {-# INLINE maskFromWord64 #-}
 instance (AllLessThan indices 64, ShuffleMany Word64# indices) => UnaryShuffleT indices X64 Bool where
   unaryShuffle (MkBoolX64 (W64# x)) = MkBoolX64 (W64# (shuffleMany# @_ @_ @indices (\_ -> x)))
   {-# INLINE unaryShuffle #-}

@@ -150,6 +150,20 @@ instance BooleanReduction X32 where
   horizontalOrBool (MkX32WithX8 cond0 cond1 cond2 cond3) = horizontalOrBool cond0 Prelude.|| horizontalOrBool cond1 Prelude.|| horizontalOrBool cond2 Prelude.|| horizontalOrBool cond3
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
+instance PackMask X32 where
+  maskToNatural (MkX32WithX8 (MkBoolX8 x0) (MkBoolX8 x1) (MkBoolX8 x2) (MkBoolX8 x3)) = (fromIntegral x0) .|. (fromIntegral x1 `unsafeShiftL` 8) .|. (fromIntegral x2 `unsafeShiftL` 16) .|. (fromIntegral x3 `unsafeShiftL` 24)
+  maskFromNatural x = MkX32WithX8 (MkBoolX8 (fromIntegral (x))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 8))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 16))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 24)))
+  maskToInteger (MkX32WithX8 (MkBoolX8 x0) (MkBoolX8 x1) (MkBoolX8 x2) (MkBoolX8 x3)) = (toInteger x0) .|. (toInteger x1 `unsafeShiftL` 8) .|. (toInteger x2 `unsafeShiftL` 16) .|. (toInteger x3 `unsafeShiftL` 24)
+  maskFromInteger x = MkX32WithX8 (MkBoolX8 (fromInteger (x))) (MkBoolX8 (fromInteger (x `unsafeShiftR` 8))) (MkBoolX8 (fromInteger (x `unsafeShiftR` 16))) (MkBoolX8 (fromInteger (x `unsafeShiftR` 24)))
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+instance PackMask32 X32 where
+  maskToWord32 (MkX32WithX8 (MkBoolX8 x0) (MkBoolX8 x1) (MkBoolX8 x2) (MkBoolX8 x3)) = (fromIntegral x0) .|. (fromIntegral x1 `unsafeShiftL` 8) .|. (fromIntegral x2 `unsafeShiftL` 16) .|. (fromIntegral x3 `unsafeShiftL` 24)
+  maskFromWord32 x = MkX32WithX8 (MkBoolX8 (fromIntegral (x))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 8))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 16))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 24)))
+  {-# INLINE maskToWord32 #-}
+  {-# INLINE maskFromWord32 #-}
 instance (i0 < 32, i1 < 32, i2 < 32, i3 < 32, i4 < 32, i5 < 32, i6 < 32, i7 < 32, i8 < 32, i9 < 32, i10 < 32, i11 < 32, i12 < 32, i13 < 32, i14 < 32, i15 < 32, i16 < 32, i17 < 32, i18 < 32, i19 < 32, i20 < 32, i21 < 32, i22 < 32, i23 < 32, i24 < 32, i25 < 32, i26 < 32, i27 < 32, i28 < 32, i29 < 32, i30 < 32, i31 < 32) => UnaryShuffleT '[i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31] X32 () where
   unaryShuffle _ = MkX32WithX8 MkUnitX8 MkUnitX8 MkUnitX8 MkUnitX8
   {-# INLINE unaryShuffle #-}

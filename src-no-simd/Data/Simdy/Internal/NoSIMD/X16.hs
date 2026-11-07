@@ -150,6 +150,20 @@ instance BooleanReduction X16 where
   horizontalOrBool (MkX16WithX8 cond0 cond1) = horizontalOrBool cond0 Prelude.|| horizontalOrBool cond1
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
+instance PackMask X16 where
+  maskToNatural (MkX16WithX8 (MkBoolX8 x0) (MkBoolX8 x1)) = (fromIntegral x0) .|. (fromIntegral x1 `unsafeShiftL` 8)
+  maskFromNatural x = MkX16WithX8 (MkBoolX8 (fromIntegral (x))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 8)))
+  maskToInteger (MkX16WithX8 (MkBoolX8 x0) (MkBoolX8 x1)) = (toInteger x0) .|. (toInteger x1 `unsafeShiftL` 8)
+  maskFromInteger x = MkX16WithX8 (MkBoolX8 (fromInteger (x))) (MkBoolX8 (fromInteger (x `unsafeShiftR` 8)))
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+instance PackMask16 X16 where
+  maskToWord16 (MkX16WithX8 (MkBoolX8 x0) (MkBoolX8 x1)) = (fromIntegral x0) .|. (fromIntegral x1 `unsafeShiftL` 8)
+  maskFromWord16 x = MkX16WithX8 (MkBoolX8 (fromIntegral (x))) (MkBoolX8 (fromIntegral (x `unsafeShiftR` 8)))
+  {-# INLINE maskToWord16 #-}
+  {-# INLINE maskFromWord16 #-}
 instance (i0 < 16, i1 < 16, i2 < 16, i3 < 16, i4 < 16, i5 < 16, i6 < 16, i7 < 16, i8 < 16, i9 < 16, i10 < 16, i11 < 16, i12 < 16, i13 < 16, i14 < 16, i15 < 16) => UnaryShuffleT '[i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15] X16 () where
   unaryShuffle _ = MkX16WithX8 MkUnitX8 MkUnitX8
   {-# INLINE unaryShuffle #-}

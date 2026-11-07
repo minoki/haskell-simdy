@@ -74,7 +74,35 @@ gen !vecCount !maxBits
     ,"  horizontalOrBool (MkBool" ++ tyCon ++ " !cond) = cond Prelude./= 0"
     ,"  {-# INLINE horizontalAndBool #-}"
     ,"  {-# INLINE horizontalOrBool #-}"
-    ,"instance (AllLessThan indices " ++ show vecCount ++ ", ShuffleMany Word" ++ show (max vecCount 8) ++ "# indices) => UnaryShuffleT indices " ++ tyCon ++ " Bool where"
+    ,"instance PackMask " ++ tyCon ++ " where"
+    ,"  maskToNatural (MkBool" ++ tyCon ++ " x) = fromIntegral x"
+    ,"  maskFromNatural x = MkBool" ++ tyCon ++ " (fromIntegral x" ++ (if vecCount < 8 then " .&. 0x" ++ showHex (2^vecCount-1) ")" else ")")
+    ,"  maskToInteger (MkBool" ++ tyCon ++ " x) = toInteger x"
+    ,"  maskFromInteger x = MkBool" ++ tyCon ++ " (fromInteger x" ++ (if vecCount < 8 then " .&. 0x" ++ showHex (2^vecCount-1) ")" else ")")
+    ,"  {-# INLINE maskToNatural #-}"
+    ,"  {-# INLINE maskFromNatural #-}"
+    ,"  {-# INLINE maskToInteger #-}"
+    ,"  {-# INLINE maskFromInteger #-}"
+    ] ++
+    (if vecCount < 8
+     then ["instance PackMask8 " ++ tyCon ++ " where"
+          ,"  maskToWord8 = coerce"
+          ,"  maskFromWord8 x = MkBool" ++ tyCon ++ " (x .&. 0x" ++ showHex (2^vecCount-1) ")"
+          ,"  {-# INLINE maskToWord8 #-}"
+          ,"  {-# INLINE maskFromWord8 #-}"
+          ]
+     else []
+    ) ++
+    (if vecCount == 8 || vecCount == 16 || vecCount == 32 || vecCount == 64
+     then ["instance PackMask" ++ show vecCount <+> tyCon ++ " where"
+          ,"  maskToWord" ++ show vecCount ++ " = coerce"
+          ,"  maskFromWord" ++ show vecCount ++ " = coerce"
+          ,"  {-# INLINE maskToWord" ++ show vecCount ++ " #-}"
+          ,"  {-# INLINE maskFromWord" ++ show vecCount ++ " #-}"
+          ]
+     else []
+    ) ++
+    ["instance (AllLessThan indices " ++ show vecCount ++ ", ShuffleMany Word" ++ show (max vecCount 8) ++ "# indices) => UnaryShuffleT indices " ++ tyCon ++ " Bool where"
     ,"  unaryShuffle (MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# x)) = MkBool" ++ tyCon ++ " (W" ++ show (max vecCount 8) ++ "# (shuffleMany# @_ @_ @indices (\\_ -> x)))"
     ,"  {-# INLINE unaryShuffle #-}"
     ,"instance (AllLessThan indices " ++ show (2 * vecCount) ++ ", ShuffleMany Word" ++ show (max vecCount 8) ++ "# indices) => BinaryShuffleT indices " ++ tyCon ++ " Bool where"
@@ -1181,7 +1209,26 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  horizontalOrBool (" ++ dataCon <+> spaceSep ["cond" ++ show i | i <- [0..n-1]] ++ ") = " ++ List.intercalate " Prelude.|| " ["horizontalOrBool cond" ++ show i | i <- [0..n-1]]
     ,"  {-# INLINE horizontalAndBool #-}"
     ,"  {-# INLINE horizontalOrBool #-}"
-    ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
+    ,"instance PackMask " ++ tyCon ++ " where"
+    ,"  maskToNatural (" ++ dataCon <+> spaceSep ["(MkBool" ++ baseTyCon ++ " x" ++ show i ++ ")" | i <- [0..n-1]] ++ ") = " ++ foldr1 (\a b -> a ++ " .|. " ++ b) ["(fromIntegral x" ++ show i ++ (if i > 0 then " `unsafeShiftL` " ++ shows (baseCount * i) ")" else ")") | i <- [0..n-1]]
+    ,"  maskFromNatural x = " ++ dataCon <+> spaceSep ["(MkBool" ++ baseTyCon ++ " (fromIntegral (x" ++ (if i > 0 then " `unsafeShiftR` " ++ shows (baseCount * i) ")" else ")") ++ (if baseCount < 8 then " .&. 0x" ++ showHex (2^baseCount-1) ")" else ")") ++ ")" | i <- [0..n-1]]
+    ,"  maskToInteger (" ++ dataCon <+> spaceSep ["(MkBool" ++ baseTyCon ++ " x" ++ show i ++ ")" | i <- [0..n-1]] ++ ") = " ++ foldr1 (\a b -> a ++ " .|. " ++ b) ["(toInteger x" ++ show i ++ (if i > 0 then " `unsafeShiftL` " ++ shows (baseCount * i) ")" else ")") | i <- [0..n-1]]
+    ,"  maskFromInteger x = " ++ dataCon <+> spaceSep ["(MkBool" ++ baseTyCon ++ " (fromInteger (x" ++ (if i > 0 then " `unsafeShiftR` " ++ shows (baseCount * i) ")" else ")") ++ (if baseCount < 8 then " .&. 0x" ++ showHex (2^baseCount-1) ")" else ")") ++ ")" | i <- [0..n-1]]
+    ,"  {-# INLINE maskToNatural #-}"
+    ,"  {-# INLINE maskFromNatural #-}"
+    ,"  {-# INLINE maskToInteger #-}"
+    ,"  {-# INLINE maskFromInteger #-}"
+    ] ++
+    (if vecCount == 8 || vecCount == 16 || vecCount == 32 || vecCount == 64
+     then ["instance PackMask" ++ show vecCount <+> tyCon ++ " where"
+          ,"  maskToWord" ++ show vecCount ++ " (" ++ dataCon <+> spaceSep ["(MkBool" ++ baseTyCon ++ " x" ++ show i ++ ")" | i <- [0..n-1]] ++ ") = " ++ foldr1 (\a b -> a ++ " .|. " ++ b) ["(fromIntegral x" ++ show i ++ (if i > 0 then " `unsafeShiftL` " ++ shows (baseCount * i) ")" else ")") | i <- [0..n-1]]
+          ,"  maskFromWord" ++ show vecCount ++ " x = " ++ dataCon <+> spaceSep ["(MkBool" ++ baseTyCon ++ " (fromIntegral (x" ++ (if i > 0 then " `unsafeShiftR` " ++ shows (baseCount * i) ")" else ")") ++ (if baseCount < 8 then " .&. 0x" ++ showHex (2^baseCount-1) ")" else ")") ++ ")" | i <- [0..n-1]]
+          ,"  {-# INLINE maskToWord" ++ show vecCount ++ " #-}"
+          ,"  {-# INLINE maskFromWord" ++ show vecCount ++ " #-}"
+          ]
+     else []
+    ) ++
+    ["instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show vecCount | i <- [0..vecCount-1]] ++ ") => UnaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
     ,"  unaryShuffle _ = " ++ dataCon <+> spaceSep (replicate n ("MkUnit" ++ baseTyCon))
     ,"  {-# INLINE unaryShuffle #-}"
     ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++ ") => BinaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"

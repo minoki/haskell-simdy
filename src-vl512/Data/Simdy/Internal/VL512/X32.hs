@@ -76,6 +76,20 @@ instance BooleanReduction X32 where
   horizontalOrBool (MkBoolX32 !cond) = cond Prelude./= 0
   {-# INLINE horizontalAndBool #-}
   {-# INLINE horizontalOrBool #-}
+instance PackMask X32 where
+  maskToNatural (MkBoolX32 x) = fromIntegral x
+  maskFromNatural x = MkBoolX32 (fromIntegral x)
+  maskToInteger (MkBoolX32 x) = toInteger x
+  maskFromInteger x = MkBoolX32 (fromInteger x)
+  {-# INLINE maskToNatural #-}
+  {-# INLINE maskFromNatural #-}
+  {-# INLINE maskToInteger #-}
+  {-# INLINE maskFromInteger #-}
+instance PackMask32 X32 where
+  maskToWord32 = coerce
+  maskFromWord32 = coerce
+  {-# INLINE maskToWord32 #-}
+  {-# INLINE maskFromWord32 #-}
 instance (AllLessThan indices 32, ShuffleMany Word32# indices) => UnaryShuffleT indices X32 Bool where
   unaryShuffle (MkBoolX32 (W32# x)) = MkBoolX32 (W32# (shuffleMany# @_ @_ @indices (\_ -> x)))
   {-# INLINE unaryShuffle #-}
