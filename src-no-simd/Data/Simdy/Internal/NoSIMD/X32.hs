@@ -14,6 +14,7 @@ module Data.Simdy.Internal.NoSIMD.X32 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
 import           Data.Monoid
 import           Data.Primitive (Prim)
 import           Data.Semigroup
@@ -112,6 +113,21 @@ instance LiftConstructor X8 => LiftConstructor X32 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance LiftMaybe X8 a => LiftMaybe X32 a where
+  mkMaybe (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (mkMaybe u0 v0) (mkMaybe u1 v1) (mkMaybe u2 v2) (mkMaybe u3 v3)
+  mkJust (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkJust u0) (mkJust u1) (mkJust u2) (mkJust u3)
+  mkNothing = MkX32WithX8 mkNothing mkNothing mkNothing mkNothing
+  isJust' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (isJust' u0) (isJust' u1) (isJust' u2) (isJust' u3)
+  isNothing' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (isNothing' u0) (isNothing' u1) (isNothing' u2) (isNothing' u3)
+  fromJust' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (fromJust' u0) (fromJust' u1) (fromJust' u2) (fromJust' u3)
+  fromMaybe' (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (fromMaybe' u0 v0) (fromMaybe' u1 v1) (fromMaybe' u2 v2) (fromMaybe' u3 v3)
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE mkNothing #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE isNothing' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
 instance Broadcast X8 a => Broadcast X32 a where
   broadcast !x = let !v = broadcast x in MkX32WithX8 v v v v
   {-# INLINE broadcast #-}
@@ -224,6 +240,12 @@ instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (Complex a) wh
   {-# INLINE unaryShuffle #-}
 instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (Complex a) where
   binaryShuffle u v = case deconstructComplex u of (x0, x1) -> case deconstructComplex v of (y0, y1) -> mkComplex (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
+  {-# INLINE binaryShuffle #-}
+instance (UnaryShuffleT indices X32 Bool, UnaryShuffleT indices X32 a, Default a, Broadcast X8 a, SelectableF X8 a) => UnaryShuffleT indices X32 (Maybe a) where
+  unaryShuffle v = mkMaybe (unaryShuffle @indices (isJust' v)) (unaryShuffle @indices (fromJust' v))
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X32 Bool, BinaryShuffleT indices X32 a, Default a, Broadcast X8 a, SelectableF X8 a) => BinaryShuffleT indices X32 (Maybe a) where
+  binaryShuffle u v = mkMaybe (binaryShuffle @indices (isJust' u) (isJust' v)) (binaryShuffle @indices (fromJust' u) (fromJust' v))
   {-# INLINE binaryShuffle #-}
 instance (UnaryShuffleT indices X32 a0, UnaryShuffleT indices X32 a1) => UnaryShuffleT indices X32 (a0, a1) where
   unaryShuffle v = case deconstructTuple2 v of (x0, x1) -> mkTuple2 (unaryShuffle @indices x0) (unaryShuffle @indices x1)

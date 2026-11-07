@@ -14,6 +14,7 @@ module Data.Simdy.Internal.NoSIMD.X64 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
 import           Data.Monoid
 import           Data.Primitive (Prim)
 import           Data.Semigroup
@@ -112,6 +113,21 @@ instance LiftConstructor X8 => LiftConstructor X64 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance LiftMaybe X8 a => LiftMaybe X64 a where
+  mkMaybe (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (mkMaybe u0 v0) (mkMaybe u1 v1) (mkMaybe u2 v2) (mkMaybe u3 v3) (mkMaybe u4 v4) (mkMaybe u5 v5) (mkMaybe u6 v6) (mkMaybe u7 v7)
+  mkJust (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkJust u0) (mkJust u1) (mkJust u2) (mkJust u3) (mkJust u4) (mkJust u5) (mkJust u6) (mkJust u7)
+  mkNothing = MkX64WithX8 mkNothing mkNothing mkNothing mkNothing mkNothing mkNothing mkNothing mkNothing
+  isJust' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (isJust' u0) (isJust' u1) (isJust' u2) (isJust' u3) (isJust' u4) (isJust' u5) (isJust' u6) (isJust' u7)
+  isNothing' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (isNothing' u0) (isNothing' u1) (isNothing' u2) (isNothing' u3) (isNothing' u4) (isNothing' u5) (isNothing' u6) (isNothing' u7)
+  fromJust' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (fromJust' u0) (fromJust' u1) (fromJust' u2) (fromJust' u3) (fromJust' u4) (fromJust' u5) (fromJust' u6) (fromJust' u7)
+  fromMaybe' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (fromMaybe' u0 v0) (fromMaybe' u1 v1) (fromMaybe' u2 v2) (fromMaybe' u3 v3) (fromMaybe' u4 v4) (fromMaybe' u5 v5) (fromMaybe' u6 v6) (fromMaybe' u7 v7)
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE mkNothing #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE isNothing' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
 instance Broadcast X8 a => Broadcast X64 a where
   broadcast !x = let !v = broadcast x in MkX64WithX8 v v v v v v v v
   {-# INLINE broadcast #-}
@@ -224,6 +240,12 @@ instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (Complex a) wh
   {-# INLINE unaryShuffle #-}
 instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (Complex a) where
   binaryShuffle u v = case deconstructComplex u of (x0, x1) -> case deconstructComplex v of (y0, y1) -> mkComplex (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
+  {-# INLINE binaryShuffle #-}
+instance (UnaryShuffleT indices X64 Bool, UnaryShuffleT indices X64 a, Default a, Broadcast X8 a, SelectableF X8 a) => UnaryShuffleT indices X64 (Maybe a) where
+  unaryShuffle v = mkMaybe (unaryShuffle @indices (isJust' v)) (unaryShuffle @indices (fromJust' v))
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X64 Bool, BinaryShuffleT indices X64 a, Default a, Broadcast X8 a, SelectableF X8 a) => BinaryShuffleT indices X64 (Maybe a) where
+  binaryShuffle u v = mkMaybe (binaryShuffle @indices (isJust' u) (isJust' v)) (binaryShuffle @indices (fromJust' u) (fromJust' v))
   {-# INLINE binaryShuffle #-}
 instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1) => UnaryShuffleT indices X64 (a0, a1) where
   unaryShuffle v = case deconstructTuple2 v of (x0, x1) -> mkTuple2 (unaryShuffle @indices x0) (unaryShuffle @indices x1)

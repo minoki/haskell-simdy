@@ -12,9 +12,11 @@
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
 import           Data.Coerce (coerce)
 import           Data.Complex (Complex (..))
+import           Data.Default (Default (def))
 import           Data.Functor.Identity (Identity (Identity, runIdentity))
 import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Kind (Constraint, Type)
+import           Data.Maybe (isJust, isNothing, fromMaybe)
 import           Data.Monoid (Product (..), Sum (..))
 import           Data.Primitive (Prim (..))
 import           Data.Proxy (Proxy)
@@ -111,6 +113,19 @@ class LiftConstructor f where
   mkComplex :: f a -> f a -> f (Complex a)
   deconstructComplex :: f (Complex a) -> (f a, f a)
 
+class LiftMaybe f a where
+  mkMaybe :: f Bool -> f a -> f (Maybe a)
+  mkJust :: f a -> f (Maybe a)
+  mkNothing :: Default a => f (Maybe a)
+  default mkNothing :: (Default a, Broadcast f Bool, Broadcast f a) => f (Maybe a)
+  mkNothing = mkMaybe (broadcast False) (broadcast def)
+  isJust' :: f (Maybe a) -> f Bool
+  isNothing' :: f (Maybe a) -> f Bool
+  default isNothing' :: Boolean (f Bool) => f (Maybe a) -> f Bool
+  isNothing' = complement . isJust'
+  fromJust' :: Default a => f (Maybe a) -> f a
+  fromMaybe' :: f a -> f (Maybe a) -> f a
+
 instance LiftConstructor Identity where
   mkTuple2 (Identity x0) (Identity x1) = Identity (x0, x1)
   mkTuple3 (Identity x0) (Identity x1) (Identity x2) = Identity (x0, x1, x2)
@@ -152,6 +167,23 @@ instance LiftConstructor Identity where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+
+instance LiftMaybe Identity a where
+  mkMaybe (Identity True) (Identity x) = Identity (Just x)
+  mkMaybe (Identity False) _ = Identity Nothing
+  mkNothing = Identity Nothing
+  mkJust (Identity x) = Identity (Just x)
+  isJust' (Identity x) = Identity (isJust x)
+  isNothing' (Identity x) = Identity (isNothing x)
+  fromJust' (Identity x) = Identity (fromMaybe def x)
+  fromMaybe' (Identity x) (Identity y) = Identity (fromMaybe x y)
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkNothing #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE isNothing' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
 
 pattern MkTuple2 :: LiftConstructor f => f a0 -> f a1 -> f (a0, a1)
 pattern MkTuple2 x0 x1 <- (deconstructTuple2 -> (x0, x1)) where
