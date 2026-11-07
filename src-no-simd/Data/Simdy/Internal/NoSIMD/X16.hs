@@ -14,10 +14,12 @@ module Data.Simdy.Internal.NoSIMD.X16 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
 import           Data.Monoid
 import           Data.Primitive (Prim)
 import           Data.Semigroup
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -112,6 +114,31 @@ instance LiftConstructor X8 => LiftConstructor X16 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance LiftMaybe X8 a => LiftMaybe X16 a where
+  mkMaybe (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (mkMaybe u0 v0) (mkMaybe u1 v1)
+  mkJust (MkX16WithX8 u0 u1) = MkX16WithX8 (mkJust u0) (mkJust u1)
+  mkNothing = MkX16WithX8 mkNothing mkNothing
+  isJust' (MkX16WithX8 u0 u1) = MkX16WithX8 (isJust' u0) (isJust' u1)
+  isNothing' (MkX16WithX8 u0 u1) = MkX16WithX8 (isNothing' u0) (isNothing' u1)
+  fromJust' (MkX16WithX8 u0 u1) = MkX16WithX8 (fromJust' u0) (fromJust' u1)
+  fromMaybe' (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (fromMaybe' u0 v0) (fromMaybe' u1 v1)
+  maybe' d f (MkX16WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1)) = select (MkX16WithX8 x0 x1) (f (MkX16WithX8 y0 y1)) d
+  fmapMaybe f (MkX16WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1)) = case f (MkX16WithX8 y0 y1) of MkX16WithX8 z0 z1 -> MkX16WithX8 (MkMaybeX8 x0 z0) (MkMaybeX8 x1 z1)
+  lift2Maybe f (MkX16WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1)) (MkX16WithX8 (MkMaybeX8 u0 v0) (MkMaybeX8 u1 v1)) = case f (MkX16WithX8 y0 y1) (MkX16WithX8 v0 v1) of MkX16WithX8 z0 z1 -> MkX16WithX8 (MkMaybeX8 (x0 B..&. u0) z0) (MkMaybeX8 (x1 B..&. u1) z1)
+  bindMaybe (MkX16WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1)) f = case f (MkX16WithX8 y0 y1) of MkX16WithX8 (MkMaybeX8 u0 v0) (MkMaybeX8 u1 v1) -> MkX16WithX8 (MkMaybeX8 (x0 B..&. u0) v0) (MkMaybeX8 (x1 B..&. u1) v1)
+  joinMaybe (MkX16WithX8 u0 u1) = MkX16WithX8 (joinMaybe u0) (joinMaybe u1)
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE mkNothing #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE isNothing' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 instance Broadcast X8 a => Broadcast X16 a where
   broadcast !x = let !v = broadcast x in MkX16WithX8 v v
   {-# INLINE broadcast #-}
@@ -224,6 +251,12 @@ instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (Complex a) wh
   {-# INLINE unaryShuffle #-}
 instance BinaryShuffleT indices X16 a => BinaryShuffleT indices X16 (Complex a) where
   binaryShuffle u v = case deconstructComplex u of (x0, x1) -> case deconstructComplex v of (y0, y1) -> mkComplex (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
+  {-# INLINE binaryShuffle #-}
+instance (UnaryShuffleT indices X16 Bool, UnaryShuffleT indices X16 a, Default a, Broadcast X8 a, SelectableF X8 a) => UnaryShuffleT indices X16 (Maybe a) where
+  unaryShuffle v = mkMaybe (unaryShuffle @indices (isJust' v)) (unaryShuffle @indices (fromJust' v))
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X16 Bool, BinaryShuffleT indices X16 a, Default a, Broadcast X8 a, SelectableF X8 a) => BinaryShuffleT indices X16 (Maybe a) where
+  binaryShuffle u v = mkMaybe (binaryShuffle @indices (isJust' u) (isJust' v)) (binaryShuffle @indices (fromJust' u) (fromJust' v))
   {-# INLINE binaryShuffle #-}
 instance (UnaryShuffleT indices X16 a0, UnaryShuffleT indices X16 a1) => UnaryShuffleT indices X16 (a0, a1) where
   unaryShuffle v = case deconstructTuple2 v of (x0, x1) -> mkTuple2 (unaryShuffle @indices x0) (unaryShuffle @indices x1)

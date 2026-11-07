@@ -14,10 +14,13 @@ module Data.Simdy.Internal.VL128.X32 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
+import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import qualified Data.Simdy.Fusible as F
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -1645,6 +1648,25 @@ instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (Complex a) wh
 instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (Complex a) where
   binaryShuffle (MkComplexX32 x y) (MkComplexX32 u v) = MkComplexX32 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
   {-# INLINE binaryShuffle #-}
+data instance X32 (Maybe a) = MkMaybeX32 !(X32 Bool) !(X32 a)
+instance (Default a, PackX32 X32 a) => PackX32 X32 (Maybe a) where
+  mkX32 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 = MkMaybeX32 (mkX32 (isJust x0) (isJust x1) (isJust x2) (isJust x3) (isJust x4) (isJust x5) (isJust x6) (isJust x7) (isJust x8) (isJust x9) (isJust x10) (isJust x11) (isJust x12) (isJust x13) (isJust x14) (isJust x15) (isJust x16) (isJust x17) (isJust x18) (isJust x19) (isJust x20) (isJust x21) (isJust x22) (isJust x23) (isJust x24) (isJust x25) (isJust x26) (isJust x27) (isJust x28) (isJust x29) (isJust x30) (isJust x31)) (mkX32 (fromMaybe def x0) (fromMaybe def x1) (fromMaybe def x2) (fromMaybe def x3) (fromMaybe def x4) (fromMaybe def x5) (fromMaybe def x6) (fromMaybe def x7) (fromMaybe def x8) (fromMaybe def x9) (fromMaybe def x10) (fromMaybe def x11) (fromMaybe def x12) (fromMaybe def x13) (fromMaybe def x14) (fromMaybe def x15) (fromMaybe def x16) (fromMaybe def x17) (fromMaybe def x18) (fromMaybe def x19) (fromMaybe def x20) (fromMaybe def x21) (fromMaybe def x22) (fromMaybe def x23) (fromMaybe def x24) (fromMaybe def x25) (fromMaybe def x26) (fromMaybe def x27) (fromMaybe def x28) (fromMaybe def x29) (fromMaybe def x30) (fromMaybe def x31))
+  unpackX32 (MkMaybeX32 x y) = case unpackX32 x of (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25, x26, x27, x28, x29, x30, x31) -> case unpackX32 y of (y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31) -> (if x0 then Just y0 else Nothing, if x1 then Just y1 else Nothing, if x2 then Just y2 else Nothing, if x3 then Just y3 else Nothing, if x4 then Just y4 else Nothing, if x5 then Just y5 else Nothing, if x6 then Just y6 else Nothing, if x7 then Just y7 else Nothing, if x8 then Just y8 else Nothing, if x9 then Just y9 else Nothing, if x10 then Just y10 else Nothing, if x11 then Just y11 else Nothing, if x12 then Just y12 else Nothing, if x13 then Just y13 else Nothing, if x14 then Just y14 else Nothing, if x15 then Just y15 else Nothing, if x16 then Just y16 else Nothing, if x17 then Just y17 else Nothing, if x18 then Just y18 else Nothing, if x19 then Just y19 else Nothing, if x20 then Just y20 else Nothing, if x21 then Just y21 else Nothing, if x22 then Just y22 else Nothing, if x23 then Just y23 else Nothing, if x24 then Just y24 else Nothing, if x25 then Just y25 else Nothing, if x26 then Just y26 else Nothing, if x27 then Just y27 else Nothing, if x28 then Just y28 else Nothing, if x29 then Just y29 else Nothing, if x30 then Just y30 else Nothing, if x31 then Just y31 else Nothing)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance (Default a, Broadcast X32 a) => Broadcast X32 (Maybe a) where
+  broadcast (Just x) = MkMaybeX32 (broadcast True) (broadcast x)
+  broadcast Nothing = MkMaybeX32 (broadcast False) (broadcast def)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 a => SelectableF X32 (Maybe a) where
+  selectF !cond (MkMaybeX32 x y) (MkMaybeX32 x' y') = MkMaybeX32 (selectF cond x x') (selectF cond y y')
+  {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X32 Bool, UnaryShuffleT indices X32 a) => UnaryShuffleT indices X32 (Maybe a) where
+  unaryShuffle (MkMaybeX32 x y) = MkMaybeX32 (unaryShuffle @indices x) (unaryShuffle @indices y)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X32 Bool, BinaryShuffleT indices X32 a) => BinaryShuffleT indices X32 (Maybe a) where
+  binaryShuffle (MkMaybeX32 x y) (MkMaybeX32 u v) = MkMaybeX32 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
+  {-# INLINE binaryShuffle #-}
 data instance X32 () = MkUnitX32
 instance PackX32 X32 () where
   mkX32 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ = MkUnitX32
@@ -1800,6 +1822,27 @@ instance LiftConstructor X32 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance (Broadcast X32 a, SelectableF X32 a) => LiftMaybe X32 a where
+  mkMaybe = MkMaybeX32
+  mkJust = MkMaybeX32 (broadcast True)
+  isJust' (MkMaybeX32 x _) = x
+  fromJust' (MkMaybeX32 _ y) = y
+  fromMaybe' x (MkMaybeX32 y z) = selectF y z x
+  maybe' d f (MkMaybeX32 x y) = select x (f y) d
+  fmapMaybe f (MkMaybeX32 x y) = MkMaybeX32 x (f y)
+  lift2Maybe f (MkMaybeX32 x y) (MkMaybeX32 u v) = MkMaybeX32 (x B..&. u) (f y v)
+  bindMaybe (MkMaybeX32 x y) f = case f y of MkMaybeX32 u v -> MkMaybeX32 (x B..&. u) v
+  joinMaybe (MkMaybeX32 x (MkMaybeX32 y z)) = MkMaybeX32 (x B..&. y) z
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 deriving via WrappedMulti X32 a instance SelectableF X32 a => Selectable (X32 a)
 deriving via WrappedMulti X32 a instance NumF X32 a => Num (X32 a)
 deriving via WrappedMulti X32 a instance FractionalF X32 a => Fractional (X32 a)

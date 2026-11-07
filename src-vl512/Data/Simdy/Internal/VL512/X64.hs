@@ -14,10 +14,13 @@ module Data.Simdy.Internal.VL512.X64 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
+import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import qualified Data.Simdy.Fusible as F
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -1001,6 +1004,25 @@ instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (Complex a) wh
 instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (Complex a) where
   binaryShuffle (MkComplexX64 x y) (MkComplexX64 u v) = MkComplexX64 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
   {-# INLINE binaryShuffle #-}
+data instance X64 (Maybe a) = MkMaybeX64 !(X64 Bool) !(X64 a)
+instance (Default a, PackX64 X64 a) => PackX64 X64 (Maybe a) where
+  mkX64 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63 = MkMaybeX64 (mkX64 (isJust x0) (isJust x1) (isJust x2) (isJust x3) (isJust x4) (isJust x5) (isJust x6) (isJust x7) (isJust x8) (isJust x9) (isJust x10) (isJust x11) (isJust x12) (isJust x13) (isJust x14) (isJust x15) (isJust x16) (isJust x17) (isJust x18) (isJust x19) (isJust x20) (isJust x21) (isJust x22) (isJust x23) (isJust x24) (isJust x25) (isJust x26) (isJust x27) (isJust x28) (isJust x29) (isJust x30) (isJust x31) (isJust x32) (isJust x33) (isJust x34) (isJust x35) (isJust x36) (isJust x37) (isJust x38) (isJust x39) (isJust x40) (isJust x41) (isJust x42) (isJust x43) (isJust x44) (isJust x45) (isJust x46) (isJust x47) (isJust x48) (isJust x49) (isJust x50) (isJust x51) (isJust x52) (isJust x53) (isJust x54) (isJust x55) (isJust x56) (isJust x57) (isJust x58) (isJust x59) (isJust x60) (isJust x61) (isJust x62) (isJust x63)) (mkX64 (fromMaybe def x0) (fromMaybe def x1) (fromMaybe def x2) (fromMaybe def x3) (fromMaybe def x4) (fromMaybe def x5) (fromMaybe def x6) (fromMaybe def x7) (fromMaybe def x8) (fromMaybe def x9) (fromMaybe def x10) (fromMaybe def x11) (fromMaybe def x12) (fromMaybe def x13) (fromMaybe def x14) (fromMaybe def x15) (fromMaybe def x16) (fromMaybe def x17) (fromMaybe def x18) (fromMaybe def x19) (fromMaybe def x20) (fromMaybe def x21) (fromMaybe def x22) (fromMaybe def x23) (fromMaybe def x24) (fromMaybe def x25) (fromMaybe def x26) (fromMaybe def x27) (fromMaybe def x28) (fromMaybe def x29) (fromMaybe def x30) (fromMaybe def x31) (fromMaybe def x32) (fromMaybe def x33) (fromMaybe def x34) (fromMaybe def x35) (fromMaybe def x36) (fromMaybe def x37) (fromMaybe def x38) (fromMaybe def x39) (fromMaybe def x40) (fromMaybe def x41) (fromMaybe def x42) (fromMaybe def x43) (fromMaybe def x44) (fromMaybe def x45) (fromMaybe def x46) (fromMaybe def x47) (fromMaybe def x48) (fromMaybe def x49) (fromMaybe def x50) (fromMaybe def x51) (fromMaybe def x52) (fromMaybe def x53) (fromMaybe def x54) (fromMaybe def x55) (fromMaybe def x56) (fromMaybe def x57) (fromMaybe def x58) (fromMaybe def x59) (fromMaybe def x60) (fromMaybe def x61) (fromMaybe def x62) (fromMaybe def x63))
+  unpackX64 (MkMaybeX64 x y) = case unpackX64 x of (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25, x26, x27, x28, x29, x30, x31, x32, x33, x34, x35, x36, x37, x38, x39, x40, x41, x42, x43, x44, x45, x46, x47, x48, x49, x50, x51, x52, x53, x54, x55, x56, x57, x58, x59, x60, x61, x62, x63) -> case unpackX64 y of (y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19, y20, y21, y22, y23, y24, y25, y26, y27, y28, y29, y30, y31, y32, y33, y34, y35, y36, y37, y38, y39, y40, y41, y42, y43, y44, y45, y46, y47, y48, y49, y50, y51, y52, y53, y54, y55, y56, y57, y58, y59, y60, y61, y62, y63) -> (if x0 then Just y0 else Nothing, if x1 then Just y1 else Nothing, if x2 then Just y2 else Nothing, if x3 then Just y3 else Nothing, if x4 then Just y4 else Nothing, if x5 then Just y5 else Nothing, if x6 then Just y6 else Nothing, if x7 then Just y7 else Nothing, if x8 then Just y8 else Nothing, if x9 then Just y9 else Nothing, if x10 then Just y10 else Nothing, if x11 then Just y11 else Nothing, if x12 then Just y12 else Nothing, if x13 then Just y13 else Nothing, if x14 then Just y14 else Nothing, if x15 then Just y15 else Nothing, if x16 then Just y16 else Nothing, if x17 then Just y17 else Nothing, if x18 then Just y18 else Nothing, if x19 then Just y19 else Nothing, if x20 then Just y20 else Nothing, if x21 then Just y21 else Nothing, if x22 then Just y22 else Nothing, if x23 then Just y23 else Nothing, if x24 then Just y24 else Nothing, if x25 then Just y25 else Nothing, if x26 then Just y26 else Nothing, if x27 then Just y27 else Nothing, if x28 then Just y28 else Nothing, if x29 then Just y29 else Nothing, if x30 then Just y30 else Nothing, if x31 then Just y31 else Nothing, if x32 then Just y32 else Nothing, if x33 then Just y33 else Nothing, if x34 then Just y34 else Nothing, if x35 then Just y35 else Nothing, if x36 then Just y36 else Nothing, if x37 then Just y37 else Nothing, if x38 then Just y38 else Nothing, if x39 then Just y39 else Nothing, if x40 then Just y40 else Nothing, if x41 then Just y41 else Nothing, if x42 then Just y42 else Nothing, if x43 then Just y43 else Nothing, if x44 then Just y44 else Nothing, if x45 then Just y45 else Nothing, if x46 then Just y46 else Nothing, if x47 then Just y47 else Nothing, if x48 then Just y48 else Nothing, if x49 then Just y49 else Nothing, if x50 then Just y50 else Nothing, if x51 then Just y51 else Nothing, if x52 then Just y52 else Nothing, if x53 then Just y53 else Nothing, if x54 then Just y54 else Nothing, if x55 then Just y55 else Nothing, if x56 then Just y56 else Nothing, if x57 then Just y57 else Nothing, if x58 then Just y58 else Nothing, if x59 then Just y59 else Nothing, if x60 then Just y60 else Nothing, if x61 then Just y61 else Nothing, if x62 then Just y62 else Nothing, if x63 then Just y63 else Nothing)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance (Default a, Broadcast X64 a) => Broadcast X64 (Maybe a) where
+  broadcast (Just x) = MkMaybeX64 (broadcast True) (broadcast x)
+  broadcast Nothing = MkMaybeX64 (broadcast False) (broadcast def)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 a => SelectableF X64 (Maybe a) where
+  selectF !cond (MkMaybeX64 x y) (MkMaybeX64 x' y') = MkMaybeX64 (selectF cond x x') (selectF cond y y')
+  {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X64 Bool, UnaryShuffleT indices X64 a) => UnaryShuffleT indices X64 (Maybe a) where
+  unaryShuffle (MkMaybeX64 x y) = MkMaybeX64 (unaryShuffle @indices x) (unaryShuffle @indices y)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X64 Bool, BinaryShuffleT indices X64 a) => BinaryShuffleT indices X64 (Maybe a) where
+  binaryShuffle (MkMaybeX64 x y) (MkMaybeX64 u v) = MkMaybeX64 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
+  {-# INLINE binaryShuffle #-}
 data instance X64 () = MkUnitX64
 instance PackX64 X64 () where
   mkX64 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ = MkUnitX64
@@ -1156,6 +1178,27 @@ instance LiftConstructor X64 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance (Broadcast X64 a, SelectableF X64 a) => LiftMaybe X64 a where
+  mkMaybe = MkMaybeX64
+  mkJust = MkMaybeX64 (broadcast True)
+  isJust' (MkMaybeX64 x _) = x
+  fromJust' (MkMaybeX64 _ y) = y
+  fromMaybe' x (MkMaybeX64 y z) = selectF y z x
+  maybe' d f (MkMaybeX64 x y) = select x (f y) d
+  fmapMaybe f (MkMaybeX64 x y) = MkMaybeX64 x (f y)
+  lift2Maybe f (MkMaybeX64 x y) (MkMaybeX64 u v) = MkMaybeX64 (x B..&. u) (f y v)
+  bindMaybe (MkMaybeX64 x y) f = case f y of MkMaybeX64 u v -> MkMaybeX64 (x B..&. u) v
+  joinMaybe (MkMaybeX64 x (MkMaybeX64 y z)) = MkMaybeX64 (x B..&. y) z
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 deriving via WrappedMulti X64 a instance SelectableF X64 a => Selectable (X64 a)
 deriving via WrappedMulti X64 a instance NumF X64 a => Num (X64 a)
 deriving via WrappedMulti X64 a instance FractionalF X64 a => Fractional (X64 a)

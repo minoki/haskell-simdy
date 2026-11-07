@@ -68,6 +68,7 @@ module Data.Simdy.Internal.VL256
 import           Data.Bits (Bits)
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default)
 import           Data.Functor.Identity
 import           Data.Int
 import           Data.Primitive
@@ -149,6 +150,7 @@ instance SIMDElement a => SIMDElement (Product a)
 instance SIMDElement a => SIMDElement (Min a)
 instance SIMDElement a => SIMDElement (Max a)
 instance SIMDElement a => SIMDElement (Complex a)
+instance (Default a, SIMDElement a) => SIMDElement (Maybe a)
 instance SIMDElement ()
 instance (SIMDElement a0, SIMDElement a1) => SIMDElement (a0, a1)
 instance (SIMDElement a0, SIMDElement a1, SIMDElement a2) => SIMDElement (a0, a1, a2)
@@ -411,6 +413,7 @@ class ( KnownSIMDLength f
       , forall a b c. (SIMDElement a, SIMDElement b, SIMDElement c) => LiftSIMD2 f a b c
       , forall a. MaskIsLiftedBool f a
       , forall a. SIMDElement a => Selectable (f a)
+      , forall a. SIMDElement a => LiftMaybe f a
       , forall a. SIMDEq a => Equatable (f a)
       , forall a. SIMDOrd a => Ordered (f a)
       , forall a. SIMDNum a => Num (f a)

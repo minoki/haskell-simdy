@@ -135,6 +135,26 @@ gen !vecCount !maxBits
        ,"  binaryShuffle (MkComplex" ++ tyCon ++ " x y) (MkComplex" ++ tyCon ++ " u v) = MkComplex" ++ tyCon ++ " (binaryShuffle @indices x u) (binaryShuffle @indices y v)"
        ,"  {-# INLINE binaryShuffle #-}"
        ]
+    ++ ["data instance " ++ tyCon ++ " (Maybe a) = MkMaybe" ++ tyCon ++ " !(" ++ tyCon ++ " Bool) !(" ++ tyCon ++ " a)"
+       ,"instance (Default a, Pack" ++ tyCon <+> tyCon ++ " a) => Pack" ++ tyCon <+> tyCon ++ " (Maybe a) where"
+       ,"  mk" ++ tyCon <+> spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ " = MkMaybe" ++ tyCon ++ " (mk" ++ tyCon <+> spaceSep ["(isJust x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ") (mk" ++ tyCon <+> spaceSep ["(fromMaybe def x" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ ")"
+       ,"  unpack" ++ tyCon ++ " (MkMaybe" ++ tyCon ++ " x y) = case unpack" ++ tyCon ++ " x of (" ++ commaSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") -> case unpack" ++ tyCon ++ " y of (" ++ commaSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") -> (" ++ commaSep ["if x" ++ show i ++ " then Just y" ++ show i ++ " else Nothing" | i <- [0..vecCount-1]] ++ ")"
+       ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
+       ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
+       ,"instance (Default a, Broadcast " ++ tyCon ++ " a) => Broadcast " ++ tyCon ++ " (Maybe a) where"
+       ,"  broadcast (Just x) = MkMaybe" ++ tyCon ++ " (broadcast True) (broadcast x)"
+       ,"  broadcast Nothing = MkMaybe" ++ tyCon ++ " (broadcast False) (broadcast def)"
+       ,"  {-# INLINE broadcast #-}"
+       ,"instance SelectableF " ++ tyCon ++ " a => SelectableF " ++ tyCon ++ " (Maybe a) where"
+       ,"  selectF !cond (MkMaybe" ++ tyCon ++ " x y) (MkMaybe" ++ tyCon ++ " x' y') = MkMaybe" ++ tyCon ++ " (selectF cond x x') (selectF cond y y')"
+       ,"  {-# INLINE selectF #-}"
+       ,"instance (UnaryShuffleT indices " ++ tyCon ++ " Bool, UnaryShuffleT indices " ++ tyCon ++ " a) => UnaryShuffleT indices " ++ tyCon ++ " (Maybe a) where"
+       ,"  unaryShuffle (MkMaybe" ++ tyCon ++ " x y) = MkMaybe" ++ tyCon ++ " (unaryShuffle @indices x) (unaryShuffle @indices y)"
+       ,"  {-# INLINE unaryShuffle #-}"
+       ,"instance (BinaryShuffleT indices " ++ tyCon ++ " Bool, BinaryShuffleT indices " ++ tyCon ++ " a) => BinaryShuffleT indices " ++ tyCon ++ " (Maybe a) where"
+       ,"  binaryShuffle (MkMaybe" ++ tyCon ++ " x y) (MkMaybe" ++ tyCon ++ " u v) = MkMaybe" ++ tyCon ++ " (binaryShuffle @indices x u) (binaryShuffle @indices y v)"
+       ,"  {-# INLINE binaryShuffle #-}"
+       ]
     {-
     ++ ["instance UnboxSIMD " ++ tyCon ++ " a => UnboxSIMD " ++ tyCon ++ " (Complex a) where"
        ,"  unsafeIndexUnboxedSIMD (VUB.V_Complex (VUB.V_2 _ u v)) !i = MkComplex" ++ tyCon ++ " (unsafeIndexUnboxedSIMD u i) (unsafeIndexUnboxedSIMD v i)"
@@ -183,6 +203,27 @@ gen !vecCount !maxBits
     ++ ["  {-# INLINE " ++ name ++ " #-}" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
     ++ ["  {-# INLINE mkComplex #-}"]
     ++ ["  {-# INLINE deconstructComplex #-}"]
+    ++ ["instance (Broadcast " ++ tyCon ++ " a, SelectableF " ++ tyCon ++ " a) => LiftMaybe " ++ tyCon ++ " a where"]
+    ++ ["  mkMaybe = MkMaybe" ++ tyCon]
+    ++ ["  mkJust = MkMaybe" ++ tyCon ++ " (broadcast True)"]
+    ++ ["  isJust' (MkMaybe" ++ tyCon ++ " x _) = x"]
+    ++ ["  fromJust' (MkMaybe" ++ tyCon ++ " _ y) = y"]
+    ++ ["  fromMaybe' x (MkMaybe" ++ tyCon ++ " y z) = selectF y z x"]
+    ++ ["  maybe' d f (MkMaybe" ++ tyCon ++ " x y) = select x (f y) d"]
+    ++ ["  fmapMaybe f (MkMaybe" ++ tyCon ++ " x y) = MkMaybe" ++ tyCon ++ " x (f y)"]
+    ++ ["  lift2Maybe f (MkMaybe" ++ tyCon ++ " x y) (MkMaybe" ++ tyCon ++ " u v) = MkMaybe" ++ tyCon ++ " (x B..&. u) (f y v)"]
+    ++ ["  bindMaybe (MkMaybe" ++ tyCon ++ " x y) f = case f y of MkMaybe" ++ tyCon ++ " u v -> MkMaybe" ++ tyCon ++ " (x B..&. u) v"]
+    ++ ["  joinMaybe (MkMaybe" ++ tyCon ++ " x (MkMaybe" ++ tyCon ++ " y z)) = MkMaybe" ++ tyCon ++ " (x B..&. y) z"]
+    ++ ["  {-# INLINE mkMaybe #-}"]
+    ++ ["  {-# INLINE mkJust #-}"]
+    ++ ["  {-# INLINE isJust' #-}"]
+    ++ ["  {-# INLINE fromJust' #-}"]
+    ++ ["  {-# INLINE fromMaybe' #-}"]
+    ++ ["  {-# INLINE maybe' #-}"]
+    ++ ["  {-# INLINE fmapMaybe #-}"]
+    ++ ["  {-# INLINE lift2Maybe #-}"]
+    ++ ["  {-# INLINE bindMaybe #-}"]
+    ++ ["  {-# INLINE joinMaybe #-}"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance SelectableF " ++ tyCon ++ " a => Selectable (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance NumF " ++ tyCon ++ " a => Num (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FractionalF " ++ tyCon ++ " a => Fractional (" ++ tyCon ++ " a)"]
@@ -830,6 +871,22 @@ genHalf !vecCount !maxBits
              ]
        )
     ++ (if vecCount == 2
+        then ["instance (Default a, SplitShortVector " ++ tyCon ++ " a) => SplitShortVector " ++ tyCon ++ " (Maybe a) where"
+             ,"  splitShortVector (MkMaybe" ++ tyCon ++ " x y) = case splitShortVector x of (Identity x0, Identity x1) -> case splitShortVector y of (Identity y0, Identity y1) -> (Identity (if x0 then Just y0 else Nothing), Identity (if x1 then Just y1 else Nothing))"
+             ,"  joinShortVector (Identity x0) (Identity x1) = MkMaybe" ++ tyCon ++ " (joinShortVector (Identity (isJust x0)) (Identity (isJust x1))) (joinShortVector (Identity (fromMaybe def x0)) (Identity (fromMaybe def x1)))"
+             ,"  {-# INLINE splitShortVector #-}"
+             ,"  {-# INLINE joinShortVector #-}"
+             ]
+        else
+          let halfTyCon = "X" ++ show (vecCount `quot` 2)
+          in ["instance SplitShortVector " ++ tyCon ++ " a => SplitShortVector " ++ tyCon ++ " (Maybe a) where"
+             ,"  splitShortVector (MkMaybe" ++ tyCon ++ " x y) = case splitShortVector x of (x0, x1) -> case splitShortVector y of (y0, y1) -> (MkMaybe" ++ halfTyCon ++ " x0 y0, MkMaybe" ++ halfTyCon ++ " x1 y1)"
+             ,"  joinShortVector (MkMaybe" ++ halfTyCon ++ " x0 y0) (MkMaybe" ++ halfTyCon ++ " x1 y1) = MkMaybe" ++ tyCon ++ " (joinShortVector x0 x1) (joinShortVector y0 y1)"
+             ,"  {-# INLINE splitShortVector #-}"
+             ,"  {-# INLINE joinShortVector #-}"
+             ]
+       )
+    ++ (if vecCount == 2
         then ["instance SplitShortVector " ++ tyCon ++ " () where"
              ,"  splitShortVector MkUnit" ++ tyCon ++ " = (Identity (), Identity ())"
              ,"  joinShortVector _ _ = MkUnit" ++ tyCon
@@ -978,10 +1035,13 @@ genFile moduleName primModules !n !maxBits
     ,"import           Data.Bits"
     ,"import           Data.Coerce (coerce)"
     ,"import           Data.Complex"
+    ,"import           Data.Default (Default (def))"
+    ,"import           Data.Maybe (isJust, fromMaybe)"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
     ,"import qualified Data.Simdy.Fusible as F"
     ,"import           Data.Simdy.Internal.Bits (Boolean, BitShift)"
+    ,"import qualified Data.Simdy.Internal.Bits as B"
     ,"import           Data.Simdy.Internal.Class"
     ,"import           Data.Simdy.Internal.Shuffle"
     ,"import           Data.Type.Ord (type (<))"
@@ -1014,10 +1074,12 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"import           Data.Bits"
     ,"import           Data.Coerce (coerce)"
     ,"import           Data.Complex"
+    ,"import           Data.Default (Default (def))"
     ,"import           Data.Monoid"
     ,"import           Data.Primitive (Prim)"
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Internal.Bits (Boolean, BitShift)"
+    ,"import qualified Data.Simdy.Internal.Bits as B"
     ,"import           Data.Simdy.Internal.Class"
     ,"import           Data.Simdy.Internal.Shuffle"
     ,"import           Data.Type.Ord (type (<))"
@@ -1080,8 +1142,34 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ++ ["  {-# INLINE mkTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE deconstructTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE " ++ name ++ " #-}" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
-    ++ ["  {-# INLINE mkComplex #-}"]
-    ++ ["  {-# INLINE deconstructComplex #-}"
+    ++ ["  {-# INLINE mkComplex #-}"
+    ,"  {-# INLINE deconstructComplex #-}"]
+    ++ ["instance LiftMaybe " ++ baseTyCon ++ " a => LiftMaybe " ++ tyCon ++ " a where"]
+    ++ [ liftBinary "mkMaybe"
+       , liftUnary "mkJust"
+       , liftNullary "mkNothing"
+       , liftUnary "isJust'"
+       , liftUnary "isNothing'"
+       , liftUnary "fromJust'"
+       , liftBinary "fromMaybe'"
+       , "  maybe' d f (" ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]] ++ ") = select (" ++ dataCon <+> spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (f (" ++ dataCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ")) d"
+       , "  fmapMaybe f (" ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]] ++ ") = case f (" ++ dataCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") of " ++ dataCon <+> spaceSep ["z" ++ show i | i <- [0..n-1]] ++ " -> " ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " x" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..n-1]]
+       , "  lift2Maybe f (" ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]] ++ ") = case f (" ++ dataCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") of " ++ dataCon <+> spaceSep ["z" ++ show i | i <- [0..n-1]] ++ " -> " ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " (x" ++ show i ++ " B..&. u" ++ show i ++ ") z" ++ show i ++ ")" | i <- [0..n-1]]
+       , "  bindMaybe (" ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]] ++ ") f = case f (" ++ dataCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") of " ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]] ++ " -> " ++ dataCon <+> spaceSep ["(MkMaybe" ++ baseTyCon ++ " (x" ++ show i ++ " B..&. u" ++ show i ++ ") v" ++ show i ++ ")" | i <- [0..n-1]]
+       , liftUnary "joinMaybe"
+       ]
+    ++ ["  {-# INLINE mkMaybe #-}"
+    ,"  {-# INLINE mkJust #-}"
+    ,"  {-# INLINE mkNothing #-}"
+    ,"  {-# INLINE isJust' #-}"
+    ,"  {-# INLINE isNothing' #-}"
+    ,"  {-# INLINE fromJust' #-}"
+    ,"  {-# INLINE fromMaybe' #-}"
+    ,"  {-# INLINE maybe' #-}"
+    ,"  {-# INLINE fmapMaybe #-}"
+    ,"  {-# INLINE lift2Maybe #-}"
+    ,"  {-# INLINE bindMaybe #-}"
+    ,"  {-# INLINE joinMaybe #-}"
     ,"instance Broadcast " ++ baseTyCon ++ " a => Broadcast " ++ tyCon ++ " a where"
     ,"  broadcast !x = let !v = broadcast x in " ++ dataCon ++ " " ++ spaceSep (replicate n "v")
     ,"  {-# INLINE broadcast #-}"
@@ -1134,6 +1222,13 @@ genReplicatedDef moduleName imports !vecCount !baseCount
        ,"  {-# INLINE unaryShuffle #-}"
        ,"instance BinaryShuffleT indices " ++ tyCon ++ " a => BinaryShuffleT indices " ++ tyCon ++ " (Complex a) where"
        ,"  binaryShuffle u v = case deconstructComplex u of (x0, x1) -> case deconstructComplex v of (y0, y1) -> mkComplex (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)"
+       ,"  {-# INLINE binaryShuffle #-}"
+       ]
+    ++ ["instance (UnaryShuffleT indices " ++ tyCon ++ " Bool, UnaryShuffleT indices " ++ tyCon ++ " a, Default a, Broadcast " ++ baseTyCon ++ " a, SelectableF " ++ baseTyCon ++ " a) => UnaryShuffleT indices " ++ tyCon ++ " (Maybe a) where"
+       ,"  unaryShuffle v = mkMaybe (unaryShuffle @indices (isJust' v)) (unaryShuffle @indices (fromJust' v))"
+       ,"  {-# INLINE unaryShuffle #-}"
+       ,"instance (BinaryShuffleT indices " ++ tyCon ++ " Bool, BinaryShuffleT indices " ++ tyCon ++ " a, Default a, Broadcast " ++ baseTyCon ++ " a, SelectableF " ++ baseTyCon ++ " a) => BinaryShuffleT indices " ++ tyCon ++ " (Maybe a) where"
+       ,"  binaryShuffle u v = mkMaybe (binaryShuffle @indices (isJust' u) (isJust' v)) (binaryShuffle @indices (fromJust' u) (fromJust' v))"
        ,"  {-# INLINE binaryShuffle #-}"
        ]
     ++ concat [["instance (" ++ commaSep ["UnaryShuffleT indices " ++ tyCon ++ " a" ++ show i | i <- [0..k-1]] ++ ") => UnaryShuffleT indices " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..k-1]] ++ ") where"
@@ -1225,6 +1320,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     n = vecCount `quot` baseCount
     dataCon = "Mk" ++ tyCon ++ "With" ++ baseTyCon
     gdataCon = "Mk" ++ gtyCon
+    liftNullary f = "  " ++ f ++ " = " ++ dataCon <+> spaceSep (replicate n f)
     liftUnary f = "  " ++ f ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(" ++ f ++ " u" ++ show i ++ ")" | i <- [0..n-1]]
     liftBinary f = "  " ++ f ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(" ++ f ++ " u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
     i_plus 0 = "i"
@@ -1240,6 +1336,8 @@ genHalfFile moduleName imports counts repCounts !maxBits
     ,"module " ++ moduleName ++ " where"
     ,"import           Data.Bits"
     ,"import           Data.Complex"
+    ,"import           Data.Default (Default (def))"
+    ,"import           Data.Maybe (isJust, fromMaybe)"
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Internal.Class"

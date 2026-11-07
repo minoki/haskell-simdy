@@ -14,10 +14,12 @@ module Data.Simdy.Internal.NoSIMD.X64 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
 import           Data.Monoid
 import           Data.Primitive (Prim)
 import           Data.Semigroup
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -112,6 +114,31 @@ instance LiftConstructor X8 => LiftConstructor X64 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance LiftMaybe X8 a => LiftMaybe X64 a where
+  mkMaybe (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (mkMaybe u0 v0) (mkMaybe u1 v1) (mkMaybe u2 v2) (mkMaybe u3 v3) (mkMaybe u4 v4) (mkMaybe u5 v5) (mkMaybe u6 v6) (mkMaybe u7 v7)
+  mkJust (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkJust u0) (mkJust u1) (mkJust u2) (mkJust u3) (mkJust u4) (mkJust u5) (mkJust u6) (mkJust u7)
+  mkNothing = MkX64WithX8 mkNothing mkNothing mkNothing mkNothing mkNothing mkNothing mkNothing mkNothing
+  isJust' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (isJust' u0) (isJust' u1) (isJust' u2) (isJust' u3) (isJust' u4) (isJust' u5) (isJust' u6) (isJust' u7)
+  isNothing' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (isNothing' u0) (isNothing' u1) (isNothing' u2) (isNothing' u3) (isNothing' u4) (isNothing' u5) (isNothing' u6) (isNothing' u7)
+  fromJust' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (fromJust' u0) (fromJust' u1) (fromJust' u2) (fromJust' u3) (fromJust' u4) (fromJust' u5) (fromJust' u6) (fromJust' u7)
+  fromMaybe' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (fromMaybe' u0 v0) (fromMaybe' u1 v1) (fromMaybe' u2 v2) (fromMaybe' u3 v3) (fromMaybe' u4 v4) (fromMaybe' u5 v5) (fromMaybe' u6 v6) (fromMaybe' u7 v7)
+  maybe' d f (MkX64WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1) (MkMaybeX8 x2 y2) (MkMaybeX8 x3 y3) (MkMaybeX8 x4 y4) (MkMaybeX8 x5 y5) (MkMaybeX8 x6 y6) (MkMaybeX8 x7 y7)) = select (MkX64WithX8 x0 x1 x2 x3 x4 x5 x6 x7) (f (MkX64WithX8 y0 y1 y2 y3 y4 y5 y6 y7)) d
+  fmapMaybe f (MkX64WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1) (MkMaybeX8 x2 y2) (MkMaybeX8 x3 y3) (MkMaybeX8 x4 y4) (MkMaybeX8 x5 y5) (MkMaybeX8 x6 y6) (MkMaybeX8 x7 y7)) = case f (MkX64WithX8 y0 y1 y2 y3 y4 y5 y6 y7) of MkX64WithX8 z0 z1 z2 z3 z4 z5 z6 z7 -> MkX64WithX8 (MkMaybeX8 x0 z0) (MkMaybeX8 x1 z1) (MkMaybeX8 x2 z2) (MkMaybeX8 x3 z3) (MkMaybeX8 x4 z4) (MkMaybeX8 x5 z5) (MkMaybeX8 x6 z6) (MkMaybeX8 x7 z7)
+  lift2Maybe f (MkX64WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1) (MkMaybeX8 x2 y2) (MkMaybeX8 x3 y3) (MkMaybeX8 x4 y4) (MkMaybeX8 x5 y5) (MkMaybeX8 x6 y6) (MkMaybeX8 x7 y7)) (MkX64WithX8 (MkMaybeX8 u0 v0) (MkMaybeX8 u1 v1) (MkMaybeX8 u2 v2) (MkMaybeX8 u3 v3) (MkMaybeX8 u4 v4) (MkMaybeX8 u5 v5) (MkMaybeX8 u6 v6) (MkMaybeX8 u7 v7)) = case f (MkX64WithX8 y0 y1 y2 y3 y4 y5 y6 y7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) of MkX64WithX8 z0 z1 z2 z3 z4 z5 z6 z7 -> MkX64WithX8 (MkMaybeX8 (x0 B..&. u0) z0) (MkMaybeX8 (x1 B..&. u1) z1) (MkMaybeX8 (x2 B..&. u2) z2) (MkMaybeX8 (x3 B..&. u3) z3) (MkMaybeX8 (x4 B..&. u4) z4) (MkMaybeX8 (x5 B..&. u5) z5) (MkMaybeX8 (x6 B..&. u6) z6) (MkMaybeX8 (x7 B..&. u7) z7)
+  bindMaybe (MkX64WithX8 (MkMaybeX8 x0 y0) (MkMaybeX8 x1 y1) (MkMaybeX8 x2 y2) (MkMaybeX8 x3 y3) (MkMaybeX8 x4 y4) (MkMaybeX8 x5 y5) (MkMaybeX8 x6 y6) (MkMaybeX8 x7 y7)) f = case f (MkX64WithX8 y0 y1 y2 y3 y4 y5 y6 y7) of MkX64WithX8 (MkMaybeX8 u0 v0) (MkMaybeX8 u1 v1) (MkMaybeX8 u2 v2) (MkMaybeX8 u3 v3) (MkMaybeX8 u4 v4) (MkMaybeX8 u5 v5) (MkMaybeX8 u6 v6) (MkMaybeX8 u7 v7) -> MkX64WithX8 (MkMaybeX8 (x0 B..&. u0) v0) (MkMaybeX8 (x1 B..&. u1) v1) (MkMaybeX8 (x2 B..&. u2) v2) (MkMaybeX8 (x3 B..&. u3) v3) (MkMaybeX8 (x4 B..&. u4) v4) (MkMaybeX8 (x5 B..&. u5) v5) (MkMaybeX8 (x6 B..&. u6) v6) (MkMaybeX8 (x7 B..&. u7) v7)
+  joinMaybe (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (joinMaybe u0) (joinMaybe u1) (joinMaybe u2) (joinMaybe u3) (joinMaybe u4) (joinMaybe u5) (joinMaybe u6) (joinMaybe u7)
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE mkNothing #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE isNothing' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 instance Broadcast X8 a => Broadcast X64 a where
   broadcast !x = let !v = broadcast x in MkX64WithX8 v v v v v v v v
   {-# INLINE broadcast #-}
@@ -224,6 +251,12 @@ instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (Complex a) wh
   {-# INLINE unaryShuffle #-}
 instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (Complex a) where
   binaryShuffle u v = case deconstructComplex u of (x0, x1) -> case deconstructComplex v of (y0, y1) -> mkComplex (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
+  {-# INLINE binaryShuffle #-}
+instance (UnaryShuffleT indices X64 Bool, UnaryShuffleT indices X64 a, Default a, Broadcast X8 a, SelectableF X8 a) => UnaryShuffleT indices X64 (Maybe a) where
+  unaryShuffle v = mkMaybe (unaryShuffle @indices (isJust' v)) (unaryShuffle @indices (fromJust' v))
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X64 Bool, BinaryShuffleT indices X64 a, Default a, Broadcast X8 a, SelectableF X8 a) => BinaryShuffleT indices X64 (Maybe a) where
+  binaryShuffle u v = mkMaybe (binaryShuffle @indices (isJust' u) (isJust' v)) (binaryShuffle @indices (fromJust' u) (fromJust' v))
   {-# INLINE binaryShuffle #-}
 instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1) => UnaryShuffleT indices X64 (a0, a1) where
   unaryShuffle v = case deconstructTuple2 v of (x0, x1) -> mkTuple2 (unaryShuffle @indices x0) (unaryShuffle @indices x1)

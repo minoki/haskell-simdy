@@ -14,10 +14,13 @@ module Data.Simdy.Internal.VL256.X8 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
+import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import qualified Data.Simdy.Fusible as F
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -1000,6 +1003,25 @@ instance UnaryShuffleT indices X8 a => UnaryShuffleT indices X8 (Complex a) wher
 instance BinaryShuffleT indices X8 a => BinaryShuffleT indices X8 (Complex a) where
   binaryShuffle (MkComplexX8 x y) (MkComplexX8 u v) = MkComplexX8 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
   {-# INLINE binaryShuffle #-}
+data instance X8 (Maybe a) = MkMaybeX8 !(X8 Bool) !(X8 a)
+instance (Default a, PackX8 X8 a) => PackX8 X8 (Maybe a) where
+  mkX8 x0 x1 x2 x3 x4 x5 x6 x7 = MkMaybeX8 (mkX8 (isJust x0) (isJust x1) (isJust x2) (isJust x3) (isJust x4) (isJust x5) (isJust x6) (isJust x7)) (mkX8 (fromMaybe def x0) (fromMaybe def x1) (fromMaybe def x2) (fromMaybe def x3) (fromMaybe def x4) (fromMaybe def x5) (fromMaybe def x6) (fromMaybe def x7))
+  unpackX8 (MkMaybeX8 x y) = case unpackX8 x of (x0, x1, x2, x3, x4, x5, x6, x7) -> case unpackX8 y of (y0, y1, y2, y3, y4, y5, y6, y7) -> (if x0 then Just y0 else Nothing, if x1 then Just y1 else Nothing, if x2 then Just y2 else Nothing, if x3 then Just y3 else Nothing, if x4 then Just y4 else Nothing, if x5 then Just y5 else Nothing, if x6 then Just y6 else Nothing, if x7 then Just y7 else Nothing)
+  {-# INLINE mkX8 #-}
+  {-# INLINE unpackX8 #-}
+instance (Default a, Broadcast X8 a) => Broadcast X8 (Maybe a) where
+  broadcast (Just x) = MkMaybeX8 (broadcast True) (broadcast x)
+  broadcast Nothing = MkMaybeX8 (broadcast False) (broadcast def)
+  {-# INLINE broadcast #-}
+instance SelectableF X8 a => SelectableF X8 (Maybe a) where
+  selectF !cond (MkMaybeX8 x y) (MkMaybeX8 x' y') = MkMaybeX8 (selectF cond x x') (selectF cond y y')
+  {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X8 Bool, UnaryShuffleT indices X8 a) => UnaryShuffleT indices X8 (Maybe a) where
+  unaryShuffle (MkMaybeX8 x y) = MkMaybeX8 (unaryShuffle @indices x) (unaryShuffle @indices y)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X8 Bool, BinaryShuffleT indices X8 a) => BinaryShuffleT indices X8 (Maybe a) where
+  binaryShuffle (MkMaybeX8 x y) (MkMaybeX8 u v) = MkMaybeX8 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
+  {-# INLINE binaryShuffle #-}
 data instance X8 () = MkUnitX8
 instance PackX8 X8 () where
   mkX8 _ _ _ _ _ _ _ _ = MkUnitX8
@@ -1155,6 +1177,27 @@ instance LiftConstructor X8 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance (Broadcast X8 a, SelectableF X8 a) => LiftMaybe X8 a where
+  mkMaybe = MkMaybeX8
+  mkJust = MkMaybeX8 (broadcast True)
+  isJust' (MkMaybeX8 x _) = x
+  fromJust' (MkMaybeX8 _ y) = y
+  fromMaybe' x (MkMaybeX8 y z) = selectF y z x
+  maybe' d f (MkMaybeX8 x y) = select x (f y) d
+  fmapMaybe f (MkMaybeX8 x y) = MkMaybeX8 x (f y)
+  lift2Maybe f (MkMaybeX8 x y) (MkMaybeX8 u v) = MkMaybeX8 (x B..&. u) (f y v)
+  bindMaybe (MkMaybeX8 x y) f = case f y of MkMaybeX8 u v -> MkMaybeX8 (x B..&. u) v
+  joinMaybe (MkMaybeX8 x (MkMaybeX8 y z)) = MkMaybeX8 (x B..&. y) z
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 deriving via WrappedMulti X8 a instance SelectableF X8 a => Selectable (X8 a)
 deriving via WrappedMulti X8 a instance NumF X8 a => Num (X8 a)
 deriving via WrappedMulti X8 a instance FractionalF X8 a => Fractional (X8 a)

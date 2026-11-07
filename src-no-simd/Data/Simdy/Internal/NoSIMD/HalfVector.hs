@@ -5,6 +5,8 @@
 module Data.Simdy.Internal.NoSIMD.HalfVector where
 import           Data.Bits
 import           Data.Complex
+import           Data.Default (Default (def))
+import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import           Data.Simdy.Internal.Class
@@ -95,6 +97,11 @@ instance SplitShortVector X2 a => SplitShortVector X2 (Max a) where
 instance SplitShortVector X2 a => SplitShortVector X2 (Complex a) where
   splitShortVector (MkComplexX2 s t) = case splitShortVector s of (Identity x0, Identity x1) -> case splitShortVector t of (Identity y0, Identity y1) -> (Identity (x0 :+ y0), Identity (x1 :+ y1))
   joinShortVector (Identity (x0 :+ y0)) (Identity (x1 :+ y1)) = MkComplexX2 (joinShortVector (Identity x0) (Identity x1)) (joinShortVector (Identity y0) (Identity y1))
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance (Default a, SplitShortVector X2 a) => SplitShortVector X2 (Maybe a) where
+  splitShortVector (MkMaybeX2 x y) = case splitShortVector x of (Identity x0, Identity x1) -> case splitShortVector y of (Identity y0, Identity y1) -> (Identity (if x0 then Just y0 else Nothing), Identity (if x1 then Just y1 else Nothing))
+  joinShortVector (Identity x0) (Identity x1) = MkMaybeX2 (joinShortVector (Identity (isJust x0)) (Identity (isJust x1))) (joinShortVector (Identity (fromMaybe def x0)) (Identity (fromMaybe def x1)))
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
 instance SplitShortVector X2 () where
@@ -206,6 +213,11 @@ instance SplitShortVector X4 a => SplitShortVector X4 (Complex a) where
   joinShortVector (MkComplexX2 x0 y0) (MkComplexX2 x1 y1) = MkComplexX4 (joinShortVector x0 x1) (joinShortVector y0 y1)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 a => SplitShortVector X4 (Maybe a) where
+  splitShortVector (MkMaybeX4 x y) = case splitShortVector x of (x0, x1) -> case splitShortVector y of (y0, y1) -> (MkMaybeX2 x0 y0, MkMaybeX2 x1 y1)
+  joinShortVector (MkMaybeX2 x0 y0) (MkMaybeX2 x1 y1) = MkMaybeX4 (joinShortVector x0 x1) (joinShortVector y0 y1)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
 instance SplitShortVector X4 () where
   splitShortVector MkUnitX4 = (MkUnitX2, MkUnitX2)
   joinShortVector MkUnitX2 MkUnitX2 = MkUnitX4
@@ -313,6 +325,11 @@ instance SplitShortVector X8 a => SplitShortVector X8 (Max a) where
 instance SplitShortVector X8 a => SplitShortVector X8 (Complex a) where
   splitShortVector (MkComplexX8 s t) = case splitShortVector s of (x0, x1) -> case splitShortVector t of (y0, y1) -> (MkComplexX4 x0 y0, MkComplexX4 x1 y1)
   joinShortVector (MkComplexX4 x0 y0) (MkComplexX4 x1 y1) = MkComplexX8 (joinShortVector x0 x1) (joinShortVector y0 y1)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (Maybe a) where
+  splitShortVector (MkMaybeX8 x y) = case splitShortVector x of (x0, x1) -> case splitShortVector y of (y0, y1) -> (MkMaybeX4 x0 y0, MkMaybeX4 x1 y1)
+  joinShortVector (MkMaybeX4 x0 y0) (MkMaybeX4 x1 y1) = MkMaybeX8 (joinShortVector x0 x1) (joinShortVector y0 y1)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
 instance SplitShortVector X8 () where

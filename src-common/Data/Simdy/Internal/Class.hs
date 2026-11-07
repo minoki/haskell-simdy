@@ -10,11 +10,14 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# OPTIONS_HADDOCK not-home #-}
 module Data.Simdy.Internal.Class (module M, module Data.Simdy.Internal.Class) where
+import           Control.Monad (join)
 import           Data.Coerce (coerce)
 import           Data.Complex (Complex (..))
+import           Data.Default (Default (def))
 import           Data.Functor.Identity (Identity (Identity, runIdentity))
 import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Kind (Constraint, Type)
+import           Data.Maybe (isJust, isNothing, fromMaybe)
 import           Data.Monoid (Product (..), Sum (..))
 import           Data.Primitive (Prim (..))
 import           Data.Proxy (Proxy)
@@ -111,6 +114,41 @@ class LiftConstructor f where
   mkComplex :: f a -> f a -> f (Complex a)
   deconstructComplex :: f (Complex a) -> (f a, f a)
 
+class LiftMaybe f a where
+  mkMaybe :: f Bool -> f a -> f (Maybe a)
+  mkJust :: f a -> f (Maybe a)
+  mkNothing :: Default a => f (Maybe a)
+  isJust' :: f (Maybe a) -> f Bool
+  isNothing' :: f (Maybe a) -> f Bool
+  fromJust' :: Default a => f (Maybe a) -> f a
+  fromMaybe' :: f a -> f (Maybe a) -> f a
+  maybe' :: Selectable (f b) => f b -> (f a -> f b) -> f (Maybe a) -> f b
+  fmapMaybe :: (f a -> f b) -> f (Maybe a) -> f (Maybe b)
+  lift2Maybe :: (f a -> f b -> f c) -> f (Maybe a) -> f (Maybe b) -> f (Maybe c)
+  bindMaybe :: f (Maybe a) -> (f a -> f (Maybe b)) -> f (Maybe b)
+  joinMaybe :: f (Maybe (Maybe a)) -> f (Maybe a)
+
+  default mkNothing :: (Default a, Broadcast f Bool, Broadcast f a) => f (Maybe a)
+  mkNothing = mkMaybe (broadcast False) (broadcast def)
+  default isNothing' :: Boolean (f Bool) => f (Maybe a) -> f Bool
+  isNothing' = complement . isJust'
+  {-
+  default maybe' :: (Default a, Selectable (f b), MaskIsLiftedBool f b) => f b -> (f a -> f b) -> f (Maybe a) -> f b
+  maybe' def' f m = select (isJust' m) (f (fromJust' m)) def'
+  default fmapMaybe :: (Default a, LiftMaybe f b) => (f a -> f b) -> f (Maybe a) -> f (Maybe b)
+  fmapMaybe f m = mkMaybe (isJust' m) (f (fromJust' m))
+  default lift2Maybe :: (Default a, Default b, Boolean (f Bool), LiftMaybe f b, LiftMaybe f c) => (f a -> f b -> f c) -> f (Maybe a) -> f (Maybe b) -> f (Maybe c)
+  lift2Maybe f x y = mkMaybe (isJust' x .&. isJust' y) (f (fromJust' x) (fromJust' y))
+  default bindMaybe :: (Default a, Default b, Boolean (f Bool), LiftMaybe f b) => f (Maybe a) -> (f a -> f (Maybe b)) -> f (Maybe b)
+  bindMaybe x f = let y = f (fromJust' x)
+                  in mkMaybe (isJust' x .&. isJust' y) (fromJust' y)
+  default joinMaybe :: (Default a, Boolean (f Bool), LiftMaybe f (Maybe a)) => f (Maybe (Maybe a)) -> f (Maybe a)
+  joinMaybe x = let y = fromJust' x
+                in mkMaybe (isJust' x .&. isJust' y) (fromJust' y)
+  -}
+  {-# INLINE mkNothing #-}
+  {-# INLINE isNothing' #-}
+
 instance LiftConstructor Identity where
   mkTuple2 (Identity x0) (Identity x1) = Identity (x0, x1)
   mkTuple3 (Identity x0) (Identity x1) (Identity x2) = Identity (x0, x1, x2)
@@ -152,6 +190,36 @@ instance LiftConstructor Identity where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+
+instance LiftMaybe Identity a where
+  mkMaybe (Identity True) (Identity x) = Identity (Just x)
+  mkMaybe (Identity False) _ = Identity Nothing
+  mkNothing = Identity Nothing
+  mkJust = coerce (Just @a)
+  isJust' = coerce (isJust @a)
+  isNothing' = coerce (isNothing @a)
+  fromJust' = coerce (fromMaybe @a def)
+  fromMaybe' = coerce (fromMaybe @a)
+  maybe' (Identity def') = coerce (maybe @_ @a def')
+  fmapMaybe :: forall b. (Identity a -> Identity b) -> Identity (Maybe a) -> Identity (Maybe b)
+  fmapMaybe = coerce (fmap @Maybe @a @b)
+  lift2Maybe :: forall b c. (Identity a -> Identity b -> Identity c) -> Identity (Maybe a) -> Identity (Maybe b) -> Identity (Maybe c)
+  lift2Maybe = coerce (liftA2 @Maybe @a @b @c)
+  bindMaybe :: forall b. Identity (Maybe a) -> (Identity a -> Identity (Maybe b)) -> Identity (Maybe b)
+  bindMaybe = coerce ((>>=) @Maybe @a @b)
+  joinMaybe = coerce (join @Maybe @a)
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkNothing #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE isNothing' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 
 pattern MkTuple2 :: LiftConstructor f => f a0 -> f a1 -> f (a0, a1)
 pattern MkTuple2 x0 x1 <- (deconstructTuple2 -> (x0, x1)) where

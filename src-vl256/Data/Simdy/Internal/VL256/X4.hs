@@ -14,10 +14,13 @@ module Data.Simdy.Internal.VL256.X4 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
+import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import qualified Data.Simdy.Fusible as F
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -1000,6 +1003,25 @@ instance UnaryShuffleT indices X4 a => UnaryShuffleT indices X4 (Complex a) wher
 instance BinaryShuffleT indices X4 a => BinaryShuffleT indices X4 (Complex a) where
   binaryShuffle (MkComplexX4 x y) (MkComplexX4 u v) = MkComplexX4 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
   {-# INLINE binaryShuffle #-}
+data instance X4 (Maybe a) = MkMaybeX4 !(X4 Bool) !(X4 a)
+instance (Default a, PackX4 X4 a) => PackX4 X4 (Maybe a) where
+  mkX4 x0 x1 x2 x3 = MkMaybeX4 (mkX4 (isJust x0) (isJust x1) (isJust x2) (isJust x3)) (mkX4 (fromMaybe def x0) (fromMaybe def x1) (fromMaybe def x2) (fromMaybe def x3))
+  unpackX4 (MkMaybeX4 x y) = case unpackX4 x of (x0, x1, x2, x3) -> case unpackX4 y of (y0, y1, y2, y3) -> (if x0 then Just y0 else Nothing, if x1 then Just y1 else Nothing, if x2 then Just y2 else Nothing, if x3 then Just y3 else Nothing)
+  {-# INLINE mkX4 #-}
+  {-# INLINE unpackX4 #-}
+instance (Default a, Broadcast X4 a) => Broadcast X4 (Maybe a) where
+  broadcast (Just x) = MkMaybeX4 (broadcast True) (broadcast x)
+  broadcast Nothing = MkMaybeX4 (broadcast False) (broadcast def)
+  {-# INLINE broadcast #-}
+instance SelectableF X4 a => SelectableF X4 (Maybe a) where
+  selectF !cond (MkMaybeX4 x y) (MkMaybeX4 x' y') = MkMaybeX4 (selectF cond x x') (selectF cond y y')
+  {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X4 Bool, UnaryShuffleT indices X4 a) => UnaryShuffleT indices X4 (Maybe a) where
+  unaryShuffle (MkMaybeX4 x y) = MkMaybeX4 (unaryShuffle @indices x) (unaryShuffle @indices y)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X4 Bool, BinaryShuffleT indices X4 a) => BinaryShuffleT indices X4 (Maybe a) where
+  binaryShuffle (MkMaybeX4 x y) (MkMaybeX4 u v) = MkMaybeX4 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
+  {-# INLINE binaryShuffle #-}
 data instance X4 () = MkUnitX4
 instance PackX4 X4 () where
   mkX4 _ _ _ _ = MkUnitX4
@@ -1155,6 +1177,27 @@ instance LiftConstructor X4 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance (Broadcast X4 a, SelectableF X4 a) => LiftMaybe X4 a where
+  mkMaybe = MkMaybeX4
+  mkJust = MkMaybeX4 (broadcast True)
+  isJust' (MkMaybeX4 x _) = x
+  fromJust' (MkMaybeX4 _ y) = y
+  fromMaybe' x (MkMaybeX4 y z) = selectF y z x
+  maybe' d f (MkMaybeX4 x y) = select x (f y) d
+  fmapMaybe f (MkMaybeX4 x y) = MkMaybeX4 x (f y)
+  lift2Maybe f (MkMaybeX4 x y) (MkMaybeX4 u v) = MkMaybeX4 (x B..&. u) (f y v)
+  bindMaybe (MkMaybeX4 x y) f = case f y of MkMaybeX4 u v -> MkMaybeX4 (x B..&. u) v
+  joinMaybe (MkMaybeX4 x (MkMaybeX4 y z)) = MkMaybeX4 (x B..&. y) z
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 deriving via WrappedMulti X4 a instance SelectableF X4 a => Selectable (X4 a)
 deriving via WrappedMulti X4 a instance NumF X4 a => Num (X4 a)
 deriving via WrappedMulti X4 a instance FractionalF X4 a => Fractional (X4 a)

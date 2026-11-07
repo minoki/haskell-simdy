@@ -14,10 +14,13 @@ module Data.Simdy.Internal.NoSIMD.X2 where
 import           Data.Bits
 import           Data.Coerce (coerce)
 import           Data.Complex
+import           Data.Default (Default (def))
+import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import qualified Data.Simdy.Fusible as F
 import           Data.Simdy.Internal.Bits (Boolean, BitShift)
+import qualified Data.Simdy.Internal.Bits as B
 import           Data.Simdy.Internal.Class
 import           Data.Simdy.Internal.Shuffle
 import           Data.Type.Ord (type (<))
@@ -1007,6 +1010,25 @@ instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Complex a) wher
 instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Complex a) where
   binaryShuffle (MkComplexX2 x y) (MkComplexX2 u v) = MkComplexX2 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
   {-# INLINE binaryShuffle #-}
+data instance X2 (Maybe a) = MkMaybeX2 !(X2 Bool) !(X2 a)
+instance (Default a, PackX2 X2 a) => PackX2 X2 (Maybe a) where
+  mkX2 x0 x1 = MkMaybeX2 (mkX2 (isJust x0) (isJust x1)) (mkX2 (fromMaybe def x0) (fromMaybe def x1))
+  unpackX2 (MkMaybeX2 x y) = case unpackX2 x of (x0, x1) -> case unpackX2 y of (y0, y1) -> (if x0 then Just y0 else Nothing, if x1 then Just y1 else Nothing)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance (Default a, Broadcast X2 a) => Broadcast X2 (Maybe a) where
+  broadcast (Just x) = MkMaybeX2 (broadcast True) (broadcast x)
+  broadcast Nothing = MkMaybeX2 (broadcast False) (broadcast def)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 a => SelectableF X2 (Maybe a) where
+  selectF !cond (MkMaybeX2 x y) (MkMaybeX2 x' y') = MkMaybeX2 (selectF cond x x') (selectF cond y y')
+  {-# INLINE selectF #-}
+instance (UnaryShuffleT indices X2 Bool, UnaryShuffleT indices X2 a) => UnaryShuffleT indices X2 (Maybe a) where
+  unaryShuffle (MkMaybeX2 x y) = MkMaybeX2 (unaryShuffle @indices x) (unaryShuffle @indices y)
+  {-# INLINE unaryShuffle #-}
+instance (BinaryShuffleT indices X2 Bool, BinaryShuffleT indices X2 a) => BinaryShuffleT indices X2 (Maybe a) where
+  binaryShuffle (MkMaybeX2 x y) (MkMaybeX2 u v) = MkMaybeX2 (binaryShuffle @indices x u) (binaryShuffle @indices y v)
+  {-# INLINE binaryShuffle #-}
 data instance X2 () = MkUnitX2
 instance PackX2 X2 () where
   mkX2 _ _ = MkUnitX2
@@ -1162,6 +1184,27 @@ instance LiftConstructor X2 where
   {-# INLINE getMax' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
+instance (Broadcast X2 a, SelectableF X2 a) => LiftMaybe X2 a where
+  mkMaybe = MkMaybeX2
+  mkJust = MkMaybeX2 (broadcast True)
+  isJust' (MkMaybeX2 x _) = x
+  fromJust' (MkMaybeX2 _ y) = y
+  fromMaybe' x (MkMaybeX2 y z) = selectF y z x
+  maybe' d f (MkMaybeX2 x y) = select x (f y) d
+  fmapMaybe f (MkMaybeX2 x y) = MkMaybeX2 x (f y)
+  lift2Maybe f (MkMaybeX2 x y) (MkMaybeX2 u v) = MkMaybeX2 (x B..&. u) (f y v)
+  bindMaybe (MkMaybeX2 x y) f = case f y of MkMaybeX2 u v -> MkMaybeX2 (x B..&. u) v
+  joinMaybe (MkMaybeX2 x (MkMaybeX2 y z)) = MkMaybeX2 (x B..&. y) z
+  {-# INLINE mkMaybe #-}
+  {-# INLINE mkJust #-}
+  {-# INLINE isJust' #-}
+  {-# INLINE fromJust' #-}
+  {-# INLINE fromMaybe' #-}
+  {-# INLINE maybe' #-}
+  {-# INLINE fmapMaybe #-}
+  {-# INLINE lift2Maybe #-}
+  {-# INLINE bindMaybe #-}
+  {-# INLINE joinMaybe #-}
 deriving via WrappedMulti X2 a instance SelectableF X2 a => Selectable (X2 a)
 deriving via WrappedMulti X2 a instance NumF X2 a => Num (X2 a)
 deriving via WrappedMulti X2 a instance FractionalF X2 a => Fractional (X2 a)
