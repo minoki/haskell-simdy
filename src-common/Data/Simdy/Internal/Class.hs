@@ -601,23 +601,7 @@ instance MinMax Double where
   minimumNumber = minimumNumberDouble
   maximumNumber = maximumNumberDouble
 
-class MinMaxF f a where
-  minF :: f a -> f a -> f a
-  maxF :: f a -> f a -> f a
-  minimumNumberF :: f a -> f a -> f a
-  maximumNumberF :: f a -> f a -> f a
-
-deriving instance MinMax a => MinMax (Identity a)
-
-instance MinMaxF f a => MinMax (WrappedMulti f a) where
-  min = coerce (minF @f @a)
-  max = coerce (maxF @f @a)
-  minimumNumber = coerce (minimumNumberF @f @a)
-  maximumNumber = coerce (maximumNumberF @f @a)
-  {-# INLINE min #-}
-  {-# INLINE max #-}
-  {-# INLINE minimumNumber #-}
-  {-# INLINE maximumNumber #-}
+deriving newtype instance MinMax a => MinMax (Identity a)
 
 -- | Lane-wise numeric operations on SIMD vectors.
 -- This is the internal (F-suffixed) version; standard 'Num' instances are
@@ -815,53 +799,6 @@ instance FloatingF f a => Floating (WrappedMulti f a) where
   {-# INLINE asinh #-}
   {-# INLINE acosh #-}
   {-# INLINE atanh #-}
-
--- | Lane-wise bitwise logic on SIMD vectors. Derives 'Boolean' via 'WrappedMulti'.
-class BooleanF f a where
-  andF :: f a -> f a -> f a
-  orF :: f a -> f a -> f a
-  xorF :: f a -> f a -> f a
-  complementF :: f a -> f a
-
--- | Lane-wise bitwise shifts on SIMD vectors. Derives 'BitShift' via 'WrappedMulti'.
-class BooleanF f a => BitShiftF f a where
-  shiftLF :: f a -> Int -> f a
-  unsafeShiftLF :: f a -> Int -> f a
-  shiftRF :: f a -> Int -> f a
-  unsafeShiftRF :: f a -> Int -> f a
-  unsafeShiftLF = shiftLF
-  unsafeShiftRF = shiftRF
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE unsafeShiftRF #-}
-
-instance BooleanF f a => Boolean (WrappedMulti f a) where
-  (.&.) = coerce (andF @f @a)
-  (.|.) = coerce (orF @f @a)
-  xor = coerce (xorF @f @a)
-  complement = coerce (complementF @f @a)
-  {-# INLINE (.&.) #-}
-  {-# INLINE (.|.) #-}
-  {-# INLINE xor #-}
-  {-# INLINE complement #-}
-
-instance BitShiftF f a => BitShift (WrappedMulti f a) where
-  shiftL = coerce (shiftLF @f @a)
-  unsafeShiftL = coerce (unsafeShiftLF @f @a)
-  shiftR = coerce (shiftRF @f @a)
-  unsafeShiftR = coerce (unsafeShiftRF @f @a)
-  {-# INLINE shiftL #-}
-  {-# INLINE unsafeShiftL #-}
-  {-# INLINE shiftR #-}
-  {-# INLINE unsafeShiftR #-}
-
--- | Lane-wise fused multiply-add on SIMD vectors.
-class NumF f a => FusedMultiplyAddF f a where
-  -- | @fusedMultiplyAddF x y z = x * y + z@ (single rounding per lane).
-  fusedMultiplyAddF :: f a -> f a -> f a -> f a
-
-instance FusedMultiplyAddF f a => FusedMultiplyAdd (WrappedMulti f a) where
-  fusedMultiplyAdd = coerce (fusedMultiplyAddF @f @a)
-  {-# INLINE fusedMultiplyAdd #-}
 
 class KnownSIMDLength f => EnumFromZero_ f a where
   enumFromZero :: f a

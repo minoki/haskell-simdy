@@ -266,12 +266,12 @@ instance SIMDFloating Double
 class ( Bits a
       , Boolean a
       , SIMDElement a
-      , BooleanF X2 a
-      , BooleanF X4 a
-      , BooleanF X8 a
-      , BooleanF X16 a
-      , BooleanF X32 a
-      , BooleanF X64 a
+      , Boolean (X2 a)
+      , Boolean (X4 a)
+      , Boolean (X8 a)
+      , Boolean (X16 a)
+      , Boolean (X32 a)
+      , Boolean (X64 a)
       ) => SIMDBoolean a
 instance SIMDBoolean Bool
 instance SIMDBoolean Int8
@@ -289,12 +289,12 @@ instance SIMDBoolean Word64
 class ( Bits a
       , BitShift a
       , SIMDBoolean a
-      , BitShiftF X2 a
-      , BitShiftF X4 a
-      , BitShiftF X8 a
-      , BitShiftF X16 a
-      , BitShiftF X32 a
-      , BitShiftF X64 a
+      , BitShift (X2 a)
+      , BitShift (X4 a)
+      , BitShift (X8 a)
+      , BitShift (X16 a)
+      , BitShift (X32 a)
+      , BitShift (X64 a)
       ) => SIMDBits a
 instance SIMDBits Int8
 instance SIMDBits Int16
@@ -310,12 +310,12 @@ instance SIMDBits Word64
 -- @('SIMD' f, 'SIMDMinMax' a)@ implies @'MinMax' (f a)@.
 class ( MinMax a
       , SIMDElement a
-      , MinMaxF X2 a
-      , MinMaxF X4 a
-      , MinMaxF X8 a
-      , MinMaxF X16 a
-      , MinMaxF X32 a
-      , MinMaxF X64 a
+      , MinMax (X2 a)
+      , MinMax (X4 a)
+      , MinMax (X8 a)
+      , MinMax (X16 a)
+      , MinMax (X32 a)
+      , MinMax (X64 a)
       ) => SIMDMinMax a
 instance SIMDMinMax Int8
 instance SIMDMinMax Int16
@@ -331,12 +331,12 @@ instance SIMDMinMax Double
 -- | Constraint for element types that support lane-wise FMA in SIMD vectors.
 class ( FusedMultiplyAdd a
       , SIMDNum a
-      , FusedMultiplyAddF X2 a
-      , FusedMultiplyAddF X4 a
-      , FusedMultiplyAddF X8 a
-      , FusedMultiplyAddF X16 a
-      , FusedMultiplyAddF X32 a
-      , FusedMultiplyAddF X64 a
+      , FusedMultiplyAdd (X2 a)
+      , FusedMultiplyAdd (X4 a)
+      , FusedMultiplyAdd (X8 a)
+      , FusedMultiplyAdd (X16 a)
+      , FusedMultiplyAdd (X32 a)
+      , FusedMultiplyAdd (X64 a)
       ) => SIMDFMA a
 instance HasFMA => SIMDFMA Float
 instance HasFMA => SIMDFMA Double

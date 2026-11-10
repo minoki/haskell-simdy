@@ -46,11 +46,11 @@ instance KnownSIMDLength X2 where
 newtype instance X2 Bool = MkBoolX2 Word8
 type instance Mask (X2 a) = X2 Bool
 instance MaskIsLiftedBool X2 a
-instance BooleanF X2 Bool where
-  andF (MkBoolX2 x) (MkBoolX2 y) = MkBoolX2 (x .&. y)
-  orF (MkBoolX2 x) (MkBoolX2 y) = MkBoolX2 (x .|. y)
-  xorF (MkBoolX2 x) (MkBoolX2 y) = MkBoolX2 (xor x y)
-  complementF (MkBoolX2 x) = MkBoolX2 (0x3 - x)
+instance Boolean (X2 Bool) where
+  (MkBoolX2 x) .&. (MkBoolX2 y) = MkBoolX2 (x .&. y)
+  (MkBoolX2 x) .|. (MkBoolX2 y) = MkBoolX2 (x .|. y)
+  xor (MkBoolX2 x) (MkBoolX2 y) = MkBoolX2 (xor x y)
+  complement (MkBoolX2 x) = MkBoolX2 (0x3 - x)
 deriving via WrappedMulti X2 a instance EquatableF X2 a => Equatable (X2 a)
 deriving via WrappedMulti X2 a instance OrderedF X2 a => Ordered (X2 a)
 instance PackX2 X2 a => IsList (X2 a) where
@@ -124,15 +124,15 @@ instance OrderedF X2 Float where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Float where
-  minF (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (minimumFloatX4# u0 v0)
-  maxF (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (maximumFloatX4# u0 v0)
-  minimumNumberF (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (minimumNumberFloatX4# u0 v0)
-  maximumNumberF (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (maximumNumberFloatX4# u0 v0)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Float) where
+  min (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (minimumFloatX4# u0 v0)
+  max (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (maximumFloatX4# u0 v0)
+  minimumNumber (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (minimumNumberFloatX4# u0 v0)
+  maximumNumber (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (maximumNumberFloatX4# u0 v0)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 negateX2Float :: X2 Float -> X2 Float
 negateX2Float (MkFloatX2 u0) = MkFloatX2 (negateFloatX4# u0)
 #if defined(USE_FMA)
@@ -157,12 +157,12 @@ instance FractionalF X2 Float where
 instance FloatingF X2 Float where
   sqrtF (MkFloatX2 u0) = MkFloatX2 (sqrtFloatX4# u0)
   {-# INLINE sqrtF #-}
-instance HasFMA => FusedMultiplyAddF X2 Float where
+instance HasFMA => FusedMultiplyAdd (X2 Float) where
 #if defined(USE_FMA)
-  fusedMultiplyAddF (MkFloatX2 u0) (MkFloatX2 v0) (MkFloatX2 w0) = MkFloatX2 (fmaddFloatX4# u0 v0 w0)
-  {-# INLINE fusedMultiplyAddF #-}
+  fusedMultiplyAdd (MkFloatX2 u0) (MkFloatX2 v0) (MkFloatX2 w0) = MkFloatX2 (fmaddFloatX4# u0 v0 w0)
+  {-# INLINE fusedMultiplyAdd #-}
 #else
-  fusedMultiplyAddF _ _ _ = fmaIsDisabled
+  fusedMultiplyAdd _ _ _ = fmaIsDisabled
 #endif
 #if defined(USE_FMA)
 {-# RULES
@@ -225,15 +225,15 @@ instance OrderedF X2 Double where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Double where
-  minF (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (minimumDoubleX2# u0 v0)
-  maxF (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (maximumDoubleX2# u0 v0)
-  minimumNumberF (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (minimumNumberDoubleX2# u0 v0)
-  maximumNumberF (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (maximumNumberDoubleX2# u0 v0)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Double) where
+  min (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (minimumDoubleX2# u0 v0)
+  max (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (maximumDoubleX2# u0 v0)
+  minimumNumber (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (minimumNumberDoubleX2# u0 v0)
+  maximumNumber (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (maximumNumberDoubleX2# u0 v0)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 negateX2Double :: X2 Double -> X2 Double
 negateX2Double (MkDoubleX2 u0) = MkDoubleX2 (negateDoubleX2# u0)
 #if defined(USE_FMA)
@@ -258,12 +258,12 @@ instance FractionalF X2 Double where
 instance FloatingF X2 Double where
   sqrtF (MkDoubleX2 u0) = MkDoubleX2 (sqrtDoubleX2# u0)
   {-# INLINE sqrtF #-}
-instance HasFMA => FusedMultiplyAddF X2 Double where
+instance HasFMA => FusedMultiplyAdd (X2 Double) where
 #if defined(USE_FMA)
-  fusedMultiplyAddF (MkDoubleX2 u0) (MkDoubleX2 v0) (MkDoubleX2 w0) = MkDoubleX2 (fmaddDoubleX2# u0 v0 w0)
-  {-# INLINE fusedMultiplyAddF #-}
+  fusedMultiplyAdd (MkDoubleX2 u0) (MkDoubleX2 v0) (MkDoubleX2 w0) = MkDoubleX2 (fmaddDoubleX2# u0 v0 w0)
+  {-# INLINE fusedMultiplyAdd #-}
 #else
-  fusedMultiplyAddF _ _ _ = fmaIsDisabled
+  fusedMultiplyAdd _ _ _ = fmaIsDisabled
 #endif
 #if defined(USE_FMA)
 {-# RULES
@@ -322,22 +322,22 @@ instance EquatableF X2 Int8 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Int8 where
   ltF (MkInt8X2 u0) (MkInt8X2 v0) = MkBoolX2 $ (fromIntegral (ltInt8X16# u0 v0 .&. 0x3))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int8 where
-  minF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (minInt8X16# u0 v0)
-  maxF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (maxInt8X16# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int8) where
+  min (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (minInt8X16# u0 v0)
+  max (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (maxInt8X16# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int8 where
   plusF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (plusInt8X16# u0 v0)
   minusF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (minusInt8X16# u0 v0)
@@ -349,20 +349,20 @@ instance NumF X2 Int8 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Int8 where
-  andF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (andInt8X16# u0 v0)
-  orF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (orInt8X16# u0 v0)
-  xorF (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (xorInt8X16# u0 v0)
-  complementF (MkInt8X2 u0) = MkInt8X2 (complementInt8X16# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int8 where
-  shiftLF (MkInt8X2 u0) (I# i) = MkInt8X2 (shiftLInt8X16# u0 i)
-  shiftRF (MkInt8X2 u0) (I# i) = MkInt8X2 (shiftRInt8X16# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Int8) where
+  (MkInt8X2 u0) .&. (MkInt8X2 v0) = MkInt8X2 (andInt8X16# u0 v0)
+  (MkInt8X2 u0) .|. (MkInt8X2 v0) = MkInt8X2 (orInt8X16# u0 v0)
+  xor (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (xorInt8X16# u0 v0)
+  complement (MkInt8X2 u0) = MkInt8X2 (complementInt8X16# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int8) where
+  shiftL (MkInt8X2 u0) (I# i) = MkInt8X2 (shiftLInt8X16# u0 i)
+  shiftR (MkInt8X2 u0) (I# i) = MkInt8X2 (shiftRInt8X16# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Int8 where
   enumFromZero = MkInt8X2 (packInt8X16# (# 0#Int8, 1#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8, 0#Int8 #))
   -- {-# INLINE enumFromZero #-}
@@ -401,22 +401,22 @@ instance EquatableF X2 Int16 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Int16 where
   ltF (MkInt16X2 u0) (MkInt16X2 v0) = MkBoolX2 $ (fromIntegral (ltInt16X8# u0 v0 .&. 0x3))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int16 where
-  minF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (minInt16X8# u0 v0)
-  maxF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (maxInt16X8# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int16) where
+  min (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (minInt16X8# u0 v0)
+  max (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (maxInt16X8# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int16 where
   plusF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (plusInt16X8# u0 v0)
   minusF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (minusInt16X8# u0 v0)
@@ -428,20 +428,20 @@ instance NumF X2 Int16 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Int16 where
-  andF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (andInt16X8# u0 v0)
-  orF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (orInt16X8# u0 v0)
-  xorF (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (xorInt16X8# u0 v0)
-  complementF (MkInt16X2 u0) = MkInt16X2 (complementInt16X8# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int16 where
-  shiftLF (MkInt16X2 u0) (I# i) = MkInt16X2 (shiftLInt16X8# u0 i)
-  shiftRF (MkInt16X2 u0) (I# i) = MkInt16X2 (shiftRInt16X8# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Int16) where
+  (MkInt16X2 u0) .&. (MkInt16X2 v0) = MkInt16X2 (andInt16X8# u0 v0)
+  (MkInt16X2 u0) .|. (MkInt16X2 v0) = MkInt16X2 (orInt16X8# u0 v0)
+  xor (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (xorInt16X8# u0 v0)
+  complement (MkInt16X2 u0) = MkInt16X2 (complementInt16X8# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int16) where
+  shiftL (MkInt16X2 u0) (I# i) = MkInt16X2 (shiftLInt16X8# u0 i)
+  shiftR (MkInt16X2 u0) (I# i) = MkInt16X2 (shiftRInt16X8# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Int16 where
   enumFromZero = MkInt16X2 (packInt16X8# (# 0#Int16, 1#Int16, 0#Int16, 0#Int16, 0#Int16, 0#Int16, 0#Int16, 0#Int16 #))
   -- {-# INLINE enumFromZero #-}
@@ -480,22 +480,22 @@ instance EquatableF X2 Int32 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Int32 where
   ltF (MkInt32X2 u0) (MkInt32X2 v0) = MkBoolX2 $ (fromIntegral (ltInt32X4# u0 v0 .&. 0x3))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int32 where
-  minF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (minInt32X4# u0 v0)
-  maxF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (maxInt32X4# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int32) where
+  min (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (minInt32X4# u0 v0)
+  max (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (maxInt32X4# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int32 where
   plusF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (plusInt32X4# u0 v0)
   minusF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (minusInt32X4# u0 v0)
@@ -507,20 +507,20 @@ instance NumF X2 Int32 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Int32 where
-  andF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (andInt32X4# u0 v0)
-  orF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (orInt32X4# u0 v0)
-  xorF (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (xorInt32X4# u0 v0)
-  complementF (MkInt32X2 u0) = MkInt32X2 (complementInt32X4# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int32 where
-  shiftLF (MkInt32X2 u0) (I# i) = MkInt32X2 (shiftLInt32X4# u0 i)
-  shiftRF (MkInt32X2 u0) (I# i) = MkInt32X2 (shiftRInt32X4# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Int32) where
+  (MkInt32X2 u0) .&. (MkInt32X2 v0) = MkInt32X2 (andInt32X4# u0 v0)
+  (MkInt32X2 u0) .|. (MkInt32X2 v0) = MkInt32X2 (orInt32X4# u0 v0)
+  xor (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (xorInt32X4# u0 v0)
+  complement (MkInt32X2 u0) = MkInt32X2 (complementInt32X4# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int32) where
+  shiftL (MkInt32X2 u0) (I# i) = MkInt32X2 (shiftLInt32X4# u0 i)
+  shiftR (MkInt32X2 u0) (I# i) = MkInt32X2 (shiftRInt32X4# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Int32 where
   enumFromZero = MkInt32X2 (packInt32X4# (# 0#Int32, 1#Int32, 0#Int32, 0#Int32 #))
   -- {-# INLINE enumFromZero #-}
@@ -559,22 +559,22 @@ instance EquatableF X2 Int64 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Int64 where
   ltF (MkInt64X2 u0) (MkInt64X2 v0) = MkBoolX2 $ (fromIntegral (ltInt64X2# u0 v0))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int64 where
-  minF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (minInt64X2# u0 v0)
-  maxF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (maxInt64X2# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int64) where
+  min (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (minInt64X2# u0 v0)
+  max (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (maxInt64X2# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int64 where
   plusF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (plusInt64X2# u0 v0)
   minusF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (minusInt64X2# u0 v0)
@@ -586,20 +586,20 @@ instance NumF X2 Int64 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Int64 where
-  andF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (andInt64X2# u0 v0)
-  orF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (orInt64X2# u0 v0)
-  xorF (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (xorInt64X2# u0 v0)
-  complementF (MkInt64X2 u0) = MkInt64X2 (complementInt64X2# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int64 where
-  shiftLF (MkInt64X2 u0) (I# i) = MkInt64X2 (shiftLInt64X2# u0 i)
-  shiftRF (MkInt64X2 u0) (I# i) = MkInt64X2 (shiftRInt64X2# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Int64) where
+  (MkInt64X2 u0) .&. (MkInt64X2 v0) = MkInt64X2 (andInt64X2# u0 v0)
+  (MkInt64X2 u0) .|. (MkInt64X2 v0) = MkInt64X2 (orInt64X2# u0 v0)
+  xor (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (xorInt64X2# u0 v0)
+  complement (MkInt64X2 u0) = MkInt64X2 (complementInt64X2# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int64) where
+  shiftL (MkInt64X2 u0) (I# i) = MkInt64X2 (shiftLInt64X2# u0 i)
+  shiftR (MkInt64X2 u0) (I# i) = MkInt64X2 (shiftRInt64X2# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Int64 where
   enumFromZero = MkInt64X2 (packInt64X2# (# 0#Int64, 1#Int64 #))
   -- {-# INLINE enumFromZero #-}
@@ -638,22 +638,22 @@ instance EquatableF X2 Word8 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Word8 where
   ltF (MkWord8X2 u0) (MkWord8X2 v0) = MkBoolX2 $ (fromIntegral (ltWord8X16# u0 v0 .&. 0x3))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word8 where
-  minF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (minWord8X16# u0 v0)
-  maxF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (maxWord8X16# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word8) where
+  min (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (minWord8X16# u0 v0)
+  max (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (maxWord8X16# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word8 where
   plusF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (plusWord8X16# u0 v0)
   minusF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (minusWord8X16# u0 v0)
@@ -664,20 +664,20 @@ instance NumF X2 Word8 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Word8 where
-  andF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (andWord8X16# u0 v0)
-  orF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (orWord8X16# u0 v0)
-  xorF (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (xorWord8X16# u0 v0)
-  complementF (MkWord8X2 u0) = MkWord8X2 (complementWord8X16# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word8 where
-  shiftLF (MkWord8X2 u0) (I# i) = MkWord8X2 (shiftLWord8X16# u0 i)
-  shiftRF (MkWord8X2 u0) (I# i) = MkWord8X2 (shiftRWord8X16# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Word8) where
+  (MkWord8X2 u0) .&. (MkWord8X2 v0) = MkWord8X2 (andWord8X16# u0 v0)
+  (MkWord8X2 u0) .|. (MkWord8X2 v0) = MkWord8X2 (orWord8X16# u0 v0)
+  xor (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (xorWord8X16# u0 v0)
+  complement (MkWord8X2 u0) = MkWord8X2 (complementWord8X16# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word8) where
+  shiftL (MkWord8X2 u0) (I# i) = MkWord8X2 (shiftLWord8X16# u0 i)
+  shiftR (MkWord8X2 u0) (I# i) = MkWord8X2 (shiftRWord8X16# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Word8 where
   enumFromZero = MkWord8X2 (packWord8X16# (# 0#Word8, 1#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8, 0#Word8 #))
   -- {-# INLINE enumFromZero #-}
@@ -716,22 +716,22 @@ instance EquatableF X2 Word16 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Word16 where
   ltF (MkWord16X2 u0) (MkWord16X2 v0) = MkBoolX2 $ (fromIntegral (ltWord16X8# u0 v0 .&. 0x3))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word16 where
-  minF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (minWord16X8# u0 v0)
-  maxF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (maxWord16X8# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word16) where
+  min (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (minWord16X8# u0 v0)
+  max (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (maxWord16X8# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word16 where
   plusF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (plusWord16X8# u0 v0)
   minusF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (minusWord16X8# u0 v0)
@@ -742,20 +742,20 @@ instance NumF X2 Word16 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Word16 where
-  andF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (andWord16X8# u0 v0)
-  orF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (orWord16X8# u0 v0)
-  xorF (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (xorWord16X8# u0 v0)
-  complementF (MkWord16X2 u0) = MkWord16X2 (complementWord16X8# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word16 where
-  shiftLF (MkWord16X2 u0) (I# i) = MkWord16X2 (shiftLWord16X8# u0 i)
-  shiftRF (MkWord16X2 u0) (I# i) = MkWord16X2 (shiftRWord16X8# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Word16) where
+  (MkWord16X2 u0) .&. (MkWord16X2 v0) = MkWord16X2 (andWord16X8# u0 v0)
+  (MkWord16X2 u0) .|. (MkWord16X2 v0) = MkWord16X2 (orWord16X8# u0 v0)
+  xor (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (xorWord16X8# u0 v0)
+  complement (MkWord16X2 u0) = MkWord16X2 (complementWord16X8# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word16) where
+  shiftL (MkWord16X2 u0) (I# i) = MkWord16X2 (shiftLWord16X8# u0 i)
+  shiftR (MkWord16X2 u0) (I# i) = MkWord16X2 (shiftRWord16X8# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Word16 where
   enumFromZero = MkWord16X2 (packWord16X8# (# 0#Word16, 1#Word16, 0#Word16, 0#Word16, 0#Word16, 0#Word16, 0#Word16, 0#Word16 #))
   -- {-# INLINE enumFromZero #-}
@@ -794,22 +794,22 @@ instance EquatableF X2 Word32 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Word32 where
   ltF (MkWord32X2 u0) (MkWord32X2 v0) = MkBoolX2 $ (fromIntegral (ltWord32X4# u0 v0 .&. 0x3))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word32 where
-  minF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (minWord32X4# u0 v0)
-  maxF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (maxWord32X4# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word32) where
+  min (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (minWord32X4# u0 v0)
+  max (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (maxWord32X4# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word32 where
   plusF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (plusWord32X4# u0 v0)
   minusF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (minusWord32X4# u0 v0)
@@ -820,20 +820,20 @@ instance NumF X2 Word32 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Word32 where
-  andF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (andWord32X4# u0 v0)
-  orF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (orWord32X4# u0 v0)
-  xorF (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (xorWord32X4# u0 v0)
-  complementF (MkWord32X2 u0) = MkWord32X2 (complementWord32X4# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word32 where
-  shiftLF (MkWord32X2 u0) (I# i) = MkWord32X2 (shiftLWord32X4# u0 i)
-  shiftRF (MkWord32X2 u0) (I# i) = MkWord32X2 (shiftRWord32X4# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Word32) where
+  (MkWord32X2 u0) .&. (MkWord32X2 v0) = MkWord32X2 (andWord32X4# u0 v0)
+  (MkWord32X2 u0) .|. (MkWord32X2 v0) = MkWord32X2 (orWord32X4# u0 v0)
+  xor (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (xorWord32X4# u0 v0)
+  complement (MkWord32X2 u0) = MkWord32X2 (complementWord32X4# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word32) where
+  shiftL (MkWord32X2 u0) (I# i) = MkWord32X2 (shiftLWord32X4# u0 i)
+  shiftR (MkWord32X2 u0) (I# i) = MkWord32X2 (shiftRWord32X4# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Word32 where
   enumFromZero = MkWord32X2 (packWord32X4# (# 0#Word32, 1#Word32, 0#Word32, 0#Word32 #))
   -- {-# INLINE enumFromZero #-}
@@ -872,22 +872,22 @@ instance EquatableF X2 Word64 where
   {-# INLINE eqF #-}
 instance OrderedF X2 Word64 where
   ltF (MkWord64X2 u0) (MkWord64X2 v0) = MkBoolX2 $ (fromIntegral (ltWord64X2# u0 v0))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word64 where
-  minF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (minWord64X2# u0 v0)
-  maxF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (maxWord64X2# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word64) where
+  min (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (minWord64X2# u0 v0)
+  max (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (maxWord64X2# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word64 where
   plusF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (plusWord64X2# u0 v0)
   minusF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (minusWord64X2# u0 v0)
@@ -898,20 +898,20 @@ instance NumF X2 Word64 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X2 Word64 where
-  andF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (andWord64X2# u0 v0)
-  orF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (orWord64X2# u0 v0)
-  xorF (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (xorWord64X2# u0 v0)
-  complementF (MkWord64X2 u0) = MkWord64X2 (complementWord64X2# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word64 where
-  shiftLF (MkWord64X2 u0) (I# i) = MkWord64X2 (shiftLWord64X2# u0 i)
-  shiftRF (MkWord64X2 u0) (I# i) = MkWord64X2 (shiftRWord64X2# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X2 Word64) where
+  (MkWord64X2 u0) .&. (MkWord64X2 v0) = MkWord64X2 (andWord64X2# u0 v0)
+  (MkWord64X2 u0) .|. (MkWord64X2 v0) = MkWord64X2 (orWord64X2# u0 v0)
+  xor (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (xorWord64X2# u0 v0)
+  complement (MkWord64X2 u0) = MkWord64X2 (complementWord64X2# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word64) where
+  shiftL (MkWord64X2 u0) (I# i) = MkWord64X2 (shiftLWord64X2# u0 i)
+  shiftR (MkWord64X2 u0) (I# i) = MkWord64X2 (shiftRWord64X2# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X2 Word64 where
   enumFromZero = MkWord64X2 (packWord64X2# (# 0#Word64, 1#Word64 #))
   -- {-# INLINE enumFromZero #-}
@@ -960,15 +960,15 @@ instance OrderedF X2 Int8 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int8 where
-  minF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int8) where
+  min (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (min x0 y0) (min x1 y1)
+  max (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int8 where
   plusF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (x0 - y0) (x1 - y1)
@@ -978,24 +978,24 @@ instance NumF X2 Int8 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Int8 where
-  andF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkInt8X2WithElems x0 x1) = MkInt8X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int8 where
-  shiftLF (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Int8) where
+  (MkInt8X2WithElems x0 x1) .&. (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkInt8X2WithElems x0 x1) .|. (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkInt8X2WithElems x0 x1) = MkInt8X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int8) where
+  shiftL (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkInt8X2WithElems x0 x1) !i = MkInt8X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Int8 where
   enumFromZero = MkInt8X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1040,15 +1040,15 @@ instance OrderedF X2 Int16 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int16 where
-  minF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int16) where
+  min (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (min x0 y0) (min x1 y1)
+  max (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int16 where
   plusF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (x0 - y0) (x1 - y1)
@@ -1058,24 +1058,24 @@ instance NumF X2 Int16 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Int16 where
-  andF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkInt16X2WithElems x0 x1) = MkInt16X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int16 where
-  shiftLF (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Int16) where
+  (MkInt16X2WithElems x0 x1) .&. (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkInt16X2WithElems x0 x1) .|. (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkInt16X2WithElems x0 x1) = MkInt16X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int16) where
+  shiftL (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkInt16X2WithElems x0 x1) !i = MkInt16X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Int16 where
   enumFromZero = MkInt16X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1120,15 +1120,15 @@ instance OrderedF X2 Int32 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int32 where
-  minF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int32) where
+  min (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (min x0 y0) (min x1 y1)
+  max (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int32 where
   plusF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (x0 - y0) (x1 - y1)
@@ -1138,24 +1138,24 @@ instance NumF X2 Int32 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Int32 where
-  andF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkInt32X2WithElems x0 x1) = MkInt32X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int32 where
-  shiftLF (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Int32) where
+  (MkInt32X2WithElems x0 x1) .&. (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkInt32X2WithElems x0 x1) .|. (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkInt32X2WithElems x0 x1) = MkInt32X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int32) where
+  shiftL (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkInt32X2WithElems x0 x1) !i = MkInt32X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Int32 where
   enumFromZero = MkInt32X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1200,15 +1200,15 @@ instance OrderedF X2 Int64 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Int64 where
-  minF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Int64) where
+  min (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (min x0 y0) (min x1 y1)
+  max (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Int64 where
   plusF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (x0 - y0) (x1 - y1)
@@ -1218,24 +1218,24 @@ instance NumF X2 Int64 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Int64 where
-  andF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkInt64X2WithElems x0 x1) = MkInt64X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Int64 where
-  shiftLF (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Int64) where
+  (MkInt64X2WithElems x0 x1) .&. (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkInt64X2WithElems x0 x1) .|. (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkInt64X2WithElems x0 x1) = MkInt64X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Int64) where
+  shiftL (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkInt64X2WithElems x0 x1) !i = MkInt64X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Int64 where
   enumFromZero = MkInt64X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1280,15 +1280,15 @@ instance OrderedF X2 Word8 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word8 where
-  minF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word8) where
+  min (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (min x0 y0) (min x1 y1)
+  max (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word8 where
   plusF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (x0 - y0) (x1 - y1)
@@ -1298,24 +1298,24 @@ instance NumF X2 Word8 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Word8 where
-  andF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkWord8X2WithElems x0 x1) = MkWord8X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word8 where
-  shiftLF (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Word8) where
+  (MkWord8X2WithElems x0 x1) .&. (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkWord8X2WithElems x0 x1) .|. (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkWord8X2WithElems x0 x1) = MkWord8X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word8) where
+  shiftL (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkWord8X2WithElems x0 x1) !i = MkWord8X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Word8 where
   enumFromZero = MkWord8X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1360,15 +1360,15 @@ instance OrderedF X2 Word16 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word16 where
-  minF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word16) where
+  min (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (min x0 y0) (min x1 y1)
+  max (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word16 where
   plusF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (x0 - y0) (x1 - y1)
@@ -1378,24 +1378,24 @@ instance NumF X2 Word16 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Word16 where
-  andF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkWord16X2WithElems x0 x1) = MkWord16X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word16 where
-  shiftLF (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Word16) where
+  (MkWord16X2WithElems x0 x1) .&. (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkWord16X2WithElems x0 x1) .|. (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkWord16X2WithElems x0 x1) = MkWord16X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word16) where
+  shiftL (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkWord16X2WithElems x0 x1) !i = MkWord16X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Word16 where
   enumFromZero = MkWord16X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1440,15 +1440,15 @@ instance OrderedF X2 Word32 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word32 where
-  minF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word32) where
+  min (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (min x0 y0) (min x1 y1)
+  max (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word32 where
   plusF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (x0 - y0) (x1 - y1)
@@ -1458,24 +1458,24 @@ instance NumF X2 Word32 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Word32 where
-  andF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkWord32X2WithElems x0 x1) = MkWord32X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word32 where
-  shiftLF (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Word32) where
+  (MkWord32X2WithElems x0 x1) .&. (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkWord32X2WithElems x0 x1) .|. (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkWord32X2WithElems x0 x1) = MkWord32X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word32) where
+  shiftL (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkWord32X2WithElems x0 x1) !i = MkWord32X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Word32 where
   enumFromZero = MkWord32X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1520,15 +1520,15 @@ instance OrderedF X2 Word64 where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X2 Word64 where
-  minF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (min x0 y0) (min x1 y1)
-  maxF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (max x0 y0) (max x1 y1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X2 Word64) where
+  min (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (min x0 y0) (min x1 y1)
+  max (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (max x0 y0) (max x1 y1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X2 Word64 where
   plusF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (x0 + y0) (x1 + y1)
   minusF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (x0 - y0) (x1 - y1)
@@ -1538,24 +1538,24 @@ instance NumF X2 Word64 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
-instance BooleanF X2 Word64 where
-  andF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (x0 .&. y0) (x1 .&. y1)
-  orF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (x0 .|. y0) (x1 .|. y1)
-  xorF (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (xor x0 y0) (xor x1 y1)
-  complementF (MkWord64X2WithElems x0 x1) = MkWord64X2WithElems (complement x0) (complement x1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X2 Word64 where
-  shiftLF (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (shiftL x0 i) (shiftL x1 i)
-  unsafeShiftLF (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
-  shiftRF (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (shiftR x0 i) (shiftR x1 i)
-  unsafeShiftRF (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
+instance Boolean (X2 Word64) where
+  (MkWord64X2WithElems x0 x1) .&. (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (x0 .&. y0) (x1 .&. y1)
+  (MkWord64X2WithElems x0 x1) .|. (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (x0 .|. y0) (x1 .|. y1)
+  xor (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (xor x0 y0) (xor x1 y1)
+  complement (MkWord64X2WithElems x0 x1) = MkWord64X2WithElems (complement x0) (complement x1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X2 Word64) where
+  shiftL (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (shiftL x0 i) (shiftL x1 i)
+  unsafeShiftL (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (unsafeShiftL x0 i) (unsafeShiftL x1 i)
+  shiftR (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (shiftR x0 i) (shiftR x1 i)
+  unsafeShiftR (MkWord64X2WithElems x0 x1) !i = MkWord64X2WithElems (unsafeShiftR x0 i) (unsafeShiftR x1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
 instance EnumFromZero_ X2 Word64 where
   enumFromZero = MkWord64X2WithElems 0 1
   -- {-# INLINE enumFromZero #-}
@@ -1861,7 +1861,3 @@ deriving via WrappedMulti X2 a instance SelectableF X2 a => Selectable (X2 a)
 deriving via WrappedMulti X2 a instance NumF X2 a => Num (X2 a)
 deriving via WrappedMulti X2 a instance FractionalF X2 a => Fractional (X2 a)
 deriving via WrappedMulti X2 a instance FloatingF X2 a => Floating (X2 a)
-deriving via WrappedMulti X2 a instance BooleanF X2 a => Boolean (X2 a)
-deriving via WrappedMulti X2 a instance BitShiftF X2 a => BitShift (X2 a)
-deriving via WrappedMulti X2 a instance MinMaxF X2 a => MinMax (X2 a)
-deriving via WrappedMulti X2 a instance FusedMultiplyAddF X2 a => FusedMultiplyAdd (X2 a)

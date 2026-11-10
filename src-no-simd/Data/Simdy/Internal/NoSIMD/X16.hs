@@ -52,10 +52,6 @@ deriving via WrappedMulti X16 a instance SelectableF X8 a => Selectable (X16 a)
 deriving via WrappedMulti X16 a instance (Num a, NumF X8 a, Broadcast X8 a, PackX8 X8 a) => Num (X16 a)
 deriving via WrappedMulti X16 a instance (Fractional a, FractionalF X8 a, Broadcast X8 a, PackX8 X8 a) => Fractional (X16 a)
 deriving via WrappedMulti X16 a instance (Floating a, FloatingF X8 a, Broadcast X8 a, PackX8 X8 a) => Floating (X16 a)
-deriving via WrappedMulti X16 a instance BooleanF X16 a => Boolean (X16 a)
-deriving via WrappedMulti X16 a instance BitShiftF X16 a => BitShift (X16 a)
-deriving via WrappedMulti X16 a instance MinMaxF X16 a => MinMax (X16 a)
-deriving via WrappedMulti X16 a instance (Num a, FusedMultiplyAddF X8 a, Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X16 a)
 instance PackX16 X16 a => IsList (X16 a) where
   type Item (X16 a) = a
   toList = toListX16
@@ -314,15 +310,15 @@ instance OrderedF X8 a => OrderedF X16 a where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X8 a => MinMaxF X16 a where
-  minF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (minF u0 v0) (minF u1 v1)
-  maxF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (maxF u0 v0) (maxF u1 v1)
-  minimumNumberF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (minimumNumberF u0 v0) (minimumNumberF u1 v1)
-  maximumNumberF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (maximumNumberF u0 v0) (maximumNumberF u1 v1)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X8 a) => MinMax (X16 a) where
+  min (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (min u0 v0) (min u1 v1)
+  max (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (max u0 v0) (max u1 v1)
+  minimumNumber (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (minimumNumber u0 v0) (minimumNumber u1 v1)
+  maximumNumber (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (maximumNumber u0 v0) (maximumNumber u1 v1)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance (Num a, NumF X8 a, Broadcast X8 a, PackX8 X8 a) => NumF X16 a where
   plusF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (plusF u0 v0) (plusF u1 v1)
   minusF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (minusF u0 v0) (minusF u1 v1)
@@ -340,27 +336,27 @@ instance (Fractional a, FractionalF X8 a, Broadcast X8 a, PackX8 X8 a) => Fracti
 instance (Floating a, FloatingF X8 a, Broadcast X8 a, PackX8 X8 a) => FloatingF X16 a where
   sqrtF (MkX16WithX8 u0 u1) = MkX16WithX8 (sqrtF u0) (sqrtF u1)
   {-# INLINE sqrtF #-}
-instance BooleanF X8 a => BooleanF X16 a where
-  andF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (andF u0 v0) (andF u1 v1)
-  orF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (orF u0 v0) (orF u1 v1)
-  xorF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (xorF u0 v0) (xorF u1 v1)
-  complementF (MkX16WithX8 u0 u1) = MkX16WithX8 (complementF u0) (complementF u1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X8 a => BitShiftF X16 a where
-  shiftLF (MkX16WithX8 u0 u1) !i = MkX16WithX8 (shiftLF u0 i) (shiftLF u1 i)
-  unsafeShiftLF (MkX16WithX8 u0 u1) !i = MkX16WithX8 (unsafeShiftLF u0 i) (unsafeShiftLF u1 i)
-  shiftRF (MkX16WithX8 u0 u1) !i = MkX16WithX8 (shiftRF u0 i) (shiftRF u1 i)
-  unsafeShiftRF (MkX16WithX8 u0 u1) !i = MkX16WithX8 (unsafeShiftRF u0 i) (unsafeShiftRF u1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
-instance (Num a, FusedMultiplyAddF X8 a, Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAddF X16 a where
-  fusedMultiplyAddF (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) (MkX16WithX8 w0 w1) = MkX16WithX8 (fusedMultiplyAddF u0 v0 w0) (fusedMultiplyAddF u1 v1 w1)
-  {-# INLINE fusedMultiplyAddF #-}
+instance Boolean (X8 a) => Boolean (X16 a) where
+  (.&.) (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 ((B..&.) u0 v0) ((B..&.) u1 v1)
+  (.|.) (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 ((B..|.) u0 v0) ((B..|.) u1 v1)
+  xor (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (B.xor u0 v0) (B.xor u1 v1)
+  complement (MkX16WithX8 u0 u1) = MkX16WithX8 (B.complement u0) (B.complement u1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X8 a) => BitShift (X16 a) where
+  shiftL (MkX16WithX8 u0 u1) !i = MkX16WithX8 (B.shiftL u0 i) (B.shiftL u1 i)
+  unsafeShiftL (MkX16WithX8 u0 u1) !i = MkX16WithX8 (B.unsafeShiftL u0 i) (B.unsafeShiftL u1 i)
+  shiftR (MkX16WithX8 u0 u1) !i = MkX16WithX8 (B.shiftR u0 i) (B.shiftR u1 i)
+  unsafeShiftR (MkX16WithX8 u0 u1) !i = MkX16WithX8 (B.unsafeShiftR u0 i) (B.unsafeShiftR u1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
+instance (Num a, NumF X8 a, FusedMultiplyAdd (X8 a), Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X16 a) where
+  fusedMultiplyAdd (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) (MkX16WithX8 w0 w1) = MkX16WithX8 (fusedMultiplyAdd u0 v0 w0) (fusedMultiplyAdd u1 v1 w1)
+  {-# INLINE fusedMultiplyAdd #-}
 instance (Num a, PackX8 X8 a) => EnumFromZero_ X16 a where
   enumFromZero = mkX16 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
   {-# INLINE enumFromZero #-}

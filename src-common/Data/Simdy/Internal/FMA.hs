@@ -1,4 +1,5 @@
 {-# LANGUAGE CPP #-}
+{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE MonoLocalBinds #-}
 {-# LANGUAGE MagicHash #-}
 -- |
@@ -8,7 +9,6 @@
 -- which is both faster and more accurate than separate multiply and add.
 module Data.Simdy.Internal.FMA where
 import           Data.Functor.Identity (Identity (Identity))
-import           Data.Coerce
 import           GHC.Exts
 
 -- | Types that support fused multiply-add: @fusedMultiplyAdd x y z = x * y + z@
@@ -143,6 +143,4 @@ instance FusedMultiplyAdd Double where
   fusedMultiplyAdd (D# x) (D# y) (D# z) = D# (fmaddDouble# x y z)
   {-# INLINE fusedMultiplyAdd #-}
 
-instance FusedMultiplyAdd a => FusedMultiplyAdd (Identity a) where
-  fusedMultiplyAdd = coerce (fusedMultiplyAdd @a)
-  {-# INLINE fusedMultiplyAdd #-}
+deriving newtype instance FusedMultiplyAdd a => FusedMultiplyAdd (Identity a)

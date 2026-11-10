@@ -52,10 +52,6 @@ deriving via WrappedMulti X64 a instance SelectableF X8 a => Selectable (X64 a)
 deriving via WrappedMulti X64 a instance (Num a, NumF X8 a, Broadcast X8 a, PackX8 X8 a) => Num (X64 a)
 deriving via WrappedMulti X64 a instance (Fractional a, FractionalF X8 a, Broadcast X8 a, PackX8 X8 a) => Fractional (X64 a)
 deriving via WrappedMulti X64 a instance (Floating a, FloatingF X8 a, Broadcast X8 a, PackX8 X8 a) => Floating (X64 a)
-deriving via WrappedMulti X64 a instance BooleanF X64 a => Boolean (X64 a)
-deriving via WrappedMulti X64 a instance BitShiftF X64 a => BitShift (X64 a)
-deriving via WrappedMulti X64 a instance MinMaxF X64 a => MinMax (X64 a)
-deriving via WrappedMulti X64 a instance (Num a, FusedMultiplyAddF X8 a, Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X64 a)
 instance PackX64 X64 a => IsList (X64 a) where
   type Item (X64 a) = a
   toList = toListX64
@@ -314,15 +310,15 @@ instance OrderedF X8 a => OrderedF X64 a where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X8 a => MinMaxF X64 a where
-  minF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (minF u0 v0) (minF u1 v1) (minF u2 v2) (minF u3 v3) (minF u4 v4) (minF u5 v5) (minF u6 v6) (minF u7 v7)
-  maxF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (maxF u0 v0) (maxF u1 v1) (maxF u2 v2) (maxF u3 v3) (maxF u4 v4) (maxF u5 v5) (maxF u6 v6) (maxF u7 v7)
-  minimumNumberF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (minimumNumberF u0 v0) (minimumNumberF u1 v1) (minimumNumberF u2 v2) (minimumNumberF u3 v3) (minimumNumberF u4 v4) (minimumNumberF u5 v5) (minimumNumberF u6 v6) (minimumNumberF u7 v7)
-  maximumNumberF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (maximumNumberF u0 v0) (maximumNumberF u1 v1) (maximumNumberF u2 v2) (maximumNumberF u3 v3) (maximumNumberF u4 v4) (maximumNumberF u5 v5) (maximumNumberF u6 v6) (maximumNumberF u7 v7)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X8 a) => MinMax (X64 a) where
+  min (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (min u0 v0) (min u1 v1) (min u2 v2) (min u3 v3) (min u4 v4) (min u5 v5) (min u6 v6) (min u7 v7)
+  max (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (max u0 v0) (max u1 v1) (max u2 v2) (max u3 v3) (max u4 v4) (max u5 v5) (max u6 v6) (max u7 v7)
+  minimumNumber (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (minimumNumber u0 v0) (minimumNumber u1 v1) (minimumNumber u2 v2) (minimumNumber u3 v3) (minimumNumber u4 v4) (minimumNumber u5 v5) (minimumNumber u6 v6) (minimumNumber u7 v7)
+  maximumNumber (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (maximumNumber u0 v0) (maximumNumber u1 v1) (maximumNumber u2 v2) (maximumNumber u3 v3) (maximumNumber u4 v4) (maximumNumber u5 v5) (maximumNumber u6 v6) (maximumNumber u7 v7)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance (Num a, NumF X8 a, Broadcast X8 a, PackX8 X8 a) => NumF X64 a where
   plusF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (plusF u0 v0) (plusF u1 v1) (plusF u2 v2) (plusF u3 v3) (plusF u4 v4) (plusF u5 v5) (plusF u6 v6) (plusF u7 v7)
   minusF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (minusF u0 v0) (minusF u1 v1) (minusF u2 v2) (minusF u3 v3) (minusF u4 v4) (minusF u5 v5) (minusF u6 v6) (minusF u7 v7)
@@ -340,27 +336,27 @@ instance (Fractional a, FractionalF X8 a, Broadcast X8 a, PackX8 X8 a) => Fracti
 instance (Floating a, FloatingF X8 a, Broadcast X8 a, PackX8 X8 a) => FloatingF X64 a where
   sqrtF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (sqrtF u0) (sqrtF u1) (sqrtF u2) (sqrtF u3) (sqrtF u4) (sqrtF u5) (sqrtF u6) (sqrtF u7)
   {-# INLINE sqrtF #-}
-instance BooleanF X8 a => BooleanF X64 a where
-  andF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (andF u0 v0) (andF u1 v1) (andF u2 v2) (andF u3 v3) (andF u4 v4) (andF u5 v5) (andF u6 v6) (andF u7 v7)
-  orF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (orF u0 v0) (orF u1 v1) (orF u2 v2) (orF u3 v3) (orF u4 v4) (orF u5 v5) (orF u6 v6) (orF u7 v7)
-  xorF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (xorF u0 v0) (xorF u1 v1) (xorF u2 v2) (xorF u3 v3) (xorF u4 v4) (xorF u5 v5) (xorF u6 v6) (xorF u7 v7)
-  complementF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (complementF u0) (complementF u1) (complementF u2) (complementF u3) (complementF u4) (complementF u5) (complementF u6) (complementF u7)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X8 a => BitShiftF X64 a where
-  shiftLF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (shiftLF u0 i) (shiftLF u1 i) (shiftLF u2 i) (shiftLF u3 i) (shiftLF u4 i) (shiftLF u5 i) (shiftLF u6 i) (shiftLF u7 i)
-  unsafeShiftLF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (unsafeShiftLF u0 i) (unsafeShiftLF u1 i) (unsafeShiftLF u2 i) (unsafeShiftLF u3 i) (unsafeShiftLF u4 i) (unsafeShiftLF u5 i) (unsafeShiftLF u6 i) (unsafeShiftLF u7 i)
-  shiftRF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (shiftRF u0 i) (shiftRF u1 i) (shiftRF u2 i) (shiftRF u3 i) (shiftRF u4 i) (shiftRF u5 i) (shiftRF u6 i) (shiftRF u7 i)
-  unsafeShiftRF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (unsafeShiftRF u0 i) (unsafeShiftRF u1 i) (unsafeShiftRF u2 i) (unsafeShiftRF u3 i) (unsafeShiftRF u4 i) (unsafeShiftRF u5 i) (unsafeShiftRF u6 i) (unsafeShiftRF u7 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
-instance (Num a, FusedMultiplyAddF X8 a, Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAddF X64 a where
-  fusedMultiplyAddF (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) (MkX64WithX8 w0 w1 w2 w3 w4 w5 w6 w7) = MkX64WithX8 (fusedMultiplyAddF u0 v0 w0) (fusedMultiplyAddF u1 v1 w1) (fusedMultiplyAddF u2 v2 w2) (fusedMultiplyAddF u3 v3 w3) (fusedMultiplyAddF u4 v4 w4) (fusedMultiplyAddF u5 v5 w5) (fusedMultiplyAddF u6 v6 w6) (fusedMultiplyAddF u7 v7 w7)
-  {-# INLINE fusedMultiplyAddF #-}
+instance Boolean (X8 a) => Boolean (X64 a) where
+  (.&.) (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 ((B..&.) u0 v0) ((B..&.) u1 v1) ((B..&.) u2 v2) ((B..&.) u3 v3) ((B..&.) u4 v4) ((B..&.) u5 v5) ((B..&.) u6 v6) ((B..&.) u7 v7)
+  (.|.) (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 ((B..|.) u0 v0) ((B..|.) u1 v1) ((B..|.) u2 v2) ((B..|.) u3 v3) ((B..|.) u4 v4) ((B..|.) u5 v5) ((B..|.) u6 v6) ((B..|.) u7 v7)
+  xor (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (B.xor u0 v0) (B.xor u1 v1) (B.xor u2 v2) (B.xor u3 v3) (B.xor u4 v4) (B.xor u5 v5) (B.xor u6 v6) (B.xor u7 v7)
+  complement (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (B.complement u0) (B.complement u1) (B.complement u2) (B.complement u3) (B.complement u4) (B.complement u5) (B.complement u6) (B.complement u7)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X8 a) => BitShift (X64 a) where
+  shiftL (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (B.shiftL u0 i) (B.shiftL u1 i) (B.shiftL u2 i) (B.shiftL u3 i) (B.shiftL u4 i) (B.shiftL u5 i) (B.shiftL u6 i) (B.shiftL u7 i)
+  unsafeShiftL (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (B.unsafeShiftL u0 i) (B.unsafeShiftL u1 i) (B.unsafeShiftL u2 i) (B.unsafeShiftL u3 i) (B.unsafeShiftL u4 i) (B.unsafeShiftL u5 i) (B.unsafeShiftL u6 i) (B.unsafeShiftL u7 i)
+  shiftR (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (B.shiftR u0 i) (B.shiftR u1 i) (B.shiftR u2 i) (B.shiftR u3 i) (B.shiftR u4 i) (B.shiftR u5 i) (B.shiftR u6 i) (B.shiftR u7 i)
+  unsafeShiftR (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) !i = MkX64WithX8 (B.unsafeShiftR u0 i) (B.unsafeShiftR u1 i) (B.unsafeShiftR u2 i) (B.unsafeShiftR u3 i) (B.unsafeShiftR u4 i) (B.unsafeShiftR u5 i) (B.unsafeShiftR u6 i) (B.unsafeShiftR u7 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
+instance (Num a, NumF X8 a, FusedMultiplyAdd (X8 a), Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X64 a) where
+  fusedMultiplyAdd (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) (MkX64WithX8 w0 w1 w2 w3 w4 w5 w6 w7) = MkX64WithX8 (fusedMultiplyAdd u0 v0 w0) (fusedMultiplyAdd u1 v1 w1) (fusedMultiplyAdd u2 v2 w2) (fusedMultiplyAdd u3 v3 w3) (fusedMultiplyAdd u4 v4 w4) (fusedMultiplyAdd u5 v5 w5) (fusedMultiplyAdd u6 v6 w6) (fusedMultiplyAdd u7 v7 w7)
+  {-# INLINE fusedMultiplyAdd #-}
 instance (Num a, PackX8 X8 a) => EnumFromZero_ X64 a where
   enumFromZero = mkX64 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
   {-# INLINE enumFromZero #-}

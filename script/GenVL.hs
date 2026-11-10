@@ -171,7 +171,7 @@ genMod name imports comment = unlines $
   ,"-- @('SIMD' f, 'SIMDBoolean' a)@ implies @'Boolean' (f a)@."
   ,"class ( " ++ List.intercalate "\n      , "
    (["Bits a", "Boolean a", "SIMDElement a"] ++
-    ["BooleanF " ++ x  ++ " a" | x <- properVecTypes]
+    ["Boolean (" ++ x  ++ " a)" | x <- properVecTypes]
    ) ++ "\n      ) => SIMDBoolean a"
   ] ++ ["instance SIMDBoolean " ++ a | a <- "Bool" : intishTypes] ++
   [""
@@ -180,7 +180,7 @@ genMod name imports comment = unlines $
   ,"-- @('SIMD' f, 'SIMDBits' a)@ implies @'BitShift' (f a)@."
   ,"class ( " ++ List.intercalate "\n      , "
    (["Bits a", "BitShift a", "SIMDBoolean a"] ++
-    ["BitShiftF " ++ x  ++ " a" | x <- properVecTypes]
+    ["BitShift (" ++ x  ++ " a)" | x <- properVecTypes]
    ) ++ "\n      ) => SIMDBits a"
   ] ++ ["instance SIMDBits " ++ a | a <- intishTypes] ++
   [""
@@ -189,14 +189,14 @@ genMod name imports comment = unlines $
   ,"-- @('SIMD' f, 'SIMDMinMax' a)@ implies @'MinMax' (f a)@."
   ,"class ( " ++ List.intercalate "\n      , "
    (["MinMax a", "SIMDElement a"] ++
-    ["MinMaxF " ++ x  ++ " a" | x <- properVecTypes]
+    ["MinMax (" ++ x  ++ " a)" | x <- properVecTypes]
    ) ++ "\n      ) => SIMDMinMax a"
   ] ++ ["instance SIMDMinMax " ++ a | a <- intishTypes ++ ["Float","Double"]] ++
   [""
   ,"-- | Constraint for element types that support lane-wise FMA in SIMD vectors."
   ,"class ( " ++ List.intercalate "\n      , "
    (["FusedMultiplyAdd a", "SIMDNum a"] ++
-    ["FusedMultiplyAddF " ++ x  ++ " a" | x <- properVecTypes]
+    ["FusedMultiplyAdd (" ++ x  ++ " a)" | x <- properVecTypes]
    ) ++ "\n      ) => SIMDFMA a"
   ,"instance HasFMA => SIMDFMA Float"
   ,"instance HasFMA => SIMDFMA Double"

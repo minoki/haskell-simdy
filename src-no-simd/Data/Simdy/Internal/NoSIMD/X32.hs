@@ -52,10 +52,6 @@ deriving via WrappedMulti X32 a instance SelectableF X8 a => Selectable (X32 a)
 deriving via WrappedMulti X32 a instance (Num a, NumF X8 a, Broadcast X8 a, PackX8 X8 a) => Num (X32 a)
 deriving via WrappedMulti X32 a instance (Fractional a, FractionalF X8 a, Broadcast X8 a, PackX8 X8 a) => Fractional (X32 a)
 deriving via WrappedMulti X32 a instance (Floating a, FloatingF X8 a, Broadcast X8 a, PackX8 X8 a) => Floating (X32 a)
-deriving via WrappedMulti X32 a instance BooleanF X32 a => Boolean (X32 a)
-deriving via WrappedMulti X32 a instance BitShiftF X32 a => BitShift (X32 a)
-deriving via WrappedMulti X32 a instance MinMaxF X32 a => MinMax (X32 a)
-deriving via WrappedMulti X32 a instance (Num a, FusedMultiplyAddF X8 a, Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X32 a)
 instance PackX32 X32 a => IsList (X32 a) where
   type Item (X32 a) = a
   toList = toListX32
@@ -314,15 +310,15 @@ instance OrderedF X8 a => OrderedF X32 a where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X8 a => MinMaxF X32 a where
-  minF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (minF u0 v0) (minF u1 v1) (minF u2 v2) (minF u3 v3)
-  maxF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (maxF u0 v0) (maxF u1 v1) (maxF u2 v2) (maxF u3 v3)
-  minimumNumberF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (minimumNumberF u0 v0) (minimumNumberF u1 v1) (minimumNumberF u2 v2) (minimumNumberF u3 v3)
-  maximumNumberF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (maximumNumberF u0 v0) (maximumNumberF u1 v1) (maximumNumberF u2 v2) (maximumNumberF u3 v3)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X8 a) => MinMax (X32 a) where
+  min (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (min u0 v0) (min u1 v1) (min u2 v2) (min u3 v3)
+  max (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (max u0 v0) (max u1 v1) (max u2 v2) (max u3 v3)
+  minimumNumber (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (minimumNumber u0 v0) (minimumNumber u1 v1) (minimumNumber u2 v2) (minimumNumber u3 v3)
+  maximumNumber (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (maximumNumber u0 v0) (maximumNumber u1 v1) (maximumNumber u2 v2) (maximumNumber u3 v3)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance (Num a, NumF X8 a, Broadcast X8 a, PackX8 X8 a) => NumF X32 a where
   plusF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (plusF u0 v0) (plusF u1 v1) (plusF u2 v2) (plusF u3 v3)
   minusF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (minusF u0 v0) (minusF u1 v1) (minusF u2 v2) (minusF u3 v3)
@@ -340,27 +336,27 @@ instance (Fractional a, FractionalF X8 a, Broadcast X8 a, PackX8 X8 a) => Fracti
 instance (Floating a, FloatingF X8 a, Broadcast X8 a, PackX8 X8 a) => FloatingF X32 a where
   sqrtF (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (sqrtF u0) (sqrtF u1) (sqrtF u2) (sqrtF u3)
   {-# INLINE sqrtF #-}
-instance BooleanF X8 a => BooleanF X32 a where
-  andF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (andF u0 v0) (andF u1 v1) (andF u2 v2) (andF u3 v3)
-  orF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (orF u0 v0) (orF u1 v1) (orF u2 v2) (orF u3 v3)
-  xorF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (xorF u0 v0) (xorF u1 v1) (xorF u2 v2) (xorF u3 v3)
-  complementF (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (complementF u0) (complementF u1) (complementF u2) (complementF u3)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X8 a => BitShiftF X32 a where
-  shiftLF (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (shiftLF u0 i) (shiftLF u1 i) (shiftLF u2 i) (shiftLF u3 i)
-  unsafeShiftLF (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (unsafeShiftLF u0 i) (unsafeShiftLF u1 i) (unsafeShiftLF u2 i) (unsafeShiftLF u3 i)
-  shiftRF (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (shiftRF u0 i) (shiftRF u1 i) (shiftRF u2 i) (shiftRF u3 i)
-  unsafeShiftRF (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (unsafeShiftRF u0 i) (unsafeShiftRF u1 i) (unsafeShiftRF u2 i) (unsafeShiftRF u3 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE unsafeShiftLF #-}
-  {-# INLINE shiftRF #-}
-  {-# INLINE unsafeShiftRF #-}
-instance (Num a, FusedMultiplyAddF X8 a, Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAddF X32 a where
-  fusedMultiplyAddF (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) (MkX32WithX8 w0 w1 w2 w3) = MkX32WithX8 (fusedMultiplyAddF u0 v0 w0) (fusedMultiplyAddF u1 v1 w1) (fusedMultiplyAddF u2 v2 w2) (fusedMultiplyAddF u3 v3 w3)
-  {-# INLINE fusedMultiplyAddF #-}
+instance Boolean (X8 a) => Boolean (X32 a) where
+  (.&.) (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 ((B..&.) u0 v0) ((B..&.) u1 v1) ((B..&.) u2 v2) ((B..&.) u3 v3)
+  (.|.) (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 ((B..|.) u0 v0) ((B..|.) u1 v1) ((B..|.) u2 v2) ((B..|.) u3 v3)
+  xor (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (B.xor u0 v0) (B.xor u1 v1) (B.xor u2 v2) (B.xor u3 v3)
+  complement (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (B.complement u0) (B.complement u1) (B.complement u2) (B.complement u3)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X8 a) => BitShift (X32 a) where
+  shiftL (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (B.shiftL u0 i) (B.shiftL u1 i) (B.shiftL u2 i) (B.shiftL u3 i)
+  unsafeShiftL (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (B.unsafeShiftL u0 i) (B.unsafeShiftL u1 i) (B.unsafeShiftL u2 i) (B.unsafeShiftL u3 i)
+  shiftR (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (B.shiftR u0 i) (B.shiftR u1 i) (B.shiftR u2 i) (B.shiftR u3 i)
+  unsafeShiftR (MkX32WithX8 u0 u1 u2 u3) !i = MkX32WithX8 (B.unsafeShiftR u0 i) (B.unsafeShiftR u1 i) (B.unsafeShiftR u2 i) (B.unsafeShiftR u3 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE unsafeShiftL #-}
+  {-# INLINE shiftR #-}
+  {-# INLINE unsafeShiftR #-}
+instance (Num a, NumF X8 a, FusedMultiplyAdd (X8 a), Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X32 a) where
+  fusedMultiplyAdd (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) (MkX32WithX8 w0 w1 w2 w3) = MkX32WithX8 (fusedMultiplyAdd u0 v0 w0) (fusedMultiplyAdd u1 v1 w1) (fusedMultiplyAdd u2 v2 w2) (fusedMultiplyAdd u3 v3 w3)
+  {-# INLINE fusedMultiplyAdd #-}
 instance (Num a, PackX8 X8 a) => EnumFromZero_ X32 a where
   enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
   {-# INLINE enumFromZero #-}

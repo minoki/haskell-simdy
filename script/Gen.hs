@@ -46,11 +46,11 @@ gen !vecCount !maxBits
     ,"newtype instance " ++ tyCon ++ " Bool = MkBool" ++ tyCon ++ " Word" ++ show (max vecCount 8)
     ,"type instance Mask (" ++ tyCon ++ " a) = " ++ tyCon ++ " Bool"
     ,"instance MaskIsLiftedBool " ++ tyCon ++ " a"
-    ,"instance BooleanF " ++ tyCon ++ " Bool where"
-    ,"  andF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .&. y)"
-    ,"  orF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .|. y)"
-    ,"  xorF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (xor x y)"
-    ,"  complementF (MkBool" ++ tyCon ++ " x) = MkBool" ++ tyCon ++ " (0x" ++ showHex (2^vecCount - 1) " - x)"
+    ,"instance Boolean (" ++ tyCon ++ " Bool) where"
+    ,"  (MkBool" ++ tyCon ++ " x) .&. (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .&. y)"
+    ,"  (MkBool" ++ tyCon ++ " x) .|. (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x .|. y)"
+    ,"  xor (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (xor x y)"
+    ,"  complement (MkBool" ++ tyCon ++ " x) = MkBool" ++ tyCon ++ " (0x" ++ showHex (2^vecCount - 1) " - x)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance EquatableF " ++ tyCon ++ " a => Equatable (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance OrderedF " ++ tyCon ++ " a => Ordered (" ++ tyCon ++ " a)"
     ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => IsList (" ++ tyCon ++ " a) where"
@@ -256,10 +256,6 @@ gen !vecCount !maxBits
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance NumF " ++ tyCon ++ " a => Num (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FractionalF " ++ tyCon ++ " a => Fractional (" ++ tyCon ++ " a)"]
     ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FloatingF " ++ tyCon ++ " a => Floating (" ++ tyCon ++ " a)"]
-    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BooleanF " ++ tyCon ++ " a => Boolean (" ++ tyCon ++ " a)"]
-    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance BitShiftF " ++ tyCon ++ " a => BitShift (" ++ tyCon ++ " a)"]
-    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"]
-    ++ ["deriving via WrappedMulti " ++ tyCon ++ " a instance FusedMultiplyAddF " ++ tyCon ++ " a => FusedMultiplyAdd (" ++ tyCon ++ " a)"]
   where
     tyCon = 'X' : show vecCount
     genType name primCon !bitsPerElem zero maxBits others
@@ -356,15 +352,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
-                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  minF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  maxF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  minimumNumberF = minF"
-                ,"  maximumNumberF = maxF"
-                ,"  {-# INLINE minF #-}"
-                ,"  {-# INLINE maxF #-}"
-                ,"  {-# INLINE minimumNumberF #-}"
-                ,"  {-# INLINE maximumNumberF #-}"
+                ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  min (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  max (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  minimumNumber = min"
+                ,"  maximumNumber = max"
+                ,"  {-# INLINE min #-}"
+                ,"  {-# INLINE max #-}"
+                ,"  {-# INLINE minimumNumber #-}"
+                ,"  {-# INLINE maximumNumber #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -374,22 +370,22 @@ gen !vecCount !maxBits
                         | otherwise = "WithVec" ++ show vecBitCount
              in ["instance OrderedF " ++ tyCon ++ " " ++ name ++ " where"
                 ,"  ltF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = MkBool" ++ tyCon ++ " $ " ++ List.intercalate " .|. " ["(fromIntegral (lt" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ mask ++ ")" ++ shift ++ ")" | i <- [0..shortVecCount-1], let shift = if i == 0 then "" else " `unsafeShiftL` " ++ show (i * shortVecSize), let mask = if bitCount < 128 then " .&. 0x" ++ showHex (2^vecCount - 1) "" else ""]
-                ,"  leF !x !y = complementF (ltF y x)"
+                ,"  leF !x !y = B.complement (ltF y x)"
                 ,"  gtF !x !y = ltF y x"
-                ,"  geF !x !y = complementF (ltF x y)"
+                ,"  geF !x !y = B.complement (ltF x y)"
                 ,"  {-# INLINE ltF #-}"
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
-                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  minF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(min" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  maxF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(max" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  minimumNumberF = minF"
-                ,"  maximumNumberF = maxF"
-                ,"  {-# INLINE minF #-}"
-                ,"  {-# INLINE maxF #-}"
-                ,"  {-# INLINE minimumNumberF #-}"
-                ,"  {-# INLINE maximumNumberF #-}"
+                ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  min (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(min" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  max (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(max" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  minimumNumber = min"
+                ,"  maximumNumber = max"
+                ,"  {-# INLINE min #-}"
+                ,"  {-# INLINE max #-}"
+                ,"  {-# INLINE minimumNumber #-}"
+                ,"  {-# INLINE maximumNumber #-}"
                 ]
     genOrderedFloat name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -404,15 +400,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
-                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  minF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  maxF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  minimumNumberF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(minimumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  maximumNumberF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(maximumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  {-# INLINE minF #-}"
-                ,"  {-# INLINE maxF #-}"
-                ,"  {-# INLINE minimumNumberF #-}"
-                ,"  {-# INLINE maximumNumberF #-}"
+                ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  min (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  max (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  minimumNumber (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(minimumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  maximumNumber (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(maximumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE min #-}"
+                ,"  {-# INLINE max #-}"
+                ,"  {-# INLINE minimumNumber #-}"
+                ,"  {-# INLINE maximumNumber #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -429,15 +425,15 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE leF #-}"
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
-                ,"instance MinMaxF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  minF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(minimum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  maxF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(maximum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  minimumNumberF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(minimumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  maximumNumberF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(maximumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  {-# INLINE minF #-}"
-                ,"  {-# INLINE maxF #-}"
-                ,"  {-# INLINE minimumNumberF #-}"
-                ,"  {-# INLINE maximumNumberF #-}"
+                ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  min (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(minimum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  max (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(maximum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  minimumNumber (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(minimumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  maximumNumber (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(maximumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE min #-}"
+                ,"  {-# INLINE max #-}"
+                ,"  {-# INLINE minimumNumber #-}"
+                ,"  {-# INLINE maximumNumber #-}"
                 ]
     genNum isSigned isFloating name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -548,12 +544,12 @@ gen !vecCount !maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min (max bitCount 128) maxBits
         in (if maxBits == 0
-            then ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
+            then ["instance HasFMA => FusedMultiplyAdd (" ++ tyCon <+> name ++ ") where"
                  ,"#if defined(USE_FMA)"
-                 ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["z" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(fusedMultiplyAdd x" ++ show i ++ " y" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                 ,"  {-# INLINE fusedMultiplyAddF #-}"
+                 ,"  fusedMultiplyAdd (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["z" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(fusedMultiplyAdd x" ++ show i ++ " y" ++ show i ++ " z" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                 ,"  {-# INLINE fusedMultiplyAdd #-}"
                  ,"#else"
-                 ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
+                 ,"  fusedMultiplyAdd _ _ _ = fmaIsDisabled"
                  ,"#endif"
                  ]
             else
@@ -562,12 +558,12 @@ gen !vecCount !maxBits
                   shortVecName = name ++ "X" ++ show shortVecSize
                   suffix | shortVecCount == 1 = ""
                          | otherwise = "WithVec" ++ show vecBitCount
-              in ["instance HasFMA => FusedMultiplyAddF " ++ tyCon ++ " " ++ name ++ " where"
+              in ["instance HasFMA => FusedMultiplyAdd (" ++ tyCon <+> name ++ ") where"
                  ,"#if defined(USE_FMA)"
-                 ,"  fusedMultiplyAddF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["w" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(fmadd" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                 ,"  {-# INLINE fusedMultiplyAddF #-}"
+                 ,"  fusedMultiplyAdd (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["w" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(fmadd" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                 ,"  {-# INLINE fusedMultiplyAdd #-}"
                  ,"#else"
-                 ,"  fusedMultiplyAddF _ _ _ = fmaIsDisabled"
+                 ,"  fusedMultiplyAdd _ _ _ = fmaIsDisabled"
                  ,"#endif"
                  ]
            ) ++
@@ -595,24 +591,24 @@ gen !vecCount !maxBits
       = let bitCount = bitsPerElem * vecCount
             vecBitCount = min (max bitCount 128) maxBits
         in if maxBits == 0
-           then ["instance BooleanF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  andF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .&. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  orF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .|. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  xorF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(xor x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  complementF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(complement x" ++ show i ++ ")" | i <- [0..vecCount-1]]
-                ,"  {-# INLINE andF #-}"
-                ,"  {-# INLINE orF #-}"
-                ,"  {-# INLINE xorF #-}"
-                ,"  {-# INLINE complementF #-}"
-                ,"instance BitShiftF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  shiftLF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  unsafeShiftLF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  shiftRF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  unsafeShiftRF (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
-                ,"  {-# INLINE shiftLF #-}"
-                ,"  {-# INLINE unsafeShiftLF #-}"
-                ,"  {-# INLINE shiftRF #-}"
-                ,"  {-# INLINE unsafeShiftRF #-}"
+           then ["instance Boolean (" ++ tyCon <+> name ++ ") where"
+                ,"  (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") .&. (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .&. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") .|. (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(x" ++ show i ++ " .|. y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  xor (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(xor x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  complement (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(complement x" ++ show i ++ ")" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE (.&.) #-}"
+                ,"  {-# INLINE (.|.) #-}"
+                ,"  {-# INLINE xor #-}"
+                ,"  {-# INLINE complement #-}"
+                ,"instance BitShift (" ++ tyCon <+> name ++ ") where"
+                ,"  shiftL (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  unsafeShiftL (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftL x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  shiftR (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(shiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  unsafeShiftR (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") !i = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(unsafeShiftR x" ++ show i ++ " i)" | i <- [0..vecCount-1]]
+                ,"  {-# INLINE shiftL #-}"
+                ,"  {-# INLINE unsafeShiftL #-}"
+                ,"  {-# INLINE shiftR #-}"
+                ,"  {-# INLINE unsafeShiftR #-}"
                 ]
            else
              let shortVecSize = vecBitCount `div` bitsPerElem
@@ -620,20 +616,20 @@ gen !vecCount !maxBits
                  shortVecName = name ++ "X" ++ show shortVecSize
                  suffix | shortVecCount == 1 = ""
                         | otherwise = "WithVec" ++ show vecBitCount
-             in ["instance BooleanF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  andF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(and" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  orF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(or" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  xorF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(xor" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  complementF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(complement" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
-                ,"  {-# INLINE andF #-}"
-                ,"  {-# INLINE orF #-}"
-                ,"  {-# INLINE xorF #-}"
-                ,"  {-# INLINE complementF #-}"
-                ,"instance BitShiftF " ++ tyCon ++ " " ++ name ++ " where"
-                ,"  shiftLF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftL" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
-                ,"  shiftRF (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftR" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
-                ,"  {-# INLINE shiftLF #-}"
-                ,"  {-# INLINE shiftRF #-}"
+             in ["instance Boolean (" ++ tyCon <+> name ++ ") where"
+                ,"  (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") .&. (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(and" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") .|. (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(or" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  xor (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(xor" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  complement (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(complement" ++ shortVecName ++ "# u" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE (.&.) #-}"
+                ,"  {-# INLINE (.|.) #-}"
+                ,"  {-# INLINE xor #-}"
+                ,"  {-# INLINE complement #-}"
+                ,"instance BitShift (" ++ tyCon <+> name ++ ") where"
+                ,"  shiftL (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftL" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
+                ,"  shiftR (Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (I# i) = Mk" ++ name ++ tyCon ++ suffix ++ " " ++ spaceSep ["(shiftR" ++ shortVecName ++ "# u" ++ show i ++ " i)" | i <- [0..shortVecCount-1]]
+                ,"  {-# INLINE shiftL #-}"
+                ,"  {-# INLINE shiftR #-}"
                 ]
     genEnumFromZero litSuffix name primCon !bitsPerElem _zero maxBits
       = let bitCount = bitsPerElem * vecCount
@@ -1140,10 +1136,6 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Num a, NumF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Num (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Fractional a, FractionalF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Fractional (" ++ tyCon ++ " a)"
     ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => Floating (" ++ tyCon ++ " a)"
-    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance BooleanF " ++ tyCon ++ " a => Boolean (" ++ tyCon ++ " a)"
-    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance BitShiftF " ++ tyCon ++ " a => BitShift (" ++ tyCon ++ " a)"
-    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance MinMaxF " ++ tyCon ++ " a => MinMax (" ++ tyCon ++ " a)"
-    ,"deriving via WrappedMulti " ++ tyCon ++ " a instance (Num a, FusedMultiplyAddF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FusedMultiplyAdd (" ++ tyCon ++ " a)"
     ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => IsList (" ++ tyCon ++ " a) where"
     ,"  type Item (" ++ tyCon ++ " a) = a"
     ,"  toList = toList" ++ tyCon
@@ -1297,15 +1289,15 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  {-# INLINE leF #-}"
     ,"  {-# INLINE gtF #-}"
     ,"  {-# INLINE geF #-}"
-    ,"instance MinMaxF " ++ baseTyCon ++ " a => MinMaxF " ++ tyCon ++ " a where"
-    ,liftBinary "minF"
-    ,liftBinary "maxF"
-    ,liftBinary "minimumNumberF"
-    ,liftBinary "maximumNumberF"
-    ,"  {-# INLINE minF #-}"
-    ,"  {-# INLINE maxF #-}"
-    ,"  {-# INLINE minimumNumberF #-}"
-    ,"  {-# INLINE maximumNumberF #-}"
+    ,"instance MinMax (" ++ baseTyCon ++ " a) => MinMax (" ++ tyCon ++ " a) where"
+    ,liftBinary "min"
+    ,liftBinary "max"
+    ,liftBinary "minimumNumber"
+    ,liftBinary "maximumNumber"
+    ,"  {-# INLINE min #-}"
+    ,"  {-# INLINE max #-}"
+    ,"  {-# INLINE minimumNumber #-}"
+    ,"  {-# INLINE maximumNumber #-}"
     ,"instance (Num a, NumF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => NumF " ++ tyCon ++ " a where"
     ,liftBinary "plusF"
     ,liftBinary "minusF"
@@ -1323,27 +1315,27 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"instance (Floating a, FloatingF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FloatingF " ++ tyCon ++ " a where"
     ,liftUnary "sqrtF"
     ,"  {-# INLINE sqrtF #-}"
-    ,"instance BooleanF " ++ baseTyCon ++ " a => BooleanF " ++ tyCon ++ " a where"
-    ,liftBinary "andF"
-    ,liftBinary "orF"
-    ,liftBinary "xorF"
-    ,liftUnary "complementF"
-    ,"  {-# INLINE andF #-}"
-    ,"  {-# INLINE orF #-}"
-    ,"  {-# INLINE xorF #-}"
-    ,"  {-# INLINE complementF #-}"
-    ,"instance BitShiftF " ++ baseTyCon ++ " a => BitShiftF " ++ tyCon ++ " a where"
-    ,"  shiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  unsafeShiftLF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftLF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  shiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(shiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  unsafeShiftRF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon ++ " " ++ spaceSep ["(unsafeShiftRF u" ++ show i ++ " i)" | i <- [0..n-1]]
-    ,"  {-# INLINE shiftLF #-}"
-    ,"  {-# INLINE unsafeShiftLF #-}"
-    ,"  {-# INLINE shiftRF #-}"
-    ,"  {-# INLINE unsafeShiftRF #-}"
-    ,"instance (Num a, FusedMultiplyAddF " ++ baseTyCon ++ " a, Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => FusedMultiplyAddF " ++ tyCon ++ " a where"
-    ,"  fusedMultiplyAddF (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["w" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(fusedMultiplyAddF u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..n-1]]
-    ,"  {-# INLINE fusedMultiplyAddF #-}"
+    ,"instance Boolean (" ++ baseTyCon ++ " a) => Boolean (" ++ tyCon ++ " a) where"
+    ,liftBinary' "(.&.)" "(B..&.)"
+    ,liftBinary' "(.|.)" "(B..|.)"
+    ,liftBinary' "xor" "B.xor"
+    ,liftUnary' "complement" "B.complement"
+    ,"  {-# INLINE (.&.) #-}"
+    ,"  {-# INLINE (.|.) #-}"
+    ,"  {-# INLINE xor #-}"
+    ,"  {-# INLINE complement #-}"
+    ,"instance BitShift (" ++ baseTyCon ++ " a) => BitShift (" ++ tyCon ++ " a) where"
+    ,"  shiftL (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon <+> spaceSep ["(B.shiftL u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  unsafeShiftL (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon <+> spaceSep ["(B.unsafeShiftL u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  shiftR (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon <+> spaceSep ["(B.shiftR u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  unsafeShiftR (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") !i = " ++ dataCon <+> spaceSep ["(B.unsafeShiftR u" ++ show i ++ " i)" | i <- [0..n-1]]
+    ,"  {-# INLINE shiftL #-}"
+    ,"  {-# INLINE unsafeShiftL #-}"
+    ,"  {-# INLINE shiftR #-}"
+    ,"  {-# INLINE unsafeShiftR #-}"
+    ,"instance (Num a, NumF " ++ baseTyCon ++ " a, FusedMultiplyAdd (" ++ baseTyCon ++ " a), Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon <+> baseTyCon ++ " a) => FusedMultiplyAdd (" ++ tyCon ++ " a) where"
+    ,"  fusedMultiplyAdd (" ++ dataCon <+> spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["w" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon <+> spaceSep ["(fusedMultiplyAdd u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"  {-# INLINE fusedMultiplyAdd #-}"
     ,"instance (Num a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => EnumFromZero_ " ++ tyCon ++ " a where"
     ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
     ,"  {-# INLINE enumFromZero #-}"
@@ -1370,6 +1362,8 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     liftNullary f = "  " ++ f ++ " = " ++ dataCon <+> spaceSep (replicate n f)
     liftUnary f = "  " ++ f ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(" ++ f ++ " u" ++ show i ++ ")" | i <- [0..n-1]]
     liftBinary f = "  " ++ f ++ " (" ++ dataCon ++ " " ++ spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon ++ " " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon ++ " " ++ spaceSep ["(" ++ f ++ " u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
+    liftUnary' f qf = "  " ++ f ++ " (" ++ dataCon <+> spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon <+> spaceSep ["(" ++ qf ++ " u" ++ show i ++ ")" | i <- [0..n-1]]
+    liftBinary' f qf = "  " ++ f ++ " (" ++ dataCon <+> spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon <+> spaceSep ["(" ++ qf ++ " u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..n-1]]
     i_plus 0 = "i"
     i_plus k = "(i +# " ++ show k ++ "#)"
 

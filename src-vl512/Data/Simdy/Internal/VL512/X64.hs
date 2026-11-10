@@ -48,11 +48,11 @@ instance KnownSIMDLength X64 where
 newtype instance X64 Bool = MkBoolX64 Word64
 type instance Mask (X64 a) = X64 Bool
 instance MaskIsLiftedBool X64 a
-instance BooleanF X64 Bool where
-  andF (MkBoolX64 x) (MkBoolX64 y) = MkBoolX64 (x .&. y)
-  orF (MkBoolX64 x) (MkBoolX64 y) = MkBoolX64 (x .|. y)
-  xorF (MkBoolX64 x) (MkBoolX64 y) = MkBoolX64 (xor x y)
-  complementF (MkBoolX64 x) = MkBoolX64 (0xffffffffffffffff - x)
+instance Boolean (X64 Bool) where
+  (MkBoolX64 x) .&. (MkBoolX64 y) = MkBoolX64 (x .&. y)
+  (MkBoolX64 x) .|. (MkBoolX64 y) = MkBoolX64 (x .|. y)
+  xor (MkBoolX64 x) (MkBoolX64 y) = MkBoolX64 (xor x y)
+  complement (MkBoolX64 x) = MkBoolX64 (0xffffffffffffffff - x)
 deriving via WrappedMulti X64 a instance EquatableF X64 a => Equatable (X64 a)
 deriving via WrappedMulti X64 a instance OrderedF X64 a => Ordered (X64 a)
 instance PackX64 X64 a => IsList (X64 a) where
@@ -126,15 +126,15 @@ instance OrderedF X64 Float where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Float where
-  minF (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (minimumFloatX16# u0 v0) (minimumFloatX16# u1 v1) (minimumFloatX16# u2 v2) (minimumFloatX16# u3 v3)
-  maxF (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (maximumFloatX16# u0 v0) (maximumFloatX16# u1 v1) (maximumFloatX16# u2 v2) (maximumFloatX16# u3 v3)
-  minimumNumberF (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (minimumNumberFloatX16# u0 v0) (minimumNumberFloatX16# u1 v1) (minimumNumberFloatX16# u2 v2) (minimumNumberFloatX16# u3 v3)
-  maximumNumberF (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (maximumNumberFloatX16# u0 v0) (maximumNumberFloatX16# u1 v1) (maximumNumberFloatX16# u2 v2) (maximumNumberFloatX16# u3 v3)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Float) where
+  min (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (minimumFloatX16# u0 v0) (minimumFloatX16# u1 v1) (minimumFloatX16# u2 v2) (minimumFloatX16# u3 v3)
+  max (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (maximumFloatX16# u0 v0) (maximumFloatX16# u1 v1) (maximumFloatX16# u2 v2) (maximumFloatX16# u3 v3)
+  minimumNumber (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (minimumNumberFloatX16# u0 v0) (minimumNumberFloatX16# u1 v1) (minimumNumberFloatX16# u2 v2) (minimumNumberFloatX16# u3 v3)
+  maximumNumber (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) = MkFloatX64WithVec512 (maximumNumberFloatX16# u0 v0) (maximumNumberFloatX16# u1 v1) (maximumNumberFloatX16# u2 v2) (maximumNumberFloatX16# u3 v3)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 negateX64Float :: X64 Float -> X64 Float
 negateX64Float (MkFloatX64WithVec512 u0 u1 u2 u3) = MkFloatX64WithVec512 (negateFloatX16# u0) (negateFloatX16# u1) (negateFloatX16# u2) (negateFloatX16# u3)
 #if defined(USE_FMA)
@@ -159,12 +159,12 @@ instance FractionalF X64 Float where
 instance FloatingF X64 Float where
   sqrtF (MkFloatX64WithVec512 u0 u1 u2 u3) = MkFloatX64WithVec512 (sqrtFloatX16# u0) (sqrtFloatX16# u1) (sqrtFloatX16# u2) (sqrtFloatX16# u3)
   {-# INLINE sqrtF #-}
-instance HasFMA => FusedMultiplyAddF X64 Float where
+instance HasFMA => FusedMultiplyAdd (X64 Float) where
 #if defined(USE_FMA)
-  fusedMultiplyAddF (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) (MkFloatX64WithVec512 w0 w1 w2 w3) = MkFloatX64WithVec512 (fmaddFloatX16# u0 v0 w0) (fmaddFloatX16# u1 v1 w1) (fmaddFloatX16# u2 v2 w2) (fmaddFloatX16# u3 v3 w3)
-  {-# INLINE fusedMultiplyAddF #-}
+  fusedMultiplyAdd (MkFloatX64WithVec512 u0 u1 u2 u3) (MkFloatX64WithVec512 v0 v1 v2 v3) (MkFloatX64WithVec512 w0 w1 w2 w3) = MkFloatX64WithVec512 (fmaddFloatX16# u0 v0 w0) (fmaddFloatX16# u1 v1 w1) (fmaddFloatX16# u2 v2 w2) (fmaddFloatX16# u3 v3 w3)
+  {-# INLINE fusedMultiplyAdd #-}
 #else
-  fusedMultiplyAddF _ _ _ = fmaIsDisabled
+  fusedMultiplyAdd _ _ _ = fmaIsDisabled
 #endif
 #if defined(USE_FMA)
 {-# RULES
@@ -227,15 +227,15 @@ instance OrderedF X64 Double where
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Double where
-  minF (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (minimumDoubleX8# u0 v0) (minimumDoubleX8# u1 v1) (minimumDoubleX8# u2 v2) (minimumDoubleX8# u3 v3) (minimumDoubleX8# u4 v4) (minimumDoubleX8# u5 v5) (minimumDoubleX8# u6 v6) (minimumDoubleX8# u7 v7)
-  maxF (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (maximumDoubleX8# u0 v0) (maximumDoubleX8# u1 v1) (maximumDoubleX8# u2 v2) (maximumDoubleX8# u3 v3) (maximumDoubleX8# u4 v4) (maximumDoubleX8# u5 v5) (maximumDoubleX8# u6 v6) (maximumDoubleX8# u7 v7)
-  minimumNumberF (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (minimumNumberDoubleX8# u0 v0) (minimumNumberDoubleX8# u1 v1) (minimumNumberDoubleX8# u2 v2) (minimumNumberDoubleX8# u3 v3) (minimumNumberDoubleX8# u4 v4) (minimumNumberDoubleX8# u5 v5) (minimumNumberDoubleX8# u6 v6) (minimumNumberDoubleX8# u7 v7)
-  maximumNumberF (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (maximumNumberDoubleX8# u0 v0) (maximumNumberDoubleX8# u1 v1) (maximumNumberDoubleX8# u2 v2) (maximumNumberDoubleX8# u3 v3) (maximumNumberDoubleX8# u4 v4) (maximumNumberDoubleX8# u5 v5) (maximumNumberDoubleX8# u6 v6) (maximumNumberDoubleX8# u7 v7)
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Double) where
+  min (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (minimumDoubleX8# u0 v0) (minimumDoubleX8# u1 v1) (minimumDoubleX8# u2 v2) (minimumDoubleX8# u3 v3) (minimumDoubleX8# u4 v4) (minimumDoubleX8# u5 v5) (minimumDoubleX8# u6 v6) (minimumDoubleX8# u7 v7)
+  max (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (maximumDoubleX8# u0 v0) (maximumDoubleX8# u1 v1) (maximumDoubleX8# u2 v2) (maximumDoubleX8# u3 v3) (maximumDoubleX8# u4 v4) (maximumDoubleX8# u5 v5) (maximumDoubleX8# u6 v6) (maximumDoubleX8# u7 v7)
+  minimumNumber (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (minimumNumberDoubleX8# u0 v0) (minimumNumberDoubleX8# u1 v1) (minimumNumberDoubleX8# u2 v2) (minimumNumberDoubleX8# u3 v3) (minimumNumberDoubleX8# u4 v4) (minimumNumberDoubleX8# u5 v5) (minimumNumberDoubleX8# u6 v6) (minimumNumberDoubleX8# u7 v7)
+  maximumNumber (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX64WithVec512 (maximumNumberDoubleX8# u0 v0) (maximumNumberDoubleX8# u1 v1) (maximumNumberDoubleX8# u2 v2) (maximumNumberDoubleX8# u3 v3) (maximumNumberDoubleX8# u4 v4) (maximumNumberDoubleX8# u5 v5) (maximumNumberDoubleX8# u6 v6) (maximumNumberDoubleX8# u7 v7)
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 negateX64Double :: X64 Double -> X64 Double
 negateX64Double (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) = MkDoubleX64WithVec512 (negateDoubleX8# u0) (negateDoubleX8# u1) (negateDoubleX8# u2) (negateDoubleX8# u3) (negateDoubleX8# u4) (negateDoubleX8# u5) (negateDoubleX8# u6) (negateDoubleX8# u7)
 #if defined(USE_FMA)
@@ -260,12 +260,12 @@ instance FractionalF X64 Double where
 instance FloatingF X64 Double where
   sqrtF (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) = MkDoubleX64WithVec512 (sqrtDoubleX8# u0) (sqrtDoubleX8# u1) (sqrtDoubleX8# u2) (sqrtDoubleX8# u3) (sqrtDoubleX8# u4) (sqrtDoubleX8# u5) (sqrtDoubleX8# u6) (sqrtDoubleX8# u7)
   {-# INLINE sqrtF #-}
-instance HasFMA => FusedMultiplyAddF X64 Double where
+instance HasFMA => FusedMultiplyAdd (X64 Double) where
 #if defined(USE_FMA)
-  fusedMultiplyAddF (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) (MkDoubleX64WithVec512 w0 w1 w2 w3 w4 w5 w6 w7) = MkDoubleX64WithVec512 (fmaddDoubleX8# u0 v0 w0) (fmaddDoubleX8# u1 v1 w1) (fmaddDoubleX8# u2 v2 w2) (fmaddDoubleX8# u3 v3 w3) (fmaddDoubleX8# u4 v4 w4) (fmaddDoubleX8# u5 v5 w5) (fmaddDoubleX8# u6 v6 w6) (fmaddDoubleX8# u7 v7 w7)
-  {-# INLINE fusedMultiplyAddF #-}
+  fusedMultiplyAdd (MkDoubleX64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) (MkDoubleX64WithVec512 w0 w1 w2 w3 w4 w5 w6 w7) = MkDoubleX64WithVec512 (fmaddDoubleX8# u0 v0 w0) (fmaddDoubleX8# u1 v1 w1) (fmaddDoubleX8# u2 v2 w2) (fmaddDoubleX8# u3 v3 w3) (fmaddDoubleX8# u4 v4 w4) (fmaddDoubleX8# u5 v5 w5) (fmaddDoubleX8# u6 v6 w6) (fmaddDoubleX8# u7 v7 w7)
+  {-# INLINE fusedMultiplyAdd #-}
 #else
-  fusedMultiplyAddF _ _ _ = fmaIsDisabled
+  fusedMultiplyAdd _ _ _ = fmaIsDisabled
 #endif
 #if defined(USE_FMA)
 {-# RULES
@@ -323,22 +323,22 @@ instance EquatableF X64 Int8 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Int8 where
   ltF (MkInt8X64 u0) (MkInt8X64 v0) = MkBoolX64 $ (fromIntegral (ltInt8X64# u0 v0))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Int8 where
-  minF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (minInt8X64# u0 v0)
-  maxF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (maxInt8X64# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Int8) where
+  min (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (minInt8X64# u0 v0)
+  max (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (maxInt8X64# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Int8 where
   plusF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (plusInt8X64# u0 v0)
   minusF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (minusInt8X64# u0 v0)
@@ -350,20 +350,20 @@ instance NumF X64 Int8 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Int8 where
-  andF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (andInt8X64# u0 v0)
-  orF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (orInt8X64# u0 v0)
-  xorF (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (xorInt8X64# u0 v0)
-  complementF (MkInt8X64 u0) = MkInt8X64 (complementInt8X64# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Int8 where
-  shiftLF (MkInt8X64 u0) (I# i) = MkInt8X64 (shiftLInt8X64# u0 i)
-  shiftRF (MkInt8X64 u0) (I# i) = MkInt8X64 (shiftRInt8X64# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Int8) where
+  (MkInt8X64 u0) .&. (MkInt8X64 v0) = MkInt8X64 (andInt8X64# u0 v0)
+  (MkInt8X64 u0) .|. (MkInt8X64 v0) = MkInt8X64 (orInt8X64# u0 v0)
+  xor (MkInt8X64 u0) (MkInt8X64 v0) = MkInt8X64 (xorInt8X64# u0 v0)
+  complement (MkInt8X64 u0) = MkInt8X64 (complementInt8X64# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Int8) where
+  shiftL (MkInt8X64 u0) (I# i) = MkInt8X64 (shiftLInt8X64# u0 i)
+  shiftR (MkInt8X64 u0) (I# i) = MkInt8X64 (shiftRInt8X64# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Int8 where
   enumFromZero = MkInt8X64 (packInt8X64# (# 0#Int8, 1#Int8, 2#Int8, 3#Int8, 4#Int8, 5#Int8, 6#Int8, 7#Int8, 8#Int8, 9#Int8, 10#Int8, 11#Int8, 12#Int8, 13#Int8, 14#Int8, 15#Int8, 16#Int8, 17#Int8, 18#Int8, 19#Int8, 20#Int8, 21#Int8, 22#Int8, 23#Int8, 24#Int8, 25#Int8, 26#Int8, 27#Int8, 28#Int8, 29#Int8, 30#Int8, 31#Int8, 32#Int8, 33#Int8, 34#Int8, 35#Int8, 36#Int8, 37#Int8, 38#Int8, 39#Int8, 40#Int8, 41#Int8, 42#Int8, 43#Int8, 44#Int8, 45#Int8, 46#Int8, 47#Int8, 48#Int8, 49#Int8, 50#Int8, 51#Int8, 52#Int8, 53#Int8, 54#Int8, 55#Int8, 56#Int8, 57#Int8, 58#Int8, 59#Int8, 60#Int8, 61#Int8, 62#Int8, 63#Int8 #))
   -- {-# INLINE enumFromZero #-}
@@ -402,22 +402,22 @@ instance EquatableF X64 Int16 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Int16 where
   ltF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkBoolX64 $ (fromIntegral (ltInt16X32# u0 v0)) .|. (fromIntegral (ltInt16X32# u1 v1) `unsafeShiftL` 32)
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Int16 where
-  minF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (minInt16X32# u0 v0) (minInt16X32# u1 v1)
-  maxF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (maxInt16X32# u0 v0) (maxInt16X32# u1 v1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Int16) where
+  min (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (minInt16X32# u0 v0) (minInt16X32# u1 v1)
+  max (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (maxInt16X32# u0 v0) (maxInt16X32# u1 v1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Int16 where
   plusF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (plusInt16X32# u0 v0) (plusInt16X32# u1 v1)
   minusF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (minusInt16X32# u0 v0) (minusInt16X32# u1 v1)
@@ -429,20 +429,20 @@ instance NumF X64 Int16 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Int16 where
-  andF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (andInt16X32# u0 v0) (andInt16X32# u1 v1)
-  orF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (orInt16X32# u0 v0) (orInt16X32# u1 v1)
-  xorF (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (xorInt16X32# u0 v0) (xorInt16X32# u1 v1)
-  complementF (MkInt16X64WithVec512 u0 u1) = MkInt16X64WithVec512 (complementInt16X32# u0) (complementInt16X32# u1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Int16 where
-  shiftLF (MkInt16X64WithVec512 u0 u1) (I# i) = MkInt16X64WithVec512 (shiftLInt16X32# u0 i) (shiftLInt16X32# u1 i)
-  shiftRF (MkInt16X64WithVec512 u0 u1) (I# i) = MkInt16X64WithVec512 (shiftRInt16X32# u0 i) (shiftRInt16X32# u1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Int16) where
+  (MkInt16X64WithVec512 u0 u1) .&. (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (andInt16X32# u0 v0) (andInt16X32# u1 v1)
+  (MkInt16X64WithVec512 u0 u1) .|. (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (orInt16X32# u0 v0) (orInt16X32# u1 v1)
+  xor (MkInt16X64WithVec512 u0 u1) (MkInt16X64WithVec512 v0 v1) = MkInt16X64WithVec512 (xorInt16X32# u0 v0) (xorInt16X32# u1 v1)
+  complement (MkInt16X64WithVec512 u0 u1) = MkInt16X64WithVec512 (complementInt16X32# u0) (complementInt16X32# u1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Int16) where
+  shiftL (MkInt16X64WithVec512 u0 u1) (I# i) = MkInt16X64WithVec512 (shiftLInt16X32# u0 i) (shiftLInt16X32# u1 i)
+  shiftR (MkInt16X64WithVec512 u0 u1) (I# i) = MkInt16X64WithVec512 (shiftRInt16X32# u0 i) (shiftRInt16X32# u1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Int16 where
   enumFromZero = MkInt16X64WithVec512 (packInt16X32# (# 0#Int16, 1#Int16, 2#Int16, 3#Int16, 4#Int16, 5#Int16, 6#Int16, 7#Int16, 8#Int16, 9#Int16, 10#Int16, 11#Int16, 12#Int16, 13#Int16, 14#Int16, 15#Int16, 16#Int16, 17#Int16, 18#Int16, 19#Int16, 20#Int16, 21#Int16, 22#Int16, 23#Int16, 24#Int16, 25#Int16, 26#Int16, 27#Int16, 28#Int16, 29#Int16, 30#Int16, 31#Int16 #)) (packInt16X32# (# 32#Int16, 33#Int16, 34#Int16, 35#Int16, 36#Int16, 37#Int16, 38#Int16, 39#Int16, 40#Int16, 41#Int16, 42#Int16, 43#Int16, 44#Int16, 45#Int16, 46#Int16, 47#Int16, 48#Int16, 49#Int16, 50#Int16, 51#Int16, 52#Int16, 53#Int16, 54#Int16, 55#Int16, 56#Int16, 57#Int16, 58#Int16, 59#Int16, 60#Int16, 61#Int16, 62#Int16, 63#Int16 #))
   -- {-# INLINE enumFromZero #-}
@@ -481,22 +481,22 @@ instance EquatableF X64 Int32 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Int32 where
   ltF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkBoolX64 $ (fromIntegral (ltInt32X16# u0 v0)) .|. (fromIntegral (ltInt32X16# u1 v1) `unsafeShiftL` 16) .|. (fromIntegral (ltInt32X16# u2 v2) `unsafeShiftL` 32) .|. (fromIntegral (ltInt32X16# u3 v3) `unsafeShiftL` 48)
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Int32 where
-  minF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (minInt32X16# u0 v0) (minInt32X16# u1 v1) (minInt32X16# u2 v2) (minInt32X16# u3 v3)
-  maxF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (maxInt32X16# u0 v0) (maxInt32X16# u1 v1) (maxInt32X16# u2 v2) (maxInt32X16# u3 v3)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Int32) where
+  min (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (minInt32X16# u0 v0) (minInt32X16# u1 v1) (minInt32X16# u2 v2) (minInt32X16# u3 v3)
+  max (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (maxInt32X16# u0 v0) (maxInt32X16# u1 v1) (maxInt32X16# u2 v2) (maxInt32X16# u3 v3)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Int32 where
   plusF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (plusInt32X16# u0 v0) (plusInt32X16# u1 v1) (plusInt32X16# u2 v2) (plusInt32X16# u3 v3)
   minusF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (minusInt32X16# u0 v0) (minusInt32X16# u1 v1) (minusInt32X16# u2 v2) (minusInt32X16# u3 v3)
@@ -508,20 +508,20 @@ instance NumF X64 Int32 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Int32 where
-  andF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (andInt32X16# u0 v0) (andInt32X16# u1 v1) (andInt32X16# u2 v2) (andInt32X16# u3 v3)
-  orF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (orInt32X16# u0 v0) (orInt32X16# u1 v1) (orInt32X16# u2 v2) (orInt32X16# u3 v3)
-  xorF (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (xorInt32X16# u0 v0) (xorInt32X16# u1 v1) (xorInt32X16# u2 v2) (xorInt32X16# u3 v3)
-  complementF (MkInt32X64WithVec512 u0 u1 u2 u3) = MkInt32X64WithVec512 (complementInt32X16# u0) (complementInt32X16# u1) (complementInt32X16# u2) (complementInt32X16# u3)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Int32 where
-  shiftLF (MkInt32X64WithVec512 u0 u1 u2 u3) (I# i) = MkInt32X64WithVec512 (shiftLInt32X16# u0 i) (shiftLInt32X16# u1 i) (shiftLInt32X16# u2 i) (shiftLInt32X16# u3 i)
-  shiftRF (MkInt32X64WithVec512 u0 u1 u2 u3) (I# i) = MkInt32X64WithVec512 (shiftRInt32X16# u0 i) (shiftRInt32X16# u1 i) (shiftRInt32X16# u2 i) (shiftRInt32X16# u3 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Int32) where
+  (MkInt32X64WithVec512 u0 u1 u2 u3) .&. (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (andInt32X16# u0 v0) (andInt32X16# u1 v1) (andInt32X16# u2 v2) (andInt32X16# u3 v3)
+  (MkInt32X64WithVec512 u0 u1 u2 u3) .|. (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (orInt32X16# u0 v0) (orInt32X16# u1 v1) (orInt32X16# u2 v2) (orInt32X16# u3 v3)
+  xor (MkInt32X64WithVec512 u0 u1 u2 u3) (MkInt32X64WithVec512 v0 v1 v2 v3) = MkInt32X64WithVec512 (xorInt32X16# u0 v0) (xorInt32X16# u1 v1) (xorInt32X16# u2 v2) (xorInt32X16# u3 v3)
+  complement (MkInt32X64WithVec512 u0 u1 u2 u3) = MkInt32X64WithVec512 (complementInt32X16# u0) (complementInt32X16# u1) (complementInt32X16# u2) (complementInt32X16# u3)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Int32) where
+  shiftL (MkInt32X64WithVec512 u0 u1 u2 u3) (I# i) = MkInt32X64WithVec512 (shiftLInt32X16# u0 i) (shiftLInt32X16# u1 i) (shiftLInt32X16# u2 i) (shiftLInt32X16# u3 i)
+  shiftR (MkInt32X64WithVec512 u0 u1 u2 u3) (I# i) = MkInt32X64WithVec512 (shiftRInt32X16# u0 i) (shiftRInt32X16# u1 i) (shiftRInt32X16# u2 i) (shiftRInt32X16# u3 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Int32 where
   enumFromZero = MkInt32X64WithVec512 (packInt32X16# (# 0#Int32, 1#Int32, 2#Int32, 3#Int32, 4#Int32, 5#Int32, 6#Int32, 7#Int32, 8#Int32, 9#Int32, 10#Int32, 11#Int32, 12#Int32, 13#Int32, 14#Int32, 15#Int32 #)) (packInt32X16# (# 16#Int32, 17#Int32, 18#Int32, 19#Int32, 20#Int32, 21#Int32, 22#Int32, 23#Int32, 24#Int32, 25#Int32, 26#Int32, 27#Int32, 28#Int32, 29#Int32, 30#Int32, 31#Int32 #)) (packInt32X16# (# 32#Int32, 33#Int32, 34#Int32, 35#Int32, 36#Int32, 37#Int32, 38#Int32, 39#Int32, 40#Int32, 41#Int32, 42#Int32, 43#Int32, 44#Int32, 45#Int32, 46#Int32, 47#Int32 #)) (packInt32X16# (# 48#Int32, 49#Int32, 50#Int32, 51#Int32, 52#Int32, 53#Int32, 54#Int32, 55#Int32, 56#Int32, 57#Int32, 58#Int32, 59#Int32, 60#Int32, 61#Int32, 62#Int32, 63#Int32 #))
   -- {-# INLINE enumFromZero #-}
@@ -560,22 +560,22 @@ instance EquatableF X64 Int64 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Int64 where
   ltF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkBoolX64 $ (fromIntegral (ltInt64X8# u0 v0)) .|. (fromIntegral (ltInt64X8# u1 v1) `unsafeShiftL` 8) .|. (fromIntegral (ltInt64X8# u2 v2) `unsafeShiftL` 16) .|. (fromIntegral (ltInt64X8# u3 v3) `unsafeShiftL` 24) .|. (fromIntegral (ltInt64X8# u4 v4) `unsafeShiftL` 32) .|. (fromIntegral (ltInt64X8# u5 v5) `unsafeShiftL` 40) .|. (fromIntegral (ltInt64X8# u6 v6) `unsafeShiftL` 48) .|. (fromIntegral (ltInt64X8# u7 v7) `unsafeShiftL` 56)
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Int64 where
-  minF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (minInt64X8# u0 v0) (minInt64X8# u1 v1) (minInt64X8# u2 v2) (minInt64X8# u3 v3) (minInt64X8# u4 v4) (minInt64X8# u5 v5) (minInt64X8# u6 v6) (minInt64X8# u7 v7)
-  maxF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (maxInt64X8# u0 v0) (maxInt64X8# u1 v1) (maxInt64X8# u2 v2) (maxInt64X8# u3 v3) (maxInt64X8# u4 v4) (maxInt64X8# u5 v5) (maxInt64X8# u6 v6) (maxInt64X8# u7 v7)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Int64) where
+  min (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (minInt64X8# u0 v0) (minInt64X8# u1 v1) (minInt64X8# u2 v2) (minInt64X8# u3 v3) (minInt64X8# u4 v4) (minInt64X8# u5 v5) (minInt64X8# u6 v6) (minInt64X8# u7 v7)
+  max (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (maxInt64X8# u0 v0) (maxInt64X8# u1 v1) (maxInt64X8# u2 v2) (maxInt64X8# u3 v3) (maxInt64X8# u4 v4) (maxInt64X8# u5 v5) (maxInt64X8# u6 v6) (maxInt64X8# u7 v7)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Int64 where
   plusF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (plusInt64X8# u0 v0) (plusInt64X8# u1 v1) (plusInt64X8# u2 v2) (plusInt64X8# u3 v3) (plusInt64X8# u4 v4) (plusInt64X8# u5 v5) (plusInt64X8# u6 v6) (plusInt64X8# u7 v7)
   minusF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (minusInt64X8# u0 v0) (minusInt64X8# u1 v1) (minusInt64X8# u2 v2) (minusInt64X8# u3 v3) (minusInt64X8# u4 v4) (minusInt64X8# u5 v5) (minusInt64X8# u6 v6) (minusInt64X8# u7 v7)
@@ -587,20 +587,20 @@ instance NumF X64 Int64 where
   {-# INLINE timesF #-}
   {-# INLINE negateF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Int64 where
-  andF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (andInt64X8# u0 v0) (andInt64X8# u1 v1) (andInt64X8# u2 v2) (andInt64X8# u3 v3) (andInt64X8# u4 v4) (andInt64X8# u5 v5) (andInt64X8# u6 v6) (andInt64X8# u7 v7)
-  orF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (orInt64X8# u0 v0) (orInt64X8# u1 v1) (orInt64X8# u2 v2) (orInt64X8# u3 v3) (orInt64X8# u4 v4) (orInt64X8# u5 v5) (orInt64X8# u6 v6) (orInt64X8# u7 v7)
-  xorF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (xorInt64X8# u0 v0) (xorInt64X8# u1 v1) (xorInt64X8# u2 v2) (xorInt64X8# u3 v3) (xorInt64X8# u4 v4) (xorInt64X8# u5 v5) (xorInt64X8# u6 v6) (xorInt64X8# u7 v7)
-  complementF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) = MkInt64X64WithVec512 (complementInt64X8# u0) (complementInt64X8# u1) (complementInt64X8# u2) (complementInt64X8# u3) (complementInt64X8# u4) (complementInt64X8# u5) (complementInt64X8# u6) (complementInt64X8# u7)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Int64 where
-  shiftLF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkInt64X64WithVec512 (shiftLInt64X8# u0 i) (shiftLInt64X8# u1 i) (shiftLInt64X8# u2 i) (shiftLInt64X8# u3 i) (shiftLInt64X8# u4 i) (shiftLInt64X8# u5 i) (shiftLInt64X8# u6 i) (shiftLInt64X8# u7 i)
-  shiftRF (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkInt64X64WithVec512 (shiftRInt64X8# u0 i) (shiftRInt64X8# u1 i) (shiftRInt64X8# u2 i) (shiftRInt64X8# u3 i) (shiftRInt64X8# u4 i) (shiftRInt64X8# u5 i) (shiftRInt64X8# u6 i) (shiftRInt64X8# u7 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Int64) where
+  (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) .&. (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (andInt64X8# u0 v0) (andInt64X8# u1 v1) (andInt64X8# u2 v2) (andInt64X8# u3 v3) (andInt64X8# u4 v4) (andInt64X8# u5 v5) (andInt64X8# u6 v6) (andInt64X8# u7 v7)
+  (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) .|. (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (orInt64X8# u0 v0) (orInt64X8# u1 v1) (orInt64X8# u2 v2) (orInt64X8# u3 v3) (orInt64X8# u4 v4) (orInt64X8# u5 v5) (orInt64X8# u6 v6) (orInt64X8# u7 v7)
+  xor (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X64WithVec512 (xorInt64X8# u0 v0) (xorInt64X8# u1 v1) (xorInt64X8# u2 v2) (xorInt64X8# u3 v3) (xorInt64X8# u4 v4) (xorInt64X8# u5 v5) (xorInt64X8# u6 v6) (xorInt64X8# u7 v7)
+  complement (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) = MkInt64X64WithVec512 (complementInt64X8# u0) (complementInt64X8# u1) (complementInt64X8# u2) (complementInt64X8# u3) (complementInt64X8# u4) (complementInt64X8# u5) (complementInt64X8# u6) (complementInt64X8# u7)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Int64) where
+  shiftL (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkInt64X64WithVec512 (shiftLInt64X8# u0 i) (shiftLInt64X8# u1 i) (shiftLInt64X8# u2 i) (shiftLInt64X8# u3 i) (shiftLInt64X8# u4 i) (shiftLInt64X8# u5 i) (shiftLInt64X8# u6 i) (shiftLInt64X8# u7 i)
+  shiftR (MkInt64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkInt64X64WithVec512 (shiftRInt64X8# u0 i) (shiftRInt64X8# u1 i) (shiftRInt64X8# u2 i) (shiftRInt64X8# u3 i) (shiftRInt64X8# u4 i) (shiftRInt64X8# u5 i) (shiftRInt64X8# u6 i) (shiftRInt64X8# u7 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Int64 where
   enumFromZero = MkInt64X64WithVec512 (packInt64X8# (# 0#Int64, 1#Int64, 2#Int64, 3#Int64, 4#Int64, 5#Int64, 6#Int64, 7#Int64 #)) (packInt64X8# (# 8#Int64, 9#Int64, 10#Int64, 11#Int64, 12#Int64, 13#Int64, 14#Int64, 15#Int64 #)) (packInt64X8# (# 16#Int64, 17#Int64, 18#Int64, 19#Int64, 20#Int64, 21#Int64, 22#Int64, 23#Int64 #)) (packInt64X8# (# 24#Int64, 25#Int64, 26#Int64, 27#Int64, 28#Int64, 29#Int64, 30#Int64, 31#Int64 #)) (packInt64X8# (# 32#Int64, 33#Int64, 34#Int64, 35#Int64, 36#Int64, 37#Int64, 38#Int64, 39#Int64 #)) (packInt64X8# (# 40#Int64, 41#Int64, 42#Int64, 43#Int64, 44#Int64, 45#Int64, 46#Int64, 47#Int64 #)) (packInt64X8# (# 48#Int64, 49#Int64, 50#Int64, 51#Int64, 52#Int64, 53#Int64, 54#Int64, 55#Int64 #)) (packInt64X8# (# 56#Int64, 57#Int64, 58#Int64, 59#Int64, 60#Int64, 61#Int64, 62#Int64, 63#Int64 #))
   -- {-# INLINE enumFromZero #-}
@@ -639,22 +639,22 @@ instance EquatableF X64 Word8 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Word8 where
   ltF (MkWord8X64 u0) (MkWord8X64 v0) = MkBoolX64 $ (fromIntegral (ltWord8X64# u0 v0))
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Word8 where
-  minF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (minWord8X64# u0 v0)
-  maxF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (maxWord8X64# u0 v0)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Word8) where
+  min (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (minWord8X64# u0 v0)
+  max (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (maxWord8X64# u0 v0)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Word8 where
   plusF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (plusWord8X64# u0 v0)
   minusF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (minusWord8X64# u0 v0)
@@ -665,20 +665,20 @@ instance NumF X64 Word8 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Word8 where
-  andF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (andWord8X64# u0 v0)
-  orF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (orWord8X64# u0 v0)
-  xorF (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (xorWord8X64# u0 v0)
-  complementF (MkWord8X64 u0) = MkWord8X64 (complementWord8X64# u0)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Word8 where
-  shiftLF (MkWord8X64 u0) (I# i) = MkWord8X64 (shiftLWord8X64# u0 i)
-  shiftRF (MkWord8X64 u0) (I# i) = MkWord8X64 (shiftRWord8X64# u0 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Word8) where
+  (MkWord8X64 u0) .&. (MkWord8X64 v0) = MkWord8X64 (andWord8X64# u0 v0)
+  (MkWord8X64 u0) .|. (MkWord8X64 v0) = MkWord8X64 (orWord8X64# u0 v0)
+  xor (MkWord8X64 u0) (MkWord8X64 v0) = MkWord8X64 (xorWord8X64# u0 v0)
+  complement (MkWord8X64 u0) = MkWord8X64 (complementWord8X64# u0)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Word8) where
+  shiftL (MkWord8X64 u0) (I# i) = MkWord8X64 (shiftLWord8X64# u0 i)
+  shiftR (MkWord8X64 u0) (I# i) = MkWord8X64 (shiftRWord8X64# u0 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Word8 where
   enumFromZero = MkWord8X64 (packWord8X64# (# 0#Word8, 1#Word8, 2#Word8, 3#Word8, 4#Word8, 5#Word8, 6#Word8, 7#Word8, 8#Word8, 9#Word8, 10#Word8, 11#Word8, 12#Word8, 13#Word8, 14#Word8, 15#Word8, 16#Word8, 17#Word8, 18#Word8, 19#Word8, 20#Word8, 21#Word8, 22#Word8, 23#Word8, 24#Word8, 25#Word8, 26#Word8, 27#Word8, 28#Word8, 29#Word8, 30#Word8, 31#Word8, 32#Word8, 33#Word8, 34#Word8, 35#Word8, 36#Word8, 37#Word8, 38#Word8, 39#Word8, 40#Word8, 41#Word8, 42#Word8, 43#Word8, 44#Word8, 45#Word8, 46#Word8, 47#Word8, 48#Word8, 49#Word8, 50#Word8, 51#Word8, 52#Word8, 53#Word8, 54#Word8, 55#Word8, 56#Word8, 57#Word8, 58#Word8, 59#Word8, 60#Word8, 61#Word8, 62#Word8, 63#Word8 #))
   -- {-# INLINE enumFromZero #-}
@@ -717,22 +717,22 @@ instance EquatableF X64 Word16 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Word16 where
   ltF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkBoolX64 $ (fromIntegral (ltWord16X32# u0 v0)) .|. (fromIntegral (ltWord16X32# u1 v1) `unsafeShiftL` 32)
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Word16 where
-  minF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (minWord16X32# u0 v0) (minWord16X32# u1 v1)
-  maxF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (maxWord16X32# u0 v0) (maxWord16X32# u1 v1)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Word16) where
+  min (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (minWord16X32# u0 v0) (minWord16X32# u1 v1)
+  max (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (maxWord16X32# u0 v0) (maxWord16X32# u1 v1)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Word16 where
   plusF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (plusWord16X32# u0 v0) (plusWord16X32# u1 v1)
   minusF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (minusWord16X32# u0 v0) (minusWord16X32# u1 v1)
@@ -743,20 +743,20 @@ instance NumF X64 Word16 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Word16 where
-  andF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (andWord16X32# u0 v0) (andWord16X32# u1 v1)
-  orF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (orWord16X32# u0 v0) (orWord16X32# u1 v1)
-  xorF (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (xorWord16X32# u0 v0) (xorWord16X32# u1 v1)
-  complementF (MkWord16X64WithVec512 u0 u1) = MkWord16X64WithVec512 (complementWord16X32# u0) (complementWord16X32# u1)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Word16 where
-  shiftLF (MkWord16X64WithVec512 u0 u1) (I# i) = MkWord16X64WithVec512 (shiftLWord16X32# u0 i) (shiftLWord16X32# u1 i)
-  shiftRF (MkWord16X64WithVec512 u0 u1) (I# i) = MkWord16X64WithVec512 (shiftRWord16X32# u0 i) (shiftRWord16X32# u1 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Word16) where
+  (MkWord16X64WithVec512 u0 u1) .&. (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (andWord16X32# u0 v0) (andWord16X32# u1 v1)
+  (MkWord16X64WithVec512 u0 u1) .|. (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (orWord16X32# u0 v0) (orWord16X32# u1 v1)
+  xor (MkWord16X64WithVec512 u0 u1) (MkWord16X64WithVec512 v0 v1) = MkWord16X64WithVec512 (xorWord16X32# u0 v0) (xorWord16X32# u1 v1)
+  complement (MkWord16X64WithVec512 u0 u1) = MkWord16X64WithVec512 (complementWord16X32# u0) (complementWord16X32# u1)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Word16) where
+  shiftL (MkWord16X64WithVec512 u0 u1) (I# i) = MkWord16X64WithVec512 (shiftLWord16X32# u0 i) (shiftLWord16X32# u1 i)
+  shiftR (MkWord16X64WithVec512 u0 u1) (I# i) = MkWord16X64WithVec512 (shiftRWord16X32# u0 i) (shiftRWord16X32# u1 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Word16 where
   enumFromZero = MkWord16X64WithVec512 (packWord16X32# (# 0#Word16, 1#Word16, 2#Word16, 3#Word16, 4#Word16, 5#Word16, 6#Word16, 7#Word16, 8#Word16, 9#Word16, 10#Word16, 11#Word16, 12#Word16, 13#Word16, 14#Word16, 15#Word16, 16#Word16, 17#Word16, 18#Word16, 19#Word16, 20#Word16, 21#Word16, 22#Word16, 23#Word16, 24#Word16, 25#Word16, 26#Word16, 27#Word16, 28#Word16, 29#Word16, 30#Word16, 31#Word16 #)) (packWord16X32# (# 32#Word16, 33#Word16, 34#Word16, 35#Word16, 36#Word16, 37#Word16, 38#Word16, 39#Word16, 40#Word16, 41#Word16, 42#Word16, 43#Word16, 44#Word16, 45#Word16, 46#Word16, 47#Word16, 48#Word16, 49#Word16, 50#Word16, 51#Word16, 52#Word16, 53#Word16, 54#Word16, 55#Word16, 56#Word16, 57#Word16, 58#Word16, 59#Word16, 60#Word16, 61#Word16, 62#Word16, 63#Word16 #))
   -- {-# INLINE enumFromZero #-}
@@ -795,22 +795,22 @@ instance EquatableF X64 Word32 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Word32 where
   ltF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkBoolX64 $ (fromIntegral (ltWord32X16# u0 v0)) .|. (fromIntegral (ltWord32X16# u1 v1) `unsafeShiftL` 16) .|. (fromIntegral (ltWord32X16# u2 v2) `unsafeShiftL` 32) .|. (fromIntegral (ltWord32X16# u3 v3) `unsafeShiftL` 48)
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Word32 where
-  minF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (minWord32X16# u0 v0) (minWord32X16# u1 v1) (minWord32X16# u2 v2) (minWord32X16# u3 v3)
-  maxF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (maxWord32X16# u0 v0) (maxWord32X16# u1 v1) (maxWord32X16# u2 v2) (maxWord32X16# u3 v3)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Word32) where
+  min (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (minWord32X16# u0 v0) (minWord32X16# u1 v1) (minWord32X16# u2 v2) (minWord32X16# u3 v3)
+  max (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (maxWord32X16# u0 v0) (maxWord32X16# u1 v1) (maxWord32X16# u2 v2) (maxWord32X16# u3 v3)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Word32 where
   plusF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (plusWord32X16# u0 v0) (plusWord32X16# u1 v1) (plusWord32X16# u2 v2) (plusWord32X16# u3 v3)
   minusF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (minusWord32X16# u0 v0) (minusWord32X16# u1 v1) (minusWord32X16# u2 v2) (minusWord32X16# u3 v3)
@@ -821,20 +821,20 @@ instance NumF X64 Word32 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Word32 where
-  andF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (andWord32X16# u0 v0) (andWord32X16# u1 v1) (andWord32X16# u2 v2) (andWord32X16# u3 v3)
-  orF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (orWord32X16# u0 v0) (orWord32X16# u1 v1) (orWord32X16# u2 v2) (orWord32X16# u3 v3)
-  xorF (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (xorWord32X16# u0 v0) (xorWord32X16# u1 v1) (xorWord32X16# u2 v2) (xorWord32X16# u3 v3)
-  complementF (MkWord32X64WithVec512 u0 u1 u2 u3) = MkWord32X64WithVec512 (complementWord32X16# u0) (complementWord32X16# u1) (complementWord32X16# u2) (complementWord32X16# u3)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Word32 where
-  shiftLF (MkWord32X64WithVec512 u0 u1 u2 u3) (I# i) = MkWord32X64WithVec512 (shiftLWord32X16# u0 i) (shiftLWord32X16# u1 i) (shiftLWord32X16# u2 i) (shiftLWord32X16# u3 i)
-  shiftRF (MkWord32X64WithVec512 u0 u1 u2 u3) (I# i) = MkWord32X64WithVec512 (shiftRWord32X16# u0 i) (shiftRWord32X16# u1 i) (shiftRWord32X16# u2 i) (shiftRWord32X16# u3 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Word32) where
+  (MkWord32X64WithVec512 u0 u1 u2 u3) .&. (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (andWord32X16# u0 v0) (andWord32X16# u1 v1) (andWord32X16# u2 v2) (andWord32X16# u3 v3)
+  (MkWord32X64WithVec512 u0 u1 u2 u3) .|. (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (orWord32X16# u0 v0) (orWord32X16# u1 v1) (orWord32X16# u2 v2) (orWord32X16# u3 v3)
+  xor (MkWord32X64WithVec512 u0 u1 u2 u3) (MkWord32X64WithVec512 v0 v1 v2 v3) = MkWord32X64WithVec512 (xorWord32X16# u0 v0) (xorWord32X16# u1 v1) (xorWord32X16# u2 v2) (xorWord32X16# u3 v3)
+  complement (MkWord32X64WithVec512 u0 u1 u2 u3) = MkWord32X64WithVec512 (complementWord32X16# u0) (complementWord32X16# u1) (complementWord32X16# u2) (complementWord32X16# u3)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Word32) where
+  shiftL (MkWord32X64WithVec512 u0 u1 u2 u3) (I# i) = MkWord32X64WithVec512 (shiftLWord32X16# u0 i) (shiftLWord32X16# u1 i) (shiftLWord32X16# u2 i) (shiftLWord32X16# u3 i)
+  shiftR (MkWord32X64WithVec512 u0 u1 u2 u3) (I# i) = MkWord32X64WithVec512 (shiftRWord32X16# u0 i) (shiftRWord32X16# u1 i) (shiftRWord32X16# u2 i) (shiftRWord32X16# u3 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Word32 where
   enumFromZero = MkWord32X64WithVec512 (packWord32X16# (# 0#Word32, 1#Word32, 2#Word32, 3#Word32, 4#Word32, 5#Word32, 6#Word32, 7#Word32, 8#Word32, 9#Word32, 10#Word32, 11#Word32, 12#Word32, 13#Word32, 14#Word32, 15#Word32 #)) (packWord32X16# (# 16#Word32, 17#Word32, 18#Word32, 19#Word32, 20#Word32, 21#Word32, 22#Word32, 23#Word32, 24#Word32, 25#Word32, 26#Word32, 27#Word32, 28#Word32, 29#Word32, 30#Word32, 31#Word32 #)) (packWord32X16# (# 32#Word32, 33#Word32, 34#Word32, 35#Word32, 36#Word32, 37#Word32, 38#Word32, 39#Word32, 40#Word32, 41#Word32, 42#Word32, 43#Word32, 44#Word32, 45#Word32, 46#Word32, 47#Word32 #)) (packWord32X16# (# 48#Word32, 49#Word32, 50#Word32, 51#Word32, 52#Word32, 53#Word32, 54#Word32, 55#Word32, 56#Word32, 57#Word32, 58#Word32, 59#Word32, 60#Word32, 61#Word32, 62#Word32, 63#Word32 #))
   -- {-# INLINE enumFromZero #-}
@@ -873,22 +873,22 @@ instance EquatableF X64 Word64 where
   {-# INLINE eqF #-}
 instance OrderedF X64 Word64 where
   ltF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkBoolX64 $ (fromIntegral (ltWord64X8# u0 v0)) .|. (fromIntegral (ltWord64X8# u1 v1) `unsafeShiftL` 8) .|. (fromIntegral (ltWord64X8# u2 v2) `unsafeShiftL` 16) .|. (fromIntegral (ltWord64X8# u3 v3) `unsafeShiftL` 24) .|. (fromIntegral (ltWord64X8# u4 v4) `unsafeShiftL` 32) .|. (fromIntegral (ltWord64X8# u5 v5) `unsafeShiftL` 40) .|. (fromIntegral (ltWord64X8# u6 v6) `unsafeShiftL` 48) .|. (fromIntegral (ltWord64X8# u7 v7) `unsafeShiftL` 56)
-  leF !x !y = complementF (ltF y x)
+  leF !x !y = B.complement (ltF y x)
   gtF !x !y = ltF y x
-  geF !x !y = complementF (ltF x y)
+  geF !x !y = B.complement (ltF x y)
   {-# INLINE ltF #-}
   {-# INLINE leF #-}
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
-instance MinMaxF X64 Word64 where
-  minF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (minWord64X8# u0 v0) (minWord64X8# u1 v1) (minWord64X8# u2 v2) (minWord64X8# u3 v3) (minWord64X8# u4 v4) (minWord64X8# u5 v5) (minWord64X8# u6 v6) (minWord64X8# u7 v7)
-  maxF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (maxWord64X8# u0 v0) (maxWord64X8# u1 v1) (maxWord64X8# u2 v2) (maxWord64X8# u3 v3) (maxWord64X8# u4 v4) (maxWord64X8# u5 v5) (maxWord64X8# u6 v6) (maxWord64X8# u7 v7)
-  minimumNumberF = minF
-  maximumNumberF = maxF
-  {-# INLINE minF #-}
-  {-# INLINE maxF #-}
-  {-# INLINE minimumNumberF #-}
-  {-# INLINE maximumNumberF #-}
+instance MinMax (X64 Word64) where
+  min (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (minWord64X8# u0 v0) (minWord64X8# u1 v1) (minWord64X8# u2 v2) (minWord64X8# u3 v3) (minWord64X8# u4 v4) (minWord64X8# u5 v5) (minWord64X8# u6 v6) (minWord64X8# u7 v7)
+  max (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (maxWord64X8# u0 v0) (maxWord64X8# u1 v1) (maxWord64X8# u2 v2) (maxWord64X8# u3 v3) (maxWord64X8# u4 v4) (maxWord64X8# u5 v5) (maxWord64X8# u6 v6) (maxWord64X8# u7 v7)
+  minimumNumber = min
+  maximumNumber = max
+  {-# INLINE min #-}
+  {-# INLINE max #-}
+  {-# INLINE minimumNumber #-}
+  {-# INLINE maximumNumber #-}
 instance NumF X64 Word64 where
   plusF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (plusWord64X8# u0 v0) (plusWord64X8# u1 v1) (plusWord64X8# u2 v2) (plusWord64X8# u3 v3) (plusWord64X8# u4 v4) (plusWord64X8# u5 v5) (plusWord64X8# u6 v6) (plusWord64X8# u7 v7)
   minusF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (minusWord64X8# u0 v0) (minusWord64X8# u1 v1) (minusWord64X8# u2 v2) (minusWord64X8# u3 v3) (minusWord64X8# u4 v4) (minusWord64X8# u5 v5) (minusWord64X8# u6 v6) (minusWord64X8# u7 v7)
@@ -899,20 +899,20 @@ instance NumF X64 Word64 where
   {-# INLINE minusF #-}
   {-# INLINE timesF #-}
   {-# INLINE absF #-}
-instance BooleanF X64 Word64 where
-  andF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (andWord64X8# u0 v0) (andWord64X8# u1 v1) (andWord64X8# u2 v2) (andWord64X8# u3 v3) (andWord64X8# u4 v4) (andWord64X8# u5 v5) (andWord64X8# u6 v6) (andWord64X8# u7 v7)
-  orF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (orWord64X8# u0 v0) (orWord64X8# u1 v1) (orWord64X8# u2 v2) (orWord64X8# u3 v3) (orWord64X8# u4 v4) (orWord64X8# u5 v5) (orWord64X8# u6 v6) (orWord64X8# u7 v7)
-  xorF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (xorWord64X8# u0 v0) (xorWord64X8# u1 v1) (xorWord64X8# u2 v2) (xorWord64X8# u3 v3) (xorWord64X8# u4 v4) (xorWord64X8# u5 v5) (xorWord64X8# u6 v6) (xorWord64X8# u7 v7)
-  complementF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) = MkWord64X64WithVec512 (complementWord64X8# u0) (complementWord64X8# u1) (complementWord64X8# u2) (complementWord64X8# u3) (complementWord64X8# u4) (complementWord64X8# u5) (complementWord64X8# u6) (complementWord64X8# u7)
-  {-# INLINE andF #-}
-  {-# INLINE orF #-}
-  {-# INLINE xorF #-}
-  {-# INLINE complementF #-}
-instance BitShiftF X64 Word64 where
-  shiftLF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkWord64X64WithVec512 (shiftLWord64X8# u0 i) (shiftLWord64X8# u1 i) (shiftLWord64X8# u2 i) (shiftLWord64X8# u3 i) (shiftLWord64X8# u4 i) (shiftLWord64X8# u5 i) (shiftLWord64X8# u6 i) (shiftLWord64X8# u7 i)
-  shiftRF (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkWord64X64WithVec512 (shiftRWord64X8# u0 i) (shiftRWord64X8# u1 i) (shiftRWord64X8# u2 i) (shiftRWord64X8# u3 i) (shiftRWord64X8# u4 i) (shiftRWord64X8# u5 i) (shiftRWord64X8# u6 i) (shiftRWord64X8# u7 i)
-  {-# INLINE shiftLF #-}
-  {-# INLINE shiftRF #-}
+instance Boolean (X64 Word64) where
+  (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) .&. (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (andWord64X8# u0 v0) (andWord64X8# u1 v1) (andWord64X8# u2 v2) (andWord64X8# u3 v3) (andWord64X8# u4 v4) (andWord64X8# u5 v5) (andWord64X8# u6 v6) (andWord64X8# u7 v7)
+  (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) .|. (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (orWord64X8# u0 v0) (orWord64X8# u1 v1) (orWord64X8# u2 v2) (orWord64X8# u3 v3) (orWord64X8# u4 v4) (orWord64X8# u5 v5) (orWord64X8# u6 v6) (orWord64X8# u7 v7)
+  xor (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X64WithVec512 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X64WithVec512 (xorWord64X8# u0 v0) (xorWord64X8# u1 v1) (xorWord64X8# u2 v2) (xorWord64X8# u3 v3) (xorWord64X8# u4 v4) (xorWord64X8# u5 v5) (xorWord64X8# u6 v6) (xorWord64X8# u7 v7)
+  complement (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) = MkWord64X64WithVec512 (complementWord64X8# u0) (complementWord64X8# u1) (complementWord64X8# u2) (complementWord64X8# u3) (complementWord64X8# u4) (complementWord64X8# u5) (complementWord64X8# u6) (complementWord64X8# u7)
+  {-# INLINE (.&.) #-}
+  {-# INLINE (.|.) #-}
+  {-# INLINE xor #-}
+  {-# INLINE complement #-}
+instance BitShift (X64 Word64) where
+  shiftL (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkWord64X64WithVec512 (shiftLWord64X8# u0 i) (shiftLWord64X8# u1 i) (shiftLWord64X8# u2 i) (shiftLWord64X8# u3 i) (shiftLWord64X8# u4 i) (shiftLWord64X8# u5 i) (shiftLWord64X8# u6 i) (shiftLWord64X8# u7 i)
+  shiftR (MkWord64X64WithVec512 u0 u1 u2 u3 u4 u5 u6 u7) (I# i) = MkWord64X64WithVec512 (shiftRWord64X8# u0 i) (shiftRWord64X8# u1 i) (shiftRWord64X8# u2 i) (shiftRWord64X8# u3 i) (shiftRWord64X8# u4 i) (shiftRWord64X8# u5 i) (shiftRWord64X8# u6 i) (shiftRWord64X8# u7 i)
+  {-# INLINE shiftL #-}
+  {-# INLINE shiftR #-}
 instance EnumFromZero_ X64 Word64 where
   enumFromZero = MkWord64X64WithVec512 (packWord64X8# (# 0#Word64, 1#Word64, 2#Word64, 3#Word64, 4#Word64, 5#Word64, 6#Word64, 7#Word64 #)) (packWord64X8# (# 8#Word64, 9#Word64, 10#Word64, 11#Word64, 12#Word64, 13#Word64, 14#Word64, 15#Word64 #)) (packWord64X8# (# 16#Word64, 17#Word64, 18#Word64, 19#Word64, 20#Word64, 21#Word64, 22#Word64, 23#Word64 #)) (packWord64X8# (# 24#Word64, 25#Word64, 26#Word64, 27#Word64, 28#Word64, 29#Word64, 30#Word64, 31#Word64 #)) (packWord64X8# (# 32#Word64, 33#Word64, 34#Word64, 35#Word64, 36#Word64, 37#Word64, 38#Word64, 39#Word64 #)) (packWord64X8# (# 40#Word64, 41#Word64, 42#Word64, 43#Word64, 44#Word64, 45#Word64, 46#Word64, 47#Word64 #)) (packWord64X8# (# 48#Word64, 49#Word64, 50#Word64, 51#Word64, 52#Word64, 53#Word64, 54#Word64, 55#Word64 #)) (packWord64X8# (# 56#Word64, 57#Word64, 58#Word64, 59#Word64, 60#Word64, 61#Word64, 62#Word64, 63#Word64 #))
   -- {-# INLINE enumFromZero #-}
@@ -1217,7 +1217,3 @@ deriving via WrappedMulti X64 a instance SelectableF X64 a => Selectable (X64 a)
 deriving via WrappedMulti X64 a instance NumF X64 a => Num (X64 a)
 deriving via WrappedMulti X64 a instance FractionalF X64 a => Fractional (X64 a)
 deriving via WrappedMulti X64 a instance FloatingF X64 a => Floating (X64 a)
-deriving via WrappedMulti X64 a instance BooleanF X64 a => Boolean (X64 a)
-deriving via WrappedMulti X64 a instance BitShiftF X64 a => BitShift (X64 a)
-deriving via WrappedMulti X64 a instance MinMaxF X64 a => MinMax (X64 a)
-deriving via WrappedMulti X64 a instance FusedMultiplyAddF X64 a => FusedMultiplyAdd (X64 a)
