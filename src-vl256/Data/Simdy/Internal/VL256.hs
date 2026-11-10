@@ -35,6 +35,8 @@ module Data.Simdy.Internal.VL256
   , SIMDBits
   , SIMDMinMax
   , SIMDFMA
+  , SIMDSemigroup
+  , SIMDMonoid
   , SIMDEnumFromZero
   , SIMDPrim
   , SIMDStorable
@@ -149,6 +151,12 @@ instance SIMDElement a => SIMDElement (Sum a)
 instance SIMDElement a => SIMDElement (Product a)
 instance SIMDElement a => SIMDElement (Min a)
 instance SIMDElement a => SIMDElement (Max a)
+instance SIMDElement a => SIMDElement (IEEEMin a)
+instance SIMDElement a => SIMDElement (IEEEMax a)
+instance SIMDElement a => SIMDElement (MinimumNumber a)
+instance SIMDElement a => SIMDElement (MaximumNumber a)
+instance SIMDElement All
+instance SIMDElement Any
 instance SIMDElement a => SIMDElement (Complex a)
 instance (Default a, SIMDElement a) => SIMDElement (Maybe a)
 instance SIMDElement ()
@@ -341,6 +349,52 @@ class ( FusedMultiplyAdd a
 instance HasFMA => SIMDFMA Float
 instance HasFMA => SIMDFMA Double
 
+class ( Semigroup a
+      , SIMDElement a
+      , Semigroup (X2 a)
+      , Semigroup (X4 a)
+      , Semigroup (X8 a)
+      , Semigroup (X16 a)
+      , Semigroup (X32 a)
+      , Semigroup (X64 a)
+      ) => SIMDSemigroup a
+instance SIMDNum a => SIMDSemigroup (Sum a)
+instance SIMDNum a => SIMDSemigroup (Product a)
+instance (Ord a, SIMDMinMax a, MinMaxIsCompatibleWithOrd a) => SIMDSemigroup (Min a)
+instance (Ord a, SIMDMinMax a, MinMaxIsCompatibleWithOrd a) => SIMDSemigroup (Max a)
+instance SIMDMinMax a => SIMDSemigroup (IEEEMin a)
+instance SIMDMinMax a => SIMDSemigroup (IEEEMax a)
+instance SIMDMinMax a => SIMDSemigroup (MinimumNumber a)
+instance SIMDMinMax a => SIMDSemigroup (MaximumNumber a)
+instance SIMDSemigroup All
+instance SIMDSemigroup Any
+instance SIMDSemigroup ()
+instance (SIMDSemigroup a0, SIMDSemigroup a1) => SIMDSemigroup (a0, a1)
+instance (SIMDSemigroup a0, SIMDSemigroup a1, SIMDSemigroup a2) => SIMDSemigroup (a0, a1, a2)
+instance (SIMDSemigroup a0, SIMDSemigroup a1, SIMDSemigroup a2, SIMDSemigroup a3) => SIMDSemigroup (a0, a1, a2, a3)
+instance (SIMDSemigroup a0, SIMDSemigroup a1, SIMDSemigroup a2, SIMDSemigroup a3, SIMDSemigroup a4) => SIMDSemigroup (a0, a1, a2, a3, a4)
+
+class ( Monoid a
+      , SIMDSemigroup a
+      , Monoid (X2 a)
+      , Monoid (X4 a)
+      , Monoid (X8 a)
+      , Monoid (X16 a)
+      , Monoid (X32 a)
+      , Monoid (X64 a)
+      ) => SIMDMonoid a
+instance SIMDNum a => SIMDMonoid (Sum a)
+instance SIMDNum a => SIMDMonoid (Product a)
+instance (Ord a, Bounded a, SIMDMinMax a, MinMaxIsCompatibleWithOrd a) => SIMDMonoid (Min a)
+instance (Ord a, Bounded a, SIMDMinMax a, MinMaxIsCompatibleWithOrd a) => SIMDMonoid (Max a)
+instance SIMDMonoid All
+instance SIMDMonoid Any
+instance SIMDMonoid ()
+instance (SIMDMonoid a0, SIMDMonoid a1) => SIMDMonoid (a0, a1)
+instance (SIMDMonoid a0, SIMDMonoid a1, SIMDMonoid a2) => SIMDMonoid (a0, a1, a2)
+instance (SIMDMonoid a0, SIMDMonoid a1, SIMDMonoid a2, SIMDMonoid a3) => SIMDMonoid (a0, a1, a2, a3)
+instance (SIMDMonoid a0, SIMDMonoid a1, SIMDMonoid a2, SIMDMonoid a3, SIMDMonoid a4) => SIMDMonoid (a0, a1, a2, a3, a4)
+
 class ( Num a
       , SIMDElement a
       , EnumFromZero X2 a
@@ -424,6 +478,8 @@ class ( KnownSIMDLength f
       , forall a. SIMDBits a => BitShift (f a)
       , forall a. SIMDMinMax a => MinMax (f a)
       , forall a. SIMDFMA a => FusedMultiplyAdd (f a)
+      , forall a. SIMDSemigroup a => Semigroup (f a)
+      , forall a. SIMDMonoid a => Monoid (f a)
       , forall a. SIMDEnumFromZero a => EnumFromZero_ f a
       , forall a. SIMDEnumFromZero a => NumF f a
       , forall a. SIMDPrim a => MultiPrim f a

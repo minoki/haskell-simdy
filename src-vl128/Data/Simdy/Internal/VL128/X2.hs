@@ -30,6 +30,7 @@ import qualified GHC.Exts
 import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
+import           GHC.TypeError (Unsatisfiable, ErrorMessage (Text))
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
 import qualified Prelude
@@ -125,6 +126,7 @@ instance OrderedF X2 Float where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Float) where
+  type MinMaxIsCompatibleWithOrd (X2 Float) = Unsatisfiable (Text "This instance is not compatible with the min/max functions in Ord")
   min (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (minimumFloatX4# u0 v0)
   max (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (maximumFloatX4# u0 v0)
   minimumNumber (MkFloatX2 u0) (MkFloatX2 v0) = MkFloatX2 (minimumNumberFloatX4# u0 v0)
@@ -226,6 +228,7 @@ instance OrderedF X2 Double where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Double) where
+  type MinMaxIsCompatibleWithOrd (X2 Double) = Unsatisfiable (Text "This instance is not compatible with the min/max functions in Ord")
   min (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (minimumDoubleX2# u0 v0)
   max (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (maximumDoubleX2# u0 v0)
   minimumNumber (MkDoubleX2 u0) (MkDoubleX2 v0) = MkDoubleX2 (minimumNumberDoubleX2# u0 v0)
@@ -330,6 +333,7 @@ instance OrderedF X2 Int8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int8) where
+  type MinMaxIsCompatibleWithOrd (X2 Int8) = ()
   min (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (minInt8X16# u0 v0)
   max (MkInt8X2 u0) (MkInt8X2 v0) = MkInt8X2 (maxInt8X16# u0 v0)
   minimumNumber = min
@@ -409,6 +413,7 @@ instance OrderedF X2 Int16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int16) where
+  type MinMaxIsCompatibleWithOrd (X2 Int16) = ()
   min (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (minInt16X8# u0 v0)
   max (MkInt16X2 u0) (MkInt16X2 v0) = MkInt16X2 (maxInt16X8# u0 v0)
   minimumNumber = min
@@ -488,6 +493,7 @@ instance OrderedF X2 Int32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int32) where
+  type MinMaxIsCompatibleWithOrd (X2 Int32) = ()
   min (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (minInt32X4# u0 v0)
   max (MkInt32X2 u0) (MkInt32X2 v0) = MkInt32X2 (maxInt32X4# u0 v0)
   minimumNumber = min
@@ -567,6 +573,7 @@ instance OrderedF X2 Int64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int64) where
+  type MinMaxIsCompatibleWithOrd (X2 Int64) = ()
   min (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (minInt64X2# u0 v0)
   max (MkInt64X2 u0) (MkInt64X2 v0) = MkInt64X2 (maxInt64X2# u0 v0)
   minimumNumber = min
@@ -646,6 +653,7 @@ instance OrderedF X2 Word8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word8) where
+  type MinMaxIsCompatibleWithOrd (X2 Word8) = ()
   min (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (minWord8X16# u0 v0)
   max (MkWord8X2 u0) (MkWord8X2 v0) = MkWord8X2 (maxWord8X16# u0 v0)
   minimumNumber = min
@@ -724,6 +732,7 @@ instance OrderedF X2 Word16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word16) where
+  type MinMaxIsCompatibleWithOrd (X2 Word16) = ()
   min (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (minWord16X8# u0 v0)
   max (MkWord16X2 u0) (MkWord16X2 v0) = MkWord16X2 (maxWord16X8# u0 v0)
   minimumNumber = min
@@ -802,6 +811,7 @@ instance OrderedF X2 Word32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word32) where
+  type MinMaxIsCompatibleWithOrd (X2 Word32) = ()
   min (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (minWord32X4# u0 v0)
   max (MkWord32X2 u0) (MkWord32X2 v0) = MkWord32X2 (maxWord32X4# u0 v0)
   minimumNumber = min
@@ -880,6 +890,7 @@ instance OrderedF X2 Word64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word64) where
+  type MinMaxIsCompatibleWithOrd (X2 Word64) = ()
   min (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (minWord64X2# u0 v0)
   max (MkWord64X2 u0) (MkWord64X2 v0) = MkWord64X2 (maxWord64X2# u0 v0)
   minimumNumber = min
@@ -961,6 +972,7 @@ instance OrderedF X2 Int8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int8) where
+  type MinMaxIsCompatibleWithOrd (X2 Int8) = ()
   min (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (min x0 y0) (min x1 y1)
   max (MkInt8X2WithElems x0 x1) (MkInt8X2WithElems y0 y1) = MkInt8X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1041,6 +1053,7 @@ instance OrderedF X2 Int16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int16) where
+  type MinMaxIsCompatibleWithOrd (X2 Int16) = ()
   min (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (min x0 y0) (min x1 y1)
   max (MkInt16X2WithElems x0 x1) (MkInt16X2WithElems y0 y1) = MkInt16X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1121,6 +1134,7 @@ instance OrderedF X2 Int32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int32) where
+  type MinMaxIsCompatibleWithOrd (X2 Int32) = ()
   min (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (min x0 y0) (min x1 y1)
   max (MkInt32X2WithElems x0 x1) (MkInt32X2WithElems y0 y1) = MkInt32X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1201,6 +1215,7 @@ instance OrderedF X2 Int64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Int64) where
+  type MinMaxIsCompatibleWithOrd (X2 Int64) = ()
   min (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (min x0 y0) (min x1 y1)
   max (MkInt64X2WithElems x0 x1) (MkInt64X2WithElems y0 y1) = MkInt64X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1281,6 +1296,7 @@ instance OrderedF X2 Word8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word8) where
+  type MinMaxIsCompatibleWithOrd (X2 Word8) = ()
   min (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (min x0 y0) (min x1 y1)
   max (MkWord8X2WithElems x0 x1) (MkWord8X2WithElems y0 y1) = MkWord8X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1361,6 +1377,7 @@ instance OrderedF X2 Word16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word16) where
+  type MinMaxIsCompatibleWithOrd (X2 Word16) = ()
   min (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (min x0 y0) (min x1 y1)
   max (MkWord16X2WithElems x0 x1) (MkWord16X2WithElems y0 y1) = MkWord16X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1441,6 +1458,7 @@ instance OrderedF X2 Word32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word32) where
+  type MinMaxIsCompatibleWithOrd (X2 Word32) = ()
   min (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (min x0 y0) (min x1 y1)
   max (MkWord32X2WithElems x0 x1) (MkWord32X2WithElems y0 y1) = MkWord32X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1521,6 +1539,7 @@ instance OrderedF X2 Word64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X2 Word64) where
+  type MinMaxIsCompatibleWithOrd (X2 Word64) = ()
   min (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (min x0 y0) (min x1 y1)
   max (MkWord64X2WithElems x0 x1) (MkWord64X2WithElems y0 y1) = MkWord64X2WithElems (max x0 y0) (max x1 y1)
   minimumNumber = min
@@ -1644,6 +1663,162 @@ instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (Max a) where
 instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (Max a) where
   binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
   {-# INLINE binaryShuffle #-}
+newtype instance X2 (IEEEMin a) = MkIEEEMinX2 (X2 a)
+instance PackX2 X2 a => PackX2 X2 (IEEEMin a) where
+  mkX2 = coerce (mkX2 @X2 @a)
+  unpackX2 = coerce (unpackX2 @X2 @a)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance Broadcast X2 a => Broadcast X2 (IEEEMin a) where
+  broadcast = coerce (broadcast @X2 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 a => SelectableF X2 (IEEEMin a) where
+  selectF = coerce (selectF @X2 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (IEEEMin a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (IEEEMin a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X2 (IEEEMax a) = MkIEEEMaxX2 (X2 a)
+instance PackX2 X2 a => PackX2 X2 (IEEEMax a) where
+  mkX2 = coerce (mkX2 @X2 @a)
+  unpackX2 = coerce (unpackX2 @X2 @a)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance Broadcast X2 a => Broadcast X2 (IEEEMax a) where
+  broadcast = coerce (broadcast @X2 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 a => SelectableF X2 (IEEEMax a) where
+  selectF = coerce (selectF @X2 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (IEEEMax a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (IEEEMax a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X2 (MinimumNumber a) = MkMinimumNumberX2 (X2 a)
+instance PackX2 X2 a => PackX2 X2 (MinimumNumber a) where
+  mkX2 = coerce (mkX2 @X2 @a)
+  unpackX2 = coerce (unpackX2 @X2 @a)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance Broadcast X2 a => Broadcast X2 (MinimumNumber a) where
+  broadcast = coerce (broadcast @X2 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 a => SelectableF X2 (MinimumNumber a) where
+  selectF = coerce (selectF @X2 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (MinimumNumber a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (MinimumNumber a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X2 (MaximumNumber a) = MkMaximumNumberX2 (X2 a)
+instance PackX2 X2 a => PackX2 X2 (MaximumNumber a) where
+  mkX2 = coerce (mkX2 @X2 @a)
+  unpackX2 = coerce (unpackX2 @X2 @a)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance Broadcast X2 a => Broadcast X2 (MaximumNumber a) where
+  broadcast = coerce (broadcast @X2 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 a => SelectableF X2 (MaximumNumber a) where
+  selectF = coerce (selectF @X2 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 a => UnaryShuffleT indices X2 (MaximumNumber a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 a => BinaryShuffleT indices X2 (MaximumNumber a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X2 All = MkAllX2 (X2 Bool)
+instance PackX2 X2 Bool => PackX2 X2 All where
+  mkX2 = coerce (mkX2 @X2 @Bool)
+  unpackX2 = coerce (unpackX2 @X2 @Bool)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance Broadcast X2 Bool => Broadcast X2 All where
+  broadcast = coerce (broadcast @X2 @Bool)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 Bool => SelectableF X2 All where
+  selectF = coerce (selectF @X2 @Bool)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 Bool => UnaryShuffleT indices X2 All where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @Bool)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 Bool => BinaryShuffleT indices X2 All where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @Bool)
+  {-# INLINE binaryShuffle #-}
+newtype instance X2 Any = MkAnyX2 (X2 Bool)
+instance PackX2 X2 Bool => PackX2 X2 Any where
+  mkX2 = coerce (mkX2 @X2 @Bool)
+  unpackX2 = coerce (unpackX2 @X2 @Bool)
+  {-# INLINE mkX2 #-}
+  {-# INLINE unpackX2 #-}
+instance Broadcast X2 Bool => Broadcast X2 Any where
+  broadcast = coerce (broadcast @X2 @Bool)
+  {-# INLINE broadcast #-}
+instance SelectableF X2 Bool => SelectableF X2 Any where
+  selectF = coerce (selectF @X2 @Bool)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X2 Bool => UnaryShuffleT indices X2 Any where
+  unaryShuffle = coerce (unaryShuffle @indices @X2 @Bool)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X2 Bool => BinaryShuffleT indices X2 Any where
+  binaryShuffle = coerce (binaryShuffle @indices @X2 @Bool)
+  {-# INLINE binaryShuffle #-}
+instance (Num a, NumF X2 a) => Semigroup (X2 (Sum a)) where
+  (<>) = coerce ((+) @(X2 a))
+  {-# INLINE (<>) #-}
+instance (Num a, NumF X2 a) => Monoid (X2 (Sum a)) where
+  mempty = MkSumX2 (fromIntegerF 0)
+  {-# INLINE mempty #-}
+instance (Num a, NumF X2 a) => Semigroup (X2 (Product a)) where
+  (<>) = coerce ((*) @(X2 a))
+  {-# INLINE (<>) #-}
+instance (Num a, NumF X2 a) => Monoid (X2 (Product a)) where
+  mempty = MkProductX2 (fromIntegerF 1)
+  {-# INLINE mempty #-}
+instance (MinMax (X2 a), MinMaxIsCompatibleWithOrd a) => Semigroup (X2 (Min a)) where
+  (<>) = coerce (min @(X2 a))
+  {-# INLINE (<>) #-}
+instance (Bounded a, MinMax (X2 a), MinMaxIsCompatibleWithOrd a, Broadcast X2 a) => Monoid (X2 (Min a)) where
+  mempty = MkMinX2 (broadcast maxBound)
+  {-# INLINE mempty #-}
+instance (MinMax (X2 a), MinMaxIsCompatibleWithOrd a) => Semigroup (X2 (Max a)) where
+  (<>) = coerce (max @(X2 a))
+  {-# INLINE (<>) #-}
+instance (Bounded a, MinMax (X2 a), MinMaxIsCompatibleWithOrd a, Broadcast X2 a) => Monoid (X2 (Max a)) where
+  mempty = MkMaxX2 (broadcast minBound)
+  {-# INLINE mempty #-}
+instance MinMax (X2 a) => Semigroup (X2 (IEEEMin a)) where
+  (<>) = coerce (min @(X2 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X2 a) => Semigroup (X2 (IEEEMax a)) where
+  (<>) = coerce (max @(X2 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X2 a) => Semigroup (X2 (MinimumNumber a)) where
+  (<>) = coerce (minimumNumber @(X2 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X2 a) => Semigroup (X2 (MaximumNumber a)) where
+  (<>) = coerce (maximumNumber @(X2 a))
+  {-# INLINE (<>) #-}
+instance Semigroup (X2 All) where
+  (<>) = coerce ((B..&.) @(X2 Bool))
+  {-# INLINE (<>) #-}
+instance Monoid (X2 All) where
+  mempty = MkAllX2 (broadcast True)
+  {-# INLINE mempty #-}
+instance Semigroup (X2 Any) where
+  (<>) = coerce ((B..|.) @(X2 Bool))
+  {-# INLINE (<>) #-}
+instance Monoid (X2 Any) where
+  mempty = MkAnyX2 (broadcast False)
+  {-# INLINE mempty #-}
 data instance X2 (Complex a) = MkComplexX2 !(X2 a) !(X2 a)
 instance PackX2 X2 a => PackX2 X2 (Complex a) where
   mkX2 (x0 :+ y0) (x1 :+ y1) = MkComplexX2 (mkX2 x0 x1) (mkX2 y0 y1)
@@ -1699,6 +1874,12 @@ instance (i0 < 2, i1 < 2) => UnaryShuffleT '[i0, i1] X2 () where
 instance (i0 < 4, i1 < 4) => BinaryShuffleT '[i0, i1] X2 () where
   binaryShuffle _ _ = MkUnitX2
   {-# INLINE binaryShuffle #-}
+instance Semigroup (X2()) where
+  _ <> _ = MkUnitX2
+  {-# INLINE (<>) #-}
+instance Monoid (X2()) where
+  mempty = MkUnitX2
+  {-# INLINE mempty #-}
 data instance X2 (a0, a1) = MkTuple2X2 !(X2 a0) !(X2 a1)
 instance (PackX2 X2 a0, PackX2 X2 a1) => PackX2 X2 (a0, a1) where
   mkX2 (x0_0, x0_1) (x1_0, x1_1) = MkTuple2X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1)
@@ -1717,6 +1898,12 @@ instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1) => UnaryShuf
 instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1) => BinaryShuffleT indices X2 (a0, a1) where
   binaryShuffle (MkTuple2X2 x0 x1) (MkTuple2X2 y0 y1) = MkTuple2X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X2 a0), Semigroup (X2 a1)) => Semigroup (X2 (a0, a1)) where
+  MkTuple2X2 x0 x1 <> MkTuple2X2 y0 y1 = MkTuple2X2 (x0 <> y0) (x1 <> y1)
+  {-# INLINE (<>) #-}
+instance (Monoid (X2 a0), Monoid (X2 a1)) => Monoid (X2 (a0, a1)) where
+  mempty = MkTuple2X2 mempty mempty
+  {-# INLINE mempty #-}
 data instance X2 (a0, a1, a2) = MkTuple3X2 !(X2 a0) !(X2 a1) !(X2 a2)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2) => PackX2 X2 (a0, a1, a2) where
   mkX2 (x0_0, x0_1, x0_2) (x1_0, x1_1, x1_2) = MkTuple3X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2)
@@ -1735,6 +1922,12 @@ instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffle
 instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2) => BinaryShuffleT indices X2 (a0, a1, a2) where
   binaryShuffle (MkTuple3X2 x0 x1 x2) (MkTuple3X2 y0 y1 y2) = MkTuple3X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X2 a0), Semigroup (X2 a1), Semigroup (X2 a2)) => Semigroup (X2 (a0, a1, a2)) where
+  MkTuple3X2 x0 x1 x2 <> MkTuple3X2 y0 y1 y2 = MkTuple3X2 (x0 <> y0) (x1 <> y1) (x2 <> y2)
+  {-# INLINE (<>) #-}
+instance (Monoid (X2 a0), Monoid (X2 a1), Monoid (X2 a2)) => Monoid (X2 (a0, a1, a2)) where
+  mempty = MkTuple3X2 mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X2 (a0, a1, a2, a3) = MkTuple4X2 !(X2 a0) !(X2 a1) !(X2 a2) !(X2 a3)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2, PackX2 X2 a3) => PackX2 X2 (a0, a1, a2, a3) where
   mkX2 (x0_0, x0_1, x0_2, x0_3) (x1_0, x1_1, x1_2, x1_3) = MkTuple4X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2) (mkX2 x0_3 x1_3)
@@ -1753,6 +1946,12 @@ instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffle
 instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2, BinaryShuffleT indices X2 a3) => BinaryShuffleT indices X2 (a0, a1, a2, a3) where
   binaryShuffle (MkTuple4X2 x0 x1 x2 x3) (MkTuple4X2 y0 y1 y2 y3) = MkTuple4X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X2 a0), Semigroup (X2 a1), Semigroup (X2 a2), Semigroup (X2 a3)) => Semigroup (X2 (a0, a1, a2, a3)) where
+  MkTuple4X2 x0 x1 x2 x3 <> MkTuple4X2 y0 y1 y2 y3 = MkTuple4X2 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3)
+  {-# INLINE (<>) #-}
+instance (Monoid (X2 a0), Monoid (X2 a1), Monoid (X2 a2), Monoid (X2 a3)) => Monoid (X2 (a0, a1, a2, a3)) where
+  mempty = MkTuple4X2 mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X2 (a0, a1, a2, a3, a4) = MkTuple5X2 !(X2 a0) !(X2 a1) !(X2 a2) !(X2 a3) !(X2 a4)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2, PackX2 X2 a3, PackX2 X2 a4) => PackX2 X2 (a0, a1, a2, a3, a4) where
   mkX2 (x0_0, x0_1, x0_2, x0_3, x0_4) (x1_0, x1_1, x1_2, x1_3, x1_4) = MkTuple5X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2) (mkX2 x0_3 x1_3) (mkX2 x0_4 x1_4)
@@ -1771,6 +1970,12 @@ instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffle
 instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2, BinaryShuffleT indices X2 a3, BinaryShuffleT indices X2 a4) => BinaryShuffleT indices X2 (a0, a1, a2, a3, a4) where
   binaryShuffle (MkTuple5X2 x0 x1 x2 x3 x4) (MkTuple5X2 y0 y1 y2 y3 y4) = MkTuple5X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X2 a0), Semigroup (X2 a1), Semigroup (X2 a2), Semigroup (X2 a3), Semigroup (X2 a4)) => Semigroup (X2 (a0, a1, a2, a3, a4)) where
+  MkTuple5X2 x0 x1 x2 x3 x4 <> MkTuple5X2 y0 y1 y2 y3 y4 = MkTuple5X2 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4)
+  {-# INLINE (<>) #-}
+instance (Monoid (X2 a0), Monoid (X2 a1), Monoid (X2 a2), Monoid (X2 a3), Monoid (X2 a4)) => Monoid (X2 (a0, a1, a2, a3, a4)) where
+  mempty = MkTuple5X2 mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X2 (a0, a1, a2, a3, a4, a5) = MkTuple6X2 !(X2 a0) !(X2 a1) !(X2 a2) !(X2 a3) !(X2 a4) !(X2 a5)
 instance (PackX2 X2 a0, PackX2 X2 a1, PackX2 X2 a2, PackX2 X2 a3, PackX2 X2 a4, PackX2 X2 a5) => PackX2 X2 (a0, a1, a2, a3, a4, a5) where
   mkX2 (x0_0, x0_1, x0_2, x0_3, x0_4, x0_5) (x1_0, x1_1, x1_2, x1_3, x1_4, x1_5) = MkTuple6X2 (mkX2 x0_0 x1_0) (mkX2 x0_1 x1_1) (mkX2 x0_2 x1_2) (mkX2 x0_3 x1_3) (mkX2 x0_4 x1_4) (mkX2 x0_5 x1_5)
@@ -1789,6 +1994,12 @@ instance (UnaryShuffleT indices X2 a0, UnaryShuffleT indices X2 a1, UnaryShuffle
 instance (BinaryShuffleT indices X2 a0, BinaryShuffleT indices X2 a1, BinaryShuffleT indices X2 a2, BinaryShuffleT indices X2 a3, BinaryShuffleT indices X2 a4, BinaryShuffleT indices X2 a5) => BinaryShuffleT indices X2 (a0, a1, a2, a3, a4, a5) where
   binaryShuffle (MkTuple6X2 x0 x1 x2 x3 x4 x5) (MkTuple6X2 y0 y1 y2 y3 y4 y5) = MkTuple6X2 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4) (binaryShuffle @indices x5 y5)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X2 a0), Semigroup (X2 a1), Semigroup (X2 a2), Semigroup (X2 a3), Semigroup (X2 a4), Semigroup (X2 a5)) => Semigroup (X2 (a0, a1, a2, a3, a4, a5)) where
+  MkTuple6X2 x0 x1 x2 x3 x4 x5 <> MkTuple6X2 y0 y1 y2 y3 y4 y5 = MkTuple6X2 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4) (x5 <> y5)
+  {-# INLINE (<>) #-}
+instance (Monoid (X2 a0), Monoid (X2 a1), Monoid (X2 a2), Monoid (X2 a3), Monoid (X2 a4), Monoid (X2 a5)) => Monoid (X2 (a0, a1, a2, a3, a4, a5)) where
+  mempty = MkTuple6X2 mempty mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 instance (PackX2 X2 a, PackX2 X2 b) => LiftSIMD X2 a b where
   liftSIMD f !v = case unpackX2 v of (x0, x1) -> mkX2 (f x0) (f x1)
   {-# INLINE liftSIMD #-}
@@ -1814,6 +2025,18 @@ instance LiftConstructor X2 where
   getMin' = coerce
   mkMax = coerce
   getMax' = coerce
+  mkIEEEMin = coerce
+  getIEEEMin' = coerce
+  mkIEEEMax = coerce
+  getIEEEMax' = coerce
+  mkMinimumNumber = coerce
+  getMinimumNumber' = coerce
+  mkMaximumNumber = coerce
+  getMaximumNumber' = coerce
+  mkAll = coerce
+  getAll' = coerce
+  mkAny = coerce
+  getAny' = coerce
   mkComplex = MkComplexX2
   deconstructComplex (MkComplexX2 x y) = (x, y)
   {-# INLINE mkTuple2 #-}
@@ -1834,6 +2057,18 @@ instance LiftConstructor X2 where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 instance (Broadcast X2 a, SelectableF X2 a) => LiftMaybe X2 a where

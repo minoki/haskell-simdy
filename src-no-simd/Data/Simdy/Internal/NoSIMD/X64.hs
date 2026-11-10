@@ -88,6 +88,18 @@ instance LiftConstructor X8 => LiftConstructor X64 where
   getMin' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getMin' u0) (getMin' u1) (getMin' u2) (getMin' u3) (getMin' u4) (getMin' u5) (getMin' u6) (getMin' u7)
   mkMax (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkMax u0) (mkMax u1) (mkMax u2) (mkMax u3) (mkMax u4) (mkMax u5) (mkMax u6) (mkMax u7)
   getMax' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getMax' u0) (getMax' u1) (getMax' u2) (getMax' u3) (getMax' u4) (getMax' u5) (getMax' u6) (getMax' u7)
+  mkIEEEMin (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkIEEEMin u0) (mkIEEEMin u1) (mkIEEEMin u2) (mkIEEEMin u3) (mkIEEEMin u4) (mkIEEEMin u5) (mkIEEEMin u6) (mkIEEEMin u7)
+  getIEEEMin' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getIEEEMin' u0) (getIEEEMin' u1) (getIEEEMin' u2) (getIEEEMin' u3) (getIEEEMin' u4) (getIEEEMin' u5) (getIEEEMin' u6) (getIEEEMin' u7)
+  mkIEEEMax (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkIEEEMax u0) (mkIEEEMax u1) (mkIEEEMax u2) (mkIEEEMax u3) (mkIEEEMax u4) (mkIEEEMax u5) (mkIEEEMax u6) (mkIEEEMax u7)
+  getIEEEMax' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getIEEEMax' u0) (getIEEEMax' u1) (getIEEEMax' u2) (getIEEEMax' u3) (getIEEEMax' u4) (getIEEEMax' u5) (getIEEEMax' u6) (getIEEEMax' u7)
+  mkMinimumNumber (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkMinimumNumber u0) (mkMinimumNumber u1) (mkMinimumNumber u2) (mkMinimumNumber u3) (mkMinimumNumber u4) (mkMinimumNumber u5) (mkMinimumNumber u6) (mkMinimumNumber u7)
+  getMinimumNumber' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getMinimumNumber' u0) (getMinimumNumber' u1) (getMinimumNumber' u2) (getMinimumNumber' u3) (getMinimumNumber' u4) (getMinimumNumber' u5) (getMinimumNumber' u6) (getMinimumNumber' u7)
+  mkMaximumNumber (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkMaximumNumber u0) (mkMaximumNumber u1) (mkMaximumNumber u2) (mkMaximumNumber u3) (mkMaximumNumber u4) (mkMaximumNumber u5) (mkMaximumNumber u6) (mkMaximumNumber u7)
+  getMaximumNumber' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getMaximumNumber' u0) (getMaximumNumber' u1) (getMaximumNumber' u2) (getMaximumNumber' u3) (getMaximumNumber' u4) (getMaximumNumber' u5) (getMaximumNumber' u6) (getMaximumNumber' u7)
+  mkAll (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkAll u0) (mkAll u1) (mkAll u2) (mkAll u3) (mkAll u4) (mkAll u5) (mkAll u6) (mkAll u7)
+  getAll' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getAll' u0) (getAll' u1) (getAll' u2) (getAll' u3) (getAll' u4) (getAll' u5) (getAll' u6) (getAll' u7)
+  mkAny (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (mkAny u0) (mkAny u1) (mkAny u2) (mkAny u3) (mkAny u4) (mkAny u5) (mkAny u6) (mkAny u7)
+  getAny' (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = MkX64WithX8 (getAny' u0) (getAny' u1) (getAny' u2) (getAny' u3) (getAny' u4) (getAny' u5) (getAny' u6) (getAny' u7)
   mkComplex (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (mkComplex u0 v0) (mkComplex u1 v1) (mkComplex u2 v2) (mkComplex u3 v3) (mkComplex u4 v4) (mkComplex u5 v5) (mkComplex u6 v6) (mkComplex u7 v7)
   deconstructComplex (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) = case deconstructComplex u0 of (v0, w0) -> case deconstructComplex u1 of (v1, w1) -> case deconstructComplex u2 of (v2, w2) -> case deconstructComplex u3 of (v3, w3) -> case deconstructComplex u4 of (v4, w4) -> case deconstructComplex u5 of (v5, w5) -> case deconstructComplex u6 of (v6, w6) -> case deconstructComplex u7 of (v7, w7) -> (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7, MkX64WithX8 w0 w1 w2 w3 w4 w5 w6 w7)
   {-# INLINE mkTuple2 #-}
@@ -108,6 +120,18 @@ instance LiftConstructor X8 => LiftConstructor X64 where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 instance LiftMaybe X8 a => LiftMaybe X64 a where
@@ -256,6 +280,42 @@ instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (Max a) where
 instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (Max a) where
   binaryShuffle u v = mkMax (binaryShuffle @indices (getMax' u) (getMax' v))
   {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (IEEEMin a) where
+  unaryShuffle v = mkIEEEMin (unaryShuffle @indices (getIEEEMin' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (IEEEMin a) where
+  binaryShuffle u v = mkIEEEMin (binaryShuffle @indices (getIEEEMin' u) (getIEEEMin' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (IEEEMax a) where
+  unaryShuffle v = mkIEEEMax (unaryShuffle @indices (getIEEEMax' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (IEEEMax a) where
+  binaryShuffle u v = mkIEEEMax (binaryShuffle @indices (getIEEEMax' u) (getIEEEMax' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (MinimumNumber a) where
+  unaryShuffle v = mkMinimumNumber (unaryShuffle @indices (getMinimumNumber' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (MinimumNumber a) where
+  binaryShuffle u v = mkMinimumNumber (binaryShuffle @indices (getMinimumNumber' u) (getMinimumNumber' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (MaximumNumber a) where
+  unaryShuffle v = mkMaximumNumber (unaryShuffle @indices (getMaximumNumber' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (MaximumNumber a) where
+  binaryShuffle u v = mkMaximumNumber (binaryShuffle @indices (getMaximumNumber' u) (getMaximumNumber' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X64 Bool => UnaryShuffleT indices X64 All where
+  unaryShuffle v = mkAll (unaryShuffle @indices (getAll' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 Bool => BinaryShuffleT indices X64 All where
+  binaryShuffle u v = mkAll (binaryShuffle @indices (getAll' u) (getAll' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X64 Bool => UnaryShuffleT indices X64 Any where
+  unaryShuffle v = mkAny (unaryShuffle @indices (getAny' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 Bool => BinaryShuffleT indices X64 Any where
+  binaryShuffle u v = mkAny (binaryShuffle @indices (getAny' u) (getAny' v))
+  {-# INLINE binaryShuffle #-}
 instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (Complex a) where
   unaryShuffle v = case deconstructComplex v of (x0, x1) -> mkComplex (unaryShuffle @indices x0) (unaryShuffle @indices x1)
   {-# INLINE unaryShuffle #-}
@@ -311,6 +371,7 @@ instance OrderedF X8 a => OrderedF X64 a where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X8 a) => MinMax (X64 a) where
+  type MinMaxIsCompatibleWithOrd (X64 a) = MinMaxIsCompatibleWithOrd (X8 a)
   min (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (min u0 v0) (min u1 v1) (min u2 v2) (min u3 v3) (min u4 v4) (min u5 v5) (min u6 v6) (min u7 v7)
   max (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (max u0 v0) (max u1 v1) (max u2 v2) (max u3 v3) (max u4 v4) (max u5 v5) (max u6 v6) (max u7 v7)
   minimumNumber (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) = MkX64WithX8 (minimumNumber u0 v0) (minimumNumber u1 v1) (minimumNumber u2 v2) (minimumNumber u3 v3) (minimumNumber u4 v4) (minimumNumber u5 v5) (minimumNumber u6 v6) (minimumNumber u7 v7)
@@ -357,6 +418,12 @@ instance BitShift (X8 a) => BitShift (X64 a) where
 instance (Num a, NumF X8 a, FusedMultiplyAdd (X8 a), Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X64 a) where
   fusedMultiplyAdd (MkX64WithX8 u0 u1 u2 u3 u4 u5 u6 u7) (MkX64WithX8 v0 v1 v2 v3 v4 v5 v6 v7) (MkX64WithX8 w0 w1 w2 w3 w4 w5 w6 w7) = MkX64WithX8 (fusedMultiplyAdd u0 v0 w0) (fusedMultiplyAdd u1 v1 w1) (fusedMultiplyAdd u2 v2 w2) (fusedMultiplyAdd u3 v3 w3) (fusedMultiplyAdd u4 v4 w4) (fusedMultiplyAdd u5 v5 w5) (fusedMultiplyAdd u6 v6 w6) (fusedMultiplyAdd u7 v7 w7)
   {-# INLINE fusedMultiplyAdd #-}
+instance Semigroup (X8 a) => Semigroup (X64 a) where
+  MkX64WithX8 x0 x1 x2 x3 x4 x5 x6 x7 <> MkX64WithX8 y0 y1 y2 y3 y4 y5 y6 y7 = MkX64WithX8 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4) (x5 <> y5) (x6 <> y6) (x7 <> y7)
+  {-# INLINE (<>) #-}
+instance Monoid (X8 a) => Monoid (X64 a) where
+  mempty = MkX64WithX8 mempty mempty mempty mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 instance (Num a, PackX8 X8 a) => EnumFromZero_ X64 a where
   enumFromZero = mkX64 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
   {-# INLINE enumFromZero #-}

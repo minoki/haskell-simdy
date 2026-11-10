@@ -10,7 +10,7 @@ import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import           Data.Simdy.Internal.Class
-import           GHC.Exts
+import           GHC.Exts hiding (Any)
 import           GHC.Int
 import           GHC.Word
 import           Data.Simdy.Internal.VL256 (X4 (..))
@@ -90,6 +90,36 @@ instance SplitShortVector X8 a => SplitShortVector X8 (Min a) where
 instance SplitShortVector X8 a => SplitShortVector X8 (Max a) where
   splitShortVector = coerce (splitShortVector @X8 @a)
   joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 All where
+  splitShortVector = coerce (splitShortVector @X8 @Bool)
+  joinShortVector = coerce (joinShortVector @X8 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 Any where
+  splitShortVector = coerce (splitShortVector @X8 @Bool)
+  joinShortVector = coerce (joinShortVector @X8 @Bool)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
 instance SplitShortVector X8 a => SplitShortVector X8 (Complex a) where
@@ -206,6 +236,36 @@ instance SplitShortVector X16 a => SplitShortVector X16 (Max a) where
   joinShortVector = coerce (joinShortVector @X16 @a)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
+instance SplitShortVector X16 a => SplitShortVector X16 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X16 @a)
+  joinShortVector = coerce (joinShortVector @X16 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X16 a => SplitShortVector X16 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X16 @a)
+  joinShortVector = coerce (joinShortVector @X16 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X16 a => SplitShortVector X16 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X16 @a)
+  joinShortVector = coerce (joinShortVector @X16 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X16 a => SplitShortVector X16 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X16 @a)
+  joinShortVector = coerce (joinShortVector @X16 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X16 All where
+  splitShortVector = coerce (splitShortVector @X16 @Bool)
+  joinShortVector = coerce (joinShortVector @X16 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X16 Any where
+  splitShortVector = coerce (splitShortVector @X16 @Bool)
+  joinShortVector = coerce (joinShortVector @X16 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
 instance SplitShortVector X16 a => SplitShortVector X16 (Complex a) where
   splitShortVector (MkComplexX16 s t) = case splitShortVector s of (x0, x1) -> case splitShortVector t of (y0, y1) -> (MkComplexX8 x0 y0, MkComplexX8 x1 y1)
   joinShortVector (MkComplexX8 x0 y0) (MkComplexX8 x1 y1) = MkComplexX16 (joinShortVector x0 x1) (joinShortVector y0 y1)
@@ -320,6 +380,36 @@ instance SplitShortVector X32 a => SplitShortVector X32 (Max a) where
   joinShortVector = coerce (joinShortVector @X32 @a)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
+instance SplitShortVector X32 a => SplitShortVector X32 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X32 @a)
+  joinShortVector = coerce (joinShortVector @X32 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X32 a => SplitShortVector X32 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X32 @a)
+  joinShortVector = coerce (joinShortVector @X32 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X32 a => SplitShortVector X32 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X32 @a)
+  joinShortVector = coerce (joinShortVector @X32 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X32 a => SplitShortVector X32 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X32 @a)
+  joinShortVector = coerce (joinShortVector @X32 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X32 All where
+  splitShortVector = coerce (splitShortVector @X32 @Bool)
+  joinShortVector = coerce (joinShortVector @X32 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X32 Any where
+  splitShortVector = coerce (splitShortVector @X32 @Bool)
+  joinShortVector = coerce (joinShortVector @X32 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
 instance SplitShortVector X32 a => SplitShortVector X32 (Complex a) where
   splitShortVector (MkComplexX32 s t) = case splitShortVector s of (x0, x1) -> case splitShortVector t of (y0, y1) -> (MkComplexX16 x0 y0, MkComplexX16 x1 y1)
   joinShortVector (MkComplexX16 x0 y0) (MkComplexX16 x1 y1) = MkComplexX32 (joinShortVector x0 x1) (joinShortVector y0 y1)
@@ -432,6 +522,36 @@ instance SplitShortVector X64 a => SplitShortVector X64 (Min a) where
 instance SplitShortVector X64 a => SplitShortVector X64 (Max a) where
   splitShortVector = coerce (splitShortVector @X64 @a)
   joinShortVector = coerce (joinShortVector @X64 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X64 a => SplitShortVector X64 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X64 @a)
+  joinShortVector = coerce (joinShortVector @X64 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X64 a => SplitShortVector X64 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X64 @a)
+  joinShortVector = coerce (joinShortVector @X64 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X64 a => SplitShortVector X64 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X64 @a)
+  joinShortVector = coerce (joinShortVector @X64 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X64 a => SplitShortVector X64 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X64 @a)
+  joinShortVector = coerce (joinShortVector @X64 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X64 All where
+  splitShortVector = coerce (splitShortVector @X64 @Bool)
+  joinShortVector = coerce (joinShortVector @X64 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X64 Any where
+  splitShortVector = coerce (splitShortVector @X64 @Bool)
+  joinShortVector = coerce (joinShortVector @X64 @Bool)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
 instance SplitShortVector X64 a => SplitShortVector X64 (Complex a) where

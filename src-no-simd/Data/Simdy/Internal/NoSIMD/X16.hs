@@ -88,6 +88,18 @@ instance LiftConstructor X8 => LiftConstructor X16 where
   getMin' (MkX16WithX8 u0 u1) = MkX16WithX8 (getMin' u0) (getMin' u1)
   mkMax (MkX16WithX8 u0 u1) = MkX16WithX8 (mkMax u0) (mkMax u1)
   getMax' (MkX16WithX8 u0 u1) = MkX16WithX8 (getMax' u0) (getMax' u1)
+  mkIEEEMin (MkX16WithX8 u0 u1) = MkX16WithX8 (mkIEEEMin u0) (mkIEEEMin u1)
+  getIEEEMin' (MkX16WithX8 u0 u1) = MkX16WithX8 (getIEEEMin' u0) (getIEEEMin' u1)
+  mkIEEEMax (MkX16WithX8 u0 u1) = MkX16WithX8 (mkIEEEMax u0) (mkIEEEMax u1)
+  getIEEEMax' (MkX16WithX8 u0 u1) = MkX16WithX8 (getIEEEMax' u0) (getIEEEMax' u1)
+  mkMinimumNumber (MkX16WithX8 u0 u1) = MkX16WithX8 (mkMinimumNumber u0) (mkMinimumNumber u1)
+  getMinimumNumber' (MkX16WithX8 u0 u1) = MkX16WithX8 (getMinimumNumber' u0) (getMinimumNumber' u1)
+  mkMaximumNumber (MkX16WithX8 u0 u1) = MkX16WithX8 (mkMaximumNumber u0) (mkMaximumNumber u1)
+  getMaximumNumber' (MkX16WithX8 u0 u1) = MkX16WithX8 (getMaximumNumber' u0) (getMaximumNumber' u1)
+  mkAll (MkX16WithX8 u0 u1) = MkX16WithX8 (mkAll u0) (mkAll u1)
+  getAll' (MkX16WithX8 u0 u1) = MkX16WithX8 (getAll' u0) (getAll' u1)
+  mkAny (MkX16WithX8 u0 u1) = MkX16WithX8 (mkAny u0) (mkAny u1)
+  getAny' (MkX16WithX8 u0 u1) = MkX16WithX8 (getAny' u0) (getAny' u1)
   mkComplex (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (mkComplex u0 v0) (mkComplex u1 v1)
   deconstructComplex (MkX16WithX8 u0 u1) = case deconstructComplex u0 of (v0, w0) -> case deconstructComplex u1 of (v1, w1) -> (MkX16WithX8 v0 v1, MkX16WithX8 w0 w1)
   {-# INLINE mkTuple2 #-}
@@ -108,6 +120,18 @@ instance LiftConstructor X8 => LiftConstructor X16 where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 instance LiftMaybe X8 a => LiftMaybe X16 a where
@@ -256,6 +280,42 @@ instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (Max a) where
 instance BinaryShuffleT indices X16 a => BinaryShuffleT indices X16 (Max a) where
   binaryShuffle u v = mkMax (binaryShuffle @indices (getMax' u) (getMax' v))
   {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (IEEEMin a) where
+  unaryShuffle v = mkIEEEMin (unaryShuffle @indices (getIEEEMin' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X16 a => BinaryShuffleT indices X16 (IEEEMin a) where
+  binaryShuffle u v = mkIEEEMin (binaryShuffle @indices (getIEEEMin' u) (getIEEEMin' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (IEEEMax a) where
+  unaryShuffle v = mkIEEEMax (unaryShuffle @indices (getIEEEMax' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X16 a => BinaryShuffleT indices X16 (IEEEMax a) where
+  binaryShuffle u v = mkIEEEMax (binaryShuffle @indices (getIEEEMax' u) (getIEEEMax' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (MinimumNumber a) where
+  unaryShuffle v = mkMinimumNumber (unaryShuffle @indices (getMinimumNumber' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X16 a => BinaryShuffleT indices X16 (MinimumNumber a) where
+  binaryShuffle u v = mkMinimumNumber (binaryShuffle @indices (getMinimumNumber' u) (getMinimumNumber' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (MaximumNumber a) where
+  unaryShuffle v = mkMaximumNumber (unaryShuffle @indices (getMaximumNumber' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X16 a => BinaryShuffleT indices X16 (MaximumNumber a) where
+  binaryShuffle u v = mkMaximumNumber (binaryShuffle @indices (getMaximumNumber' u) (getMaximumNumber' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X16 Bool => UnaryShuffleT indices X16 All where
+  unaryShuffle v = mkAll (unaryShuffle @indices (getAll' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X16 Bool => BinaryShuffleT indices X16 All where
+  binaryShuffle u v = mkAll (binaryShuffle @indices (getAll' u) (getAll' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X16 Bool => UnaryShuffleT indices X16 Any where
+  unaryShuffle v = mkAny (unaryShuffle @indices (getAny' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X16 Bool => BinaryShuffleT indices X16 Any where
+  binaryShuffle u v = mkAny (binaryShuffle @indices (getAny' u) (getAny' v))
+  {-# INLINE binaryShuffle #-}
 instance UnaryShuffleT indices X16 a => UnaryShuffleT indices X16 (Complex a) where
   unaryShuffle v = case deconstructComplex v of (x0, x1) -> mkComplex (unaryShuffle @indices x0) (unaryShuffle @indices x1)
   {-# INLINE unaryShuffle #-}
@@ -311,6 +371,7 @@ instance OrderedF X8 a => OrderedF X16 a where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X8 a) => MinMax (X16 a) where
+  type MinMaxIsCompatibleWithOrd (X16 a) = MinMaxIsCompatibleWithOrd (X8 a)
   min (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (min u0 v0) (min u1 v1)
   max (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (max u0 v0) (max u1 v1)
   minimumNumber (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) = MkX16WithX8 (minimumNumber u0 v0) (minimumNumber u1 v1)
@@ -357,6 +418,12 @@ instance BitShift (X8 a) => BitShift (X16 a) where
 instance (Num a, NumF X8 a, FusedMultiplyAdd (X8 a), Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X16 a) where
   fusedMultiplyAdd (MkX16WithX8 u0 u1) (MkX16WithX8 v0 v1) (MkX16WithX8 w0 w1) = MkX16WithX8 (fusedMultiplyAdd u0 v0 w0) (fusedMultiplyAdd u1 v1 w1)
   {-# INLINE fusedMultiplyAdd #-}
+instance Semigroup (X8 a) => Semigroup (X16 a) where
+  MkX16WithX8 x0 x1 <> MkX16WithX8 y0 y1 = MkX16WithX8 (x0 <> y0) (x1 <> y1)
+  {-# INLINE (<>) #-}
+instance Monoid (X8 a) => Monoid (X16 a) where
+  mempty = MkX16WithX8 mempty mempty
+  {-# INLINE mempty #-}
 instance (Num a, PackX8 X8 a) => EnumFromZero_ X16 a where
   enumFromZero = mkX16 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
   {-# INLINE enumFromZero #-}

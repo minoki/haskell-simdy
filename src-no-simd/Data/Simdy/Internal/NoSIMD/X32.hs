@@ -88,6 +88,18 @@ instance LiftConstructor X8 => LiftConstructor X32 where
   getMin' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getMin' u0) (getMin' u1) (getMin' u2) (getMin' u3)
   mkMax (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkMax u0) (mkMax u1) (mkMax u2) (mkMax u3)
   getMax' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getMax' u0) (getMax' u1) (getMax' u2) (getMax' u3)
+  mkIEEEMin (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkIEEEMin u0) (mkIEEEMin u1) (mkIEEEMin u2) (mkIEEEMin u3)
+  getIEEEMin' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getIEEEMin' u0) (getIEEEMin' u1) (getIEEEMin' u2) (getIEEEMin' u3)
+  mkIEEEMax (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkIEEEMax u0) (mkIEEEMax u1) (mkIEEEMax u2) (mkIEEEMax u3)
+  getIEEEMax' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getIEEEMax' u0) (getIEEEMax' u1) (getIEEEMax' u2) (getIEEEMax' u3)
+  mkMinimumNumber (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkMinimumNumber u0) (mkMinimumNumber u1) (mkMinimumNumber u2) (mkMinimumNumber u3)
+  getMinimumNumber' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getMinimumNumber' u0) (getMinimumNumber' u1) (getMinimumNumber' u2) (getMinimumNumber' u3)
+  mkMaximumNumber (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkMaximumNumber u0) (mkMaximumNumber u1) (mkMaximumNumber u2) (mkMaximumNumber u3)
+  getMaximumNumber' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getMaximumNumber' u0) (getMaximumNumber' u1) (getMaximumNumber' u2) (getMaximumNumber' u3)
+  mkAll (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkAll u0) (mkAll u1) (mkAll u2) (mkAll u3)
+  getAll' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getAll' u0) (getAll' u1) (getAll' u2) (getAll' u3)
+  mkAny (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (mkAny u0) (mkAny u1) (mkAny u2) (mkAny u3)
+  getAny' (MkX32WithX8 u0 u1 u2 u3) = MkX32WithX8 (getAny' u0) (getAny' u1) (getAny' u2) (getAny' u3)
   mkComplex (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (mkComplex u0 v0) (mkComplex u1 v1) (mkComplex u2 v2) (mkComplex u3 v3)
   deconstructComplex (MkX32WithX8 u0 u1 u2 u3) = case deconstructComplex u0 of (v0, w0) -> case deconstructComplex u1 of (v1, w1) -> case deconstructComplex u2 of (v2, w2) -> case deconstructComplex u3 of (v3, w3) -> (MkX32WithX8 v0 v1 v2 v3, MkX32WithX8 w0 w1 w2 w3)
   {-# INLINE mkTuple2 #-}
@@ -108,6 +120,18 @@ instance LiftConstructor X8 => LiftConstructor X32 where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 instance LiftMaybe X8 a => LiftMaybe X32 a where
@@ -256,6 +280,42 @@ instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (Max a) where
 instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (Max a) where
   binaryShuffle u v = mkMax (binaryShuffle @indices (getMax' u) (getMax' v))
   {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (IEEEMin a) where
+  unaryShuffle v = mkIEEEMin (unaryShuffle @indices (getIEEEMin' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (IEEEMin a) where
+  binaryShuffle u v = mkIEEEMin (binaryShuffle @indices (getIEEEMin' u) (getIEEEMin' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (IEEEMax a) where
+  unaryShuffle v = mkIEEEMax (unaryShuffle @indices (getIEEEMax' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (IEEEMax a) where
+  binaryShuffle u v = mkIEEEMax (binaryShuffle @indices (getIEEEMax' u) (getIEEEMax' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (MinimumNumber a) where
+  unaryShuffle v = mkMinimumNumber (unaryShuffle @indices (getMinimumNumber' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (MinimumNumber a) where
+  binaryShuffle u v = mkMinimumNumber (binaryShuffle @indices (getMinimumNumber' u) (getMinimumNumber' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (MaximumNumber a) where
+  unaryShuffle v = mkMaximumNumber (unaryShuffle @indices (getMaximumNumber' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (MaximumNumber a) where
+  binaryShuffle u v = mkMaximumNumber (binaryShuffle @indices (getMaximumNumber' u) (getMaximumNumber' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X32 Bool => UnaryShuffleT indices X32 All where
+  unaryShuffle v = mkAll (unaryShuffle @indices (getAll' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 Bool => BinaryShuffleT indices X32 All where
+  binaryShuffle u v = mkAll (binaryShuffle @indices (getAll' u) (getAll' v))
+  {-# INLINE binaryShuffle #-}
+instance UnaryShuffleT indices X32 Bool => UnaryShuffleT indices X32 Any where
+  unaryShuffle v = mkAny (unaryShuffle @indices (getAny' v))
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 Bool => BinaryShuffleT indices X32 Any where
+  binaryShuffle u v = mkAny (binaryShuffle @indices (getAny' u) (getAny' v))
+  {-# INLINE binaryShuffle #-}
 instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (Complex a) where
   unaryShuffle v = case deconstructComplex v of (x0, x1) -> mkComplex (unaryShuffle @indices x0) (unaryShuffle @indices x1)
   {-# INLINE unaryShuffle #-}
@@ -311,6 +371,7 @@ instance OrderedF X8 a => OrderedF X32 a where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X8 a) => MinMax (X32 a) where
+  type MinMaxIsCompatibleWithOrd (X32 a) = MinMaxIsCompatibleWithOrd (X8 a)
   min (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (min u0 v0) (min u1 v1) (min u2 v2) (min u3 v3)
   max (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (max u0 v0) (max u1 v1) (max u2 v2) (max u3 v3)
   minimumNumber (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) = MkX32WithX8 (minimumNumber u0 v0) (minimumNumber u1 v1) (minimumNumber u2 v2) (minimumNumber u3 v3)
@@ -357,6 +418,12 @@ instance BitShift (X8 a) => BitShift (X32 a) where
 instance (Num a, NumF X8 a, FusedMultiplyAdd (X8 a), Broadcast X8 a, PackX8 X8 a) => FusedMultiplyAdd (X32 a) where
   fusedMultiplyAdd (MkX32WithX8 u0 u1 u2 u3) (MkX32WithX8 v0 v1 v2 v3) (MkX32WithX8 w0 w1 w2 w3) = MkX32WithX8 (fusedMultiplyAdd u0 v0 w0) (fusedMultiplyAdd u1 v1 w1) (fusedMultiplyAdd u2 v2 w2) (fusedMultiplyAdd u3 v3 w3)
   {-# INLINE fusedMultiplyAdd #-}
+instance Semigroup (X8 a) => Semigroup (X32 a) where
+  MkX32WithX8 x0 x1 x2 x3 <> MkX32WithX8 y0 y1 y2 y3 = MkX32WithX8 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3)
+  {-# INLINE (<>) #-}
+instance Monoid (X8 a) => Monoid (X32 a) where
+  mempty = MkX32WithX8 mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 instance (Num a, PackX8 X8 a) => EnumFromZero_ X32 a where
   enumFromZero = mkX32 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
   {-# INLINE enumFromZero #-}

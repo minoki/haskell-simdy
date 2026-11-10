@@ -10,7 +10,7 @@ import           Data.Maybe (isJust, fromMaybe)
 import           Data.Monoid
 import           Data.Semigroup
 import           Data.Simdy.Internal.Class
-import           GHC.Exts
+import           GHC.Exts hiding (Any)
 import           GHC.Int
 import           GHC.Word
 import           Data.Functor.Identity
@@ -92,6 +92,36 @@ instance SplitShortVector X2 a => SplitShortVector X2 (Min a) where
 instance SplitShortVector X2 a => SplitShortVector X2 (Max a) where
   splitShortVector = coerce (splitShortVector @X2 @a)
   joinShortVector = coerce (joinShortVector @X2 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X2 a => SplitShortVector X2 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X2 @a)
+  joinShortVector = coerce (joinShortVector @X2 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X2 a => SplitShortVector X2 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X2 @a)
+  joinShortVector = coerce (joinShortVector @X2 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X2 a => SplitShortVector X2 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X2 @a)
+  joinShortVector = coerce (joinShortVector @X2 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X2 a => SplitShortVector X2 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X2 @a)
+  joinShortVector = coerce (joinShortVector @X2 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X2 All where
+  splitShortVector = coerce (splitShortVector @X2 @Bool)
+  joinShortVector = coerce (joinShortVector @X2 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X2 Any where
+  splitShortVector = coerce (splitShortVector @X2 @Bool)
+  joinShortVector = coerce (joinShortVector @X2 @Bool)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
 instance SplitShortVector X2 a => SplitShortVector X2 (Complex a) where
@@ -208,6 +238,36 @@ instance SplitShortVector X4 a => SplitShortVector X4 (Max a) where
   joinShortVector = coerce (joinShortVector @X4 @a)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 a => SplitShortVector X4 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X4 @a)
+  joinShortVector = coerce (joinShortVector @X4 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 a => SplitShortVector X4 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X4 @a)
+  joinShortVector = coerce (joinShortVector @X4 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 a => SplitShortVector X4 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X4 @a)
+  joinShortVector = coerce (joinShortVector @X4 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 a => SplitShortVector X4 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X4 @a)
+  joinShortVector = coerce (joinShortVector @X4 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 All where
+  splitShortVector = coerce (splitShortVector @X4 @Bool)
+  joinShortVector = coerce (joinShortVector @X4 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X4 Any where
+  splitShortVector = coerce (splitShortVector @X4 @Bool)
+  joinShortVector = coerce (joinShortVector @X4 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
 instance SplitShortVector X4 a => SplitShortVector X4 (Complex a) where
   splitShortVector (MkComplexX4 s t) = case splitShortVector s of (x0, x1) -> case splitShortVector t of (y0, y1) -> (MkComplexX2 x0 y0, MkComplexX2 x1 y1)
   joinShortVector (MkComplexX2 x0 y0) (MkComplexX2 x1 y1) = MkComplexX4 (joinShortVector x0 x1) (joinShortVector y0 y1)
@@ -320,6 +380,36 @@ instance SplitShortVector X8 a => SplitShortVector X8 (Min a) where
 instance SplitShortVector X8 a => SplitShortVector X8 (Max a) where
   splitShortVector = coerce (splitShortVector @X8 @a)
   joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (IEEEMin a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (IEEEMax a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (MinimumNumber a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 a => SplitShortVector X8 (MaximumNumber a) where
+  splitShortVector = coerce (splitShortVector @X8 @a)
+  joinShortVector = coerce (joinShortVector @X8 @a)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 All where
+  splitShortVector = coerce (splitShortVector @X8 @Bool)
+  joinShortVector = coerce (joinShortVector @X8 @Bool)
+  {-# INLINE splitShortVector #-}
+  {-# INLINE joinShortVector #-}
+instance SplitShortVector X8 Any where
+  splitShortVector = coerce (splitShortVector @X8 @Bool)
+  joinShortVector = coerce (joinShortVector @X8 @Bool)
   {-# INLINE splitShortVector #-}
   {-# INLINE joinShortVector #-}
 instance SplitShortVector X8 a => SplitShortVector X8 (Complex a) where

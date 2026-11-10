@@ -144,6 +144,61 @@ gen !vecCount !maxBits
     ++ genNewtype "Product"
     ++ genNewtype "Min"
     ++ genNewtype "Max"
+    ++ genNewtype "IEEEMin"
+    ++ genNewtype "IEEEMax"
+    ++ genNewtype "MinimumNumber"
+    ++ genNewtype "MaximumNumber"
+    ++ genMonoNewtype "All" "Bool"
+    ++ genMonoNewtype "Any" "Bool"
+    ++ ["instance (Num a, NumF " ++ tyCon ++ " a) => Semigroup (" ++ tyCon ++ " (Sum a)) where"
+       ,"  (<>) = coerce ((+) @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance (Num a, NumF " ++ tyCon ++ " a) => Monoid (" ++ tyCon ++ " (Sum a)) where"
+       ,"  mempty = MkSum" ++ tyCon ++ " (fromIntegerF 0)"
+       ,"  {-# INLINE mempty #-}"
+       ,"instance (Num a, NumF " ++ tyCon ++ " a) => Semigroup (" ++ tyCon ++ " (Product a)) where"
+       ,"  (<>) = coerce ((*) @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance (Num a, NumF " ++ tyCon ++ " a) => Monoid (" ++ tyCon ++ " (Product a)) where"
+       ,"  mempty = MkProduct" ++ tyCon ++ " (fromIntegerF 1)"
+       ,"  {-# INLINE mempty #-}"
+       ,"instance (MinMax (" ++ tyCon ++ " a), MinMaxIsCompatibleWithOrd a) => Semigroup (" ++ tyCon ++ " (Min a)) where"
+       ,"  (<>) = coerce (min @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance (Bounded a, MinMax (" ++ tyCon ++ " a), MinMaxIsCompatibleWithOrd a, Broadcast " ++ tyCon ++ " a) => Monoid (" ++ tyCon ++ " (Min a)) where"
+       ,"  mempty = MkMin" ++ tyCon ++ " (broadcast maxBound)"
+       ,"  {-# INLINE mempty #-}"
+       ,"instance (MinMax (" ++ tyCon ++ " a), MinMaxIsCompatibleWithOrd a) => Semigroup (" ++ tyCon ++ " (Max a)) where"
+       ,"  (<>) = coerce (max @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance (Bounded a, MinMax (" ++ tyCon ++ " a), MinMaxIsCompatibleWithOrd a, Broadcast " ++ tyCon ++ " a) => Monoid (" ++ tyCon ++ " (Max a)) where"
+       ,"  mempty = MkMax" ++ tyCon ++ " (broadcast minBound)"
+       ,"  {-# INLINE mempty #-}"
+       ,"instance MinMax (" ++ tyCon ++ " a) => Semigroup (" ++ tyCon ++ " (IEEEMin a)) where"
+       ,"  (<>) = coerce (min @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance MinMax (" ++ tyCon ++ " a) => Semigroup (" ++ tyCon ++ " (IEEEMax a)) where"
+       ,"  (<>) = coerce (max @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance MinMax (" ++ tyCon ++ " a) => Semigroup (" ++ tyCon ++ " (MinimumNumber a)) where"
+       ,"  (<>) = coerce (minimumNumber @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance MinMax (" ++ tyCon ++ " a) => Semigroup (" ++ tyCon ++ " (MaximumNumber a)) where"
+       ,"  (<>) = coerce (maximumNumber @(" ++ tyCon ++ " a))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance Semigroup (" ++ tyCon ++ " All) where"
+       ,"  (<>) = coerce ((B..&.) @(" ++ tyCon ++ " Bool))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance Monoid (" ++ tyCon ++ " All) where"
+       ,"  mempty = MkAll" ++ tyCon ++ " (broadcast True)"
+       ,"  {-# INLINE mempty #-}"
+       ,"instance Semigroup (" ++ tyCon ++ " Any) where"
+       ,"  (<>) = coerce ((B..|.) @(" ++ tyCon ++ " Bool))"
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance Monoid (" ++ tyCon ++ " Any) where"
+       ,"  mempty = MkAny" ++ tyCon ++ " (broadcast False)"
+       ,"  {-# INLINE mempty #-}"
+       ]
     ++ ["data instance " ++ tyCon ++ " (Complex a) = MkComplex" ++ tyCon ++ " !(" ++ tyCon ++ " a) !(" ++ tyCon ++ " a)"
        ,"instance Pack" ++ tyCon ++ " " ++ tyCon ++ " a => Pack" ++ tyCon ++ " " ++ tyCon ++ " (Complex a) where"
        ,"  mk" ++ tyCon ++ " " ++ spaceSep ["(x" ++ show i ++ " :+ y" ++ show i ++ ")" | i <- [0..vecCount-1]] ++ " = MkComplex" ++ tyCon ++ " (mk" ++ tyCon ++ " " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (mk" ++ tyCon ++ " " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ")"
@@ -211,6 +266,12 @@ gen !vecCount !maxBits
        ,"instance (" ++ commaSep ["i" ++ show i ++ " < " ++ show (2 * vecCount) | i <- [0..vecCount-1]] ++ ") => BinaryShuffleT '[" ++ commaSep ["i" ++ show i | i <- [0..vecCount-1]] ++ "] " ++ tyCon ++ " () where"
        ,"  binaryShuffle _ _ = MkUnit" ++ tyCon
        ,"  {-# INLINE binaryShuffle #-}"
+       ,"instance Semigroup (" ++ tyCon ++ "()) where"
+       ,"  _ <> _ = MkUnit" ++ tyCon
+       ,"  {-# INLINE (<>) #-}"
+       ,"instance Monoid (" ++ tyCon ++ "()) where"
+       ,"  mempty = MkUnit" ++ tyCon
+       ,"  {-# INLINE mempty #-}"
        ]
     ++ concatMap genTuple [2..maxTupleLen]
     ++ ["instance (Pack" ++ tyCon ++ " " ++ tyCon ++ " a, Pack" ++ tyCon ++ " " ++ tyCon ++ " b) => LiftSIMD " ++ tyCon ++ " a b where"
@@ -223,12 +284,36 @@ gen !vecCount !maxBits
     ++ ["instance LiftConstructor " ++ tyCon ++ " where"]
     ++ ["  mkTuple" ++ show i ++ " = MkTuple" ++ show i ++ tyCon | i <- [2..maxTupleLen]]
     ++ ["  deconstructTuple" ++ show i ++ " (MkTuple" ++ show i ++ tyCon ++ " " ++ spaceSep ["v" ++ show j | j <- [0..i-1]] ++ ") = (" ++ commaSep ["v" ++ show j | j <- [0..i-1]] ++ ")" | i <- [2..maxTupleLen]]
-    ++ ["  " ++ name ++ " = coerce" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ ["  " ++ name ++ " = coerce"
+       | name <- [ "mkSum", "getSum'"
+                 , "mkProduct", "getProduct'"
+                 , "mkMin", "getMin'"
+                 , "mkMax", "getMax'"
+                 , "mkIEEEMin", "getIEEEMin'"
+                 , "mkIEEEMax", "getIEEEMax'"
+                 , "mkMinimumNumber", "getMinimumNumber'"
+                 , "mkMaximumNumber", "getMaximumNumber'"
+                 , "mkAll", "getAll'"
+                 , "mkAny", "getAny'"
+                 ]
+       ]
     ++ ["  mkComplex = MkComplex" ++ tyCon]
     ++ ["  deconstructComplex (MkComplex" ++ tyCon ++ " x y) = (x, y)"]
     ++ ["  {-# INLINE mkTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE deconstructTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
-    ++ ["  {-# INLINE " ++ name ++ " #-}" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ ["  {-# INLINE " ++ name ++ " #-}"
+       | name <- [ "mkSum", "getSum'"
+                 , "mkProduct", "getProduct'"
+                 , "mkMin", "getMin'"
+                 , "mkMax", "getMax'"
+                 , "mkIEEEMin", "getIEEEMin'"
+                 , "mkIEEEMax", "getIEEEMax'"
+                 , "mkMinimumNumber", "getMinimumNumber'"
+                 , "mkMaximumNumber", "getMaximumNumber'"
+                 , "mkAll", "getAll'"
+                 , "mkAny", "getAny'"
+                 ]
+       ]
     ++ ["  {-# INLINE mkComplex #-}"]
     ++ ["  {-# INLINE deconstructComplex #-}"]
     ++ ["instance (Broadcast " ++ tyCon ++ " a, SelectableF " ++ tyCon ++ " a) => LiftMaybe " ++ tyCon ++ " a where"]
@@ -353,6 +438,7 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
                 ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  type MinMaxIsCompatibleWithOrd (" ++ tyCon <+> name ++ ") = ()"
                 ,"  min (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  max (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  minimumNumber = min"
@@ -378,6 +464,7 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
                 ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  type MinMaxIsCompatibleWithOrd (" ++ tyCon <+> name ++ ") = ()"
                 ,"  min (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(min" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  max (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(max" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  minimumNumber = min"
@@ -401,6 +488,7 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
                 ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  type MinMaxIsCompatibleWithOrd (" ++ tyCon <+> name ++ ") = Unsatisfiable (Text \"This instance is not compatible with the min/max functions in Ord\")"
                 ,"  min (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(min x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  max (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(max x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
                 ,"  minimumNumber (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["x" ++ show i | i <- [0..vecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["y" ++ show i | i <- [0..vecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ "WithElems " ++ spaceSep ["(minimumNumber x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..vecCount-1]]
@@ -426,6 +514,7 @@ gen !vecCount !maxBits
                 ,"  {-# INLINE gtF #-}"
                 ,"  {-# INLINE geF #-}"
                 ,"instance MinMax (" ++ tyCon <+> name ++ ") where"
+                ,"  type MinMaxIsCompatibleWithOrd (" ++ tyCon <+> name ++ ") = Unsatisfiable (Text \"This instance is not compatible with the min/max functions in Ord\")"
                 ,"  min (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(minimum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  max (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(maximum" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
                 ,"  minimumNumber (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["u" ++ show i | i <- [0..shortVecCount-1]] ++ ") (Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["v" ++ show i | i <- [0..shortVecCount-1]] ++ ") = Mk" ++ name ++ tyCon ++ suffix <+> spaceSep ["(minimumNumber" ++ shortVecName ++ "# u" ++ show i ++ " v" ++ show i ++ ")" | i <- [0..shortVecCount-1]]
@@ -796,6 +885,12 @@ gen !vecCount !maxBits
         ,"instance (" ++ commaSep ["BinaryShuffleT indices " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => BinaryShuffleT indices " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
         ,"  binaryShuffle (MkTuple" ++ show n ++ tyCon <+> spaceSep ["x" ++ show i | i <- [0..n-1]] ++ ") (MkTuple" ++ show n ++ tyCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ ") = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(binaryShuffle @indices x" ++ show i ++ " y" ++ show i ++ ")" | i <- [0..n-1]]
         ,"  {-# INLINE binaryShuffle #-}"
+        ,"instance (" ++ commaSep ["Semigroup (" ++ tyCon ++ " a" ++ show i ++ ")" | i <- [0..n-1]] ++ ") => Semigroup (" ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ")) where"
+        ,"  MkTuple" ++ show n ++ tyCon <+> spaceSep ["x" ++ show i | i <- [0..n-1]] ++ " <> MkTuple" ++ show n ++ tyCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ " = MkTuple" ++ show n ++ tyCon <+> spaceSep ["(x" ++ show i ++ " <> y" ++ show i ++ ")" | i <- [0..n-1]]
+        ,"  {-# INLINE (<>) #-}"
+        ,"instance (" ++ commaSep ["Monoid (" ++ tyCon ++ " a" ++ show i ++ ")" | i <- [0..n-1]] ++ ") => Monoid (" ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ")) where"
+        ,"  mempty = MkTuple" ++ show n ++ tyCon <+> spaceSep (replicate n "mempty")
+        ,"  {-# INLINE mempty #-}"
         ] {- ++ if n <= maxTupleLenForUnboxedVector
              then ["instance (" ++ commaSep ["UnboxSIMD " ++ tyCon ++ " a" ++ show i | i <- [0..n-1]] ++ ") => UnboxSIMD " ++ tyCon ++ " (" ++ commaSep ["a" ++ show i | i <- [0..n-1]] ++ ") where"
                   ,"  unsafeIndexUnboxedSIMD (VUB.V_" ++ show n ++ " _ " ++ spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") !i = MkTuple" ++ show n ++ tyCon ++ " " ++ spaceSep ["(unsafeIndexUnboxedSIMD v" ++ show i ++ " i)" | i <- [0..n-1]]
@@ -834,6 +929,26 @@ gen !vecCount !maxBits
         ,"  {-# INLINE unsafeReadUnboxedSIMD #-}"
         ,"  {-# INLINE unsafeWriteUnboxedSIMD #-}"
         -}
+        ]
+    genMonoNewtype !name !base
+      = ["newtype instance " ++ tyCon <+> name ++ " = Mk" ++ name ++ tyCon ++ " (" ++ tyCon <+> base ++ ")"
+        ,"instance Pack" ++ tyCon <+> tyCon <+> base ++ " => Pack" ++ tyCon <+> tyCon <+> name ++ " where"
+        ,"  mk" ++ tyCon ++ " = coerce (mk" ++ tyCon ++ " @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  unpack" ++ tyCon ++ " = coerce (unpack" ++ tyCon ++ " @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  {-# INLINE mk" ++ tyCon ++ " #-}"
+        ,"  {-# INLINE unpack" ++ tyCon ++ " #-}"
+        ,"instance Broadcast " ++ tyCon <+> base ++ " => Broadcast " ++ tyCon <+> name ++ " where"
+        ,"  broadcast = coerce (broadcast @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  {-# INLINE broadcast #-}"
+        ,"instance SelectableF " ++ tyCon <+> base ++ " => SelectableF " ++ tyCon <+> name ++ " where"
+        ,"  selectF = coerce (selectF @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  {-# INLINE selectF #-}"
+        ,"instance UnaryShuffleT indices " ++ tyCon <+> base ++ " => UnaryShuffleT indices " ++ tyCon <+> name ++ " where"
+        ,"  unaryShuffle = coerce (unaryShuffle @indices @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  {-# INLINE unaryShuffle #-}"
+        ,"instance BinaryShuffleT indices " ++ tyCon <+> base ++ " => BinaryShuffleT indices " ++ tyCon <+> name ++ " where"
+        ,"  binaryShuffle = coerce (binaryShuffle @indices @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  {-# INLINE binaryShuffle #-}"
         ]
 
 genHalf :: Int -> Int -> [String]
@@ -878,6 +993,12 @@ genHalf !vecCount !maxBits
     ++ genNewtype "Product"
     ++ genNewtype "Min"
     ++ genNewtype "Max"
+    ++ genNewtype "IEEEMin"
+    ++ genNewtype "IEEEMax"
+    ++ genNewtype "MinimumNumber"
+    ++ genNewtype "MaximumNumber"
+    ++ genMonoNewtype "All" "Bool"
+    ++ genMonoNewtype "Any" "Bool"
     ++ (if vecCount == 2
         then ["instance SplitShortVector " ++ tyCon ++ " a => SplitShortVector " ++ tyCon ++ " (Complex a) where"
              ,"  splitShortVector (MkComplex" ++ tyCon ++ " s t) = case splitShortVector s of (Identity x0, Identity x1) -> case splitShortVector t of (Identity y0, Identity y1) -> (Identity (x0 :+ y0), Identity (x1 :+ y1))"
@@ -1001,6 +1122,13 @@ genHalf !vecCount !maxBits
         ,"  {-# INLINE splitShortVector #-}"
         ,"  {-# INLINE joinShortVector #-}"
         ]
+    genMonoNewtype !name !base
+      = ["instance SplitShortVector " ++ tyCon <+> name ++ " where"
+        ,"  splitShortVector = coerce (splitShortVector @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  joinShortVector = coerce (joinShortVector @" ++ tyCon ++ " @" ++ base ++ ")"
+        ,"  {-# INLINE splitShortVector #-}"
+        ,"  {-# INLINE joinShortVector #-}"
+        ]
 
 genHalfReplicated :: Int -> Int -> [String]
 genHalfReplicated !vecCount !baseCount
@@ -1074,6 +1202,7 @@ genFile moduleName primModules !n !maxBits
     ,"import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)"
     ,"import           GHC.Int"
     ,"import           GHC.IO"
+    ,"import           GHC.TypeError (Unsatisfiable, ErrorMessage (Text))"
     ,"import           GHC.Word"
     -- ,"import qualified Data.Vector.Unboxed.Base as VUB"
     ,"import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)"
@@ -1156,12 +1285,36 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"instance LiftConstructor " ++ baseTyCon ++ " => LiftConstructor " ++ tyCon ++ " where"]
     ++ ["  mkTuple" ++ show i <+> spaceSep [parens (dataCon <+> spaceSep ["u" ++ show j ++ "_" ++ show k | k <- [0..n-1]]) | j <- [0..i-1]] ++ " = " ++ dataCon <+> spaceSep [parens ("mkTuple" ++ show i <+> spaceSep ["u" ++ show j ++ "_" ++ show k | j <- [0..i-1]]) | k <- [0..n-1]] | i <- [2..maxTupleLen]]
     ++ ["  deconstructTuple" ++ show i <+> parens (dataCon <+> spaceSep ["u" ++ show j | j <- [0..n-1]]) ++ " = " ++ concat ["case deconstructTuple" ++ show i <+> "u" ++ show j ++ " of " ++ parens (commaSep ["u" ++ show j ++ "_" ++ show k | k <- [0..i-1]]) ++ " -> "| j <- [0..n-1]] ++ parens (commaSep [dataCon <+> spaceSep ["u" ++ show j ++ "_" ++ show k | j <- [0..n-1]] | k <- [0..i-1]]) | i <- [2..maxTupleLen]]
-    ++ [liftUnary name | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ [liftUnary name
+       | name <- [ "mkSum", "getSum'"
+                 , "mkProduct", "getProduct'"
+                 , "mkMin", "getMin'"
+                 , "mkMax", "getMax'"
+                 , "mkIEEEMin", "getIEEEMin'"
+                 , "mkIEEEMax", "getIEEEMax'"
+                 , "mkMinimumNumber", "getMinimumNumber'"
+                 , "mkMaximumNumber", "getMaximumNumber'"
+                 , "mkAll", "getAll'"
+                 , "mkAny", "getAny'"
+                 ]
+       ]
     ++ [liftBinary "mkComplex"]
     ++ ["  deconstructComplex " ++ parens (dataCon <+> spaceSep ["u" ++ show j | j <- [0..n-1]]) ++ " = " ++ concat ["case deconstructComplex u" ++ show j ++ " of " ++ parens ("v" ++ show j ++ ", w" ++ show j) ++ " -> "| j <- [0..n-1]] ++ parens (dataCon <+> spaceSep ["v" ++ show j | j <- [0..n-1]] ++ ", " ++ dataCon <+> spaceSep ["w" ++ show j | j <- [0..n-1]])]
     ++ ["  {-# INLINE mkTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
     ++ ["  {-# INLINE deconstructTuple" ++ show i ++ " #-}" | i <- [2..maxTupleLen]]
-    ++ ["  {-# INLINE " ++ name ++ " #-}" | name <- ["mkSum", "getSum'", "mkProduct", "getProduct'", "mkMin", "getMin'", "mkMax", "getMax'" {- , "mkAll", "getAll'", "mkAny", "getAny'" -}]]
+    ++ ["  {-# INLINE " ++ name ++ " #-}"
+       | name <- [ "mkSum", "getSum'"
+                 , "mkProduct", "getProduct'"
+                 , "mkMin", "getMin'"
+                 , "mkMax", "getMax'"
+                 , "mkIEEEMin", "getIEEEMin'"
+                 , "mkIEEEMax", "getIEEEMax'"
+                 , "mkMinimumNumber", "getMinimumNumber'"
+                 , "mkMaximumNumber", "getMaximumNumber'"
+                 , "mkAll", "getAll'"
+                 , "mkAny", "getAny'"
+                 ]
+       ]
     ++ ["  {-# INLINE mkComplex #-}"
     ,"  {-# INLINE deconstructComplex #-}"]
     ++ ["instance LiftMaybe " ++ baseTyCon ++ " a => LiftMaybe " ++ tyCon ++ " a where"]
@@ -1255,7 +1408,14 @@ genReplicatedDef moduleName imports !vecCount !baseCount
                ,"instance BinaryShuffleT indices " ++ tyCon ++ " a => BinaryShuffleT indices " ++ tyCon ++ " (" ++ name ++ " a) where"
                ,"  binaryShuffle u v = mk" ++ name ++ " (binaryShuffle @indices (get" ++ name ++ "' u) (get" ++ name ++ "' v))"
                ,"  {-# INLINE binaryShuffle #-}"
-               ] | name <- ["Sum", "Product", "Min", "Max"]]
+               ] | name <- ["Sum", "Product", "Min", "Max", "IEEEMin", "IEEEMax", "MinimumNumber", "MaximumNumber"]]
+    ++ concat [["instance UnaryShuffleT indices " ++ tyCon <+> base ++ " => UnaryShuffleT indices " ++ tyCon <+> name ++ " where"
+               ,"  unaryShuffle v = mk" ++ name ++ " (unaryShuffle @indices (get" ++ name ++ "' v))"
+               ,"  {-# INLINE unaryShuffle #-}"
+               ,"instance BinaryShuffleT indices " ++ tyCon <+> base ++ " => BinaryShuffleT indices " ++ tyCon <+> name ++ " where"
+               ,"  binaryShuffle u v = mk" ++ name ++ " (binaryShuffle @indices (get" ++ name ++ "' u) (get" ++ name ++ "' v))"
+               ,"  {-# INLINE binaryShuffle #-}"
+               ] | (name, base) <- [("All", "Bool"), ("Any", "Bool")]]
     ++ ["instance UnaryShuffleT indices " ++ tyCon ++ " a => UnaryShuffleT indices " ++ tyCon ++ " (Complex a) where"
        ,"  unaryShuffle v = case deconstructComplex v of (x0, x1) -> mkComplex (unaryShuffle @indices x0) (unaryShuffle @indices x1)"
        ,"  {-# INLINE unaryShuffle #-}"
@@ -1290,6 +1450,7 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"  {-# INLINE gtF #-}"
     ,"  {-# INLINE geF #-}"
     ,"instance MinMax (" ++ baseTyCon ++ " a) => MinMax (" ++ tyCon ++ " a) where"
+    ,"  type MinMaxIsCompatibleWithOrd (" ++ tyCon ++ " a) = MinMaxIsCompatibleWithOrd (" ++ baseTyCon ++ " a)"
     ,liftBinary "min"
     ,liftBinary "max"
     ,liftBinary "minimumNumber"
@@ -1336,6 +1497,12 @@ genReplicatedDef moduleName imports !vecCount !baseCount
     ,"instance (Num a, NumF " ++ baseTyCon ++ " a, FusedMultiplyAdd (" ++ baseTyCon ++ " a), Broadcast " ++ baseTyCon ++ " a, Pack" ++ baseTyCon <+> baseTyCon ++ " a) => FusedMultiplyAdd (" ++ tyCon ++ " a) where"
     ,"  fusedMultiplyAdd (" ++ dataCon <+> spaceSep ["u" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["v" ++ show i | i <- [0..n-1]] ++ ") (" ++ dataCon <+> spaceSep ["w" ++ show i | i <- [0..n-1]] ++ ") = " ++ dataCon <+> spaceSep ["(fusedMultiplyAdd u" ++ show i ++ " v" ++ show i ++ " w" ++ show i ++ ")" | i <- [0..n-1]]
     ,"  {-# INLINE fusedMultiplyAdd #-}"
+    ,"instance Semigroup (" ++ baseTyCon ++ " a) => Semigroup (" ++ tyCon ++ " a) where"
+    ,"  " ++ dataCon <+> spaceSep ["x" ++ show i | i <- [0..n-1]] ++ " <> " ++ dataCon <+> spaceSep ["y" ++ show i | i <- [0..n-1]] ++ " = " ++ dataCon <+> spaceSep ["(x" ++ show i ++ " <> y" ++ show i ++ ")" | i <- [0..n-1]]
+    ,"  {-# INLINE (<>) #-}"
+    ,"instance Monoid (" ++ baseTyCon ++ " a) => Monoid (" ++ tyCon ++ " a) where"
+    ,"  mempty = " ++ dataCon <+> spaceSep (replicate n "mempty")
+    ,"  {-# INLINE mempty #-}"
     ,"instance (Num a, Pack" ++ baseTyCon ++ " " ++ baseTyCon ++ " a) => EnumFromZero_ " ++ tyCon ++ " a where"
     ,"  enumFromZero = mk" ++ tyCon ++ " " ++ spaceSep [show i | i <- [0..vecCount-1]]
     ,"  {-# INLINE enumFromZero #-}"
@@ -1382,7 +1549,7 @@ genHalfFile moduleName imports counts repCounts !maxBits
     ,"import           Data.Monoid"
     ,"import           Data.Semigroup"
     ,"import           Data.Simdy.Internal.Class"
-    ,"import           GHC.Exts"
+    ,"import           GHC.Exts hiding (Any)"
     ,"import           GHC.Int"
     ,"import           GHC.Word"
     ] ++ ["import           " ++ mod | mod <- imports]

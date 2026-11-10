@@ -30,6 +30,7 @@ import qualified GHC.Exts
 import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
+import           GHC.TypeError (Unsatisfiable, ErrorMessage (Text))
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
 import qualified Prelude
@@ -125,6 +126,7 @@ instance OrderedF X64 Float where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Float) where
+  type MinMaxIsCompatibleWithOrd (X64 Float) = Unsatisfiable (Text "This instance is not compatible with the min/max functions in Ord")
   min (MkFloatX64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkFloatX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkFloatX64WithVec128 (minimumFloatX4# u0 v0) (minimumFloatX4# u1 v1) (minimumFloatX4# u2 v2) (minimumFloatX4# u3 v3) (minimumFloatX4# u4 v4) (minimumFloatX4# u5 v5) (minimumFloatX4# u6 v6) (minimumFloatX4# u7 v7) (minimumFloatX4# u8 v8) (minimumFloatX4# u9 v9) (minimumFloatX4# u10 v10) (minimumFloatX4# u11 v11) (minimumFloatX4# u12 v12) (minimumFloatX4# u13 v13) (minimumFloatX4# u14 v14) (minimumFloatX4# u15 v15)
   max (MkFloatX64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkFloatX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkFloatX64WithVec128 (maximumFloatX4# u0 v0) (maximumFloatX4# u1 v1) (maximumFloatX4# u2 v2) (maximumFloatX4# u3 v3) (maximumFloatX4# u4 v4) (maximumFloatX4# u5 v5) (maximumFloatX4# u6 v6) (maximumFloatX4# u7 v7) (maximumFloatX4# u8 v8) (maximumFloatX4# u9 v9) (maximumFloatX4# u10 v10) (maximumFloatX4# u11 v11) (maximumFloatX4# u12 v12) (maximumFloatX4# u13 v13) (maximumFloatX4# u14 v14) (maximumFloatX4# u15 v15)
   minimumNumber (MkFloatX64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkFloatX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkFloatX64WithVec128 (minimumNumberFloatX4# u0 v0) (minimumNumberFloatX4# u1 v1) (minimumNumberFloatX4# u2 v2) (minimumNumberFloatX4# u3 v3) (minimumNumberFloatX4# u4 v4) (minimumNumberFloatX4# u5 v5) (minimumNumberFloatX4# u6 v6) (minimumNumberFloatX4# u7 v7) (minimumNumberFloatX4# u8 v8) (minimumNumberFloatX4# u9 v9) (minimumNumberFloatX4# u10 v10) (minimumNumberFloatX4# u11 v11) (minimumNumberFloatX4# u12 v12) (minimumNumberFloatX4# u13 v13) (minimumNumberFloatX4# u14 v14) (minimumNumberFloatX4# u15 v15)
@@ -226,6 +228,7 @@ instance OrderedF X64 Double where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Double) where
+  type MinMaxIsCompatibleWithOrd (X64 Double) = Unsatisfiable (Text "This instance is not compatible with the min/max functions in Ord")
   min (MkDoubleX64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkDoubleX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkDoubleX64WithVec128 (minimumDoubleX2# u0 v0) (minimumDoubleX2# u1 v1) (minimumDoubleX2# u2 v2) (minimumDoubleX2# u3 v3) (minimumDoubleX2# u4 v4) (minimumDoubleX2# u5 v5) (minimumDoubleX2# u6 v6) (minimumDoubleX2# u7 v7) (minimumDoubleX2# u8 v8) (minimumDoubleX2# u9 v9) (minimumDoubleX2# u10 v10) (minimumDoubleX2# u11 v11) (minimumDoubleX2# u12 v12) (minimumDoubleX2# u13 v13) (minimumDoubleX2# u14 v14) (minimumDoubleX2# u15 v15) (minimumDoubleX2# u16 v16) (minimumDoubleX2# u17 v17) (minimumDoubleX2# u18 v18) (minimumDoubleX2# u19 v19) (minimumDoubleX2# u20 v20) (minimumDoubleX2# u21 v21) (minimumDoubleX2# u22 v22) (minimumDoubleX2# u23 v23) (minimumDoubleX2# u24 v24) (minimumDoubleX2# u25 v25) (minimumDoubleX2# u26 v26) (minimumDoubleX2# u27 v27) (minimumDoubleX2# u28 v28) (minimumDoubleX2# u29 v29) (minimumDoubleX2# u30 v30) (minimumDoubleX2# u31 v31)
   max (MkDoubleX64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkDoubleX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkDoubleX64WithVec128 (maximumDoubleX2# u0 v0) (maximumDoubleX2# u1 v1) (maximumDoubleX2# u2 v2) (maximumDoubleX2# u3 v3) (maximumDoubleX2# u4 v4) (maximumDoubleX2# u5 v5) (maximumDoubleX2# u6 v6) (maximumDoubleX2# u7 v7) (maximumDoubleX2# u8 v8) (maximumDoubleX2# u9 v9) (maximumDoubleX2# u10 v10) (maximumDoubleX2# u11 v11) (maximumDoubleX2# u12 v12) (maximumDoubleX2# u13 v13) (maximumDoubleX2# u14 v14) (maximumDoubleX2# u15 v15) (maximumDoubleX2# u16 v16) (maximumDoubleX2# u17 v17) (maximumDoubleX2# u18 v18) (maximumDoubleX2# u19 v19) (maximumDoubleX2# u20 v20) (maximumDoubleX2# u21 v21) (maximumDoubleX2# u22 v22) (maximumDoubleX2# u23 v23) (maximumDoubleX2# u24 v24) (maximumDoubleX2# u25 v25) (maximumDoubleX2# u26 v26) (maximumDoubleX2# u27 v27) (maximumDoubleX2# u28 v28) (maximumDoubleX2# u29 v29) (maximumDoubleX2# u30 v30) (maximumDoubleX2# u31 v31)
   minimumNumber (MkDoubleX64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkDoubleX64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkDoubleX64WithVec128 (minimumNumberDoubleX2# u0 v0) (minimumNumberDoubleX2# u1 v1) (minimumNumberDoubleX2# u2 v2) (minimumNumberDoubleX2# u3 v3) (minimumNumberDoubleX2# u4 v4) (minimumNumberDoubleX2# u5 v5) (minimumNumberDoubleX2# u6 v6) (minimumNumberDoubleX2# u7 v7) (minimumNumberDoubleX2# u8 v8) (minimumNumberDoubleX2# u9 v9) (minimumNumberDoubleX2# u10 v10) (minimumNumberDoubleX2# u11 v11) (minimumNumberDoubleX2# u12 v12) (minimumNumberDoubleX2# u13 v13) (minimumNumberDoubleX2# u14 v14) (minimumNumberDoubleX2# u15 v15) (minimumNumberDoubleX2# u16 v16) (minimumNumberDoubleX2# u17 v17) (minimumNumberDoubleX2# u18 v18) (minimumNumberDoubleX2# u19 v19) (minimumNumberDoubleX2# u20 v20) (minimumNumberDoubleX2# u21 v21) (minimumNumberDoubleX2# u22 v22) (minimumNumberDoubleX2# u23 v23) (minimumNumberDoubleX2# u24 v24) (minimumNumberDoubleX2# u25 v25) (minimumNumberDoubleX2# u26 v26) (minimumNumberDoubleX2# u27 v27) (minimumNumberDoubleX2# u28 v28) (minimumNumberDoubleX2# u29 v29) (minimumNumberDoubleX2# u30 v30) (minimumNumberDoubleX2# u31 v31)
@@ -330,6 +333,7 @@ instance OrderedF X64 Int8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int8) where
+  type MinMaxIsCompatibleWithOrd (X64 Int8) = ()
   min (MkInt8X64WithVec128 u0 u1 u2 u3) (MkInt8X64WithVec128 v0 v1 v2 v3) = MkInt8X64WithVec128 (minInt8X16# u0 v0) (minInt8X16# u1 v1) (minInt8X16# u2 v2) (minInt8X16# u3 v3)
   max (MkInt8X64WithVec128 u0 u1 u2 u3) (MkInt8X64WithVec128 v0 v1 v2 v3) = MkInt8X64WithVec128 (maxInt8X16# u0 v0) (maxInt8X16# u1 v1) (maxInt8X16# u2 v2) (maxInt8X16# u3 v3)
   minimumNumber = min
@@ -409,6 +413,7 @@ instance OrderedF X64 Int16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int16) where
+  type MinMaxIsCompatibleWithOrd (X64 Int16) = ()
   min (MkInt16X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt16X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt16X64WithVec128 (minInt16X8# u0 v0) (minInt16X8# u1 v1) (minInt16X8# u2 v2) (minInt16X8# u3 v3) (minInt16X8# u4 v4) (minInt16X8# u5 v5) (minInt16X8# u6 v6) (minInt16X8# u7 v7)
   max (MkInt16X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt16X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt16X64WithVec128 (maxInt16X8# u0 v0) (maxInt16X8# u1 v1) (maxInt16X8# u2 v2) (maxInt16X8# u3 v3) (maxInt16X8# u4 v4) (maxInt16X8# u5 v5) (maxInt16X8# u6 v6) (maxInt16X8# u7 v7)
   minimumNumber = min
@@ -488,6 +493,7 @@ instance OrderedF X64 Int32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int32) where
+  type MinMaxIsCompatibleWithOrd (X64 Int32) = ()
   min (MkInt32X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkInt32X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkInt32X64WithVec128 (minInt32X4# u0 v0) (minInt32X4# u1 v1) (minInt32X4# u2 v2) (minInt32X4# u3 v3) (minInt32X4# u4 v4) (minInt32X4# u5 v5) (minInt32X4# u6 v6) (minInt32X4# u7 v7) (minInt32X4# u8 v8) (minInt32X4# u9 v9) (minInt32X4# u10 v10) (minInt32X4# u11 v11) (minInt32X4# u12 v12) (minInt32X4# u13 v13) (minInt32X4# u14 v14) (minInt32X4# u15 v15)
   max (MkInt32X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkInt32X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkInt32X64WithVec128 (maxInt32X4# u0 v0) (maxInt32X4# u1 v1) (maxInt32X4# u2 v2) (maxInt32X4# u3 v3) (maxInt32X4# u4 v4) (maxInt32X4# u5 v5) (maxInt32X4# u6 v6) (maxInt32X4# u7 v7) (maxInt32X4# u8 v8) (maxInt32X4# u9 v9) (maxInt32X4# u10 v10) (maxInt32X4# u11 v11) (maxInt32X4# u12 v12) (maxInt32X4# u13 v13) (maxInt32X4# u14 v14) (maxInt32X4# u15 v15)
   minimumNumber = min
@@ -567,6 +573,7 @@ instance OrderedF X64 Int64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int64) where
+  type MinMaxIsCompatibleWithOrd (X64 Int64) = ()
   min (MkInt64X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkInt64X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkInt64X64WithVec128 (minInt64X2# u0 v0) (minInt64X2# u1 v1) (minInt64X2# u2 v2) (minInt64X2# u3 v3) (minInt64X2# u4 v4) (minInt64X2# u5 v5) (minInt64X2# u6 v6) (minInt64X2# u7 v7) (minInt64X2# u8 v8) (minInt64X2# u9 v9) (minInt64X2# u10 v10) (minInt64X2# u11 v11) (minInt64X2# u12 v12) (minInt64X2# u13 v13) (minInt64X2# u14 v14) (minInt64X2# u15 v15) (minInt64X2# u16 v16) (minInt64X2# u17 v17) (minInt64X2# u18 v18) (minInt64X2# u19 v19) (minInt64X2# u20 v20) (minInt64X2# u21 v21) (minInt64X2# u22 v22) (minInt64X2# u23 v23) (minInt64X2# u24 v24) (minInt64X2# u25 v25) (minInt64X2# u26 v26) (minInt64X2# u27 v27) (minInt64X2# u28 v28) (minInt64X2# u29 v29) (minInt64X2# u30 v30) (minInt64X2# u31 v31)
   max (MkInt64X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkInt64X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkInt64X64WithVec128 (maxInt64X2# u0 v0) (maxInt64X2# u1 v1) (maxInt64X2# u2 v2) (maxInt64X2# u3 v3) (maxInt64X2# u4 v4) (maxInt64X2# u5 v5) (maxInt64X2# u6 v6) (maxInt64X2# u7 v7) (maxInt64X2# u8 v8) (maxInt64X2# u9 v9) (maxInt64X2# u10 v10) (maxInt64X2# u11 v11) (maxInt64X2# u12 v12) (maxInt64X2# u13 v13) (maxInt64X2# u14 v14) (maxInt64X2# u15 v15) (maxInt64X2# u16 v16) (maxInt64X2# u17 v17) (maxInt64X2# u18 v18) (maxInt64X2# u19 v19) (maxInt64X2# u20 v20) (maxInt64X2# u21 v21) (maxInt64X2# u22 v22) (maxInt64X2# u23 v23) (maxInt64X2# u24 v24) (maxInt64X2# u25 v25) (maxInt64X2# u26 v26) (maxInt64X2# u27 v27) (maxInt64X2# u28 v28) (maxInt64X2# u29 v29) (maxInt64X2# u30 v30) (maxInt64X2# u31 v31)
   minimumNumber = min
@@ -646,6 +653,7 @@ instance OrderedF X64 Word8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word8) where
+  type MinMaxIsCompatibleWithOrd (X64 Word8) = ()
   min (MkWord8X64WithVec128 u0 u1 u2 u3) (MkWord8X64WithVec128 v0 v1 v2 v3) = MkWord8X64WithVec128 (minWord8X16# u0 v0) (minWord8X16# u1 v1) (minWord8X16# u2 v2) (minWord8X16# u3 v3)
   max (MkWord8X64WithVec128 u0 u1 u2 u3) (MkWord8X64WithVec128 v0 v1 v2 v3) = MkWord8X64WithVec128 (maxWord8X16# u0 v0) (maxWord8X16# u1 v1) (maxWord8X16# u2 v2) (maxWord8X16# u3 v3)
   minimumNumber = min
@@ -724,6 +732,7 @@ instance OrderedF X64 Word16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word16) where
+  type MinMaxIsCompatibleWithOrd (X64 Word16) = ()
   min (MkWord16X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord16X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord16X64WithVec128 (minWord16X8# u0 v0) (minWord16X8# u1 v1) (minWord16X8# u2 v2) (minWord16X8# u3 v3) (minWord16X8# u4 v4) (minWord16X8# u5 v5) (minWord16X8# u6 v6) (minWord16X8# u7 v7)
   max (MkWord16X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord16X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord16X64WithVec128 (maxWord16X8# u0 v0) (maxWord16X8# u1 v1) (maxWord16X8# u2 v2) (maxWord16X8# u3 v3) (maxWord16X8# u4 v4) (maxWord16X8# u5 v5) (maxWord16X8# u6 v6) (maxWord16X8# u7 v7)
   minimumNumber = min
@@ -802,6 +811,7 @@ instance OrderedF X64 Word32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word32) where
+  type MinMaxIsCompatibleWithOrd (X64 Word32) = ()
   min (MkWord32X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkWord32X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkWord32X64WithVec128 (minWord32X4# u0 v0) (minWord32X4# u1 v1) (minWord32X4# u2 v2) (minWord32X4# u3 v3) (minWord32X4# u4 v4) (minWord32X4# u5 v5) (minWord32X4# u6 v6) (minWord32X4# u7 v7) (minWord32X4# u8 v8) (minWord32X4# u9 v9) (minWord32X4# u10 v10) (minWord32X4# u11 v11) (minWord32X4# u12 v12) (minWord32X4# u13 v13) (minWord32X4# u14 v14) (minWord32X4# u15 v15)
   max (MkWord32X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15) (MkWord32X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) = MkWord32X64WithVec128 (maxWord32X4# u0 v0) (maxWord32X4# u1 v1) (maxWord32X4# u2 v2) (maxWord32X4# u3 v3) (maxWord32X4# u4 v4) (maxWord32X4# u5 v5) (maxWord32X4# u6 v6) (maxWord32X4# u7 v7) (maxWord32X4# u8 v8) (maxWord32X4# u9 v9) (maxWord32X4# u10 v10) (maxWord32X4# u11 v11) (maxWord32X4# u12 v12) (maxWord32X4# u13 v13) (maxWord32X4# u14 v14) (maxWord32X4# u15 v15)
   minimumNumber = min
@@ -880,6 +890,7 @@ instance OrderedF X64 Word64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word64) where
+  type MinMaxIsCompatibleWithOrd (X64 Word64) = ()
   min (MkWord64X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkWord64X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkWord64X64WithVec128 (minWord64X2# u0 v0) (minWord64X2# u1 v1) (minWord64X2# u2 v2) (minWord64X2# u3 v3) (minWord64X2# u4 v4) (minWord64X2# u5 v5) (minWord64X2# u6 v6) (minWord64X2# u7 v7) (minWord64X2# u8 v8) (minWord64X2# u9 v9) (minWord64X2# u10 v10) (minWord64X2# u11 v11) (minWord64X2# u12 v12) (minWord64X2# u13 v13) (minWord64X2# u14 v14) (minWord64X2# u15 v15) (minWord64X2# u16 v16) (minWord64X2# u17 v17) (minWord64X2# u18 v18) (minWord64X2# u19 v19) (minWord64X2# u20 v20) (minWord64X2# u21 v21) (minWord64X2# u22 v22) (minWord64X2# u23 v23) (minWord64X2# u24 v24) (minWord64X2# u25 v25) (minWord64X2# u26 v26) (minWord64X2# u27 v27) (minWord64X2# u28 v28) (minWord64X2# u29 v29) (minWord64X2# u30 v30) (minWord64X2# u31 v31)
   max (MkWord64X64WithVec128 u0 u1 u2 u3 u4 u5 u6 u7 u8 u9 u10 u11 u12 u13 u14 u15 u16 u17 u18 u19 u20 u21 u22 u23 u24 u25 u26 u27 u28 u29 u30 u31) (MkWord64X64WithVec128 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 v16 v17 v18 v19 v20 v21 v22 v23 v24 v25 v26 v27 v28 v29 v30 v31) = MkWord64X64WithVec128 (maxWord64X2# u0 v0) (maxWord64X2# u1 v1) (maxWord64X2# u2 v2) (maxWord64X2# u3 v3) (maxWord64X2# u4 v4) (maxWord64X2# u5 v5) (maxWord64X2# u6 v6) (maxWord64X2# u7 v7) (maxWord64X2# u8 v8) (maxWord64X2# u9 v9) (maxWord64X2# u10 v10) (maxWord64X2# u11 v11) (maxWord64X2# u12 v12) (maxWord64X2# u13 v13) (maxWord64X2# u14 v14) (maxWord64X2# u15 v15) (maxWord64X2# u16 v16) (maxWord64X2# u17 v17) (maxWord64X2# u18 v18) (maxWord64X2# u19 v19) (maxWord64X2# u20 v20) (maxWord64X2# u21 v21) (maxWord64X2# u22 v22) (maxWord64X2# u23 v23) (maxWord64X2# u24 v24) (maxWord64X2# u25 v25) (maxWord64X2# u26 v26) (maxWord64X2# u27 v27) (maxWord64X2# u28 v28) (maxWord64X2# u29 v29) (maxWord64X2# u30 v30) (maxWord64X2# u31 v31)
   minimumNumber = min
@@ -961,6 +972,7 @@ instance OrderedF X64 Int8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int8) where
+  type MinMaxIsCompatibleWithOrd (X64 Int8) = ()
   min (MkInt8X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt8X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt8X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkInt8X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt8X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt8X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1041,6 +1053,7 @@ instance OrderedF X64 Int16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int16) where
+  type MinMaxIsCompatibleWithOrd (X64 Int16) = ()
   min (MkInt16X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt16X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt16X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkInt16X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt16X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt16X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1121,6 +1134,7 @@ instance OrderedF X64 Int32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int32) where
+  type MinMaxIsCompatibleWithOrd (X64 Int32) = ()
   min (MkInt32X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt32X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt32X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkInt32X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt32X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt32X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1201,6 +1215,7 @@ instance OrderedF X64 Int64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Int64) where
+  type MinMaxIsCompatibleWithOrd (X64 Int64) = ()
   min (MkInt64X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt64X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt64X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkInt64X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkInt64X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkInt64X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1281,6 +1296,7 @@ instance OrderedF X64 Word8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word8) where
+  type MinMaxIsCompatibleWithOrd (X64 Word8) = ()
   min (MkWord8X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord8X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord8X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkWord8X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord8X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord8X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1361,6 +1377,7 @@ instance OrderedF X64 Word16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word16) where
+  type MinMaxIsCompatibleWithOrd (X64 Word16) = ()
   min (MkWord16X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord16X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord16X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkWord16X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord16X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord16X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1441,6 +1458,7 @@ instance OrderedF X64 Word32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word32) where
+  type MinMaxIsCompatibleWithOrd (X64 Word32) = ()
   min (MkWord32X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord32X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord32X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkWord32X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord32X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord32X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1521,6 +1539,7 @@ instance OrderedF X64 Word64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X64 Word64) where
+  type MinMaxIsCompatibleWithOrd (X64 Word64) = ()
   min (MkWord64X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord64X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord64X64WithElems (min x0 y0) (min x1 y1) (min x2 y2) (min x3 y3) (min x4 y4) (min x5 y5) (min x6 y6) (min x7 y7) (min x8 y8) (min x9 y9) (min x10 y10) (min x11 y11) (min x12 y12) (min x13 y13) (min x14 y14) (min x15 y15) (min x16 y16) (min x17 y17) (min x18 y18) (min x19 y19) (min x20 y20) (min x21 y21) (min x22 y22) (min x23 y23) (min x24 y24) (min x25 y25) (min x26 y26) (min x27 y27) (min x28 y28) (min x29 y29) (min x30 y30) (min x31 y31) (min x32 y32) (min x33 y33) (min x34 y34) (min x35 y35) (min x36 y36) (min x37 y37) (min x38 y38) (min x39 y39) (min x40 y40) (min x41 y41) (min x42 y42) (min x43 y43) (min x44 y44) (min x45 y45) (min x46 y46) (min x47 y47) (min x48 y48) (min x49 y49) (min x50 y50) (min x51 y51) (min x52 y52) (min x53 y53) (min x54 y54) (min x55 y55) (min x56 y56) (min x57 y57) (min x58 y58) (min x59 y59) (min x60 y60) (min x61 y61) (min x62 y62) (min x63 y63)
   max (MkWord64X64WithElems x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (MkWord64X64WithElems y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63) = MkWord64X64WithElems (max x0 y0) (max x1 y1) (max x2 y2) (max x3 y3) (max x4 y4) (max x5 y5) (max x6 y6) (max x7 y7) (max x8 y8) (max x9 y9) (max x10 y10) (max x11 y11) (max x12 y12) (max x13 y13) (max x14 y14) (max x15 y15) (max x16 y16) (max x17 y17) (max x18 y18) (max x19 y19) (max x20 y20) (max x21 y21) (max x22 y22) (max x23 y23) (max x24 y24) (max x25 y25) (max x26 y26) (max x27 y27) (max x28 y28) (max x29 y29) (max x30 y30) (max x31 y31) (max x32 y32) (max x33 y33) (max x34 y34) (max x35 y35) (max x36 y36) (max x37 y37) (max x38 y38) (max x39 y39) (max x40 y40) (max x41 y41) (max x42 y42) (max x43 y43) (max x44 y44) (max x45 y45) (max x46 y46) (max x47 y47) (max x48 y48) (max x49 y49) (max x50 y50) (max x51 y51) (max x52 y52) (max x53 y53) (max x54 y54) (max x55 y55) (max x56 y56) (max x57 y57) (max x58 y58) (max x59 y59) (max x60 y60) (max x61 y61) (max x62 y62) (max x63 y63)
   minimumNumber = min
@@ -1644,6 +1663,162 @@ instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (Max a) where
 instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (Max a) where
   binaryShuffle = coerce (binaryShuffle @indices @X64 @a)
   {-# INLINE binaryShuffle #-}
+newtype instance X64 (IEEEMin a) = MkIEEEMinX64 (X64 a)
+instance PackX64 X64 a => PackX64 X64 (IEEEMin a) where
+  mkX64 = coerce (mkX64 @X64 @a)
+  unpackX64 = coerce (unpackX64 @X64 @a)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance Broadcast X64 a => Broadcast X64 (IEEEMin a) where
+  broadcast = coerce (broadcast @X64 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 a => SelectableF X64 (IEEEMin a) where
+  selectF = coerce (selectF @X64 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (IEEEMin a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X64 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (IEEEMin a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X64 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X64 (IEEEMax a) = MkIEEEMaxX64 (X64 a)
+instance PackX64 X64 a => PackX64 X64 (IEEEMax a) where
+  mkX64 = coerce (mkX64 @X64 @a)
+  unpackX64 = coerce (unpackX64 @X64 @a)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance Broadcast X64 a => Broadcast X64 (IEEEMax a) where
+  broadcast = coerce (broadcast @X64 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 a => SelectableF X64 (IEEEMax a) where
+  selectF = coerce (selectF @X64 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (IEEEMax a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X64 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (IEEEMax a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X64 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X64 (MinimumNumber a) = MkMinimumNumberX64 (X64 a)
+instance PackX64 X64 a => PackX64 X64 (MinimumNumber a) where
+  mkX64 = coerce (mkX64 @X64 @a)
+  unpackX64 = coerce (unpackX64 @X64 @a)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance Broadcast X64 a => Broadcast X64 (MinimumNumber a) where
+  broadcast = coerce (broadcast @X64 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 a => SelectableF X64 (MinimumNumber a) where
+  selectF = coerce (selectF @X64 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (MinimumNumber a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X64 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (MinimumNumber a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X64 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X64 (MaximumNumber a) = MkMaximumNumberX64 (X64 a)
+instance PackX64 X64 a => PackX64 X64 (MaximumNumber a) where
+  mkX64 = coerce (mkX64 @X64 @a)
+  unpackX64 = coerce (unpackX64 @X64 @a)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance Broadcast X64 a => Broadcast X64 (MaximumNumber a) where
+  broadcast = coerce (broadcast @X64 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 a => SelectableF X64 (MaximumNumber a) where
+  selectF = coerce (selectF @X64 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X64 a => UnaryShuffleT indices X64 (MaximumNumber a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X64 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 a => BinaryShuffleT indices X64 (MaximumNumber a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X64 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X64 All = MkAllX64 (X64 Bool)
+instance PackX64 X64 Bool => PackX64 X64 All where
+  mkX64 = coerce (mkX64 @X64 @Bool)
+  unpackX64 = coerce (unpackX64 @X64 @Bool)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance Broadcast X64 Bool => Broadcast X64 All where
+  broadcast = coerce (broadcast @X64 @Bool)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 Bool => SelectableF X64 All where
+  selectF = coerce (selectF @X64 @Bool)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X64 Bool => UnaryShuffleT indices X64 All where
+  unaryShuffle = coerce (unaryShuffle @indices @X64 @Bool)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 Bool => BinaryShuffleT indices X64 All where
+  binaryShuffle = coerce (binaryShuffle @indices @X64 @Bool)
+  {-# INLINE binaryShuffle #-}
+newtype instance X64 Any = MkAnyX64 (X64 Bool)
+instance PackX64 X64 Bool => PackX64 X64 Any where
+  mkX64 = coerce (mkX64 @X64 @Bool)
+  unpackX64 = coerce (unpackX64 @X64 @Bool)
+  {-# INLINE mkX64 #-}
+  {-# INLINE unpackX64 #-}
+instance Broadcast X64 Bool => Broadcast X64 Any where
+  broadcast = coerce (broadcast @X64 @Bool)
+  {-# INLINE broadcast #-}
+instance SelectableF X64 Bool => SelectableF X64 Any where
+  selectF = coerce (selectF @X64 @Bool)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X64 Bool => UnaryShuffleT indices X64 Any where
+  unaryShuffle = coerce (unaryShuffle @indices @X64 @Bool)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X64 Bool => BinaryShuffleT indices X64 Any where
+  binaryShuffle = coerce (binaryShuffle @indices @X64 @Bool)
+  {-# INLINE binaryShuffle #-}
+instance (Num a, NumF X64 a) => Semigroup (X64 (Sum a)) where
+  (<>) = coerce ((+) @(X64 a))
+  {-# INLINE (<>) #-}
+instance (Num a, NumF X64 a) => Monoid (X64 (Sum a)) where
+  mempty = MkSumX64 (fromIntegerF 0)
+  {-# INLINE mempty #-}
+instance (Num a, NumF X64 a) => Semigroup (X64 (Product a)) where
+  (<>) = coerce ((*) @(X64 a))
+  {-# INLINE (<>) #-}
+instance (Num a, NumF X64 a) => Monoid (X64 (Product a)) where
+  mempty = MkProductX64 (fromIntegerF 1)
+  {-# INLINE mempty #-}
+instance (MinMax (X64 a), MinMaxIsCompatibleWithOrd a) => Semigroup (X64 (Min a)) where
+  (<>) = coerce (min @(X64 a))
+  {-# INLINE (<>) #-}
+instance (Bounded a, MinMax (X64 a), MinMaxIsCompatibleWithOrd a, Broadcast X64 a) => Monoid (X64 (Min a)) where
+  mempty = MkMinX64 (broadcast maxBound)
+  {-# INLINE mempty #-}
+instance (MinMax (X64 a), MinMaxIsCompatibleWithOrd a) => Semigroup (X64 (Max a)) where
+  (<>) = coerce (max @(X64 a))
+  {-# INLINE (<>) #-}
+instance (Bounded a, MinMax (X64 a), MinMaxIsCompatibleWithOrd a, Broadcast X64 a) => Monoid (X64 (Max a)) where
+  mempty = MkMaxX64 (broadcast minBound)
+  {-# INLINE mempty #-}
+instance MinMax (X64 a) => Semigroup (X64 (IEEEMin a)) where
+  (<>) = coerce (min @(X64 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X64 a) => Semigroup (X64 (IEEEMax a)) where
+  (<>) = coerce (max @(X64 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X64 a) => Semigroup (X64 (MinimumNumber a)) where
+  (<>) = coerce (minimumNumber @(X64 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X64 a) => Semigroup (X64 (MaximumNumber a)) where
+  (<>) = coerce (maximumNumber @(X64 a))
+  {-# INLINE (<>) #-}
+instance Semigroup (X64 All) where
+  (<>) = coerce ((B..&.) @(X64 Bool))
+  {-# INLINE (<>) #-}
+instance Monoid (X64 All) where
+  mempty = MkAllX64 (broadcast True)
+  {-# INLINE mempty #-}
+instance Semigroup (X64 Any) where
+  (<>) = coerce ((B..|.) @(X64 Bool))
+  {-# INLINE (<>) #-}
+instance Monoid (X64 Any) where
+  mempty = MkAnyX64 (broadcast False)
+  {-# INLINE mempty #-}
 data instance X64 (Complex a) = MkComplexX64 !(X64 a) !(X64 a)
 instance PackX64 X64 a => PackX64 X64 (Complex a) where
   mkX64 (x0 :+ y0) (x1 :+ y1) (x2 :+ y2) (x3 :+ y3) (x4 :+ y4) (x5 :+ y5) (x6 :+ y6) (x7 :+ y7) (x8 :+ y8) (x9 :+ y9) (x10 :+ y10) (x11 :+ y11) (x12 :+ y12) (x13 :+ y13) (x14 :+ y14) (x15 :+ y15) (x16 :+ y16) (x17 :+ y17) (x18 :+ y18) (x19 :+ y19) (x20 :+ y20) (x21 :+ y21) (x22 :+ y22) (x23 :+ y23) (x24 :+ y24) (x25 :+ y25) (x26 :+ y26) (x27 :+ y27) (x28 :+ y28) (x29 :+ y29) (x30 :+ y30) (x31 :+ y31) (x32 :+ y32) (x33 :+ y33) (x34 :+ y34) (x35 :+ y35) (x36 :+ y36) (x37 :+ y37) (x38 :+ y38) (x39 :+ y39) (x40 :+ y40) (x41 :+ y41) (x42 :+ y42) (x43 :+ y43) (x44 :+ y44) (x45 :+ y45) (x46 :+ y46) (x47 :+ y47) (x48 :+ y48) (x49 :+ y49) (x50 :+ y50) (x51 :+ y51) (x52 :+ y52) (x53 :+ y53) (x54 :+ y54) (x55 :+ y55) (x56 :+ y56) (x57 :+ y57) (x58 :+ y58) (x59 :+ y59) (x60 :+ y60) (x61 :+ y61) (x62 :+ y62) (x63 :+ y63) = MkComplexX64 (mkX64 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31 x32 x33 x34 x35 x36 x37 x38 x39 x40 x41 x42 x43 x44 x45 x46 x47 x48 x49 x50 x51 x52 x53 x54 x55 x56 x57 x58 x59 x60 x61 x62 x63) (mkX64 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31 y32 y33 y34 y35 y36 y37 y38 y39 y40 y41 y42 y43 y44 y45 y46 y47 y48 y49 y50 y51 y52 y53 y54 y55 y56 y57 y58 y59 y60 y61 y62 y63)
@@ -1699,6 +1874,12 @@ instance (i0 < 64, i1 < 64, i2 < 64, i3 < 64, i4 < 64, i5 < 64, i6 < 64, i7 < 64
 instance (i0 < 128, i1 < 128, i2 < 128, i3 < 128, i4 < 128, i5 < 128, i6 < 128, i7 < 128, i8 < 128, i9 < 128, i10 < 128, i11 < 128, i12 < 128, i13 < 128, i14 < 128, i15 < 128, i16 < 128, i17 < 128, i18 < 128, i19 < 128, i20 < 128, i21 < 128, i22 < 128, i23 < 128, i24 < 128, i25 < 128, i26 < 128, i27 < 128, i28 < 128, i29 < 128, i30 < 128, i31 < 128, i32 < 128, i33 < 128, i34 < 128, i35 < 128, i36 < 128, i37 < 128, i38 < 128, i39 < 128, i40 < 128, i41 < 128, i42 < 128, i43 < 128, i44 < 128, i45 < 128, i46 < 128, i47 < 128, i48 < 128, i49 < 128, i50 < 128, i51 < 128, i52 < 128, i53 < 128, i54 < 128, i55 < 128, i56 < 128, i57 < 128, i58 < 128, i59 < 128, i60 < 128, i61 < 128, i62 < 128, i63 < 128) => BinaryShuffleT '[i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31, i32, i33, i34, i35, i36, i37, i38, i39, i40, i41, i42, i43, i44, i45, i46, i47, i48, i49, i50, i51, i52, i53, i54, i55, i56, i57, i58, i59, i60, i61, i62, i63] X64 () where
   binaryShuffle _ _ = MkUnitX64
   {-# INLINE binaryShuffle #-}
+instance Semigroup (X64()) where
+  _ <> _ = MkUnitX64
+  {-# INLINE (<>) #-}
+instance Monoid (X64()) where
+  mempty = MkUnitX64
+  {-# INLINE mempty #-}
 data instance X64 (a0, a1) = MkTuple2X64 !(X64 a0) !(X64 a1)
 instance (PackX64 X64 a0, PackX64 X64 a1) => PackX64 X64 (a0, a1) where
   mkX64 (x0_0, x0_1) (x1_0, x1_1) (x2_0, x2_1) (x3_0, x3_1) (x4_0, x4_1) (x5_0, x5_1) (x6_0, x6_1) (x7_0, x7_1) (x8_0, x8_1) (x9_0, x9_1) (x10_0, x10_1) (x11_0, x11_1) (x12_0, x12_1) (x13_0, x13_1) (x14_0, x14_1) (x15_0, x15_1) (x16_0, x16_1) (x17_0, x17_1) (x18_0, x18_1) (x19_0, x19_1) (x20_0, x20_1) (x21_0, x21_1) (x22_0, x22_1) (x23_0, x23_1) (x24_0, x24_1) (x25_0, x25_1) (x26_0, x26_1) (x27_0, x27_1) (x28_0, x28_1) (x29_0, x29_1) (x30_0, x30_1) (x31_0, x31_1) (x32_0, x32_1) (x33_0, x33_1) (x34_0, x34_1) (x35_0, x35_1) (x36_0, x36_1) (x37_0, x37_1) (x38_0, x38_1) (x39_0, x39_1) (x40_0, x40_1) (x41_0, x41_1) (x42_0, x42_1) (x43_0, x43_1) (x44_0, x44_1) (x45_0, x45_1) (x46_0, x46_1) (x47_0, x47_1) (x48_0, x48_1) (x49_0, x49_1) (x50_0, x50_1) (x51_0, x51_1) (x52_0, x52_1) (x53_0, x53_1) (x54_0, x54_1) (x55_0, x55_1) (x56_0, x56_1) (x57_0, x57_1) (x58_0, x58_1) (x59_0, x59_1) (x60_0, x60_1) (x61_0, x61_1) (x62_0, x62_1) (x63_0, x63_1) = MkTuple2X64 (mkX64 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0 x32_0 x33_0 x34_0 x35_0 x36_0 x37_0 x38_0 x39_0 x40_0 x41_0 x42_0 x43_0 x44_0 x45_0 x46_0 x47_0 x48_0 x49_0 x50_0 x51_0 x52_0 x53_0 x54_0 x55_0 x56_0 x57_0 x58_0 x59_0 x60_0 x61_0 x62_0 x63_0) (mkX64 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1 x32_1 x33_1 x34_1 x35_1 x36_1 x37_1 x38_1 x39_1 x40_1 x41_1 x42_1 x43_1 x44_1 x45_1 x46_1 x47_1 x48_1 x49_1 x50_1 x51_1 x52_1 x53_1 x54_1 x55_1 x56_1 x57_1 x58_1 x59_1 x60_1 x61_1 x62_1 x63_1)
@@ -1717,6 +1898,12 @@ instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1) => UnarySh
 instance (BinaryShuffleT indices X64 a0, BinaryShuffleT indices X64 a1) => BinaryShuffleT indices X64 (a0, a1) where
   binaryShuffle (MkTuple2X64 x0 x1) (MkTuple2X64 y0 y1) = MkTuple2X64 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X64 a0), Semigroup (X64 a1)) => Semigroup (X64 (a0, a1)) where
+  MkTuple2X64 x0 x1 <> MkTuple2X64 y0 y1 = MkTuple2X64 (x0 <> y0) (x1 <> y1)
+  {-# INLINE (<>) #-}
+instance (Monoid (X64 a0), Monoid (X64 a1)) => Monoid (X64 (a0, a1)) where
+  mempty = MkTuple2X64 mempty mempty
+  {-# INLINE mempty #-}
 data instance X64 (a0, a1, a2) = MkTuple3X64 !(X64 a0) !(X64 a1) !(X64 a2)
 instance (PackX64 X64 a0, PackX64 X64 a1, PackX64 X64 a2) => PackX64 X64 (a0, a1, a2) where
   mkX64 (x0_0, x0_1, x0_2) (x1_0, x1_1, x1_2) (x2_0, x2_1, x2_2) (x3_0, x3_1, x3_2) (x4_0, x4_1, x4_2) (x5_0, x5_1, x5_2) (x6_0, x6_1, x6_2) (x7_0, x7_1, x7_2) (x8_0, x8_1, x8_2) (x9_0, x9_1, x9_2) (x10_0, x10_1, x10_2) (x11_0, x11_1, x11_2) (x12_0, x12_1, x12_2) (x13_0, x13_1, x13_2) (x14_0, x14_1, x14_2) (x15_0, x15_1, x15_2) (x16_0, x16_1, x16_2) (x17_0, x17_1, x17_2) (x18_0, x18_1, x18_2) (x19_0, x19_1, x19_2) (x20_0, x20_1, x20_2) (x21_0, x21_1, x21_2) (x22_0, x22_1, x22_2) (x23_0, x23_1, x23_2) (x24_0, x24_1, x24_2) (x25_0, x25_1, x25_2) (x26_0, x26_1, x26_2) (x27_0, x27_1, x27_2) (x28_0, x28_1, x28_2) (x29_0, x29_1, x29_2) (x30_0, x30_1, x30_2) (x31_0, x31_1, x31_2) (x32_0, x32_1, x32_2) (x33_0, x33_1, x33_2) (x34_0, x34_1, x34_2) (x35_0, x35_1, x35_2) (x36_0, x36_1, x36_2) (x37_0, x37_1, x37_2) (x38_0, x38_1, x38_2) (x39_0, x39_1, x39_2) (x40_0, x40_1, x40_2) (x41_0, x41_1, x41_2) (x42_0, x42_1, x42_2) (x43_0, x43_1, x43_2) (x44_0, x44_1, x44_2) (x45_0, x45_1, x45_2) (x46_0, x46_1, x46_2) (x47_0, x47_1, x47_2) (x48_0, x48_1, x48_2) (x49_0, x49_1, x49_2) (x50_0, x50_1, x50_2) (x51_0, x51_1, x51_2) (x52_0, x52_1, x52_2) (x53_0, x53_1, x53_2) (x54_0, x54_1, x54_2) (x55_0, x55_1, x55_2) (x56_0, x56_1, x56_2) (x57_0, x57_1, x57_2) (x58_0, x58_1, x58_2) (x59_0, x59_1, x59_2) (x60_0, x60_1, x60_2) (x61_0, x61_1, x61_2) (x62_0, x62_1, x62_2) (x63_0, x63_1, x63_2) = MkTuple3X64 (mkX64 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0 x32_0 x33_0 x34_0 x35_0 x36_0 x37_0 x38_0 x39_0 x40_0 x41_0 x42_0 x43_0 x44_0 x45_0 x46_0 x47_0 x48_0 x49_0 x50_0 x51_0 x52_0 x53_0 x54_0 x55_0 x56_0 x57_0 x58_0 x59_0 x60_0 x61_0 x62_0 x63_0) (mkX64 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1 x32_1 x33_1 x34_1 x35_1 x36_1 x37_1 x38_1 x39_1 x40_1 x41_1 x42_1 x43_1 x44_1 x45_1 x46_1 x47_1 x48_1 x49_1 x50_1 x51_1 x52_1 x53_1 x54_1 x55_1 x56_1 x57_1 x58_1 x59_1 x60_1 x61_1 x62_1 x63_1) (mkX64 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2 x32_2 x33_2 x34_2 x35_2 x36_2 x37_2 x38_2 x39_2 x40_2 x41_2 x42_2 x43_2 x44_2 x45_2 x46_2 x47_2 x48_2 x49_2 x50_2 x51_2 x52_2 x53_2 x54_2 x55_2 x56_2 x57_2 x58_2 x59_2 x60_2 x61_2 x62_2 x63_2)
@@ -1735,6 +1922,12 @@ instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1, UnaryShuff
 instance (BinaryShuffleT indices X64 a0, BinaryShuffleT indices X64 a1, BinaryShuffleT indices X64 a2) => BinaryShuffleT indices X64 (a0, a1, a2) where
   binaryShuffle (MkTuple3X64 x0 x1 x2) (MkTuple3X64 y0 y1 y2) = MkTuple3X64 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X64 a0), Semigroup (X64 a1), Semigroup (X64 a2)) => Semigroup (X64 (a0, a1, a2)) where
+  MkTuple3X64 x0 x1 x2 <> MkTuple3X64 y0 y1 y2 = MkTuple3X64 (x0 <> y0) (x1 <> y1) (x2 <> y2)
+  {-# INLINE (<>) #-}
+instance (Monoid (X64 a0), Monoid (X64 a1), Monoid (X64 a2)) => Monoid (X64 (a0, a1, a2)) where
+  mempty = MkTuple3X64 mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X64 (a0, a1, a2, a3) = MkTuple4X64 !(X64 a0) !(X64 a1) !(X64 a2) !(X64 a3)
 instance (PackX64 X64 a0, PackX64 X64 a1, PackX64 X64 a2, PackX64 X64 a3) => PackX64 X64 (a0, a1, a2, a3) where
   mkX64 (x0_0, x0_1, x0_2, x0_3) (x1_0, x1_1, x1_2, x1_3) (x2_0, x2_1, x2_2, x2_3) (x3_0, x3_1, x3_2, x3_3) (x4_0, x4_1, x4_2, x4_3) (x5_0, x5_1, x5_2, x5_3) (x6_0, x6_1, x6_2, x6_3) (x7_0, x7_1, x7_2, x7_3) (x8_0, x8_1, x8_2, x8_3) (x9_0, x9_1, x9_2, x9_3) (x10_0, x10_1, x10_2, x10_3) (x11_0, x11_1, x11_2, x11_3) (x12_0, x12_1, x12_2, x12_3) (x13_0, x13_1, x13_2, x13_3) (x14_0, x14_1, x14_2, x14_3) (x15_0, x15_1, x15_2, x15_3) (x16_0, x16_1, x16_2, x16_3) (x17_0, x17_1, x17_2, x17_3) (x18_0, x18_1, x18_2, x18_3) (x19_0, x19_1, x19_2, x19_3) (x20_0, x20_1, x20_2, x20_3) (x21_0, x21_1, x21_2, x21_3) (x22_0, x22_1, x22_2, x22_3) (x23_0, x23_1, x23_2, x23_3) (x24_0, x24_1, x24_2, x24_3) (x25_0, x25_1, x25_2, x25_3) (x26_0, x26_1, x26_2, x26_3) (x27_0, x27_1, x27_2, x27_3) (x28_0, x28_1, x28_2, x28_3) (x29_0, x29_1, x29_2, x29_3) (x30_0, x30_1, x30_2, x30_3) (x31_0, x31_1, x31_2, x31_3) (x32_0, x32_1, x32_2, x32_3) (x33_0, x33_1, x33_2, x33_3) (x34_0, x34_1, x34_2, x34_3) (x35_0, x35_1, x35_2, x35_3) (x36_0, x36_1, x36_2, x36_3) (x37_0, x37_1, x37_2, x37_3) (x38_0, x38_1, x38_2, x38_3) (x39_0, x39_1, x39_2, x39_3) (x40_0, x40_1, x40_2, x40_3) (x41_0, x41_1, x41_2, x41_3) (x42_0, x42_1, x42_2, x42_3) (x43_0, x43_1, x43_2, x43_3) (x44_0, x44_1, x44_2, x44_3) (x45_0, x45_1, x45_2, x45_3) (x46_0, x46_1, x46_2, x46_3) (x47_0, x47_1, x47_2, x47_3) (x48_0, x48_1, x48_2, x48_3) (x49_0, x49_1, x49_2, x49_3) (x50_0, x50_1, x50_2, x50_3) (x51_0, x51_1, x51_2, x51_3) (x52_0, x52_1, x52_2, x52_3) (x53_0, x53_1, x53_2, x53_3) (x54_0, x54_1, x54_2, x54_3) (x55_0, x55_1, x55_2, x55_3) (x56_0, x56_1, x56_2, x56_3) (x57_0, x57_1, x57_2, x57_3) (x58_0, x58_1, x58_2, x58_3) (x59_0, x59_1, x59_2, x59_3) (x60_0, x60_1, x60_2, x60_3) (x61_0, x61_1, x61_2, x61_3) (x62_0, x62_1, x62_2, x62_3) (x63_0, x63_1, x63_2, x63_3) = MkTuple4X64 (mkX64 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0 x32_0 x33_0 x34_0 x35_0 x36_0 x37_0 x38_0 x39_0 x40_0 x41_0 x42_0 x43_0 x44_0 x45_0 x46_0 x47_0 x48_0 x49_0 x50_0 x51_0 x52_0 x53_0 x54_0 x55_0 x56_0 x57_0 x58_0 x59_0 x60_0 x61_0 x62_0 x63_0) (mkX64 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1 x32_1 x33_1 x34_1 x35_1 x36_1 x37_1 x38_1 x39_1 x40_1 x41_1 x42_1 x43_1 x44_1 x45_1 x46_1 x47_1 x48_1 x49_1 x50_1 x51_1 x52_1 x53_1 x54_1 x55_1 x56_1 x57_1 x58_1 x59_1 x60_1 x61_1 x62_1 x63_1) (mkX64 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2 x32_2 x33_2 x34_2 x35_2 x36_2 x37_2 x38_2 x39_2 x40_2 x41_2 x42_2 x43_2 x44_2 x45_2 x46_2 x47_2 x48_2 x49_2 x50_2 x51_2 x52_2 x53_2 x54_2 x55_2 x56_2 x57_2 x58_2 x59_2 x60_2 x61_2 x62_2 x63_2) (mkX64 x0_3 x1_3 x2_3 x3_3 x4_3 x5_3 x6_3 x7_3 x8_3 x9_3 x10_3 x11_3 x12_3 x13_3 x14_3 x15_3 x16_3 x17_3 x18_3 x19_3 x20_3 x21_3 x22_3 x23_3 x24_3 x25_3 x26_3 x27_3 x28_3 x29_3 x30_3 x31_3 x32_3 x33_3 x34_3 x35_3 x36_3 x37_3 x38_3 x39_3 x40_3 x41_3 x42_3 x43_3 x44_3 x45_3 x46_3 x47_3 x48_3 x49_3 x50_3 x51_3 x52_3 x53_3 x54_3 x55_3 x56_3 x57_3 x58_3 x59_3 x60_3 x61_3 x62_3 x63_3)
@@ -1753,6 +1946,12 @@ instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1, UnaryShuff
 instance (BinaryShuffleT indices X64 a0, BinaryShuffleT indices X64 a1, BinaryShuffleT indices X64 a2, BinaryShuffleT indices X64 a3) => BinaryShuffleT indices X64 (a0, a1, a2, a3) where
   binaryShuffle (MkTuple4X64 x0 x1 x2 x3) (MkTuple4X64 y0 y1 y2 y3) = MkTuple4X64 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X64 a0), Semigroup (X64 a1), Semigroup (X64 a2), Semigroup (X64 a3)) => Semigroup (X64 (a0, a1, a2, a3)) where
+  MkTuple4X64 x0 x1 x2 x3 <> MkTuple4X64 y0 y1 y2 y3 = MkTuple4X64 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3)
+  {-# INLINE (<>) #-}
+instance (Monoid (X64 a0), Monoid (X64 a1), Monoid (X64 a2), Monoid (X64 a3)) => Monoid (X64 (a0, a1, a2, a3)) where
+  mempty = MkTuple4X64 mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X64 (a0, a1, a2, a3, a4) = MkTuple5X64 !(X64 a0) !(X64 a1) !(X64 a2) !(X64 a3) !(X64 a4)
 instance (PackX64 X64 a0, PackX64 X64 a1, PackX64 X64 a2, PackX64 X64 a3, PackX64 X64 a4) => PackX64 X64 (a0, a1, a2, a3, a4) where
   mkX64 (x0_0, x0_1, x0_2, x0_3, x0_4) (x1_0, x1_1, x1_2, x1_3, x1_4) (x2_0, x2_1, x2_2, x2_3, x2_4) (x3_0, x3_1, x3_2, x3_3, x3_4) (x4_0, x4_1, x4_2, x4_3, x4_4) (x5_0, x5_1, x5_2, x5_3, x5_4) (x6_0, x6_1, x6_2, x6_3, x6_4) (x7_0, x7_1, x7_2, x7_3, x7_4) (x8_0, x8_1, x8_2, x8_3, x8_4) (x9_0, x9_1, x9_2, x9_3, x9_4) (x10_0, x10_1, x10_2, x10_3, x10_4) (x11_0, x11_1, x11_2, x11_3, x11_4) (x12_0, x12_1, x12_2, x12_3, x12_4) (x13_0, x13_1, x13_2, x13_3, x13_4) (x14_0, x14_1, x14_2, x14_3, x14_4) (x15_0, x15_1, x15_2, x15_3, x15_4) (x16_0, x16_1, x16_2, x16_3, x16_4) (x17_0, x17_1, x17_2, x17_3, x17_4) (x18_0, x18_1, x18_2, x18_3, x18_4) (x19_0, x19_1, x19_2, x19_3, x19_4) (x20_0, x20_1, x20_2, x20_3, x20_4) (x21_0, x21_1, x21_2, x21_3, x21_4) (x22_0, x22_1, x22_2, x22_3, x22_4) (x23_0, x23_1, x23_2, x23_3, x23_4) (x24_0, x24_1, x24_2, x24_3, x24_4) (x25_0, x25_1, x25_2, x25_3, x25_4) (x26_0, x26_1, x26_2, x26_3, x26_4) (x27_0, x27_1, x27_2, x27_3, x27_4) (x28_0, x28_1, x28_2, x28_3, x28_4) (x29_0, x29_1, x29_2, x29_3, x29_4) (x30_0, x30_1, x30_2, x30_3, x30_4) (x31_0, x31_1, x31_2, x31_3, x31_4) (x32_0, x32_1, x32_2, x32_3, x32_4) (x33_0, x33_1, x33_2, x33_3, x33_4) (x34_0, x34_1, x34_2, x34_3, x34_4) (x35_0, x35_1, x35_2, x35_3, x35_4) (x36_0, x36_1, x36_2, x36_3, x36_4) (x37_0, x37_1, x37_2, x37_3, x37_4) (x38_0, x38_1, x38_2, x38_3, x38_4) (x39_0, x39_1, x39_2, x39_3, x39_4) (x40_0, x40_1, x40_2, x40_3, x40_4) (x41_0, x41_1, x41_2, x41_3, x41_4) (x42_0, x42_1, x42_2, x42_3, x42_4) (x43_0, x43_1, x43_2, x43_3, x43_4) (x44_0, x44_1, x44_2, x44_3, x44_4) (x45_0, x45_1, x45_2, x45_3, x45_4) (x46_0, x46_1, x46_2, x46_3, x46_4) (x47_0, x47_1, x47_2, x47_3, x47_4) (x48_0, x48_1, x48_2, x48_3, x48_4) (x49_0, x49_1, x49_2, x49_3, x49_4) (x50_0, x50_1, x50_2, x50_3, x50_4) (x51_0, x51_1, x51_2, x51_3, x51_4) (x52_0, x52_1, x52_2, x52_3, x52_4) (x53_0, x53_1, x53_2, x53_3, x53_4) (x54_0, x54_1, x54_2, x54_3, x54_4) (x55_0, x55_1, x55_2, x55_3, x55_4) (x56_0, x56_1, x56_2, x56_3, x56_4) (x57_0, x57_1, x57_2, x57_3, x57_4) (x58_0, x58_1, x58_2, x58_3, x58_4) (x59_0, x59_1, x59_2, x59_3, x59_4) (x60_0, x60_1, x60_2, x60_3, x60_4) (x61_0, x61_1, x61_2, x61_3, x61_4) (x62_0, x62_1, x62_2, x62_3, x62_4) (x63_0, x63_1, x63_2, x63_3, x63_4) = MkTuple5X64 (mkX64 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0 x32_0 x33_0 x34_0 x35_0 x36_0 x37_0 x38_0 x39_0 x40_0 x41_0 x42_0 x43_0 x44_0 x45_0 x46_0 x47_0 x48_0 x49_0 x50_0 x51_0 x52_0 x53_0 x54_0 x55_0 x56_0 x57_0 x58_0 x59_0 x60_0 x61_0 x62_0 x63_0) (mkX64 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1 x32_1 x33_1 x34_1 x35_1 x36_1 x37_1 x38_1 x39_1 x40_1 x41_1 x42_1 x43_1 x44_1 x45_1 x46_1 x47_1 x48_1 x49_1 x50_1 x51_1 x52_1 x53_1 x54_1 x55_1 x56_1 x57_1 x58_1 x59_1 x60_1 x61_1 x62_1 x63_1) (mkX64 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2 x32_2 x33_2 x34_2 x35_2 x36_2 x37_2 x38_2 x39_2 x40_2 x41_2 x42_2 x43_2 x44_2 x45_2 x46_2 x47_2 x48_2 x49_2 x50_2 x51_2 x52_2 x53_2 x54_2 x55_2 x56_2 x57_2 x58_2 x59_2 x60_2 x61_2 x62_2 x63_2) (mkX64 x0_3 x1_3 x2_3 x3_3 x4_3 x5_3 x6_3 x7_3 x8_3 x9_3 x10_3 x11_3 x12_3 x13_3 x14_3 x15_3 x16_3 x17_3 x18_3 x19_3 x20_3 x21_3 x22_3 x23_3 x24_3 x25_3 x26_3 x27_3 x28_3 x29_3 x30_3 x31_3 x32_3 x33_3 x34_3 x35_3 x36_3 x37_3 x38_3 x39_3 x40_3 x41_3 x42_3 x43_3 x44_3 x45_3 x46_3 x47_3 x48_3 x49_3 x50_3 x51_3 x52_3 x53_3 x54_3 x55_3 x56_3 x57_3 x58_3 x59_3 x60_3 x61_3 x62_3 x63_3) (mkX64 x0_4 x1_4 x2_4 x3_4 x4_4 x5_4 x6_4 x7_4 x8_4 x9_4 x10_4 x11_4 x12_4 x13_4 x14_4 x15_4 x16_4 x17_4 x18_4 x19_4 x20_4 x21_4 x22_4 x23_4 x24_4 x25_4 x26_4 x27_4 x28_4 x29_4 x30_4 x31_4 x32_4 x33_4 x34_4 x35_4 x36_4 x37_4 x38_4 x39_4 x40_4 x41_4 x42_4 x43_4 x44_4 x45_4 x46_4 x47_4 x48_4 x49_4 x50_4 x51_4 x52_4 x53_4 x54_4 x55_4 x56_4 x57_4 x58_4 x59_4 x60_4 x61_4 x62_4 x63_4)
@@ -1771,6 +1970,12 @@ instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1, UnaryShuff
 instance (BinaryShuffleT indices X64 a0, BinaryShuffleT indices X64 a1, BinaryShuffleT indices X64 a2, BinaryShuffleT indices X64 a3, BinaryShuffleT indices X64 a4) => BinaryShuffleT indices X64 (a0, a1, a2, a3, a4) where
   binaryShuffle (MkTuple5X64 x0 x1 x2 x3 x4) (MkTuple5X64 y0 y1 y2 y3 y4) = MkTuple5X64 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X64 a0), Semigroup (X64 a1), Semigroup (X64 a2), Semigroup (X64 a3), Semigroup (X64 a4)) => Semigroup (X64 (a0, a1, a2, a3, a4)) where
+  MkTuple5X64 x0 x1 x2 x3 x4 <> MkTuple5X64 y0 y1 y2 y3 y4 = MkTuple5X64 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4)
+  {-# INLINE (<>) #-}
+instance (Monoid (X64 a0), Monoid (X64 a1), Monoid (X64 a2), Monoid (X64 a3), Monoid (X64 a4)) => Monoid (X64 (a0, a1, a2, a3, a4)) where
+  mempty = MkTuple5X64 mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X64 (a0, a1, a2, a3, a4, a5) = MkTuple6X64 !(X64 a0) !(X64 a1) !(X64 a2) !(X64 a3) !(X64 a4) !(X64 a5)
 instance (PackX64 X64 a0, PackX64 X64 a1, PackX64 X64 a2, PackX64 X64 a3, PackX64 X64 a4, PackX64 X64 a5) => PackX64 X64 (a0, a1, a2, a3, a4, a5) where
   mkX64 (x0_0, x0_1, x0_2, x0_3, x0_4, x0_5) (x1_0, x1_1, x1_2, x1_3, x1_4, x1_5) (x2_0, x2_1, x2_2, x2_3, x2_4, x2_5) (x3_0, x3_1, x3_2, x3_3, x3_4, x3_5) (x4_0, x4_1, x4_2, x4_3, x4_4, x4_5) (x5_0, x5_1, x5_2, x5_3, x5_4, x5_5) (x6_0, x6_1, x6_2, x6_3, x6_4, x6_5) (x7_0, x7_1, x7_2, x7_3, x7_4, x7_5) (x8_0, x8_1, x8_2, x8_3, x8_4, x8_5) (x9_0, x9_1, x9_2, x9_3, x9_4, x9_5) (x10_0, x10_1, x10_2, x10_3, x10_4, x10_5) (x11_0, x11_1, x11_2, x11_3, x11_4, x11_5) (x12_0, x12_1, x12_2, x12_3, x12_4, x12_5) (x13_0, x13_1, x13_2, x13_3, x13_4, x13_5) (x14_0, x14_1, x14_2, x14_3, x14_4, x14_5) (x15_0, x15_1, x15_2, x15_3, x15_4, x15_5) (x16_0, x16_1, x16_2, x16_3, x16_4, x16_5) (x17_0, x17_1, x17_2, x17_3, x17_4, x17_5) (x18_0, x18_1, x18_2, x18_3, x18_4, x18_5) (x19_0, x19_1, x19_2, x19_3, x19_4, x19_5) (x20_0, x20_1, x20_2, x20_3, x20_4, x20_5) (x21_0, x21_1, x21_2, x21_3, x21_4, x21_5) (x22_0, x22_1, x22_2, x22_3, x22_4, x22_5) (x23_0, x23_1, x23_2, x23_3, x23_4, x23_5) (x24_0, x24_1, x24_2, x24_3, x24_4, x24_5) (x25_0, x25_1, x25_2, x25_3, x25_4, x25_5) (x26_0, x26_1, x26_2, x26_3, x26_4, x26_5) (x27_0, x27_1, x27_2, x27_3, x27_4, x27_5) (x28_0, x28_1, x28_2, x28_3, x28_4, x28_5) (x29_0, x29_1, x29_2, x29_3, x29_4, x29_5) (x30_0, x30_1, x30_2, x30_3, x30_4, x30_5) (x31_0, x31_1, x31_2, x31_3, x31_4, x31_5) (x32_0, x32_1, x32_2, x32_3, x32_4, x32_5) (x33_0, x33_1, x33_2, x33_3, x33_4, x33_5) (x34_0, x34_1, x34_2, x34_3, x34_4, x34_5) (x35_0, x35_1, x35_2, x35_3, x35_4, x35_5) (x36_0, x36_1, x36_2, x36_3, x36_4, x36_5) (x37_0, x37_1, x37_2, x37_3, x37_4, x37_5) (x38_0, x38_1, x38_2, x38_3, x38_4, x38_5) (x39_0, x39_1, x39_2, x39_3, x39_4, x39_5) (x40_0, x40_1, x40_2, x40_3, x40_4, x40_5) (x41_0, x41_1, x41_2, x41_3, x41_4, x41_5) (x42_0, x42_1, x42_2, x42_3, x42_4, x42_5) (x43_0, x43_1, x43_2, x43_3, x43_4, x43_5) (x44_0, x44_1, x44_2, x44_3, x44_4, x44_5) (x45_0, x45_1, x45_2, x45_3, x45_4, x45_5) (x46_0, x46_1, x46_2, x46_3, x46_4, x46_5) (x47_0, x47_1, x47_2, x47_3, x47_4, x47_5) (x48_0, x48_1, x48_2, x48_3, x48_4, x48_5) (x49_0, x49_1, x49_2, x49_3, x49_4, x49_5) (x50_0, x50_1, x50_2, x50_3, x50_4, x50_5) (x51_0, x51_1, x51_2, x51_3, x51_4, x51_5) (x52_0, x52_1, x52_2, x52_3, x52_4, x52_5) (x53_0, x53_1, x53_2, x53_3, x53_4, x53_5) (x54_0, x54_1, x54_2, x54_3, x54_4, x54_5) (x55_0, x55_1, x55_2, x55_3, x55_4, x55_5) (x56_0, x56_1, x56_2, x56_3, x56_4, x56_5) (x57_0, x57_1, x57_2, x57_3, x57_4, x57_5) (x58_0, x58_1, x58_2, x58_3, x58_4, x58_5) (x59_0, x59_1, x59_2, x59_3, x59_4, x59_5) (x60_0, x60_1, x60_2, x60_3, x60_4, x60_5) (x61_0, x61_1, x61_2, x61_3, x61_4, x61_5) (x62_0, x62_1, x62_2, x62_3, x62_4, x62_5) (x63_0, x63_1, x63_2, x63_3, x63_4, x63_5) = MkTuple6X64 (mkX64 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0 x32_0 x33_0 x34_0 x35_0 x36_0 x37_0 x38_0 x39_0 x40_0 x41_0 x42_0 x43_0 x44_0 x45_0 x46_0 x47_0 x48_0 x49_0 x50_0 x51_0 x52_0 x53_0 x54_0 x55_0 x56_0 x57_0 x58_0 x59_0 x60_0 x61_0 x62_0 x63_0) (mkX64 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1 x32_1 x33_1 x34_1 x35_1 x36_1 x37_1 x38_1 x39_1 x40_1 x41_1 x42_1 x43_1 x44_1 x45_1 x46_1 x47_1 x48_1 x49_1 x50_1 x51_1 x52_1 x53_1 x54_1 x55_1 x56_1 x57_1 x58_1 x59_1 x60_1 x61_1 x62_1 x63_1) (mkX64 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2 x32_2 x33_2 x34_2 x35_2 x36_2 x37_2 x38_2 x39_2 x40_2 x41_2 x42_2 x43_2 x44_2 x45_2 x46_2 x47_2 x48_2 x49_2 x50_2 x51_2 x52_2 x53_2 x54_2 x55_2 x56_2 x57_2 x58_2 x59_2 x60_2 x61_2 x62_2 x63_2) (mkX64 x0_3 x1_3 x2_3 x3_3 x4_3 x5_3 x6_3 x7_3 x8_3 x9_3 x10_3 x11_3 x12_3 x13_3 x14_3 x15_3 x16_3 x17_3 x18_3 x19_3 x20_3 x21_3 x22_3 x23_3 x24_3 x25_3 x26_3 x27_3 x28_3 x29_3 x30_3 x31_3 x32_3 x33_3 x34_3 x35_3 x36_3 x37_3 x38_3 x39_3 x40_3 x41_3 x42_3 x43_3 x44_3 x45_3 x46_3 x47_3 x48_3 x49_3 x50_3 x51_3 x52_3 x53_3 x54_3 x55_3 x56_3 x57_3 x58_3 x59_3 x60_3 x61_3 x62_3 x63_3) (mkX64 x0_4 x1_4 x2_4 x3_4 x4_4 x5_4 x6_4 x7_4 x8_4 x9_4 x10_4 x11_4 x12_4 x13_4 x14_4 x15_4 x16_4 x17_4 x18_4 x19_4 x20_4 x21_4 x22_4 x23_4 x24_4 x25_4 x26_4 x27_4 x28_4 x29_4 x30_4 x31_4 x32_4 x33_4 x34_4 x35_4 x36_4 x37_4 x38_4 x39_4 x40_4 x41_4 x42_4 x43_4 x44_4 x45_4 x46_4 x47_4 x48_4 x49_4 x50_4 x51_4 x52_4 x53_4 x54_4 x55_4 x56_4 x57_4 x58_4 x59_4 x60_4 x61_4 x62_4 x63_4) (mkX64 x0_5 x1_5 x2_5 x3_5 x4_5 x5_5 x6_5 x7_5 x8_5 x9_5 x10_5 x11_5 x12_5 x13_5 x14_5 x15_5 x16_5 x17_5 x18_5 x19_5 x20_5 x21_5 x22_5 x23_5 x24_5 x25_5 x26_5 x27_5 x28_5 x29_5 x30_5 x31_5 x32_5 x33_5 x34_5 x35_5 x36_5 x37_5 x38_5 x39_5 x40_5 x41_5 x42_5 x43_5 x44_5 x45_5 x46_5 x47_5 x48_5 x49_5 x50_5 x51_5 x52_5 x53_5 x54_5 x55_5 x56_5 x57_5 x58_5 x59_5 x60_5 x61_5 x62_5 x63_5)
@@ -1789,6 +1994,12 @@ instance (UnaryShuffleT indices X64 a0, UnaryShuffleT indices X64 a1, UnaryShuff
 instance (BinaryShuffleT indices X64 a0, BinaryShuffleT indices X64 a1, BinaryShuffleT indices X64 a2, BinaryShuffleT indices X64 a3, BinaryShuffleT indices X64 a4, BinaryShuffleT indices X64 a5) => BinaryShuffleT indices X64 (a0, a1, a2, a3, a4, a5) where
   binaryShuffle (MkTuple6X64 x0 x1 x2 x3 x4 x5) (MkTuple6X64 y0 y1 y2 y3 y4 y5) = MkTuple6X64 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4) (binaryShuffle @indices x5 y5)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X64 a0), Semigroup (X64 a1), Semigroup (X64 a2), Semigroup (X64 a3), Semigroup (X64 a4), Semigroup (X64 a5)) => Semigroup (X64 (a0, a1, a2, a3, a4, a5)) where
+  MkTuple6X64 x0 x1 x2 x3 x4 x5 <> MkTuple6X64 y0 y1 y2 y3 y4 y5 = MkTuple6X64 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4) (x5 <> y5)
+  {-# INLINE (<>) #-}
+instance (Monoid (X64 a0), Monoid (X64 a1), Monoid (X64 a2), Monoid (X64 a3), Monoid (X64 a4), Monoid (X64 a5)) => Monoid (X64 (a0, a1, a2, a3, a4, a5)) where
+  mempty = MkTuple6X64 mempty mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 instance (PackX64 X64 a, PackX64 X64 b) => LiftSIMD X64 a b where
   liftSIMD f !v = case unpackX64 v of (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25, x26, x27, x28, x29, x30, x31, x32, x33, x34, x35, x36, x37, x38, x39, x40, x41, x42, x43, x44, x45, x46, x47, x48, x49, x50, x51, x52, x53, x54, x55, x56, x57, x58, x59, x60, x61, x62, x63) -> mkX64 (f x0) (f x1) (f x2) (f x3) (f x4) (f x5) (f x6) (f x7) (f x8) (f x9) (f x10) (f x11) (f x12) (f x13) (f x14) (f x15) (f x16) (f x17) (f x18) (f x19) (f x20) (f x21) (f x22) (f x23) (f x24) (f x25) (f x26) (f x27) (f x28) (f x29) (f x30) (f x31) (f x32) (f x33) (f x34) (f x35) (f x36) (f x37) (f x38) (f x39) (f x40) (f x41) (f x42) (f x43) (f x44) (f x45) (f x46) (f x47) (f x48) (f x49) (f x50) (f x51) (f x52) (f x53) (f x54) (f x55) (f x56) (f x57) (f x58) (f x59) (f x60) (f x61) (f x62) (f x63)
   {-# INLINE liftSIMD #-}
@@ -1814,6 +2025,18 @@ instance LiftConstructor X64 where
   getMin' = coerce
   mkMax = coerce
   getMax' = coerce
+  mkIEEEMin = coerce
+  getIEEEMin' = coerce
+  mkIEEEMax = coerce
+  getIEEEMax' = coerce
+  mkMinimumNumber = coerce
+  getMinimumNumber' = coerce
+  mkMaximumNumber = coerce
+  getMaximumNumber' = coerce
+  mkAll = coerce
+  getAll' = coerce
+  mkAny = coerce
+  getAny' = coerce
   mkComplex = MkComplexX64
   deconstructComplex (MkComplexX64 x y) = (x, y)
   {-# INLINE mkTuple2 #-}
@@ -1834,6 +2057,18 @@ instance LiftConstructor X64 where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 instance (Broadcast X64 a, SelectableF X64 a) => LiftMaybe X64 a where

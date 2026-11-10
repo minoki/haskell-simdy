@@ -31,6 +31,7 @@ import qualified GHC.Exts
 import           GHC.Exts (Ptr (..), Float (..), Double (..), coerce, (+#), IsList (..), Word8#, Word16#, Word32#, Word64#)
 import           GHC.Int
 import           GHC.IO
+import           GHC.TypeError (Unsatisfiable, ErrorMessage (Text))
 import           GHC.Word
 import           Prelude hiding (not, (&&), (||), (==), (<), (<=), (>), (>=), min, max)
 import qualified Prelude
@@ -126,6 +127,7 @@ instance OrderedF X32 Float where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Float) where
+  type MinMaxIsCompatibleWithOrd (X32 Float) = Unsatisfiable (Text "This instance is not compatible with the min/max functions in Ord")
   min (MkFloatX32WithVec256 u0 u1 u2 u3) (MkFloatX32WithVec256 v0 v1 v2 v3) = MkFloatX32WithVec256 (minimumFloatX8# u0 v0) (minimumFloatX8# u1 v1) (minimumFloatX8# u2 v2) (minimumFloatX8# u3 v3)
   max (MkFloatX32WithVec256 u0 u1 u2 u3) (MkFloatX32WithVec256 v0 v1 v2 v3) = MkFloatX32WithVec256 (maximumFloatX8# u0 v0) (maximumFloatX8# u1 v1) (maximumFloatX8# u2 v2) (maximumFloatX8# u3 v3)
   minimumNumber (MkFloatX32WithVec256 u0 u1 u2 u3) (MkFloatX32WithVec256 v0 v1 v2 v3) = MkFloatX32WithVec256 (minimumNumberFloatX8# u0 v0) (minimumNumberFloatX8# u1 v1) (minimumNumberFloatX8# u2 v2) (minimumNumberFloatX8# u3 v3)
@@ -227,6 +229,7 @@ instance OrderedF X32 Double where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Double) where
+  type MinMaxIsCompatibleWithOrd (X32 Double) = Unsatisfiable (Text "This instance is not compatible with the min/max functions in Ord")
   min (MkDoubleX32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX32WithVec256 (minimumDoubleX4# u0 v0) (minimumDoubleX4# u1 v1) (minimumDoubleX4# u2 v2) (minimumDoubleX4# u3 v3) (minimumDoubleX4# u4 v4) (minimumDoubleX4# u5 v5) (minimumDoubleX4# u6 v6) (minimumDoubleX4# u7 v7)
   max (MkDoubleX32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX32WithVec256 (maximumDoubleX4# u0 v0) (maximumDoubleX4# u1 v1) (maximumDoubleX4# u2 v2) (maximumDoubleX4# u3 v3) (maximumDoubleX4# u4 v4) (maximumDoubleX4# u5 v5) (maximumDoubleX4# u6 v6) (maximumDoubleX4# u7 v7)
   minimumNumber (MkDoubleX32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkDoubleX32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkDoubleX32WithVec256 (minimumNumberDoubleX4# u0 v0) (minimumNumberDoubleX4# u1 v1) (minimumNumberDoubleX4# u2 v2) (minimumNumberDoubleX4# u3 v3) (minimumNumberDoubleX4# u4 v4) (minimumNumberDoubleX4# u5 v5) (minimumNumberDoubleX4# u6 v6) (minimumNumberDoubleX4# u7 v7)
@@ -330,6 +333,7 @@ instance OrderedF X32 Int8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Int8) where
+  type MinMaxIsCompatibleWithOrd (X32 Int8) = ()
   min (MkInt8X32 u0) (MkInt8X32 v0) = MkInt8X32 (minInt8X32# u0 v0)
   max (MkInt8X32 u0) (MkInt8X32 v0) = MkInt8X32 (maxInt8X32# u0 v0)
   minimumNumber = min
@@ -409,6 +413,7 @@ instance OrderedF X32 Int16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Int16) where
+  type MinMaxIsCompatibleWithOrd (X32 Int16) = ()
   min (MkInt16X32WithVec256 u0 u1) (MkInt16X32WithVec256 v0 v1) = MkInt16X32WithVec256 (minInt16X16# u0 v0) (minInt16X16# u1 v1)
   max (MkInt16X32WithVec256 u0 u1) (MkInt16X32WithVec256 v0 v1) = MkInt16X32WithVec256 (maxInt16X16# u0 v0) (maxInt16X16# u1 v1)
   minimumNumber = min
@@ -488,6 +493,7 @@ instance OrderedF X32 Int32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Int32) where
+  type MinMaxIsCompatibleWithOrd (X32 Int32) = ()
   min (MkInt32X32WithVec256 u0 u1 u2 u3) (MkInt32X32WithVec256 v0 v1 v2 v3) = MkInt32X32WithVec256 (minInt32X8# u0 v0) (minInt32X8# u1 v1) (minInt32X8# u2 v2) (minInt32X8# u3 v3)
   max (MkInt32X32WithVec256 u0 u1 u2 u3) (MkInt32X32WithVec256 v0 v1 v2 v3) = MkInt32X32WithVec256 (maxInt32X8# u0 v0) (maxInt32X8# u1 v1) (maxInt32X8# u2 v2) (maxInt32X8# u3 v3)
   minimumNumber = min
@@ -567,6 +573,7 @@ instance OrderedF X32 Int64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Int64) where
+  type MinMaxIsCompatibleWithOrd (X32 Int64) = ()
   min (MkInt64X32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X32WithVec256 (minInt64X4# u0 v0) (minInt64X4# u1 v1) (minInt64X4# u2 v2) (minInt64X4# u3 v3) (minInt64X4# u4 v4) (minInt64X4# u5 v5) (minInt64X4# u6 v6) (minInt64X4# u7 v7)
   max (MkInt64X32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkInt64X32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkInt64X32WithVec256 (maxInt64X4# u0 v0) (maxInt64X4# u1 v1) (maxInt64X4# u2 v2) (maxInt64X4# u3 v3) (maxInt64X4# u4 v4) (maxInt64X4# u5 v5) (maxInt64X4# u6 v6) (maxInt64X4# u7 v7)
   minimumNumber = min
@@ -646,6 +653,7 @@ instance OrderedF X32 Word8 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Word8) where
+  type MinMaxIsCompatibleWithOrd (X32 Word8) = ()
   min (MkWord8X32 u0) (MkWord8X32 v0) = MkWord8X32 (minWord8X32# u0 v0)
   max (MkWord8X32 u0) (MkWord8X32 v0) = MkWord8X32 (maxWord8X32# u0 v0)
   minimumNumber = min
@@ -724,6 +732,7 @@ instance OrderedF X32 Word16 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Word16) where
+  type MinMaxIsCompatibleWithOrd (X32 Word16) = ()
   min (MkWord16X32WithVec256 u0 u1) (MkWord16X32WithVec256 v0 v1) = MkWord16X32WithVec256 (minWord16X16# u0 v0) (minWord16X16# u1 v1)
   max (MkWord16X32WithVec256 u0 u1) (MkWord16X32WithVec256 v0 v1) = MkWord16X32WithVec256 (maxWord16X16# u0 v0) (maxWord16X16# u1 v1)
   minimumNumber = min
@@ -802,6 +811,7 @@ instance OrderedF X32 Word32 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Word32) where
+  type MinMaxIsCompatibleWithOrd (X32 Word32) = ()
   min (MkWord32X32WithVec256 u0 u1 u2 u3) (MkWord32X32WithVec256 v0 v1 v2 v3) = MkWord32X32WithVec256 (minWord32X8# u0 v0) (minWord32X8# u1 v1) (minWord32X8# u2 v2) (minWord32X8# u3 v3)
   max (MkWord32X32WithVec256 u0 u1 u2 u3) (MkWord32X32WithVec256 v0 v1 v2 v3) = MkWord32X32WithVec256 (maxWord32X8# u0 v0) (maxWord32X8# u1 v1) (maxWord32X8# u2 v2) (maxWord32X8# u3 v3)
   minimumNumber = min
@@ -880,6 +890,7 @@ instance OrderedF X32 Word64 where
   {-# INLINE gtF #-}
   {-# INLINE geF #-}
 instance MinMax (X32 Word64) where
+  type MinMaxIsCompatibleWithOrd (X32 Word64) = ()
   min (MkWord64X32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X32WithVec256 (minWord64X4# u0 v0) (minWord64X4# u1 v1) (minWord64X4# u2 v2) (minWord64X4# u3 v3) (minWord64X4# u4 v4) (minWord64X4# u5 v5) (minWord64X4# u6 v6) (minWord64X4# u7 v7)
   max (MkWord64X32WithVec256 u0 u1 u2 u3 u4 u5 u6 u7) (MkWord64X32WithVec256 v0 v1 v2 v3 v4 v5 v6 v7) = MkWord64X32WithVec256 (maxWord64X4# u0 v0) (maxWord64X4# u1 v1) (maxWord64X4# u2 v2) (maxWord64X4# u3 v3) (maxWord64X4# u4 v4) (maxWord64X4# u5 v5) (maxWord64X4# u6 v6) (maxWord64X4# u7 v7)
   minimumNumber = min
@@ -999,6 +1010,162 @@ instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (Max a) where
 instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (Max a) where
   binaryShuffle = coerce (binaryShuffle @indices @X32 @a)
   {-# INLINE binaryShuffle #-}
+newtype instance X32 (IEEEMin a) = MkIEEEMinX32 (X32 a)
+instance PackX32 X32 a => PackX32 X32 (IEEEMin a) where
+  mkX32 = coerce (mkX32 @X32 @a)
+  unpackX32 = coerce (unpackX32 @X32 @a)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance Broadcast X32 a => Broadcast X32 (IEEEMin a) where
+  broadcast = coerce (broadcast @X32 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 a => SelectableF X32 (IEEEMin a) where
+  selectF = coerce (selectF @X32 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (IEEEMin a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X32 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (IEEEMin a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X32 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X32 (IEEEMax a) = MkIEEEMaxX32 (X32 a)
+instance PackX32 X32 a => PackX32 X32 (IEEEMax a) where
+  mkX32 = coerce (mkX32 @X32 @a)
+  unpackX32 = coerce (unpackX32 @X32 @a)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance Broadcast X32 a => Broadcast X32 (IEEEMax a) where
+  broadcast = coerce (broadcast @X32 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 a => SelectableF X32 (IEEEMax a) where
+  selectF = coerce (selectF @X32 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (IEEEMax a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X32 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (IEEEMax a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X32 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X32 (MinimumNumber a) = MkMinimumNumberX32 (X32 a)
+instance PackX32 X32 a => PackX32 X32 (MinimumNumber a) where
+  mkX32 = coerce (mkX32 @X32 @a)
+  unpackX32 = coerce (unpackX32 @X32 @a)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance Broadcast X32 a => Broadcast X32 (MinimumNumber a) where
+  broadcast = coerce (broadcast @X32 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 a => SelectableF X32 (MinimumNumber a) where
+  selectF = coerce (selectF @X32 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (MinimumNumber a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X32 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (MinimumNumber a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X32 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X32 (MaximumNumber a) = MkMaximumNumberX32 (X32 a)
+instance PackX32 X32 a => PackX32 X32 (MaximumNumber a) where
+  mkX32 = coerce (mkX32 @X32 @a)
+  unpackX32 = coerce (unpackX32 @X32 @a)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance Broadcast X32 a => Broadcast X32 (MaximumNumber a) where
+  broadcast = coerce (broadcast @X32 @a)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 a => SelectableF X32 (MaximumNumber a) where
+  selectF = coerce (selectF @X32 @a)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X32 a => UnaryShuffleT indices X32 (MaximumNumber a) where
+  unaryShuffle = coerce (unaryShuffle @indices @X32 @a)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 a => BinaryShuffleT indices X32 (MaximumNumber a) where
+  binaryShuffle = coerce (binaryShuffle @indices @X32 @a)
+  {-# INLINE binaryShuffle #-}
+newtype instance X32 All = MkAllX32 (X32 Bool)
+instance PackX32 X32 Bool => PackX32 X32 All where
+  mkX32 = coerce (mkX32 @X32 @Bool)
+  unpackX32 = coerce (unpackX32 @X32 @Bool)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance Broadcast X32 Bool => Broadcast X32 All where
+  broadcast = coerce (broadcast @X32 @Bool)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 Bool => SelectableF X32 All where
+  selectF = coerce (selectF @X32 @Bool)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X32 Bool => UnaryShuffleT indices X32 All where
+  unaryShuffle = coerce (unaryShuffle @indices @X32 @Bool)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 Bool => BinaryShuffleT indices X32 All where
+  binaryShuffle = coerce (binaryShuffle @indices @X32 @Bool)
+  {-# INLINE binaryShuffle #-}
+newtype instance X32 Any = MkAnyX32 (X32 Bool)
+instance PackX32 X32 Bool => PackX32 X32 Any where
+  mkX32 = coerce (mkX32 @X32 @Bool)
+  unpackX32 = coerce (unpackX32 @X32 @Bool)
+  {-# INLINE mkX32 #-}
+  {-# INLINE unpackX32 #-}
+instance Broadcast X32 Bool => Broadcast X32 Any where
+  broadcast = coerce (broadcast @X32 @Bool)
+  {-# INLINE broadcast #-}
+instance SelectableF X32 Bool => SelectableF X32 Any where
+  selectF = coerce (selectF @X32 @Bool)
+  {-# INLINE selectF #-}
+instance UnaryShuffleT indices X32 Bool => UnaryShuffleT indices X32 Any where
+  unaryShuffle = coerce (unaryShuffle @indices @X32 @Bool)
+  {-# INLINE unaryShuffle #-}
+instance BinaryShuffleT indices X32 Bool => BinaryShuffleT indices X32 Any where
+  binaryShuffle = coerce (binaryShuffle @indices @X32 @Bool)
+  {-# INLINE binaryShuffle #-}
+instance (Num a, NumF X32 a) => Semigroup (X32 (Sum a)) where
+  (<>) = coerce ((+) @(X32 a))
+  {-# INLINE (<>) #-}
+instance (Num a, NumF X32 a) => Monoid (X32 (Sum a)) where
+  mempty = MkSumX32 (fromIntegerF 0)
+  {-# INLINE mempty #-}
+instance (Num a, NumF X32 a) => Semigroup (X32 (Product a)) where
+  (<>) = coerce ((*) @(X32 a))
+  {-# INLINE (<>) #-}
+instance (Num a, NumF X32 a) => Monoid (X32 (Product a)) where
+  mempty = MkProductX32 (fromIntegerF 1)
+  {-# INLINE mempty #-}
+instance (MinMax (X32 a), MinMaxIsCompatibleWithOrd a) => Semigroup (X32 (Min a)) where
+  (<>) = coerce (min @(X32 a))
+  {-# INLINE (<>) #-}
+instance (Bounded a, MinMax (X32 a), MinMaxIsCompatibleWithOrd a, Broadcast X32 a) => Monoid (X32 (Min a)) where
+  mempty = MkMinX32 (broadcast maxBound)
+  {-# INLINE mempty #-}
+instance (MinMax (X32 a), MinMaxIsCompatibleWithOrd a) => Semigroup (X32 (Max a)) where
+  (<>) = coerce (max @(X32 a))
+  {-# INLINE (<>) #-}
+instance (Bounded a, MinMax (X32 a), MinMaxIsCompatibleWithOrd a, Broadcast X32 a) => Monoid (X32 (Max a)) where
+  mempty = MkMaxX32 (broadcast minBound)
+  {-# INLINE mempty #-}
+instance MinMax (X32 a) => Semigroup (X32 (IEEEMin a)) where
+  (<>) = coerce (min @(X32 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X32 a) => Semigroup (X32 (IEEEMax a)) where
+  (<>) = coerce (max @(X32 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X32 a) => Semigroup (X32 (MinimumNumber a)) where
+  (<>) = coerce (minimumNumber @(X32 a))
+  {-# INLINE (<>) #-}
+instance MinMax (X32 a) => Semigroup (X32 (MaximumNumber a)) where
+  (<>) = coerce (maximumNumber @(X32 a))
+  {-# INLINE (<>) #-}
+instance Semigroup (X32 All) where
+  (<>) = coerce ((B..&.) @(X32 Bool))
+  {-# INLINE (<>) #-}
+instance Monoid (X32 All) where
+  mempty = MkAllX32 (broadcast True)
+  {-# INLINE mempty #-}
+instance Semigroup (X32 Any) where
+  (<>) = coerce ((B..|.) @(X32 Bool))
+  {-# INLINE (<>) #-}
+instance Monoid (X32 Any) where
+  mempty = MkAnyX32 (broadcast False)
+  {-# INLINE mempty #-}
 data instance X32 (Complex a) = MkComplexX32 !(X32 a) !(X32 a)
 instance PackX32 X32 a => PackX32 X32 (Complex a) where
   mkX32 (x0 :+ y0) (x1 :+ y1) (x2 :+ y2) (x3 :+ y3) (x4 :+ y4) (x5 :+ y5) (x6 :+ y6) (x7 :+ y7) (x8 :+ y8) (x9 :+ y9) (x10 :+ y10) (x11 :+ y11) (x12 :+ y12) (x13 :+ y13) (x14 :+ y14) (x15 :+ y15) (x16 :+ y16) (x17 :+ y17) (x18 :+ y18) (x19 :+ y19) (x20 :+ y20) (x21 :+ y21) (x22 :+ y22) (x23 :+ y23) (x24 :+ y24) (x25 :+ y25) (x26 :+ y26) (x27 :+ y27) (x28 :+ y28) (x29 :+ y29) (x30 :+ y30) (x31 :+ y31) = MkComplexX32 (mkX32 x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 x16 x17 x18 x19 x20 x21 x22 x23 x24 x25 x26 x27 x28 x29 x30 x31) (mkX32 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 y20 y21 y22 y23 y24 y25 y26 y27 y28 y29 y30 y31)
@@ -1054,6 +1221,12 @@ instance (i0 < 32, i1 < 32, i2 < 32, i3 < 32, i4 < 32, i5 < 32, i6 < 32, i7 < 32
 instance (i0 < 64, i1 < 64, i2 < 64, i3 < 64, i4 < 64, i5 < 64, i6 < 64, i7 < 64, i8 < 64, i9 < 64, i10 < 64, i11 < 64, i12 < 64, i13 < 64, i14 < 64, i15 < 64, i16 < 64, i17 < 64, i18 < 64, i19 < 64, i20 < 64, i21 < 64, i22 < 64, i23 < 64, i24 < 64, i25 < 64, i26 < 64, i27 < 64, i28 < 64, i29 < 64, i30 < 64, i31 < 64) => BinaryShuffleT '[i0, i1, i2, i3, i4, i5, i6, i7, i8, i9, i10, i11, i12, i13, i14, i15, i16, i17, i18, i19, i20, i21, i22, i23, i24, i25, i26, i27, i28, i29, i30, i31] X32 () where
   binaryShuffle _ _ = MkUnitX32
   {-# INLINE binaryShuffle #-}
+instance Semigroup (X32()) where
+  _ <> _ = MkUnitX32
+  {-# INLINE (<>) #-}
+instance Monoid (X32()) where
+  mempty = MkUnitX32
+  {-# INLINE mempty #-}
 data instance X32 (a0, a1) = MkTuple2X32 !(X32 a0) !(X32 a1)
 instance (PackX32 X32 a0, PackX32 X32 a1) => PackX32 X32 (a0, a1) where
   mkX32 (x0_0, x0_1) (x1_0, x1_1) (x2_0, x2_1) (x3_0, x3_1) (x4_0, x4_1) (x5_0, x5_1) (x6_0, x6_1) (x7_0, x7_1) (x8_0, x8_1) (x9_0, x9_1) (x10_0, x10_1) (x11_0, x11_1) (x12_0, x12_1) (x13_0, x13_1) (x14_0, x14_1) (x15_0, x15_1) (x16_0, x16_1) (x17_0, x17_1) (x18_0, x18_1) (x19_0, x19_1) (x20_0, x20_1) (x21_0, x21_1) (x22_0, x22_1) (x23_0, x23_1) (x24_0, x24_1) (x25_0, x25_1) (x26_0, x26_1) (x27_0, x27_1) (x28_0, x28_1) (x29_0, x29_1) (x30_0, x30_1) (x31_0, x31_1) = MkTuple2X32 (mkX32 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0) (mkX32 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1)
@@ -1072,6 +1245,12 @@ instance (UnaryShuffleT indices X32 a0, UnaryShuffleT indices X32 a1) => UnarySh
 instance (BinaryShuffleT indices X32 a0, BinaryShuffleT indices X32 a1) => BinaryShuffleT indices X32 (a0, a1) where
   binaryShuffle (MkTuple2X32 x0 x1) (MkTuple2X32 y0 y1) = MkTuple2X32 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X32 a0), Semigroup (X32 a1)) => Semigroup (X32 (a0, a1)) where
+  MkTuple2X32 x0 x1 <> MkTuple2X32 y0 y1 = MkTuple2X32 (x0 <> y0) (x1 <> y1)
+  {-# INLINE (<>) #-}
+instance (Monoid (X32 a0), Monoid (X32 a1)) => Monoid (X32 (a0, a1)) where
+  mempty = MkTuple2X32 mempty mempty
+  {-# INLINE mempty #-}
 data instance X32 (a0, a1, a2) = MkTuple3X32 !(X32 a0) !(X32 a1) !(X32 a2)
 instance (PackX32 X32 a0, PackX32 X32 a1, PackX32 X32 a2) => PackX32 X32 (a0, a1, a2) where
   mkX32 (x0_0, x0_1, x0_2) (x1_0, x1_1, x1_2) (x2_0, x2_1, x2_2) (x3_0, x3_1, x3_2) (x4_0, x4_1, x4_2) (x5_0, x5_1, x5_2) (x6_0, x6_1, x6_2) (x7_0, x7_1, x7_2) (x8_0, x8_1, x8_2) (x9_0, x9_1, x9_2) (x10_0, x10_1, x10_2) (x11_0, x11_1, x11_2) (x12_0, x12_1, x12_2) (x13_0, x13_1, x13_2) (x14_0, x14_1, x14_2) (x15_0, x15_1, x15_2) (x16_0, x16_1, x16_2) (x17_0, x17_1, x17_2) (x18_0, x18_1, x18_2) (x19_0, x19_1, x19_2) (x20_0, x20_1, x20_2) (x21_0, x21_1, x21_2) (x22_0, x22_1, x22_2) (x23_0, x23_1, x23_2) (x24_0, x24_1, x24_2) (x25_0, x25_1, x25_2) (x26_0, x26_1, x26_2) (x27_0, x27_1, x27_2) (x28_0, x28_1, x28_2) (x29_0, x29_1, x29_2) (x30_0, x30_1, x30_2) (x31_0, x31_1, x31_2) = MkTuple3X32 (mkX32 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0) (mkX32 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1) (mkX32 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2)
@@ -1090,6 +1269,12 @@ instance (UnaryShuffleT indices X32 a0, UnaryShuffleT indices X32 a1, UnaryShuff
 instance (BinaryShuffleT indices X32 a0, BinaryShuffleT indices X32 a1, BinaryShuffleT indices X32 a2) => BinaryShuffleT indices X32 (a0, a1, a2) where
   binaryShuffle (MkTuple3X32 x0 x1 x2) (MkTuple3X32 y0 y1 y2) = MkTuple3X32 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X32 a0), Semigroup (X32 a1), Semigroup (X32 a2)) => Semigroup (X32 (a0, a1, a2)) where
+  MkTuple3X32 x0 x1 x2 <> MkTuple3X32 y0 y1 y2 = MkTuple3X32 (x0 <> y0) (x1 <> y1) (x2 <> y2)
+  {-# INLINE (<>) #-}
+instance (Monoid (X32 a0), Monoid (X32 a1), Monoid (X32 a2)) => Monoid (X32 (a0, a1, a2)) where
+  mempty = MkTuple3X32 mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X32 (a0, a1, a2, a3) = MkTuple4X32 !(X32 a0) !(X32 a1) !(X32 a2) !(X32 a3)
 instance (PackX32 X32 a0, PackX32 X32 a1, PackX32 X32 a2, PackX32 X32 a3) => PackX32 X32 (a0, a1, a2, a3) where
   mkX32 (x0_0, x0_1, x0_2, x0_3) (x1_0, x1_1, x1_2, x1_3) (x2_0, x2_1, x2_2, x2_3) (x3_0, x3_1, x3_2, x3_3) (x4_0, x4_1, x4_2, x4_3) (x5_0, x5_1, x5_2, x5_3) (x6_0, x6_1, x6_2, x6_3) (x7_0, x7_1, x7_2, x7_3) (x8_0, x8_1, x8_2, x8_3) (x9_0, x9_1, x9_2, x9_3) (x10_0, x10_1, x10_2, x10_3) (x11_0, x11_1, x11_2, x11_3) (x12_0, x12_1, x12_2, x12_3) (x13_0, x13_1, x13_2, x13_3) (x14_0, x14_1, x14_2, x14_3) (x15_0, x15_1, x15_2, x15_3) (x16_0, x16_1, x16_2, x16_3) (x17_0, x17_1, x17_2, x17_3) (x18_0, x18_1, x18_2, x18_3) (x19_0, x19_1, x19_2, x19_3) (x20_0, x20_1, x20_2, x20_3) (x21_0, x21_1, x21_2, x21_3) (x22_0, x22_1, x22_2, x22_3) (x23_0, x23_1, x23_2, x23_3) (x24_0, x24_1, x24_2, x24_3) (x25_0, x25_1, x25_2, x25_3) (x26_0, x26_1, x26_2, x26_3) (x27_0, x27_1, x27_2, x27_3) (x28_0, x28_1, x28_2, x28_3) (x29_0, x29_1, x29_2, x29_3) (x30_0, x30_1, x30_2, x30_3) (x31_0, x31_1, x31_2, x31_3) = MkTuple4X32 (mkX32 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0) (mkX32 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1) (mkX32 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2) (mkX32 x0_3 x1_3 x2_3 x3_3 x4_3 x5_3 x6_3 x7_3 x8_3 x9_3 x10_3 x11_3 x12_3 x13_3 x14_3 x15_3 x16_3 x17_3 x18_3 x19_3 x20_3 x21_3 x22_3 x23_3 x24_3 x25_3 x26_3 x27_3 x28_3 x29_3 x30_3 x31_3)
@@ -1108,6 +1293,12 @@ instance (UnaryShuffleT indices X32 a0, UnaryShuffleT indices X32 a1, UnaryShuff
 instance (BinaryShuffleT indices X32 a0, BinaryShuffleT indices X32 a1, BinaryShuffleT indices X32 a2, BinaryShuffleT indices X32 a3) => BinaryShuffleT indices X32 (a0, a1, a2, a3) where
   binaryShuffle (MkTuple4X32 x0 x1 x2 x3) (MkTuple4X32 y0 y1 y2 y3) = MkTuple4X32 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X32 a0), Semigroup (X32 a1), Semigroup (X32 a2), Semigroup (X32 a3)) => Semigroup (X32 (a0, a1, a2, a3)) where
+  MkTuple4X32 x0 x1 x2 x3 <> MkTuple4X32 y0 y1 y2 y3 = MkTuple4X32 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3)
+  {-# INLINE (<>) #-}
+instance (Monoid (X32 a0), Monoid (X32 a1), Monoid (X32 a2), Monoid (X32 a3)) => Monoid (X32 (a0, a1, a2, a3)) where
+  mempty = MkTuple4X32 mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X32 (a0, a1, a2, a3, a4) = MkTuple5X32 !(X32 a0) !(X32 a1) !(X32 a2) !(X32 a3) !(X32 a4)
 instance (PackX32 X32 a0, PackX32 X32 a1, PackX32 X32 a2, PackX32 X32 a3, PackX32 X32 a4) => PackX32 X32 (a0, a1, a2, a3, a4) where
   mkX32 (x0_0, x0_1, x0_2, x0_3, x0_4) (x1_0, x1_1, x1_2, x1_3, x1_4) (x2_0, x2_1, x2_2, x2_3, x2_4) (x3_0, x3_1, x3_2, x3_3, x3_4) (x4_0, x4_1, x4_2, x4_3, x4_4) (x5_0, x5_1, x5_2, x5_3, x5_4) (x6_0, x6_1, x6_2, x6_3, x6_4) (x7_0, x7_1, x7_2, x7_3, x7_4) (x8_0, x8_1, x8_2, x8_3, x8_4) (x9_0, x9_1, x9_2, x9_3, x9_4) (x10_0, x10_1, x10_2, x10_3, x10_4) (x11_0, x11_1, x11_2, x11_3, x11_4) (x12_0, x12_1, x12_2, x12_3, x12_4) (x13_0, x13_1, x13_2, x13_3, x13_4) (x14_0, x14_1, x14_2, x14_3, x14_4) (x15_0, x15_1, x15_2, x15_3, x15_4) (x16_0, x16_1, x16_2, x16_3, x16_4) (x17_0, x17_1, x17_2, x17_3, x17_4) (x18_0, x18_1, x18_2, x18_3, x18_4) (x19_0, x19_1, x19_2, x19_3, x19_4) (x20_0, x20_1, x20_2, x20_3, x20_4) (x21_0, x21_1, x21_2, x21_3, x21_4) (x22_0, x22_1, x22_2, x22_3, x22_4) (x23_0, x23_1, x23_2, x23_3, x23_4) (x24_0, x24_1, x24_2, x24_3, x24_4) (x25_0, x25_1, x25_2, x25_3, x25_4) (x26_0, x26_1, x26_2, x26_3, x26_4) (x27_0, x27_1, x27_2, x27_3, x27_4) (x28_0, x28_1, x28_2, x28_3, x28_4) (x29_0, x29_1, x29_2, x29_3, x29_4) (x30_0, x30_1, x30_2, x30_3, x30_4) (x31_0, x31_1, x31_2, x31_3, x31_4) = MkTuple5X32 (mkX32 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0) (mkX32 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1) (mkX32 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2) (mkX32 x0_3 x1_3 x2_3 x3_3 x4_3 x5_3 x6_3 x7_3 x8_3 x9_3 x10_3 x11_3 x12_3 x13_3 x14_3 x15_3 x16_3 x17_3 x18_3 x19_3 x20_3 x21_3 x22_3 x23_3 x24_3 x25_3 x26_3 x27_3 x28_3 x29_3 x30_3 x31_3) (mkX32 x0_4 x1_4 x2_4 x3_4 x4_4 x5_4 x6_4 x7_4 x8_4 x9_4 x10_4 x11_4 x12_4 x13_4 x14_4 x15_4 x16_4 x17_4 x18_4 x19_4 x20_4 x21_4 x22_4 x23_4 x24_4 x25_4 x26_4 x27_4 x28_4 x29_4 x30_4 x31_4)
@@ -1126,6 +1317,12 @@ instance (UnaryShuffleT indices X32 a0, UnaryShuffleT indices X32 a1, UnaryShuff
 instance (BinaryShuffleT indices X32 a0, BinaryShuffleT indices X32 a1, BinaryShuffleT indices X32 a2, BinaryShuffleT indices X32 a3, BinaryShuffleT indices X32 a4) => BinaryShuffleT indices X32 (a0, a1, a2, a3, a4) where
   binaryShuffle (MkTuple5X32 x0 x1 x2 x3 x4) (MkTuple5X32 y0 y1 y2 y3 y4) = MkTuple5X32 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X32 a0), Semigroup (X32 a1), Semigroup (X32 a2), Semigroup (X32 a3), Semigroup (X32 a4)) => Semigroup (X32 (a0, a1, a2, a3, a4)) where
+  MkTuple5X32 x0 x1 x2 x3 x4 <> MkTuple5X32 y0 y1 y2 y3 y4 = MkTuple5X32 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4)
+  {-# INLINE (<>) #-}
+instance (Monoid (X32 a0), Monoid (X32 a1), Monoid (X32 a2), Monoid (X32 a3), Monoid (X32 a4)) => Monoid (X32 (a0, a1, a2, a3, a4)) where
+  mempty = MkTuple5X32 mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 data instance X32 (a0, a1, a2, a3, a4, a5) = MkTuple6X32 !(X32 a0) !(X32 a1) !(X32 a2) !(X32 a3) !(X32 a4) !(X32 a5)
 instance (PackX32 X32 a0, PackX32 X32 a1, PackX32 X32 a2, PackX32 X32 a3, PackX32 X32 a4, PackX32 X32 a5) => PackX32 X32 (a0, a1, a2, a3, a4, a5) where
   mkX32 (x0_0, x0_1, x0_2, x0_3, x0_4, x0_5) (x1_0, x1_1, x1_2, x1_3, x1_4, x1_5) (x2_0, x2_1, x2_2, x2_3, x2_4, x2_5) (x3_0, x3_1, x3_2, x3_3, x3_4, x3_5) (x4_0, x4_1, x4_2, x4_3, x4_4, x4_5) (x5_0, x5_1, x5_2, x5_3, x5_4, x5_5) (x6_0, x6_1, x6_2, x6_3, x6_4, x6_5) (x7_0, x7_1, x7_2, x7_3, x7_4, x7_5) (x8_0, x8_1, x8_2, x8_3, x8_4, x8_5) (x9_0, x9_1, x9_2, x9_3, x9_4, x9_5) (x10_0, x10_1, x10_2, x10_3, x10_4, x10_5) (x11_0, x11_1, x11_2, x11_3, x11_4, x11_5) (x12_0, x12_1, x12_2, x12_3, x12_4, x12_5) (x13_0, x13_1, x13_2, x13_3, x13_4, x13_5) (x14_0, x14_1, x14_2, x14_3, x14_4, x14_5) (x15_0, x15_1, x15_2, x15_3, x15_4, x15_5) (x16_0, x16_1, x16_2, x16_3, x16_4, x16_5) (x17_0, x17_1, x17_2, x17_3, x17_4, x17_5) (x18_0, x18_1, x18_2, x18_3, x18_4, x18_5) (x19_0, x19_1, x19_2, x19_3, x19_4, x19_5) (x20_0, x20_1, x20_2, x20_3, x20_4, x20_5) (x21_0, x21_1, x21_2, x21_3, x21_4, x21_5) (x22_0, x22_1, x22_2, x22_3, x22_4, x22_5) (x23_0, x23_1, x23_2, x23_3, x23_4, x23_5) (x24_0, x24_1, x24_2, x24_3, x24_4, x24_5) (x25_0, x25_1, x25_2, x25_3, x25_4, x25_5) (x26_0, x26_1, x26_2, x26_3, x26_4, x26_5) (x27_0, x27_1, x27_2, x27_3, x27_4, x27_5) (x28_0, x28_1, x28_2, x28_3, x28_4, x28_5) (x29_0, x29_1, x29_2, x29_3, x29_4, x29_5) (x30_0, x30_1, x30_2, x30_3, x30_4, x30_5) (x31_0, x31_1, x31_2, x31_3, x31_4, x31_5) = MkTuple6X32 (mkX32 x0_0 x1_0 x2_0 x3_0 x4_0 x5_0 x6_0 x7_0 x8_0 x9_0 x10_0 x11_0 x12_0 x13_0 x14_0 x15_0 x16_0 x17_0 x18_0 x19_0 x20_0 x21_0 x22_0 x23_0 x24_0 x25_0 x26_0 x27_0 x28_0 x29_0 x30_0 x31_0) (mkX32 x0_1 x1_1 x2_1 x3_1 x4_1 x5_1 x6_1 x7_1 x8_1 x9_1 x10_1 x11_1 x12_1 x13_1 x14_1 x15_1 x16_1 x17_1 x18_1 x19_1 x20_1 x21_1 x22_1 x23_1 x24_1 x25_1 x26_1 x27_1 x28_1 x29_1 x30_1 x31_1) (mkX32 x0_2 x1_2 x2_2 x3_2 x4_2 x5_2 x6_2 x7_2 x8_2 x9_2 x10_2 x11_2 x12_2 x13_2 x14_2 x15_2 x16_2 x17_2 x18_2 x19_2 x20_2 x21_2 x22_2 x23_2 x24_2 x25_2 x26_2 x27_2 x28_2 x29_2 x30_2 x31_2) (mkX32 x0_3 x1_3 x2_3 x3_3 x4_3 x5_3 x6_3 x7_3 x8_3 x9_3 x10_3 x11_3 x12_3 x13_3 x14_3 x15_3 x16_3 x17_3 x18_3 x19_3 x20_3 x21_3 x22_3 x23_3 x24_3 x25_3 x26_3 x27_3 x28_3 x29_3 x30_3 x31_3) (mkX32 x0_4 x1_4 x2_4 x3_4 x4_4 x5_4 x6_4 x7_4 x8_4 x9_4 x10_4 x11_4 x12_4 x13_4 x14_4 x15_4 x16_4 x17_4 x18_4 x19_4 x20_4 x21_4 x22_4 x23_4 x24_4 x25_4 x26_4 x27_4 x28_4 x29_4 x30_4 x31_4) (mkX32 x0_5 x1_5 x2_5 x3_5 x4_5 x5_5 x6_5 x7_5 x8_5 x9_5 x10_5 x11_5 x12_5 x13_5 x14_5 x15_5 x16_5 x17_5 x18_5 x19_5 x20_5 x21_5 x22_5 x23_5 x24_5 x25_5 x26_5 x27_5 x28_5 x29_5 x30_5 x31_5)
@@ -1144,6 +1341,12 @@ instance (UnaryShuffleT indices X32 a0, UnaryShuffleT indices X32 a1, UnaryShuff
 instance (BinaryShuffleT indices X32 a0, BinaryShuffleT indices X32 a1, BinaryShuffleT indices X32 a2, BinaryShuffleT indices X32 a3, BinaryShuffleT indices X32 a4, BinaryShuffleT indices X32 a5) => BinaryShuffleT indices X32 (a0, a1, a2, a3, a4, a5) where
   binaryShuffle (MkTuple6X32 x0 x1 x2 x3 x4 x5) (MkTuple6X32 y0 y1 y2 y3 y4 y5) = MkTuple6X32 (binaryShuffle @indices x0 y0) (binaryShuffle @indices x1 y1) (binaryShuffle @indices x2 y2) (binaryShuffle @indices x3 y3) (binaryShuffle @indices x4 y4) (binaryShuffle @indices x5 y5)
   {-# INLINE binaryShuffle #-}
+instance (Semigroup (X32 a0), Semigroup (X32 a1), Semigroup (X32 a2), Semigroup (X32 a3), Semigroup (X32 a4), Semigroup (X32 a5)) => Semigroup (X32 (a0, a1, a2, a3, a4, a5)) where
+  MkTuple6X32 x0 x1 x2 x3 x4 x5 <> MkTuple6X32 y0 y1 y2 y3 y4 y5 = MkTuple6X32 (x0 <> y0) (x1 <> y1) (x2 <> y2) (x3 <> y3) (x4 <> y4) (x5 <> y5)
+  {-# INLINE (<>) #-}
+instance (Monoid (X32 a0), Monoid (X32 a1), Monoid (X32 a2), Monoid (X32 a3), Monoid (X32 a4), Monoid (X32 a5)) => Monoid (X32 (a0, a1, a2, a3, a4, a5)) where
+  mempty = MkTuple6X32 mempty mempty mempty mempty mempty mempty
+  {-# INLINE mempty #-}
 instance (PackX32 X32 a, PackX32 X32 b) => LiftSIMD X32 a b where
   liftSIMD f !v = case unpackX32 v of (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23, x24, x25, x26, x27, x28, x29, x30, x31) -> mkX32 (f x0) (f x1) (f x2) (f x3) (f x4) (f x5) (f x6) (f x7) (f x8) (f x9) (f x10) (f x11) (f x12) (f x13) (f x14) (f x15) (f x16) (f x17) (f x18) (f x19) (f x20) (f x21) (f x22) (f x23) (f x24) (f x25) (f x26) (f x27) (f x28) (f x29) (f x30) (f x31)
   {-# INLINE liftSIMD #-}
@@ -1169,6 +1372,18 @@ instance LiftConstructor X32 where
   getMin' = coerce
   mkMax = coerce
   getMax' = coerce
+  mkIEEEMin = coerce
+  getIEEEMin' = coerce
+  mkIEEEMax = coerce
+  getIEEEMax' = coerce
+  mkMinimumNumber = coerce
+  getMinimumNumber' = coerce
+  mkMaximumNumber = coerce
+  getMaximumNumber' = coerce
+  mkAll = coerce
+  getAll' = coerce
+  mkAny = coerce
+  getAny' = coerce
   mkComplex = MkComplexX32
   deconstructComplex (MkComplexX32 x y) = (x, y)
   {-# INLINE mkTuple2 #-}
@@ -1189,6 +1404,18 @@ instance LiftConstructor X32 where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 instance (Broadcast X32 a, SelectableF X32 a) => LiftMaybe X32 a where

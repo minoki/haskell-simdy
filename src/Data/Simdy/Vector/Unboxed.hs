@@ -16,7 +16,7 @@ import           Data.Complex (Complex)
 import           Data.Functor.Identity (Identity (Identity))
 import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Monoid (Product, Sum)
-import           Data.Semigroup (Max, Min)
+import           Data.Semigroup (All, Any, Max, Min)
 import           Data.Simdy.Internal.Class (EnumFromZero, LiftConstructor)
 import           Data.Simdy.Internal.Default
 import           Data.Simdy.Vector.Class (MultiUnbox)
@@ -37,10 +37,19 @@ instance SIMDUnbox Word8
 instance SIMDUnbox Word16
 instance SIMDUnbox Word32
 instance SIMDUnbox Word64
+instance SIMDUnbox Bool
 instance SIMDUnbox a => SIMDUnbox (Sum a)
 instance SIMDUnbox a => SIMDUnbox (Product a)
 instance SIMDUnbox a => SIMDUnbox (Min a)
 instance SIMDUnbox a => SIMDUnbox (Max a)
+{-
+instance SIMDUnbox a => SIMDUnbox (IEEEMin a)
+instance SIMDUnbox a => SIMDUnbox (IEEEMax a)
+instance SIMDUnbox a => SIMDUnbox (MinimumNumber a)
+instance SIMDUnbox a => SIMDUnbox (MaximumNumber a)
+-}
+instance SIMDUnbox All
+instance SIMDUnbox Any
 instance SIMDUnbox a => SIMDUnbox (Complex a)
 instance SIMDUnbox ()
 instance (SIMDUnbox a, SIMDUnbox b) => SIMDUnbox (a, b)

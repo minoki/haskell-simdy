@@ -112,6 +112,7 @@ library common
                       Data.Simdy.Internal.Stream
     other-modules:    Data.Simdy.Internal.Class.Generated
                       Data.Simdy.Internal.FMA
+                      Data.Simdy.Internal.MinMax
 
     c-sources:        cbits/float_minmax.c
                       cbits/float_minmaxnm.c
@@ -338,7 +339,9 @@ library
                       Data.Simdy.Mask
                       Data.Simdy.Maybe
                       Data.Simdy.MinMax
+                      Data.Simdy.Monoid
                       Data.Simdy.Pack
+                      Data.Simdy.Semigroup
                       Data.Simdy.Shuffle
                       Data.Simdy.Split
                       Data.Simdy.Stream

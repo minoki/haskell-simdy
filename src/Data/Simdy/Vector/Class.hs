@@ -16,7 +16,7 @@ import           Data.Array.Byte (ByteArray (..), MutableByteArray (..))
 import           Data.Complex (Complex)
 import           Data.Int (Int16, Int32, Int64, Int8)
 import           Data.Monoid (Product, Sum)
-import           Data.Semigroup (Max, Min)
+import           Data.Semigroup (All, Any, Max, Min)
 import           Data.Simdy.Internal.Class
 import qualified Data.Vector.Generic as VG
 import qualified Data.Vector.Generic.Mutable as VGM
@@ -169,6 +169,16 @@ instance MultiPrim f Word64 => SIMDVector VU.Vector f Word64 where
   unsafeIndexMulti (VUB.V_Word64 v) = unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
+instance (MultiPrim f Word8, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => SIMDMVector VUM.MVector f Bool where
+  unsafeReadMulti (VUB.MV_Bool v) i = (Data.Simdy.Internal.Class./= broadcast 0) <$> unsafeReadMulti @_ @f v i
+  unsafeWriteMulti (VUB.MV_Bool v) i b = unsafeWriteMulti @_ @f v i (select b 1 0)
+  {-# INLINE unsafeReadMulti #-}
+  {-# INLINE unsafeWriteMulti #-}
+
+instance (MultiPrim f Word8, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => SIMDVector VU.Vector f Bool where
+  unsafeIndexMulti (VUB.V_Bool v) = (Data.Simdy.Internal.Class./= broadcast 0) . unsafeIndexMulti @_ @f v
+  {-# INLINE unsafeIndexMulti #-}
+
 instance (LiftConstructor f, SIMDMVector VUM.MVector f a, VU.Unbox a) => SIMDMVector VUM.MVector f (Sum a) where
   unsafeReadMulti (VUB.MV_Sum v) !i = mkSum <$> unsafeReadMulti v i
   unsafeWriteMulti (VUB.MV_Sum v) !i = unsafeWriteMulti v i . getSum'
@@ -207,6 +217,26 @@ instance (LiftConstructor f, SIMDMVector VUM.MVector f a, VU.Unbox a) => SIMDMVe
 
 instance (LiftConstructor f, SIMDVector VU.Vector f a, VU.Unbox a) => SIMDVector VU.Vector f (Max a) where
   unsafeIndexMulti (VUB.V_Max v) = mkMax . unsafeIndexMulti v
+  {-# INLINE unsafeIndexMulti #-}
+
+instance (MultiPrim f Word8, LiftConstructor f, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => SIMDMVector VUM.MVector f All where
+  unsafeReadMulti (VUB.MV_All v) !i = mkAll <$> unsafeReadMulti v i
+  unsafeWriteMulti (VUB.MV_All v) !i = unsafeWriteMulti v i . getAll'
+  {-# INLINE unsafeReadMulti #-}
+  {-# INLINE unsafeWriteMulti #-}
+
+instance (MultiPrim f Word8, LiftConstructor f, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => SIMDVector VU.Vector f All where
+  unsafeIndexMulti (VUB.V_All v) = mkAll . unsafeIndexMulti v
+  {-# INLINE unsafeIndexMulti #-}
+
+instance (MultiPrim f Word8, LiftConstructor f, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => SIMDMVector VUM.MVector f Any where
+  unsafeReadMulti (VUB.MV_Any v) !i = mkAny <$> unsafeReadMulti v i
+  unsafeWriteMulti (VUB.MV_Any v) !i = unsafeWriteMulti v i . getAny'
+  {-# INLINE unsafeReadMulti #-}
+  {-# INLINE unsafeWriteMulti #-}
+
+instance (MultiPrim f Word8, LiftConstructor f, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => SIMDVector VU.Vector f Any where
+  unsafeIndexMulti (VUB.V_Any v) = mkAny . unsafeIndexMulti v
   {-# INLINE unsafeIndexMulti #-}
 
 instance (KnownSIMDLength f, Broadcast f ()) => SIMDMVector VUM.MVector f () where
@@ -310,10 +340,13 @@ instance MultiPrim f Word8 => MultiUnbox f Word8
 instance MultiPrim f Word16 => MultiUnbox f Word16
 instance MultiPrim f Word32 => MultiUnbox f Word32
 instance MultiPrim f Word64 => MultiUnbox f Word64
+instance (MultiPrim f Word8, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => MultiUnbox f Bool
 instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Sum a)
 instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Product a)
 instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Min a)
 instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Max a)
+instance (MultiPrim f Word8, LiftConstructor f, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => MultiUnbox f All
+instance (MultiPrim f Word8, LiftConstructor f, Broadcast f Word8, Num (f Word8), Equatable (f Word8), Selectable (f Word8), MaskIsLiftedBool f Word8) => MultiUnbox f Any
 instance (LiftConstructor f, MultiUnbox f a) => MultiUnbox f (Complex a)
 instance (KnownSIMDLength f, Broadcast f ()) => MultiUnbox f ()
 instance (LiftConstructor f, MultiUnbox f a, MultiUnbox f b) => MultiUnbox f (a, b)

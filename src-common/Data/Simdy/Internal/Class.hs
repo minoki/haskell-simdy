@@ -21,10 +21,11 @@ import           Data.Maybe (isJust, isNothing, fromMaybe)
 import           Data.Monoid (Product (..), Sum (..))
 import           Data.Primitive (Prim (..))
 import           Data.Proxy (Proxy)
-import           Data.Semigroup (Max (..), Min (..))
+import           Data.Semigroup (Max (..), Min (..), All (..), Any (..))
 import           Data.Simdy.Internal.Bits
 import           Data.Simdy.Internal.Class.Generated as M
 import           Data.Simdy.Internal.FMA as M
+import           Data.Simdy.Internal.MinMax as M
 import           Data.Word (Word16, Word32, Word64, Word8)
 import           Foreign.Ptr (Ptr)
 import           Foreign.Storable
@@ -105,12 +106,18 @@ class LiftConstructor f where
   getMin' :: f (Min a) -> f a
   mkMax :: f a -> f (Max a)
   getMax' :: f (Max a) -> f a
-  {-
+  mkIEEEMin :: f a -> f (IEEEMin a)
+  getIEEEMin' :: f (IEEEMin a) -> f a
+  mkIEEEMax :: f a -> f (IEEEMax a)
+  getIEEEMax' :: f (IEEEMax a) -> f a
+  mkMinimumNumber :: f a -> f (MinimumNumber a)
+  getMinimumNumber' :: f (MinimumNumber a) -> f a
+  mkMaximumNumber :: f a -> f (MaximumNumber a)
+  getMaximumNumber' :: f (MaximumNumber a) -> f a
   mkAll :: f Bool -> f All
   getAll' :: f All -> f Bool
   mkAny :: f Bool -> f Any
   getAny' :: f Any -> f Bool
-  -}
   mkComplex :: f a -> f a -> f (Complex a)
   deconstructComplex :: f (Complex a) -> (f a, f a)
 
@@ -168,6 +175,18 @@ instance LiftConstructor Identity where
   getMin' = coerce
   mkMax = coerce
   getMax' = coerce
+  mkIEEEMin = coerce
+  getIEEEMin' = coerce
+  mkIEEEMax = coerce
+  getIEEEMax' = coerce
+  mkMinimumNumber = coerce
+  getMinimumNumber' = coerce
+  mkMaximumNumber = coerce
+  getMaximumNumber' = coerce
+  mkAll = coerce
+  getAll' = coerce
+  mkAny = coerce
+  getAny' = coerce
   mkComplex (Identity x) (Identity y) = Identity (x :+ y)
   deconstructComplex (Identity (x :+ y)) = (Identity x, Identity y)
   {-# INLINE mkTuple2 #-}
@@ -188,6 +207,18 @@ instance LiftConstructor Identity where
   {-# INLINE getMin' #-}
   {-# INLINE mkMax #-}
   {-# INLINE getMax' #-}
+  {-# INLINE mkIEEEMin #-}
+  {-# INLINE getIEEEMin' #-}
+  {-# INLINE mkIEEEMax #-}
+  {-# INLINE getIEEEMax' #-}
+  {-# INLINE mkMinimumNumber #-}
+  {-# INLINE getMinimumNumber' #-}
+  {-# INLINE mkMaximumNumber #-}
+  {-# INLINE getMaximumNumber' #-}
+  {-# INLINE mkAll #-}
+  {-# INLINE getAll' #-}
+  {-# INLINE mkAny #-}
+  {-# INLINE getAny' #-}
   {-# INLINE mkComplex #-}
   {-# INLINE deconstructComplex #-}
 
@@ -257,7 +288,22 @@ pattern MkMax :: LiftConstructor f => f a -> f (Max a)
 pattern MkMax x <- (getMax' -> x) where
   MkMax = mkMax
 
-{-
+pattern MkIEEEMin :: LiftConstructor f => f a -> f (IEEEMin a)
+pattern MkIEEEMin x <- (getIEEEMin' -> x) where
+  MkIEEEMin = mkIEEEMin
+
+pattern MkIEEEMax :: LiftConstructor f => f a -> f (IEEEMax a)
+pattern MkIEEEMax x <- (getIEEEMax' -> x) where
+  MkIEEEMax = mkIEEEMax
+
+pattern MkMinimumNumber :: LiftConstructor f => f a -> f (MinimumNumber a)
+pattern MkMinimumNumber x <- (getMinimumNumber' -> x) where
+  MkMinimumNumber = mkMinimumNumber
+
+pattern MkMaximumNumber :: LiftConstructor f => f a -> f (MaximumNumber a)
+pattern MkMaximumNumber x <- (getMaximumNumber' -> x) where
+  MkMaximumNumber = mkMaximumNumber
+
 pattern MkAll :: LiftConstructor f => f Bool -> f All
 pattern MkAll x <- (getAll' -> x) where
   MkAll = mkAll
@@ -265,7 +311,6 @@ pattern MkAll x <- (getAll' -> x) where
 pattern MkAny :: LiftConstructor f => f Bool -> f Any
 pattern MkAny x <- (getAny' -> x) where
   MkAny = mkAny
--}
 
 pattern MkComplex :: LiftConstructor f => f a -> f a -> f (Complex a)
 pattern MkComplex x0 x1 <- (deconstructComplex -> (x0, x1)) where
@@ -408,8 +453,6 @@ class Equatable a where
   x /= y = complement (x == y)
   {-# INLINE (/=) #-}
 
-newtype Scalar a = MkScalar a
-
 type instance Mask (Scalar a) = Bool
 type instance Mask Int = Bool
 type instance Mask Int8 = Bool
@@ -528,80 +571,6 @@ instance OrderedF f a => Ordered (WrappedMulti f a) where
   {-# INLINE (<=) #-}
   {-# INLINE (>) #-}
   {-# INLINE (>=) #-}
-
--- | Lane-wise minimum and maximum.
---
--- For floating-point types, 'min' and 'max' follow IEEE 754-2019 semantics
--- (propagating NaN), while 'minimumNumber' and 'maximumNumber' prefer numeric
--- values over NaN.
-class MinMax a where
-  min :: a -> a -> a
-  max :: a -> a -> a
-  -- | Like 'min', but returns the numeric value if one argument is NaN.
-  minimumNumber :: a -> a -> a
-  -- | Like 'max', but returns the numeric value if one argument is NaN.
-  maximumNumber :: a -> a -> a
-
-instance Ord a => MinMax (Scalar a) where
-  min = coerce (Prelude.min @a)
-  max = coerce (Prelude.max @a)
-  minimumNumber = min
-  maximumNumber = max
-  {-# INLINE min #-}
-  {-# INLINE max #-}
-  {-# INLINE minimumNumber #-}
-  {-# INLINE maximumNumber #-}
-
-deriving via Scalar Int instance MinMax Int
-deriving via Scalar Int8 instance MinMax Int8
-deriving via Scalar Int16 instance MinMax Int16
-deriving via Scalar Int32 instance MinMax Int32
-deriving via Scalar Int64 instance MinMax Int64
-deriving via Scalar Word instance MinMax Word
-deriving via Scalar Word8 instance MinMax Word8
-deriving via Scalar Word16 instance MinMax Word16
-deriving via Scalar Word32 instance MinMax Word32
-deriving via Scalar Word64 instance MinMax Word64
-
-foreign import ccall unsafe "hs_simdy_minimumFloat"
-  minimumFloat :: Float -> Float -> Float
-
-foreign import ccall unsafe "hs_simdy_maximumFloat"
-  maximumFloat :: Float -> Float -> Float
-
-foreign import ccall unsafe "hs_simdy_minimumNumberFloat"
-  minimumNumberFloat :: Float -> Float -> Float
-
-foreign import ccall unsafe "hs_simdy_maximumNumberFloat"
-  maximumNumberFloat :: Float -> Float -> Float
-
-foreign import ccall unsafe "hs_simdy_minimumDouble"
-  minimumDouble :: Double -> Double -> Double
-
-foreign import ccall unsafe "hs_simdy_maximumDouble"
-  maximumDouble :: Double -> Double -> Double
-
-foreign import ccall unsafe "hs_simdy_minimumNumberDouble"
-  minimumNumberDouble :: Double -> Double -> Double
-
-foreign import ccall unsafe "hs_simdy_maximumNumberDouble"
-  maximumNumberDouble :: Double -> Double -> Double
-
--- | IEEE 754-2019 compliant instance
-instance MinMax Float where
-  min = minimumFloat
-  max = maximumFloat
-  minimumNumber = minimumNumberFloat
-  maximumNumber = maximumNumberFloat
-
--- | IEEE 754-2019 compliant instance
-instance MinMax Double where
-  min = minimumDouble
-  max = maximumDouble
-  minimumNumber = minimumNumberDouble
-  maximumNumber = maximumNumberDouble
-
-deriving newtype instance MinMax a => MinMax (Identity a)
 
 -- | Lane-wise numeric operations on SIMD vectors.
 -- This is the internal (F-suffixed) version; standard 'Num' instances are
@@ -810,5 +779,3 @@ instance Num a => EnumFromZero_ Identity a where
 -- | Constraint alias for types that support generating @[0, 1, 2, ...]@ SIMD vectors.
 -- Used by @Data.Simdy.Vector.Generic.indexed@ and related functions.
 type EnumFromZero f a = (EnumFromZero_ f a, Num a, NumF f a, Broadcast f a)
-
--- TODO: Add Data.Semigroup and Data.Monoid counterparts
