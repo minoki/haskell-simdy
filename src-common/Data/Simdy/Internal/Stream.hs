@@ -192,6 +192,36 @@ zip5 = zipWith5D mkTuple5 (,,,,)
 zip6 :: forall x m a b c d e f. (Monad m, LiftConstructor x) => Stream m x a -> Stream m x b -> Stream m x c -> Stream m x d -> Stream m x e -> Stream m x f -> Stream m x (a, b, c, d, e, f)
 zip6 = zipWith6D mkTuple6 (,,,,,)
 
+{-# INLINE [1] and #-}
+and :: forall x m. (Monad m, KnownSIMDLength x, BooleanReduction x) => Stream m x Bool -> m Bool
+and (MkStream multiStep step s0 n) = loop n s0
+  where
+    m = simdLength @x
+    loop !i s | i >= m = do (s', b) <- multiStep s
+                            if horizontalAndBool b
+                              then loop (i - m) s'
+                              else pure False
+              | i > 0 = do (s', b) <- step s
+                           if b
+                             then loop (i - 1) s'
+                             else pure False
+              | otherwise = pure True
+
+{-# INLINE [1] or #-}
+or :: forall x m. (Monad m, KnownSIMDLength x, BooleanReduction x) => Stream m x Bool -> m Bool
+or (MkStream multiStep step s0 n) = loop n s0
+  where
+    m = simdLength @x
+    loop !i s | i >= m = do (s', b) <- multiStep s
+                            if horizontalOrBool b
+                              then pure True
+                              else loop (i - m) s'
+              | i > 0 = do (s', b) <- step s
+                           if b
+                             then pure True
+                             else loop (i - 1) s'
+              | otherwise = pure False
+
 -- | Pair each element with its index.
 {-# INLINE [1] indexed #-}
 indexed :: forall x m i a. (Monad m, EnumFromZero x i, LiftConstructor x) => Stream m x a -> Stream m x (i, a)

@@ -43,6 +43,8 @@ module Data.Simdy.Stream
   , zip6
   , fold
   , fold'
+  , and
+  , or
   , indexed
   , enumFromN
   , enumFromStepN

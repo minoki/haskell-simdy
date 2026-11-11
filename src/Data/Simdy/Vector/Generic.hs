@@ -69,22 +69,26 @@ module Data.Simdy.Vector.Generic
     -- * Folding
   , fold
   , fold'
+    -- * Specialized folds
+  , and
+  , or
     -- * Conversion
   , convert
   ) where
 import           Data.Coerce (coerce)
 import           Data.Simdy.Internal.Class
-import           Data.Simdy.Internal.Default (SIMD, SIMDElement, SIMDEnumFromZero)
-import           Data.Simdy.Vector.Stream (stream)
-import qualified Data.Simdy.Vector.Stream as Stream
+import           Data.Simdy.Internal.Default (SIMD, SIMDElement,
+                                              SIMDEnumFromZero)
 import qualified Data.Simdy.Internal.Stream as Stream
 import qualified Data.Simdy.Stream as Stream (fold, fold')
 import           Data.Simdy.Vector.Class
+import           Data.Simdy.Vector.Stream (stream)
+import qualified Data.Simdy.Vector.Stream as Stream
 -- import qualified Data.Vector.Generic as VG
 -- import qualified Data.Vector.Generic.Mutable as VGM
 import           Data.Functor.Identity
-import           Prelude hiding (map, mapM_, replicate, zip, zip3, zipWith,
-                          zipWith3)
+import           Prelude hiding (and, map, mapM_, or, replicate, zip, zip3,
+                          zipWith, zipWith3)
 
 -- | Create a vector of @n@ copies of a value.
 {-# INLINE replicate #-}
@@ -396,6 +400,14 @@ fold append initial = runIdentity . Stream.fold append initial . stream
 {-# INLINE fold' #-}
 fold' :: forall x v a. (SIMD x, SIMDElement a, SIMDVector v x a) => (forall xx. SIMD xx => xx a -> xx a -> xx a) -> x a -> v a -> a
 fold' append initial = runIdentity . Stream.fold' append initial . stream
+
+{-# INLINE and #-}
+and :: forall x v. (SIMD x, SIMDVector v x Bool) => v Bool -> Bool
+and = runIdentity . Stream.and @x . stream
+
+{-# INLINE or #-}
+or :: forall x v. (SIMD x, SIMDVector v x Bool) => v Bool -> Bool
+or = runIdentity . Stream.or @x . stream
 
 -- | Convert between vector representations (e.g. primitive to unboxed) using stream fusion.
 {-# INLINE convert #-}
