@@ -39,7 +39,7 @@ import           GHC.Core.Make (mkCoreApps, mkNaturalExpr)
 import           GHC.Core.Type (RuntimeRepType)
 import           GHC.Driver.Backend (DefunctionalizedCodeOutput (LlvmCodeOutput, NcgCodeOutput),
                                      backendCodeOutput)
-#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0)
+#if MIN_VERSION_GLASGOW_HASKELL(9, 12, 0, 0) && !MIN_VERSION_GLASGOW_HASKELL(9, 14, 0, 0)
 import           GHC.Driver.DynFlags (DynFlags (backend), isAvxEnabled)
 #else
 import           GHC.Driver.DynFlags (DynFlags)
