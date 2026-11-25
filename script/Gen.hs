@@ -83,6 +83,11 @@ gen !vecCount !maxBits
     ,"  {-# INLINE maskFromNatural #-}"
     ,"  {-# INLINE maskToInteger #-}"
     ,"  {-# INLINE maskFromInteger #-}"
+    ,"instance EquatableF " ++ tyCon ++ " Bool where"
+    ,"  eqF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (0x" ++ showHex (2^vecCount - 1) " - xor x y)"
+    ,"  neF (MkBool" ++ tyCon ++ " x) (MkBool" ++ tyCon ++ " y) = MkBool" ++ tyCon ++ " (x `xor` y)"
+    ,"  {-# INLINE eqF #-}"
+    ,"  {-# INLINE neF #-}"
     ] ++
     (if vecCount < 8
      then ["instance PackMask8 " ++ tyCon ++ " where"

@@ -188,6 +188,7 @@ instance SIMDEq Word32
 instance SIMDEq Word64
 instance SIMDEq Float
 instance SIMDEq Double
+instance SIMDEq Bool
 
 -- | Constraint for element types that support lane-wise ordering comparison.
 --

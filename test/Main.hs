@@ -286,7 +286,7 @@ properties proxyX =
       [ testPackUnpack proxy
       , testBroadcast proxy
       , testSelect proxy
-      -- , testEq proxy
+      , testEq proxy
       , testBoolean proxy
       ]
   , let proxy :: Proxy (x Int8)

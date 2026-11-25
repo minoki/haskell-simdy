@@ -82,6 +82,11 @@ instance PackMask X4 where
   {-# INLINE maskFromNatural #-}
   {-# INLINE maskToInteger #-}
   {-# INLINE maskFromInteger #-}
+instance EquatableF X4 Bool where
+  eqF (MkBoolX4 x) (MkBoolX4 y) = MkBoolX4 (0xf - xor x y)
+  neF (MkBoolX4 x) (MkBoolX4 y) = MkBoolX4 (x `xor` y)
+  {-# INLINE eqF #-}
+  {-# INLINE neF #-}
 instance PackMask8 X4 where
   maskToWord8 = coerce
   maskFromWord8 x = MkBoolX4 (x .&. 0xf)

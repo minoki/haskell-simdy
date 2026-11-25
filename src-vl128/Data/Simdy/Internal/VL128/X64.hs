@@ -84,6 +84,11 @@ instance PackMask X64 where
   {-# INLINE maskFromNatural #-}
   {-# INLINE maskToInteger #-}
   {-# INLINE maskFromInteger #-}
+instance EquatableF X64 Bool where
+  eqF (MkBoolX64 x) (MkBoolX64 y) = MkBoolX64 (0xffffffffffffffff - xor x y)
+  neF (MkBoolX64 x) (MkBoolX64 y) = MkBoolX64 (x `xor` y)
+  {-# INLINE eqF #-}
+  {-# INLINE neF #-}
 instance PackMask64 X64 where
   maskToWord64 = coerce
   maskFromWord64 = coerce

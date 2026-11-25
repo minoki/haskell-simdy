@@ -84,6 +84,11 @@ instance PackMask X32 where
   {-# INLINE maskFromNatural #-}
   {-# INLINE maskToInteger #-}
   {-# INLINE maskFromInteger #-}
+instance EquatableF X32 Bool where
+  eqF (MkBoolX32 x) (MkBoolX32 y) = MkBoolX32 (0xffffffff - xor x y)
+  neF (MkBoolX32 x) (MkBoolX32 y) = MkBoolX32 (x `xor` y)
+  {-# INLINE eqF #-}
+  {-# INLINE neF #-}
 instance PackMask32 X32 where
   maskToWord32 = coerce
   maskFromWord32 = coerce

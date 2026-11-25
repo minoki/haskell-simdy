@@ -85,6 +85,11 @@ instance PackMask X16 where
   {-# INLINE maskFromNatural #-}
   {-# INLINE maskToInteger #-}
   {-# INLINE maskFromInteger #-}
+instance EquatableF X16 Bool where
+  eqF (MkBoolX16 x) (MkBoolX16 y) = MkBoolX16 (0xffff - xor x y)
+  neF (MkBoolX16 x) (MkBoolX16 y) = MkBoolX16 (x `xor` y)
+  {-# INLINE eqF #-}
+  {-# INLINE neF #-}
 instance PackMask16 X16 where
   maskToWord16 = coerce
   maskFromWord16 = coerce

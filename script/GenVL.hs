@@ -131,7 +131,7 @@ genMod name imports comment = unlines $
    (["Eq a", "SIMDElement a"] ++
     ["EquatableF " ++ x  ++ " a" | x <- properVecTypes]
    ) ++ "\n      ) => SIMDEq a"
-  ] ++ ["instance SIMDEq " ++ a | a <- intishTypes ++ ["Float","Double"]] ++
+  ] ++ ["instance SIMDEq " ++ a | a <- intishTypes ++ ["Float","Double","Bool"]] ++
   [""
   ,"-- | Constraint for element types that support lane-wise ordering comparison."
   ,"--"
