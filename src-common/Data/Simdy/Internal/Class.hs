@@ -494,14 +494,21 @@ instance Eq a => Equatable (Identity a) where
 
 class Boolean (f Bool) => EquatableF f a where
   eqF :: f a -> f a -> f Bool
+  neF :: f a -> f a -> f Bool
+  neF x y = complement (eqF x y)
+  {-# INLINE neF #-}
 
 instance Eq a => EquatableF Identity a where
   eqF = coerce ((Prelude.==) @a)
+  neF = coerce ((Prelude./=) @a)
   {-# INLINE eqF #-}
+  {-# INLINE neF #-}
 
 instance EquatableF f a => Equatable (WrappedMulti f a) where
   (==) = coerce (eqF @f @a)
+  (/=) = coerce (neF @f @a)
   {-# INLINE (==) #-}
+  {-# INLINE (/=) #-}
 
 -- | Lane-wise ordering comparison, returning a 'Mask'.
 --
