@@ -437,9 +437,10 @@ test-suite float-minmax-test
     type:             exitcode-stdio-1.0
     main-is:          cbits/test_float_minmax.c
     build-depends:    simdy,
-                      simdy:vl128-c,
-                      simdy:vl256-c,
-                      simdy:vl512-c
+                      simdy:vl128-c
+    if arch(i386) || arch(x86_64)
+        build-depends: simdy:vl256-c,
+                       simdy:vl512-c
 
 test-suite double-minmax-test
     import:           warnings
@@ -448,9 +449,10 @@ test-suite double-minmax-test
     type:             exitcode-stdio-1.0
     main-is:          cbits/test_double_minmax.c
     build-depends:    simdy,
-                      simdy:vl128-c,
-                      simdy:vl256-c,
-                      simdy:vl512-c
+                      simdy:vl128-c
+    if arch(i386) || arch(x86_64)
+        build-depends: simdy:vl256-c,
+                       simdy:vl512-c
 
 library matmul
     import:           warnings
